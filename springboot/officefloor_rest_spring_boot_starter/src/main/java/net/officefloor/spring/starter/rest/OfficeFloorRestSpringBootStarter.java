@@ -8,6 +8,7 @@ import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.server.http.servlet.HttpServletHttpServerImplementation;
 import net.officefloor.server.http.servlet.HttpServletOfficeFloorBridge;
+import net.officefloor.woof.WoofLoaderSettings;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -70,18 +71,25 @@ public class OfficeFloorRestSpringBootStarter {
         }
 
         // Load OfficeFloor (capturing the REST endpoints)
-        this.bridge = HttpServletHttpServerImplementation.load(() -> {
+        this.bridge = WoofLoaderSettings.contextualLoad((context) -> {
 
-            // Compile the OfficeFloor
-            OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
-            compiler.setOfficeFloorSource(new SpringBootOfficeFloorSource(this.mapper, this.restEndpoints,
-                    this.applicationContext, this.openApi));
-            Map<String, String> sourceProperties = this.properties.getConfig();
-            if (sourceProperties != null) {
-                sourceProperties.forEach(compiler::addProperty);
-            }
-            this.officeFloor = compiler.compile("OfficeFloor");
-            this.officeFloor.openOfficeFloor();
+            // Avoid WoOF loading (as Spring specific)
+            context.notLoad();
+
+            // Load OfficeFloor
+            return HttpServletHttpServerImplementation.load(() -> {
+
+                // Compile the OfficeFloor
+                OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
+                compiler.setOfficeFloorSource(new SpringBootOfficeFloorSource(this.mapper, this.restEndpoints,
+                        this.applicationContext, this.openApi));
+                Map<String, String> sourceProperties = this.properties.getConfig();
+                if (sourceProperties != null) {
+                    sourceProperties.forEach(compiler::addProperty);
+                }
+                this.officeFloor = compiler.compile("OfficeFloor");
+                this.officeFloor.openOfficeFloor();
+            });
         });
     }
 

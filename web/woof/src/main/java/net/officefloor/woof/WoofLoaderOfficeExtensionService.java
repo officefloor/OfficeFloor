@@ -120,6 +120,11 @@ public class WoofLoaderOfficeExtensionService implements OfficeExtensionService,
 		String officeName = context.getOfficeName();
 		WoofLoaderConfiguration configuration = WoofLoaderSettings.getWoofLoaderConfiguration(officeName);
 
+		// Determine if load
+		if (!configuration.isLoad()) {
+			return;
+		}
+
 		// Employ the architects
 		WebArchitect web = WebArchitectEmployer.employWebArchitect(officeArchitect, context);
 		ComposeArchitect compose = ComposeEmployer.employComposeArchitect(officeArchitect, context);

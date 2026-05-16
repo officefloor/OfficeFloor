@@ -74,6 +74,11 @@ public class WoofLoaderOfficeFloorExtensionService
 			String officeName = office.getDeployedOfficeName();
 			WoofLoaderConfiguration configuration = WoofLoaderSettings.getWoofLoaderConfiguration(officeName);
 
+			// Determine if load
+			if (!configuration.isLoad()) {
+				continue NEXT_OFFICE;
+			}
+
 			// Load the additional profiles for the application (needed before override properties)
 			if (configuration.isLoadAdditionalProfiles()) {
 				String[] additionalProfiles = configuration.getAdditionalProfiles(context);
