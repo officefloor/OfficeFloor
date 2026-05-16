@@ -161,8 +161,9 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
 
         // Add CORS decoration
         MomentoKey<CorsConfiguration> corsMomento = restArchitect.addRestMethodDecorator((context) -> {
-            CorsConfiguration corsConfiguration = loadCorsConfiguration(context.getPath());
-            context.setMomento(corsConfiguration);
+            CorsConfiguration pathCorsConfiguration = loadCorsConfiguration(context.getPath());
+            CorsConfiguration methodCorsConfiguration = OfficeFloorRestEndpoint.createCorsConfiguration(context.getConfiguration("cors", ComposeCorsConfiguration.class));
+            context.setMomento(OfficeFloorRestEndpoint.combineCors(pathCorsConfiguration, methodCorsConfiguration));
         });
 
         // Add the rest servicing
