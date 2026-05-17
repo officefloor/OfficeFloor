@@ -15,7 +15,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 /**
  * Tests HTTP security composition loading in WoOF.
  */
-@Disabled
 public class WoofCompositionSecurityTest {
 
     private static final String AUTHENTICATED_ONLY = "_authenticated";

@@ -65,6 +65,7 @@ import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.WritableHttpCookie;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
@@ -1709,6 +1710,12 @@ public class HttpSecurityArchitectTest {
 				new MockCredentials("test", "test").loadHttpRequest(
 						MockHttpServer.mockRequest("/login").cookies(challenged)));
 		authenticated.assertResponse(200, "AUTHENTICATED");
+		WritableHttpCookie jsessionid = authenticated.getCookie("jsessionid");
+
+		// Ensure can make request
+		MockHttpResponse accessed = this.server.send(MockHttpServer.mockRequest("/path")
+				.cookie(jsessionid.getName(), jsessionid.getValue()));
+		accessed.assertResponse(200, "AUTHENTICATED");
 	}
 
 	public static class ComposedSecuredServicer {
@@ -1728,7 +1735,6 @@ public class HttpSecurityArchitectTest {
 		@Next("authenticate")
 		public MockCredentials login(ServerHttpConnection connection) throws IOException {
 			String authValue = connection.getRequest().getHeaders().getHeader("authorization").getValue();
-			// Format: "Mock userName,password[,roles...]"
 			String params = authValue.substring(MockChallengeHttpSecuritySource.AUTHENTICATION_SCHEME.length() + 1);
 			String[] parts = params.split(",");
 			return new MockCredentials(parts[0], parts[1]);
