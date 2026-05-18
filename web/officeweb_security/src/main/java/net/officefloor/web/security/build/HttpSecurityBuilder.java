@@ -21,6 +21,7 @@
 package net.officefloor.web.security.build;
 
 import net.officefloor.compile.properties.PropertyConfigurable;
+import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.web.security.HttpAccessControl;
@@ -75,12 +76,19 @@ public interface HttpSecurityBuilder extends PropertyConfigurable {
 
 	/**
 	 * Creates a {@link HttpSecurer} for this {@link HttpSecurity}.
-	 * 
+	 *
 	 * @param securable
 	 *            {@link HttpSecurable} to provide the access configuration. May
 	 *            be <code>null</code> to just require authentication.
 	 * @return {@link HttpSecurer}.
 	 */
 	HttpSecurer createHttpSecurer(HttpSecurable securable);
+
+	/**
+	 * Obtains the {@link OfficeManagedObject} for the {@link HttpAccessControl}.
+	 *
+	 * @return {@link OfficeManagedObject} for the {@link HttpAccessControl}.
+	 */
+	OfficeManagedObject getHttpAccessControl();
 
 }

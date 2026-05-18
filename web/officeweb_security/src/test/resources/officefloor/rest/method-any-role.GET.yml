@@ -1,0 +1,7 @@
+composition:
+  security:
+    challenge:
+      any-role: [ method ]
+
+service:
+  class: ${TestClass}$SecuredService

@@ -2,6 +2,7 @@ package net.officefloor.web.security.rest;
 
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
+import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.Flow;
@@ -18,10 +19,10 @@ import java.util.Map;
  */
 public class HttpSecurityRestMethodDecorator implements RestMethodDecorator<Void> {
 
-    private final Map<String, HttpSecurityBuilder> securities;
+    private final Map<String, HttpSecurityBuilder> specificSecurity;
 
-    public HttpSecurityRestMethodDecorator(Map<String, HttpSecurityBuilder> securities) {
-        this.securities = securities;
+    public HttpSecurityRestMethodDecorator(Map<String, HttpSecurityBuilder> specificSecurity) {
+        this.specificSecurity = specificSecurity;
     }
 
     /*
@@ -31,13 +32,21 @@ public class HttpSecurityRestMethodDecorator implements RestMethodDecorator<Void
     @Override
     public void decorateRestMethod(RestMethodDecoratorContext<Void> context) {
 
-        // TODO handle different securities
-        HttpSecurityBuilder securityBuilder = this.securities.get("one");
+        // Obtain the security
+        String sectionName = "SECURITY_" + context.getHttpMethod().getName() + "_" + context.getPath().getPath();
+
+        // Need to be specific about which security
+        HttpSecurityBuilder securityBuilder = this.specificSecurity.get("challenge");
 
         context.addHttpInputInterceptor((interceptor) -> {
 
+            // Build section to intercept and enforce authentication
             OfficeSection section = interceptor.getOfficeArchitect()
-                    .addOfficeSection("Access", ClassSectionSource.class.getName(), HttpSecurityAccess.class.getName());
+                    .addOfficeSection(sectionName, ClassSectionSource.class.getName(), HttpSecurityAccess.class.getName());
+
+            // Explicitly link the default HttpAccessControl (handles all securities + content-type negotiation)
+            OfficeSectionObject accessControlObject = section.getOfficeSectionObject(HttpAccessControl.class.getName());
+            interceptor.getOfficeArchitect().link(accessControlObject, securityBuilder.getHttpAccessControl());
 
             // Link in the section for interception
             OfficeSectionInput input = section.getOfficeSectionInput("service");
@@ -47,8 +56,10 @@ public class HttpSecurityRestMethodDecorator implements RestMethodDecorator<Void
     }
 
     public static class HttpSecurityAccess {
-        public void service(HttpAccessControl accessControl, ServerHttpConnection connection, @Flow("output") Runnable accessible) throws Exception {
-            connection.getResponse().getEntityWriter().write("Access");
+        public void service(HttpAccessControl accessControl, @Flow("output") Runnable next, ServerHttpConnection connection) {
+
+            // Access allowed
+            next.run();
         }
     }
 

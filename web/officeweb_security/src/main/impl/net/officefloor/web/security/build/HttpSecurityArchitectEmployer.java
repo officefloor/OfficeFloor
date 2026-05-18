@@ -1085,6 +1085,11 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 			return builder;
 		}
 
+		@Override
+		public OfficeManagedObject getHttpAccessControl() {
+			return this.httpAccessControl;
+		}
+
 		/*
 		 * =============== HttpSecurityConfiguration ====================
 		 */

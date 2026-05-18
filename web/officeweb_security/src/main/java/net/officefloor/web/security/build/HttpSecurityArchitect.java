@@ -24,8 +24,10 @@ import java.io.Serializable;
 import java.util.Map;
 
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.web.build.WebArchitect;
+import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.spi.security.HttpSecuritySource;
 

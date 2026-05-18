@@ -1,0 +1,3 @@
+security:
+  challenge:
+    all-roles: [ one, two ]
