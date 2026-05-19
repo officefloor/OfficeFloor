@@ -7,9 +7,6 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.test.Closure;
-import net.officefloor.server.http.HttpClientTestUtil;
-import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
@@ -19,20 +16,17 @@ import net.officefloor.web.compile.WebCompileOfficeFloor;
 import net.officefloor.web.json.JacksonHttpObjectResponderFactory;
 import net.officefloor.web.rest.build.RestArchitect;
 import net.officefloor.web.rest.build.RestEmployer;
-import net.officefloor.web.security.HttpSecurityArchitectTest;
 import net.officefloor.web.security.build.HttpSecurityArchitect;
 import net.officefloor.web.security.build.HttpSecurityArchitectEmployer;
 import net.officefloor.web.security.build.HttpSecurityBuilder;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.fail;
 
 public class RestSecurityTest {
 
@@ -210,7 +204,25 @@ public class RestSecurityTest {
     }
 
     protected void doTest(String path, TestLogic logic) {
-        Closure<MockHttpServer> server = new Closure<>();
+        logic.test((message, expectedStatus, roles) -> {
+
+            // Undertake request and confirm appropriate secure status
+            MockHttpRequestBuilder request = MockHttpServer.mockRequest(path);
+            if (roles.length > 0) {
+                String user = roles[0]; // Consider first role the user's name
+                request.header("Authorization", "Mock " + user + (AUTHENTICATED_ONLY.equals(user) ? "" : ("," + String.join(",", roles))));
+            }
+            MockHttpResponse response = server.send(request);
+            assertEquals(expectedStatus, response.getStatus().getStatusCode(), message);
+        });
+    }
+
+    private static OfficeFloor officeFloor;
+
+    private static MockHttpServer server;
+
+    @BeforeAll
+    public static void startServer() throws Exception {
         WebCompileOfficeFloor compile = new WebCompileOfficeFloor();
         compile.web((context) -> {
 
@@ -227,7 +239,7 @@ public class RestSecurityTest {
 
             // Create the properties
             PropertyList properties = sourceContext.createPropertyList();
-            properties.addProperty("TestClass").setValue(this.getClass().getName());
+            properties.addProperty("TestClass").setValue(RestSecurityTest.class.getName());
 
             // Load the security
             Map<String, HttpSecurityBuilder> securities = security.addHttpSecurities("officefloor/rest-security", properties);
@@ -242,23 +254,14 @@ public class RestSecurityTest {
             // Load the REST
             rest.addRestServices(false, "officefloor/rest", properties);
         });
-        compile.mockHttpServer((mockServer) -> server.value = mockServer);
-        try (OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor()) {
-            try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
-                logic.test((message, expectedStatus, roles) -> {
+        compile.mockHttpServer((mockServer) -> server = mockServer);
+        officeFloor = compile.compileAndOpenOfficeFloor();
+    }
 
-                    // Undertake request and confirm appropriate secure status
-                    MockHttpRequestBuilder request = MockHttpServer.mockRequest(path);
-                    if (roles.length > 0) {
-                        String user = roles[0]; // Consider first role the user's name
-                        request.header("Authorization", "Mock " + user + (AUTHENTICATED_ONLY.equals(user) ? "" : ("," + String.join(",", roles))));
-                    }
-                    MockHttpResponse response = server.value.send(request);
-                    assertEquals(expectedStatus, response.getStatus().getStatusCode(), message);
-                });
-            }
-        } catch (Exception ex) {
-            fail(ex);
+    @AfterAll
+    public static void stopServer() throws Exception {
+        if (officeFloor != null) {
+            officeFloor.closeOfficeFloor();
         }
     }
 
