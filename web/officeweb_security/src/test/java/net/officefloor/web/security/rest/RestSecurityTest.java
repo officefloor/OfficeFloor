@@ -182,7 +182,7 @@ public class RestSecurityTest {
 
     @Test
     public void methodAllRolesAccumulates() {
-        this.doTest("/endpoint-any-role/method-accumulate/access", (assertion) -> {
+        this.doTest("/endpoint-all-roles/method-accumulate/access", (assertion) -> {
             assertion.check("Must be authenticated", 401);
             assertion.check("Method specific security not inherited", 200, "endpoint-one", "endpoint-two");
         });
@@ -210,7 +210,7 @@ public class RestSecurityTest {
             MockHttpRequestBuilder request = MockHttpServer.mockRequest(path);
             if (roles.length > 0) {
                 String user = roles[0]; // Consider first role the user's name
-                request.header("Authorization", "Mock " + user + (AUTHENTICATED_ONLY.equals(user) ? "" : ("," + String.join(",", roles))));
+                request.header("Authorization", "Mock " + user + "," + (AUTHENTICATED_ONLY.equals(user) ? user : String.join(",", roles)));
             }
             MockHttpResponse response = server.send(request);
             assertEquals(expectedStatus, response.getStatus().getStatusCode(), message);

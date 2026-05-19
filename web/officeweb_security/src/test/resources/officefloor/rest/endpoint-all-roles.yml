@@ -1,3 +1,3 @@
 security:
   challenge:
-    all-roles: [ one, two ]
+    all-roles: [ endpoint-one, endpoint-two ]

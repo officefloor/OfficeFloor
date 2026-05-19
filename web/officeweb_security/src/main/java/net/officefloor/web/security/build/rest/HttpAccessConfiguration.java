@@ -15,5 +15,5 @@ public class HttpAccessConfiguration {
     List<String> allRoles;
 
     @JsonProperty("inherit-all-roles")
-    boolean isInheritAllRoles;
+    Boolean inheritAllRoles;
 }

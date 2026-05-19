@@ -107,14 +107,17 @@ public class HttpSecurityRestMethodDecorator implements RestMethodDecorator<Void
                 }
             }
 
-            // all-roles inherits roles
+            // all-roles inherits roles (unless overridden by inherit-all-roles: false)
             Set<String> allRoles = new HashSet<>();
-            for (HttpSecurityConfiguration securityConfig : configurations) {
+            ALL_ROLES_DONE: for (HttpSecurityConfiguration securityConfig : configurations) {
                 HttpAccessConfiguration accessConfig = securityConfig.getAccesses().get(securityName);
                 if (accessConfig != null) {
                     List<String> roles = accessConfig.getAllRoles();
                     if (roles != null) {
                         allRoles.addAll(roles);
+                    }
+                    if (Boolean.FALSE.equals(accessConfig.getInheritAllRoles())) {
+                        break ALL_ROLES_DONE;
                     }
                 }
             }
@@ -122,9 +125,6 @@ public class HttpSecurityRestMethodDecorator implements RestMethodDecorator<Void
             // Add the access builder
             int accessIndex = accessBuilders.size();
             accessBuilders.add(new AccessBuilder(accessControlManagedObject, new Access(accessIndex, anyRoles, allRoles.toArray(String[]::new))));
-
-            // TODO REMOVE
-            System.out.println("  " + context.getPath().getPath() + " " + String.join(",", anyRoles) + " - " + String.join(",", allRoles));
         }
 
         // Create the Accesses
