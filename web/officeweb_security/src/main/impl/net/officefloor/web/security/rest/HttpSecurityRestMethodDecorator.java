@@ -4,6 +4,7 @@ import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuild
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
+import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
@@ -34,6 +35,7 @@ import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.security.build.HttpSecurityBuilder;
 import net.officefloor.web.security.build.rest.HttpAccessConfiguration;
 import net.officefloor.web.security.build.rest.HttpSecurityConfiguration;
+import net.officefloor.web.spi.security.HttpSecurity;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -86,12 +88,18 @@ public class HttpSecurityRestMethodDecorator implements RestMethodDecorator<Void
         // Lowest configuration indicates the HTTP Security instances involved
         configuration = configurations.get(0);
 
+        // Obtain the architect
+        OfficeArchitect officeArchitect = context.getOfficeArchitect();
+
         // Obtain the access
         List<AccessBuilder> accessBuilders = new LinkedList<>();
         for (String securityName : configuration.getAccesses().keySet()) {
 
             // Obtain the security builder
             HttpSecurityBuilder securityBuilder = this.securities.get(securityName);
+            if (securityBuilder == null) {
+                throw officeArchitect.addIssue("No " + HttpSecurity.class.getSimpleName() + " configured by name '" + securityName + "'");
+            }
             OfficeManagedObject accessControlManagedObject = securityBuilder.getHttpAccessControl();
 
             // any-roles takes the lowest configuration only

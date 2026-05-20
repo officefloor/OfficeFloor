@@ -1,5 +1,6 @@
 package net.officefloor.web.rest.build;
 
+import net.officefloor.activity.compose.build.ComposeArchitect;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeFlowSinkNode;
 import net.officefloor.compile.spi.office.OfficeFlowSourceNode;
@@ -29,16 +30,30 @@ public class RestMethodContextImpl<M> {
 
     private final List<HttpInputInterceptor> interceptors = new LinkedList<>();
 
+    private final OfficeArchitect officeArchitect;
+
+    private final WebArchitect webArchitect;
+
+    private final ComposeArchitect composeArchitect;
+
+    private final OfficeSourceContext officeSourceContext;
+
     private Object[] momentos;
 
     public RestMethodContextImpl(boolean isSecure, HttpMethod httpMethod,
                                  RestPathContext path, OfficeSectionInput sectionInput,
-                                 RestConfiguration configuration) {
+                                 RestConfiguration configuration, OfficeArchitect officeArchitect,
+                                 WebArchitect webArchitect, ComposeArchitect composeArchitect,
+                                 OfficeSourceContext officeSourceContext) {
         this.isSecure = isSecure;
         this.httpMethod = httpMethod;
         this.path = path;
         this.sectionInput = sectionInput;
         this.configuration = configuration;
+        this.officeArchitect = officeArchitect;
+        this.webArchitect = webArchitect;
+        this.composeArchitect = composeArchitect;
+        this.officeSourceContext = officeSourceContext;
     }
 
     public void decorateRestMethod(List<RestMethodDecorator<?>> decorators) {
@@ -85,6 +100,26 @@ public class RestMethodContextImpl<M> {
                 @Override
                 public void setMomento(M momento) {
                     RestMethodContextImpl.this.momentos[momentoIndex] = momento;
+                }
+
+                @Override
+                public OfficeArchitect getOfficeArchitect() {
+                    return RestMethodContextImpl.this.officeArchitect;
+                }
+
+                @Override
+                public WebArchitect getWebArchitect() {
+                    return RestMethodContextImpl.this.webArchitect;
+                }
+
+                @Override
+                public ComposeArchitect getComposeArchitect() {
+                    return RestMethodContextImpl.this.composeArchitect;
+                }
+
+                @Override
+                public OfficeSourceContext getOfficeSourceContext() {
+                    return RestMethodContextImpl.this.officeSourceContext;
                 }
             });
         }

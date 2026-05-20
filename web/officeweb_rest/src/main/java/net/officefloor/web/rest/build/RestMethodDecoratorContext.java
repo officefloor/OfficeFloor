@@ -1,6 +1,10 @@
 package net.officefloor.web.rest.build;
 
+import net.officefloor.activity.compose.build.ComposeArchitect;
+import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.server.http.HttpMethod;
+import net.officefloor.web.build.WebArchitect;
 
 /**
  * Context for the {@link RestMethod}.
@@ -62,5 +66,33 @@ public interface RestMethodDecoratorContext<M> {
      * @param momento Momento on the {@link RestMethod} available via the {@link MomentoKey}.
      */
     void setMomento(M momento);
+
+    /**
+     * Obtains the {@link OfficeArchitect}.
+     *
+     * @return {@link OfficeArchitect}.
+     */
+    OfficeArchitect getOfficeArchitect();
+
+    /**
+     * Obtains the {@link WebArchitect}.
+     *
+     * @return {@link WebArchitect}.
+     */
+    WebArchitect getWebArchitect();
+
+    /**
+     * Obtains the {@link ComposeArchitect}.
+     *
+     * @return {@link ComposeArchitect}.
+     */
+    ComposeArchitect getComposeArchitect();
+
+    /**
+     * Obtains the {@link OfficeSourceContext}.
+     *
+     * @return {@link OfficeSourceContext}.
+     */
+    OfficeSourceContext getOfficeSourceContext();
 
 }

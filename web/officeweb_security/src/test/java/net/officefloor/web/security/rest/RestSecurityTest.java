@@ -188,6 +188,15 @@ public class RestSecurityTest {
         });
     }
 
+    @Test
+    public void multipleHttpSecurities() {
+        this.doTest("/multiple-http-security", (assertion) -> {
+            assertion.check("Must be authenticated", 401);
+            assertion.check("challenge HttpSecurity", 200, "challenge");
+            assertion.check("another HttpSecurity", 200, "another");
+        });
+    }
+
     public static class SecuredService {
         public void service(ObjectResponse<String> response) {
             response.send("SECURED");

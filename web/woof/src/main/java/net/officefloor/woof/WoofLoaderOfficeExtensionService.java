@@ -53,6 +53,8 @@ import net.officefloor.web.rest.build.RestArchitect;
 import net.officefloor.web.rest.build.RestEmployer;
 import net.officefloor.web.security.build.HttpSecurityArchitect;
 import net.officefloor.web.security.build.HttpSecurityArchitectEmployer;
+import net.officefloor.web.security.build.HttpSecurityBuilder;
+import net.officefloor.web.security.rest.HttpSecurityRestMethodDecorator;
 import net.officefloor.web.template.build.WebTemplateArchitect;
 import net.officefloor.web.template.build.WebTemplateArchitectEmployer;
 import net.officefloor.woof.WoofLoaderSettings.WoofLoaderConfiguration;
@@ -142,6 +144,7 @@ public class WoofLoaderOfficeExtensionService implements OfficeExtensionService,
 		String restDirectory = interpolateRestDirectory(officeFloorDirectory, context.getProperty(REST_DIRECTORY_PROPERTY, REST_DEFAULT_DIRECTORY));
 		String objectsDirectory = interpolateRestDirectory(officeFloorDirectory, context.getProperty(OBJECTS_DIRECTORY_PROPERTY, OBJECTS_DEFAULT_DIRECTORY));
 		String governDirectory = interpolateRestDirectory(officeFloorDirectory, context.getProperty(GOVERN_DIRECTORY_PROPERTY, GOVERN_DEFAULT_DIRECTORY));
+		String securityDirectory = interpolateRestDirectory(officeFloorDirectory, context.getProperty(SECURITY_DIRECTORY_PROPERTY, SECURITY_DEFAULT_DIRECTORY));
 
 		// Determine if WoOF application
 		if ((!configuration.isWoofApplication(context)) && (!rest.isRestAvailable(restDirectory))) {
@@ -211,11 +214,14 @@ public class WoofLoaderOfficeExtensionService implements OfficeExtensionService,
 				woofLoader.loadWoofConfiguration(woofContext);
 			}
 
-			// Load governance and REST
+			// Load governance
 			GovernanceArchitect governanceArchitect = GovernanceEmployer.employGovernanceArchitect(officeArchitect, compose, context);
 			Map<String, OfficeGovernance> governances = governanceArchitect.addGovernances(governDirectory, composeProperties);
 			governances.forEach(compose::addGovernance);
-			rest.addRestServices(false, restDirectory, composeProperties);
+
+			// Load the HTTP Security and configure security
+			Map<String, HttpSecurityBuilder> securityBuilders = security.addHttpSecurities(securityDirectory, composeProperties);
+			rest.addRestMethodDecorator(new HttpSecurityRestMethodDecorator(securityBuilders));
 		}
 
 		// Load the optional objects configuration to the application
@@ -366,6 +372,13 @@ public class WoofLoaderOfficeExtensionService implements OfficeExtensionService,
 		templater.informWebArchitect();
 		resources.informWebArchitect();
 		security.informWebArchitect();
+
+		// Load the REST services
+		if (configuration.isLoadWoof()) {
+			rest.addRestServices(false, restDirectory, composeProperties);
+		}
+
+		// Inform of web
 		web.informOfficeArchitect();
 	}
 

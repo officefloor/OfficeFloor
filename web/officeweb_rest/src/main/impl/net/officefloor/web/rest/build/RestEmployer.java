@@ -99,7 +99,8 @@ public class RestEmployer {
 
             // Add the REST method
             restPathContext.addRestMethod(new RestMethodContextImpl<>(isSecure, method, restPathContext,
-                    composedEndpoint.input, composedEndpoint.configuration));
+                    composedEndpoint.input, composedEndpoint.configuration, this.officeArchitect, this.webArchitect,
+                    this.composeArchitect, this.officeSourceContext));
 
             // Decorate the REST methods
             restPathContext.decorateRestMethods(this.decorators);
@@ -184,7 +185,8 @@ public class RestEmployer {
                     // Create and initialise the context
                     RestMethodContextImpl<?> methodContext = new RestMethodContextImpl<>(
                             isSecure, endpointMethod, endpointContext,
-                            composedEndpoint.input, composedEndpoint.configuration);
+                            composedEndpoint.input, composedEndpoint.configuration, this.officeArchitect,
+                            this.webArchitect, this.composeArchitect, this.officeSourceContext);
                     endpointContext.addRestMethod(methodContext);
                 }
 

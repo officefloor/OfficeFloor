@@ -1,7 +1,0 @@
-composition:
-  security:
-    challenge:
-      inherit-all-roles: false
-
-service:
-  class: ${TestClass}$SecuredService

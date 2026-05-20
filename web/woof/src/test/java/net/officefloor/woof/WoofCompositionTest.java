@@ -43,6 +43,7 @@ import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Tests composition configuration loading in WoOF.
@@ -212,6 +213,20 @@ public class WoofCompositionTest {
         }
         @Enforce
         public void enforce() {}
+    }
+
+    @Test
+    public void httpSecurity() throws Exception {
+        this.doTest("/secured", (context) -> {
+        }, (response) -> {
+            assertEquals(401, response.getStatusLine().getStatusCode(), "Should not be allowed access");
+        });
+    }
+
+    public static class SecuredService {
+        public void service() {
+            fail("Should not be invoked, as no access");
+        }
     }
 
     @Test
