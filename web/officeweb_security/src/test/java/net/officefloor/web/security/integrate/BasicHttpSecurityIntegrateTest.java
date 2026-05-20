@@ -34,6 +34,9 @@ import net.officefloor.web.security.build.HttpSecurityBuilder;
 import net.officefloor.web.security.scheme.BasicHttpSecuritySource;
 import net.officefloor.web.security.store.CredentialStore;
 import net.officefloor.web.security.store.PasswordFileManagedObjectSource;
+import org.junit.jupiter.api.Test;
+
+import static net.officefloor.frame.test.OfficeFrameTestCase.fail;
 
 /**
  * Integrate tests the {@link BasicHttpSecuritySource}.
@@ -54,7 +57,7 @@ public class BasicHttpSecurityIntegrateTest extends AbstractHttpSecurityIntegrat
 		// Obtain the password file
 		String passwordFilePath;
 		try {
-			passwordFilePath = this.findFile(this.getClass(), "basic-password-file.txt").getAbsolutePath();
+			passwordFilePath = this.files.findFile(this.getClass(), "basic-password-file.txt").getAbsolutePath();
 		} catch (Throwable ex) {
 			throw fail(ex);
 		}
@@ -72,7 +75,8 @@ public class BasicHttpSecurityIntegrateTest extends AbstractHttpSecurityIntegrat
 	/**
 	 * Ensure can integrate.
 	 */
-	public void testIntegration() throws Exception {
+	@Test
+	public void integration() throws Exception {
 
 		// Should not authenticate (without credentials)
 		this.doRequest("/service", 401, "");
@@ -84,7 +88,8 @@ public class BasicHttpSecurityIntegrateTest extends AbstractHttpSecurityIntegrat
 	/**
 	 * Ensure can go through multiple login attempts.
 	 */
-	public void testMultipleLoginAttempts() throws Exception {
+	@Test
+	public void multipleLoginAttempts() throws Exception {
 
 		// Ensure can try multiple times
 		this.doRequest("/service", 401, "");
@@ -99,7 +104,8 @@ public class BasicHttpSecurityIntegrateTest extends AbstractHttpSecurityIntegrat
 	/**
 	 * Ensure can logout.
 	 */
-	public void testLogout() throws Exception {
+	@Test
+	public void logout() throws Exception {
 
 		// Authenticate with credentials
 		MockHttpResponse response = this.doRequest("/service", "daniel", "password", 200, "Serviced for daniel");

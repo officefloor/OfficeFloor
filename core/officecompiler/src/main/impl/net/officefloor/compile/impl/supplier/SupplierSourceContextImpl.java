@@ -72,7 +72,7 @@ public class SupplierSourceContextImpl extends SourceContextImpl
 	private final List<SupplierCompileCompletion> compileCompletions = new LinkedList<>();
 
 	/**
-	 * {@link SuppliedManagedObjectSourceImpl} instances.
+	 * {@link SuppliedManagedObjectSource} instances.
 	 */
 	private final List<SuppliedManagedObjectSourceTypeImpl> suppliedManagedObjectSources = new LinkedList<>();
 

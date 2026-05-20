@@ -39,10 +39,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import net.officefloor.activity.compose.build.ComposeArchitect;
+import net.officefloor.activity.compose.build.ComposeEmployer;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
+import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -144,8 +147,10 @@ public class JwtServerTest extends OfficeFrameTestCase {
 		});
 		compiler.web((context) -> {
 			OfficeArchitect office = context.getOfficeArchitect();
+			OfficeSourceContext sourceContext = context.getOfficeSourceContext();
+			ComposeArchitect compose = ComposeEmployer.employComposeArchitect(office, sourceContext);
 			HttpSecurityArchitect security = HttpSecurityArchitectEmployer
-					.employHttpSecurityArchitect(context.getWebArchitect(), office, context.getOfficeSourceContext());
+					.employHttpSecurityArchitect(context.getWebArchitect(), compose, office, sourceContext);
 
 			// Add the basic authentication
 			security.addHttpSecurity(BASIC.class.getName(), BasicHttpSecuritySource.class.getName())
@@ -214,8 +219,10 @@ public class JwtServerTest extends OfficeFrameTestCase {
 		authorityCompiler.web((context) -> {
 			OfficeArchitect office = context.getOfficeArchitect();
 			WebArchitect web = context.getWebArchitect();
+			OfficeSourceContext sourceContext = context.getOfficeSourceContext();
+			ComposeArchitect compose = ComposeEmployer.employComposeArchitect(office, sourceContext);
 			HttpSecurityArchitect security = HttpSecurityArchitectEmployer
-					.employHttpSecurityArchitect(context.getWebArchitect(), office, context.getOfficeSourceContext());
+					.employHttpSecurityArchitect(web, compose, office, sourceContext);
 
 			// Add the basic authentication
 			security.addHttpSecurity(BASIC.class.getName(), BasicHttpSecuritySource.class.getName())
@@ -258,8 +265,10 @@ public class JwtServerTest extends OfficeFrameTestCase {
 		resourceCompiler.mockHttpServer((server) -> this.resourceServer = server);
 		resourceCompiler.web((context) -> {
 			OfficeArchitect office = context.getOfficeArchitect();
+			OfficeSourceContext sourceContext = context.getOfficeSourceContext();
+			ComposeArchitect compose = ComposeEmployer.employComposeArchitect(office, sourceContext);
 			HttpSecurityArchitect security = HttpSecurityArchitectEmployer
-					.employHttpSecurityArchitect(context.getWebArchitect(), office, context.getOfficeSourceContext());
+					.employHttpSecurityArchitect(context.getWebArchitect(), compose, office, sourceContext);
 
 			// Create JWT handlers
 			OfficeSectionInput retrieveKeys = office

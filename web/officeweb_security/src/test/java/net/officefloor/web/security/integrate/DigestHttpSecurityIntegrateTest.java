@@ -36,6 +36,11 @@ import net.officefloor.web.security.build.HttpSecurityArchitect;
 import net.officefloor.web.security.build.HttpSecurityBuilder;
 import net.officefloor.web.security.scheme.DigestHttpSecuritySource;
 import net.officefloor.web.security.store.PasswordFileManagedObjectSource;
+import org.junit.jupiter.api.Test;
+
+import static net.officefloor.frame.test.OfficeFrameTestCase.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * Integrate the {@link DigestHttpSecuritySource}.
@@ -62,7 +67,7 @@ public class DigestHttpSecurityIntegrateTest extends AbstractHttpSecurityIntegra
 		// Obtain the password file
 		String passwordFilePath;
 		try {
-			passwordFilePath = this.findFile(this.getClass(), "digest-password-file.txt").getAbsolutePath();
+			passwordFilePath = this.files.findFile(this.getClass(), "digest-password-file.txt").getAbsolutePath();
 		} catch (Exception ex) {
 			throw fail(ex);
 		}
@@ -80,7 +85,8 @@ public class DigestHttpSecurityIntegrateTest extends AbstractHttpSecurityIntegra
 	/**
 	 * Ensure can integrate.
 	 */
-	public void testIntegration() throws Exception {
+	@Test
+	public void integration() throws Exception {
 
 		// Should not authenticate (without credentials)
 		this.doRequest("/service", 401, "");
@@ -94,7 +100,8 @@ public class DigestHttpSecurityIntegrateTest extends AbstractHttpSecurityIntegra
 	/**
 	 * Ensure can logout.
 	 */
-	public void testLogout() throws Exception {
+	@Test
+	public void logout() throws Exception {
 
 		// Authenticate with credentials
 		MockHttpResponse init = this.doInit("/service");
@@ -124,7 +131,7 @@ public class DigestHttpSecurityIntegrateTest extends AbstractHttpSecurityIntegra
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest(path));
 
 		// Ensure challenge
-		assertEquals("Should be challenge", 401, response.getStatus().getStatusCode());
+		assertEquals(401, response.getStatus().getStatusCode(), "Should be challenge");
 
 		// Return response
 		return response;
@@ -155,11 +162,11 @@ public class DigestHttpSecurityIntegrateTest extends AbstractHttpSecurityIntegra
 		properties.load(new StringReader(propertiesText));
 
 		// Ensure digest properties available
-		assertEquals("Incorrect realm", "TestRealm", properties.getProperty("realm"));
-		assertEquals("Incorrect algorithm", "MD5", properties.getProperty("algorithm"));
-		assertEquals("Incorrect qop (with above , replacement)", "authauth-int", properties.getProperty("qop"));
-		assertNotNull("Should have nonce", properties.getProperty("nonce"));
-		assertNotNull("Should have opaque", properties.getProperty("opaque"));
+		assertEquals("TestRealm", properties.getProperty("realm"), "Incorrect realm");
+		assertEquals("MD5", properties.getProperty("algorithm"), "Incorrect algorithm");
+		assertEquals("authauth-int", properties.getProperty("qop"), "Incorrect qop (with above , replacement)");
+		assertNotNull(properties.getProperty("nonce"), "Should have nonce");
+		assertNotNull(properties.getProperty("opaque"), "Should have opaque");
 
 		// Generate the authentication header
 		String realm = properties.getProperty("realm");

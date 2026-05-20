@@ -21,6 +21,8 @@
 package net.officefloor.woof;
 
 import java.util.Properties;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
@@ -33,6 +35,7 @@ import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.server.http.HttpServer;
 import net.officefloor.web.build.WebArchitect;
+import net.officefloor.web.rest.build.RestEmployer;
 import net.officefloor.woof.WoofLoaderSettings.WoofLoaderConfiguration;
 import net.officefloor.woof.model.teams.WoofTeamsRepositoryImpl;
 import net.officefloor.woof.teams.WoofTeamsLoader;
@@ -71,9 +74,52 @@ public class WoofLoaderOfficeFloorExtensionService
 			String officeName = office.getDeployedOfficeName();
 			WoofLoaderConfiguration configuration = WoofLoaderSettings.getWoofLoaderConfiguration(officeName);
 
+			// Determine if load
+			if (!configuration.isLoad()) {
+				continue NEXT_OFFICE;
+			}
+
+			// Load the additional profiles for the application (needed before override properties)
+			if (configuration.isLoadAdditionalProfiles()) {
+				String[] additionalProfiles = configuration.getAdditionalProfiles(context);
+				for (String additionalProfile : additionalProfiles) {
+					office.addAdditionalProfile(additionalProfile);
+				}
+			}
+
+			// Load the override properties for the application
+			Properties overrideProperties = null;
+			if (configuration.isLoadOverrideProperties()) {
+				overrideProperties = configuration.getOverrideProperties(context, context);
+				for (String propertyName : overrideProperties.stringPropertyNames()) {
+					String propertyValue = overrideProperties.getProperty(propertyName);
+					office.addOverrideProperty(propertyName, propertyValue);
+				}
+			}
+
+			// Function to obtain office property
+			final Properties finalOverrideProperties = overrideProperties;
+			BiFunction<String, String, String> getOfficeProperty = (propertyName, defaultValue) -> {
+
+				// Determine if override property
+				if (finalOverrideProperties != null) {
+					String propertyValue = finalOverrideProperties.getProperty(propertyName);
+					if ((propertyValue != null) && (!propertyValue.isEmpty())) {
+						return propertyValue;
+					}
+				}
+
+				// Determine from Office prefixed property
+				return context.getProperty(officeName + "." + propertyName, defaultValue);
+			};
+
+			// Obtain the REST directory
+			String officeFloorDirectory = getOfficeProperty.apply(WoofLoaderOfficeExtensionService.OFFICE_FLOOR_DIRECTORY_PROPERTY, WoofLoaderOfficeExtensionService.OFFICE_FLOOR_DEFAULT_DIRECTORY);
+			String restDirectory = WoofLoaderOfficeExtensionService.interpolateRestDirectory(officeFloorDirectory, getOfficeProperty.apply(WoofLoaderOfficeExtensionService.REST_DIRECTORY_PROPERTY, WoofLoaderOfficeExtensionService.REST_DEFAULT_DIRECTORY));
+
 			// Determine if WoOF application
-			if (!configuration.isWoofApplication(context)) {
-				continue NEXT_OFFICE; // not WoOF application
+			if ((!configuration.isWoofApplication(context)) && (!RestEmployer.isRestAvailable(restDirectory))) {
+				return; // not WoOF application
 			}
 
 			// Load the HTTP Server
@@ -94,27 +140,6 @@ public class WoofLoaderOfficeFloorExtensionService
 			// Indicate loading WoOF
 			if (!configuration.isContextualLoad()) {
 				context.getLogger().info("Extending Office " + officeName + " with WoOF");
-			}
-
-			// Load the additional profiles for the application
-			if (configuration.isLoadAdditionalProfiles()) {
-
-				// Load the additional profiles
-				String[] additionalProfiles = configuration.getAdditionalProfiles(context);
-				for (String additionalProfile : additionalProfiles) {
-					office.addAdditionalProfile(additionalProfile);
-				}
-			}
-
-			// Load the override properties for the application
-			if (configuration.isLoadOverrideProperties()) {
-
-				// Load the override properties
-				Properties properties = configuration.getOverrideProperties(context, context);
-				for (String propertyName : properties.stringPropertyNames()) {
-					String propertyValue = properties.getProperty(propertyName);
-					office.addOverrideProperty(propertyName, propertyValue);
-				}
 			}
 
 			// Load the optional teams configuration for the application

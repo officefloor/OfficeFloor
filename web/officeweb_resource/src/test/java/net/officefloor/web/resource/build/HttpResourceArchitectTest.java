@@ -24,11 +24,14 @@ import java.io.File;
 import java.io.IOException;
 import java.util.function.Consumer;
 
+import net.officefloor.activity.compose.build.ComposeArchitect;
+import net.officefloor.activity.compose.build.ComposeEmployer;
 import net.officefloor.compile.impl.structure.OfficeNodeImpl;
 import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeEscalation;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -517,8 +520,11 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 	 */
 	private void compile(Initialiser initialiser) throws Exception {
 		this.compile.web((context) -> {
+			OfficeArchitect office = context.getOfficeArchitect();
+			OfficeSourceContext sourceContext = context.getOfficeSourceContext();
+			ComposeArchitect compose = ComposeEmployer.employComposeArchitect(office, sourceContext);
 			this.securityArchitect = HttpSecurityArchitectEmployer.employHttpSecurityArchitect(
-					context.getWebArchitect(), context.getOfficeArchitect(), context.getOfficeSourceContext());
+					context.getWebArchitect(), compose, office, sourceContext);
 			HttpResourceArchitect resource = HttpResourceArchitectEmployer.employHttpResourceArchitect(
 					context.getWebArchitect(), this.securityArchitect, context.getOfficeArchitect(),
 					context.getOfficeSourceContext());
@@ -545,8 +551,11 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		this.compile.getOfficeFloorCompiler().setCompilerIssues(issues);
 		this.compile.web((context) -> {
+			OfficeArchitect office = context.getOfficeArchitect();
+			OfficeSourceContext sourceContext = context.getOfficeSourceContext();
+			ComposeArchitect compose = ComposeEmployer.employComposeArchitect(office, sourceContext);
 			this.securityArchitect = HttpSecurityArchitectEmployer.employHttpSecurityArchitect(
-					context.getWebArchitect(), context.getOfficeArchitect(), context.getOfficeSourceContext());
+					context.getWebArchitect(), compose, office, sourceContext);
 			HttpResourceArchitect resource = HttpResourceArchitectEmployer.employHttpResourceArchitect(
 					context.getWebArchitect(), this.securityArchitect, context.getOfficeArchitect(),
 					context.getOfficeSourceContext());

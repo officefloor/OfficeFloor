@@ -24,7 +24,7 @@ public class GovernanceConfiguration {
 
     private String source;
 
-    private Map<String, String> config;
+    private Map<String, String> properties;
 
     /*
      * ========== Composition ===========

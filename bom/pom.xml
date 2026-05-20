@@ -170,9 +170,19 @@
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
+				<groupId>net.officefloor.activity</groupId>
+				<artifactId>officeadmin</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
 				<groupId>net.officefloor.dependency</groupId>
 				<artifactId>officedependency</artifactId>
 				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.activity</groupId>
+				<artifactId>officemanagedobject</artifactId>
+				<version>4.0.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.activity</groupId>

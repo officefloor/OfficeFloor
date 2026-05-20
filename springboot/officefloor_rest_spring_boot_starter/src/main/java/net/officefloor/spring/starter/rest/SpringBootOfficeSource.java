@@ -13,15 +13,11 @@ import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.office.source.impl.AbstractOfficeSource;
-import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.plugin.section.clazz.MethodParameterAnnotation;
-import net.officefloor.server.http.HttpMethod;
-import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
 import net.officefloor.spring.starter.rest.argument.SpringArgumentManagedObjectSource;
-import net.officefloor.spring.starter.rest.argument.SpringBeanManagedObjectSource;
+import net.officefloor.spring.starter.rest.argument.SpringBeanSupplierSource;
 import net.officefloor.spring.starter.rest.argument.SpringMvcArguments;
 import net.officefloor.spring.starter.rest.argument.SpringTypeQualifierInterrogator;
 import net.officefloor.spring.starter.rest.cors.ComposeCorsConfiguration;
@@ -37,22 +33,19 @@ import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.json.JacksonHttpObjectParserFactory;
 import net.officefloor.web.openapi.OpenApiArchitect;
 import net.officefloor.web.openapi.build.OpenApiEmployer;
+import net.officefloor.web.rest.build.MomentoKey;
 import net.officefloor.web.rest.build.RestArchitect;
 import net.officefloor.web.rest.build.RestEmployer;
 import net.officefloor.web.rest.build.RestEndpoint;
-import net.officefloor.web.rest.build.RestEndpointContext;
-import net.officefloor.web.rest.build.RestListener;
 import net.officefloor.web.rest.build.RestMethod;
-import net.officefloor.web.rest.build.RestMethodContext;
-import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.config.BeanDefinition;
+import net.officefloor.web.rest.build.RestMethodDecoratorContext;
+import net.officefloor.web.rest.build.RestPathContext;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.web.cors.CorsConfiguration;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -79,6 +72,29 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
         this.restEndpoints = restEndpoints;
         this.applicationContext = applicationContext;
         this.openApi = openApi;
+    }
+
+    /**
+     * Loads the {@link CorsConfiguration} from the {@link RestPathContext}.
+     *
+     * @param path {@link RestPathContext}.
+     * @return {@link CorsConfiguration} or <code>null</code> if no CORS configured.
+     */
+    private static CorsConfiguration loadCorsConfiguration(RestPathContext path) {
+
+        // Drop out of recursion when at root
+        if (path == null) {
+            return null;
+        }
+
+        // Shorter path has lower precedence
+        CorsConfiguration parentCors = loadCorsConfiguration(path.getParentPath());
+
+        // Obtain the CORS from current path segment
+        ComposeCorsConfiguration composeConfiguration = path.getConfiguration("cors", ComposeCorsConfiguration.class);
+
+        // Return the combined CORS, taking longer path as precedence
+        return OfficeFloorRestEndpoint.combineCors(OfficeFloorRestEndpoint.createCorsConfiguration(composeConfiguration), parentCors);
     }
 
     /*
@@ -143,59 +159,44 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
         // Allow Spring to handle responses
         webArchitect.addHttpObjectResponder(new SpringHttpObjectResponderFactory(springExceptionHandlers));
 
+        // Add CORS decoration
+        MomentoKey<CorsConfiguration> corsMomento = restArchitect.addRestMethodDecorator((context) -> {
+            CorsConfiguration pathCorsConfiguration = loadCorsConfiguration(context.getPath());
+            CorsConfiguration methodCorsConfiguration = OfficeFloorRestEndpoint.createCorsConfiguration(context.getConfiguration("cors", ComposeCorsConfiguration.class));
+            context.setMomento(OfficeFloorRestEndpoint.combineCors(pathCorsConfiguration, methodCorsConfiguration));
+        });
+
         // Add the rest servicing
         officeSourceContext.getLogger().info("Loading REST endpoints:");
         PropertyList propertyList = officeSourceContext.createPropertyList();
         for (String propertyName : officeSourceContext.getPropertyNames()) {
             propertyList.addProperty(propertyName).setValue(officeSourceContext.getProperty(propertyName));
         }
-        restArchitect.addRestServices(false, "officefloor/rest", propertyList, new RestListener() {
-            @Override
-            public void initialiseRestMethod(RestMethodContext restMethodContext) {
-                officeSourceContext.getLogger().info("  " + restMethodContext.getHttpMethod().getName() + " " + restMethodContext.getPath());
-            }
+        Map<String, RestEndpoint> restEndpoints = restArchitect.addRestServices(false, "officefloor/rest", propertyList);
 
-            @Override
-            public void endpoint(RestEndpoint restEndpoint) {
-                SpringBootOfficeSource.this.restEndpoints.add(new OfficeFloorRestEndpoint(restEndpoint));
+        // Include the REST endpoints (sorted for deterministic loading and logging)
+        List<String> endpointPaths = restEndpoints.keySet().stream().sorted((a, b) -> {
+            int longerSecond = a.length() - b.length(); // short path first
+            return (longerSecond != 0) ? longerSecond : String.CASE_INSENSITIVE_ORDER.compare(a, b);
+        }).toList();
+        for (String endpointPath : endpointPaths) {
+            RestEndpoint restEndpoint = restEndpoints.get(endpointPath);
+
+            // Include the rest endpoint
+            this.restEndpoints.add(new OfficeFloorRestEndpoint(restEndpoint, corsMomento));
+
+            // Log the REST methods (in deterministic order)
+            List<RestMethod> sortedRestMethods = restEndpoint.getRestMethods().stream()
+                    .sorted((a, b) -> String.CASE_INSENSITIVE_ORDER.compare(a.getHttpMethod().getName(), b.getHttpMethod().getName()))
+                    .toList();
+            for (RestMethod restMethod : sortedRestMethods) {
+                officeSourceContext.getLogger().info("  " + restMethod.getHttpMethod().getName() + " " + restEndpoint.getPath());
             }
-        });
+        }
 
         // Register all the Spring components for use
         ConfigurableListableBeanFactory beanFactory = this.applicationContext.getBeanFactory();
-        for (String beanName : beanFactory.getBeanDefinitionNames()) {
-            BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
-
-            // Obtain the bean type
-            Class<?> beanType = beanFactory.getType(beanName);
-
-            // Ensure type can be loaded (avoid lambdas)
-            String beanTypeName = beanType.getName();
-            if (officeSourceContext.loadOptionalClass(beanTypeName) != null) {
-
-                // Obtain the bean qualifier
-                String qualifier = null;
-                if (beanDefinition instanceof AnnotatedBeanDefinition) {
-                    AnnotatedBeanDefinition annotatedBeanDefinition = (AnnotatedBeanDefinition) beanDefinition;
-                    AnnotationMetadata metadata = annotatedBeanDefinition.getMetadata();
-
-                    // Obtain the qualifier
-                    Map<String, Object> attributes = metadata.getAnnotationAttributes(Qualifier.class.getName());
-                    qualifier = (attributes != null) ? (String) attributes.get("value") : null;
-                }
-
-                // Register bean
-                String objectName = "SPRING_" + beanName;
-                OfficeManagedObject beanMo = officeArchitect.addOfficeManagedObjectSource(
-                                objectName,
-                                new SpringBeanManagedObjectSource(beanName, beanType, beanFactory))
-                        .addOfficeManagedObject(objectName, ManagedObjectScope.THREAD);
-                if (qualifier != null) {
-                    beanMo.addTypeQualification(qualifier, beanTypeName);
-                }
-
-            }
-        }
+        officeArchitect.addSupplier("SPRING", new SpringBeanSupplierSource(beanFactory));
 
         // Add access to servlet request/response
         this.addOfficeManagedObjectSource(HttpServletRequest.class, new HttpServletRequestManagedObjectSource(), officeArchitect);
@@ -210,25 +211,25 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
 
         // Load in-line configured spring dependencies
         officeArchitect.addManagedFunctionAugmentor((context) -> {
-                ManagedFunctionType<?, ?> functionType = context.getManagedFunctionType();
-                for (ManagedFunctionObjectType<?> functionParameterType : functionType.getObjectTypes()) {
-                    Class<?> objectType = functionParameterType.getObjectType();
+            ManagedFunctionType<?, ?> functionType = context.getManagedFunctionType();
+            for (ManagedFunctionObjectType<?> functionParameterType : functionType.getObjectTypes()) {
+                Class<?> objectType = functionParameterType.getObjectType();
 
-                    // Obtain the method parameter annotation
-                    MethodParameterAnnotation parameterAnnotation = functionParameterType.getAnnotation(MethodParameterAnnotation.class);
-                    if (parameterAnnotation != null) {
+                // Obtain the method parameter annotation
+                MethodParameterAnnotation parameterAnnotation = functionParameterType.getAnnotation(MethodParameterAnnotation.class);
+                if (parameterAnnotation != null) {
 
-                        // Obtain the method details for the parameter
-                        Method method = parameterAnnotation.getMethod();
-                        int parameterIndex = parameterAnnotation.getParameterIndex();
+                    // Obtain the method details for the parameter
+                    Method method = parameterAnnotation.getMethod();
+                    int parameterIndex = parameterAnnotation.getParameterIndex();
 
-                        // Determine if in-line configuration of dependency
-                        if (springArgumentChecker.isSpringArgument(objectType, functionParameterType.getAnnotations())) {
-                            this.handleSpringArgument(objectType, method, parameterIndex, officeArchitect);
-                        }
+                    // Determine if in-line configuration of dependency
+                    if (springArgumentChecker.isSpringArgument(objectType, functionParameterType.getAnnotations())) {
+                        this.handleSpringArgument(objectType, method, parameterIndex, officeArchitect);
                     }
                 }
-            });
+            }
+        });
 
         // Configure the Open API
         OpenApiArchitect openApiArchitect = OpenApiEmployer.employOpenApiArchitect(officeArchitect, webArchitect, null, officeSourceContext);

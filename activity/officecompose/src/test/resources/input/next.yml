@@ -1,0 +1,3 @@
+service:
+  class: ${TestClass}$NextService
+  next: "#input"

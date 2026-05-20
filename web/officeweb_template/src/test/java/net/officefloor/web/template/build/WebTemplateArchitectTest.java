@@ -27,12 +27,15 @@ import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.util.function.Consumer;
 
+import net.officefloor.activity.compose.build.ComposeArchitect;
+import net.officefloor.activity.compose.build.ComposeEmployer;
 import net.officefloor.compile.impl.structure.FunctionNamespaceNodeImpl;
 import net.officefloor.compile.impl.structure.OfficeNodeImpl;
 import net.officefloor.compile.impl.structure.SectionNodeImpl;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.Flow;
@@ -909,8 +912,9 @@ public class WebTemplateArchitectTest extends OfficeFrameTestCase {
 		MockHttpResponse response = this.template((context, templater) -> {
 			WebArchitect web = context.getWebArchitect();
 			OfficeArchitect office = context.getOfficeArchitect();
-			HttpSecurityArchitect security = HttpSecurityArchitectEmployer.employHttpSecurityArchitect(web, office,
-					context.getOfficeSourceContext());
+			OfficeSourceContext sourceContext = context.getOfficeSourceContext();
+			ComposeArchitect compose = ComposeEmployer.employComposeArchitect(office, sourceContext);
+			HttpSecurityArchitect security = HttpSecurityArchitectEmployer.employHttpSecurityArchitect(web, compose, office, sourceContext);
 			security.addHttpSecurity("SECURITY", new MockChallengeHttpSecuritySource("REALM"));
 			WebTemplate template = templater.addTemplate(false, "/path", new StringReader("SECURE"));
 			template.getHttpSecurer();
@@ -949,8 +953,9 @@ public class WebTemplateArchitectTest extends OfficeFrameTestCase {
 		MockHttpResponse response = this.template((context, templater) -> {
 			WebArchitect web = context.getWebArchitect();
 			OfficeArchitect office = context.getOfficeArchitect();
-			HttpSecurityArchitect security = HttpSecurityArchitectEmployer.employHttpSecurityArchitect(web, office,
-					context.getOfficeSourceContext());
+			OfficeSourceContext sourceContext = context.getOfficeSourceContext();
+			ComposeArchitect compose = ComposeEmployer.employComposeArchitect(office, sourceContext);
+			HttpSecurityArchitect security = HttpSecurityArchitectEmployer.employHttpSecurityArchitect(web, compose, office, sourceContext);
 			security.addHttpSecurity("SECURITY", new MockChallengeHttpSecuritySource("REALM"));
 			WebTemplate template = templater.addTemplate(false, "/path", new StringReader("SECURE"));
 			template.getHttpSecurer().addRole("role");

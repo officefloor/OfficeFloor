@@ -1,0 +1,2 @@
+administration:
+  class: ${TestClass}$MockSimple

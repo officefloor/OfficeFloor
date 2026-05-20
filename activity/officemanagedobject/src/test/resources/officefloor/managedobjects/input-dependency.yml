@@ -1,0 +1,3 @@
+managed-object:
+  class: ${TestClass}$MockInputDependency
+  scope: PROCESS

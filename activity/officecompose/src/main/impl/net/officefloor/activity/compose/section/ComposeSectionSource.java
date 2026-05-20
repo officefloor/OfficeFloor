@@ -4,6 +4,7 @@ import net.officefloor.activity.compose.ComposeConfiguration;
 import net.officefloor.activity.compose.CompositionConfiguration;
 import net.officefloor.activity.compose.FunctionConfiguration;
 import net.officefloor.activity.compose.build.ComposeArchitect;
+import net.officefloor.activity.compose.build.ComposeEmployer;
 import net.officefloor.activity.procedure.Procedure;
 import net.officefloor.activity.procedure.ProcedureEscalationType;
 import net.officefloor.activity.procedure.ProcedureFlowType;
@@ -244,6 +245,9 @@ public class ComposeSectionSource extends AbstractSectionSource {
             functions.put(procedureName, new ComposedFunction(functionConfiguration, procedureType, procedure));
         }
 
+        // SectionOutputs created for #-prefixed external input references (deduplicated by name)
+        Map<String, SectionOutput> externalSectionOutputs = new HashMap<>();
+
         // Map composition (following deterministic order)
         for (String composedFunctionName : new ArrayList<>(functions.keySet()).stream().sorted().toList()) {
             ComposedFunction composedFunction = functions.get(composedFunctionName);
@@ -252,16 +256,26 @@ public class ComposeSectionSource extends AbstractSectionSource {
             String next = composedFunction.functionConfiguration.getNext();
             if ((next != null) && (!next.isEmpty())) {
 
-                // Obtain the next procedure
-                ComposedFunction nextFunction = functions.get(next);
-                if (nextFunction == null) {
-                    // Unknown next function
-                    sectionDesigner.addIssue("Function " + composedFunctionName + " has next configured to unknown function " + next);
+                if (next.startsWith(ComposeEmployer.ADDED_INPUT_PREFIX)) {
+                    // External input reference — route via a SectionOutput
+                    String outputName = next.substring(ComposeEmployer.ADDED_INPUT_PREFIX.length());
+                    SectionOutput externalOutput = externalSectionOutputs.computeIfAbsent(outputName,
+                            (name) -> sectionDesigner.addSectionOutput(name, null, false));
+                    sectionDesigner.link(composedFunction.procedure.getSubSectionOutput(ProcedureArchitect.NEXT_OUTPUT_NAME),
+                            externalOutput);
 
                 } else {
-                    // Map to procedure
-                    sectionDesigner.link(composedFunction.procedure.getSubSectionOutput(ProcedureArchitect.NEXT_OUTPUT_NAME),
-                            nextFunction.procedure.getSubSectionInput(ProcedureArchitect.INPUT_NAME));
+                    // Obtain the next procedure
+                    ComposedFunction nextFunction = functions.get(next);
+                    if (nextFunction == null) {
+                        // Unknown next function
+                        sectionDesigner.addIssue("Function " + composedFunctionName + " has next configured to unknown function " + next);
+
+                    } else {
+                        // Map to procedure
+                        sectionDesigner.link(composedFunction.procedure.getSubSectionOutput(ProcedureArchitect.NEXT_OUTPUT_NAME),
+                                nextFunction.procedure.getSubSectionInput(ProcedureArchitect.INPUT_NAME));
+                    }
                 }
             }
 
@@ -276,7 +290,15 @@ public class ComposeSectionSource extends AbstractSectionSource {
                     }, (flowType) -> {
                         sectionDesigner.addIssue("Function " + composedFunctionName + " has output " + flowType.getFlowName() + " but it is not configured");
                     }, (flowType, handlerName) -> {
-                        sectionDesigner.addIssue("Function " + composedFunctionName + " has output " + flowType.getFlowName() + " that is configured to unknown function " + handlerName);
+                        if (handlerName.startsWith(ComposeEmployer.ADDED_INPUT_PREFIX)) {
+                            // External input reference — route via a SectionOutput
+                            String outputName = handlerName.substring(ComposeEmployer.ADDED_INPUT_PREFIX.length());
+                            SectionOutput externalOutput = externalSectionOutputs.computeIfAbsent(outputName,
+                                    (name) -> sectionDesigner.addSectionOutput(name, null, false));
+                            sectionDesigner.link(composedFunction.procedure.getSubSectionOutput(flowType.getFlowName()), externalOutput);
+                        } else {
+                            sectionDesigner.addIssue("Function " + composedFunctionName + " has output " + flowType.getFlowName() + " that is configured to unknown function " + handlerName);
+                        }
                     }, (flowName, handlerName) -> {
                         sectionDesigner.addIssue("Function " + composedFunctionName + " configures output " + flowName + " but it does not output the flow");
                     });

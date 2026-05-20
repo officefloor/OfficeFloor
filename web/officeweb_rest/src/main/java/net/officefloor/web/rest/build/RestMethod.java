@@ -38,16 +38,12 @@ public interface RestMethod {
     OfficeSectionInput getServiceInput();
 
     /**
-     * <p>
-     * Obtains additional configuration for the {@link RestMethod}.
-     * <p>
-     * This for example is CORS specific configuration for the {@link RestMethod}.
+     * Obtains the Momento for the {@link MomentoKey}.
      *
-     * @param itemName Name of configuration item.
-     * @param type     Type of configuration.
-     * @param <T>      Type of configuration.
-     * @return Configuration item.
+     * @param key {@link MomentoKey}.
+     * @param <M> Type of Momento.
+     * @return Momento or <code>null</code> if no Momento specified by the respective {@link RestMethodDecorator}.
      */
-    <T> T getConfiguration(String itemName, Class<T> type);
+    <M> M getMomento(MomentoKey<M> key);
 
 }
