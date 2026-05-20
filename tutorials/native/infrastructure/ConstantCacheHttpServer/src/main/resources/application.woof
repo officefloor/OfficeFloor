@@ -1,0 +1,29 @@
+<woof>
+  <http-continuations>
+    <http-continuation path="/cached/{key}" secure="false" x="39" y="40">
+      <procedure name="service"/>
+    </http-continuation>
+  </http-continuations>
+  <http-inputs>
+  </http-inputs>
+  <templates>
+  </templates>
+  <sections>
+  </sections>
+  <procedures>
+    <procedure name="service" resource="net.officefloor.tutorial.constantcachehttpserver.ConstantCacheLogic" source="Class" procedure="service" x="249" y="37">
+      <next argument-type="">
+      </next>
+    </procedure>
+  </procedures>
+  <securities>
+  </securities>
+  <governances>
+  </governances>
+  <resources>
+  </resources>
+  <exceptions>
+  </exceptions>
+  <starting>
+  </starting>
+</woof>

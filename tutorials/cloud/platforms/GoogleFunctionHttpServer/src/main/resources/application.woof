@@ -1,0 +1,43 @@
+<woof>
+  <http-continuations>
+    <http-continuation path="/posts" secure="false" x="76" y="176">
+      <procedure name="getPosts"/>
+    </http-continuation>
+    <http-continuation path="/posts/{id}" secure="false" x="75" y="114">
+      <procedure name="getPost"/>
+    </http-continuation>
+  </http-continuations>
+  <http-inputs>
+    <http-input path="/posts" method="POST" secure="false" x="75" y="49">
+      <procedure name="createPost"/>
+    </http-input>
+  </http-inputs>
+  <templates>
+  </templates>
+  <sections>
+  </sections>
+  <procedures>
+    <procedure name="createPost" resource="net.officefloor.tutorial.googlefunctionhttpserver.GoogleFunctionLogic" source="Class" procedure="createPost" x="216" y="47">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="getPost" resource="net.officefloor.tutorial.googlefunctionhttpserver.GoogleFunctionLogic" source="Class" procedure="getPost" x="243" y="108">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="getPosts" resource="net.officefloor.tutorial.googlefunctionhttpserver.GoogleFunctionLogic" source="Class" procedure="getPosts" x="235" y="172">
+      <next argument-type="">
+      </next>
+    </procedure>
+  </procedures>
+  <securities>
+  </securities>
+  <governances>
+  </governances>
+  <resources>
+  </resources>
+  <exceptions>
+  </exceptions>
+  <starting>
+  </starting>
+</woof>

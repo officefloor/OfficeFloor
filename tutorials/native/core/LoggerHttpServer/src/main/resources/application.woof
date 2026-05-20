@@ -1,0 +1,29 @@
+<woof>
+  <http-continuations>
+  </http-continuations>
+  <http-inputs>
+    <http-input path="/" method="POST" secure="false" x="18" y="33">
+      <procedure name="log"/>
+    </http-input>
+  </http-inputs>
+  <templates>
+  </templates>
+  <sections>
+  </sections>
+  <procedures>
+    <procedure name="log" resource="net.officefloor.tutorial.loggerhttpserver.LogLogic" source="Class" procedure="log" x="149" y="32">
+      <next argument-type="">
+      </next>
+    </procedure>
+  </procedures>
+  <securities>
+  </securities>
+  <governances>
+  </governances>
+  <resources>
+  </resources>
+  <exceptions>
+  </exceptions>
+  <starting>
+  </starting>
+</woof>

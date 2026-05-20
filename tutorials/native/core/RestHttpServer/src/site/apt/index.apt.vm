@@ -1,0 +1,106 @@
+~~~
+~~ #%L
+~~ REST Tutorial
+~~ %%
+~~ Copyright (C) 2005 - 2020 Daniel Sagenschneider
+~~ %%
+~~ Licensed under the Apache License, Version 2.0 (the "License");
+~~ you may not use this file except in compliance with the License.
+~~ You may obtain a copy of the License at
+~~ 
+~~      http://www.apache.org/licenses/LICENSE-2.0
+~~ 
+~~ Unless required by applicable law or agreed to in writing, software
+~~ distributed under the License is distributed on an "AS IS" BASIS,
+~~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~~ See the License for the specific language governing permissions and
+~~ limitations under the License.
+~~ #L%
+~~~
+
+                                               -----------------------
+                                                    REST Tutorial 
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+REST Tutorial
+
+  This tutorial demonstrates REST with WoOF.
+                                                                                                                          
+  The example used in this tutorial is two end points:
+  
+   * <<<POST /vehicle>>> <<<\{"vehicleType":"car","wheels":4\}>>> to create a vehicle entry  
+      
+   * <<<GET /vehicle/\{id\}>>> to obtain the vehicle entry by the vehicle's identifier
+   
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/RestHttpServer}Tutorial Source}}
+
+
+
+*WoOF configuration
+
+  To configure REST end-points with WoOF, use the following from the palette:
+  
+   * <<<HTTP Continuation>>> to provide GET end points
+   
+   * <<<HTTP Input>>> to provide other HTTP method end points
+   
+  The <<<HTTP Continuation>>> is separate, as HTTP redirects are <continuations> via GET methods.  Therefore, it is possible to connect to this to trigger a redirect to the respective URL.
+   
+  The configuration of the two end points are as follows:
+  
+[./images/RestHttpServer-configuration.png] RestHttpServer screen shot.
+
+  The handling of the end-points is provided by connecting them to other items.  In this case, <<<procedures>>> provide the implementation of the end points.
+  
+
+
+*Object parsing / responding
+
+  Similar to {{{../JavaScriptApp/index.html}AJAX with templates tutorial}} object parsing and responding is via the {{{/apidocs/net/officefloor/web/HttpObject.html}@HttpObject}} and {{{/apidocs/net/officefloor/web/ObjectResponse.html}ObjectResponse}}.  The below is the object used in this tutorial:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/resthttpserver/Vehicle.java|ignoreDownloadError=false}
+
+  For convenience, the <<<Entity>>> object is re-used for parsing out the <<<POST>>> pay load.
+  
+  The implementation of the <<<POST>>> handling is the following:  
+  
+%{snippet|id=post|file=${basedir}/src/main/java/net/officefloor/tutorial/resthttpserver/RestLogic.java|ignoreDownloadError=false}
+
+  As the JSON data is loaded onto the object, it is passed to the <<<EntityManager>>> to store within the database.
+  
+  Should there be invalid data, a {{{/apidocs/net/officefloor/server/http/HttpException.html}HttpException}} can be thrown to specify the response status code and entity pay load.  In this case, a custom status code is used.
+
+
+
+*Path parameters
+
+  Using <<<\{...\}>>> within the path specifies a path parameter.
+  
+  In the case of this tutorial, this is used to specify the vehicle identifier within the URL.  
+  
+  Note that multiple path parameters may be specified in the URL along with ability to specify them where ever appropriate in the URL.  The only requirement is that path parameters in the URL are separated by at least one character.  
+
+  The following demonstrates passing the path parameter value to the handling logic:
+  
+%{snippet|id=get|file=${basedir}/src/main/java/net/officefloor/tutorial/resthttpserver/RestLogic.java|ignoreDownloadError=false}
+
+  The {{{/apidocs/net/officefloor/web/HttpPathParameter.html}@HttpPathParameter}} annotation specifies to load the path value.  See the other annotations in the package for extracting various aspects of the HTTP request.
+
+
+*Testing
+
+  The following shows the ease of testing the REST end points:
+  
+%{snippet|id=calling|file=${basedir}/src/test/java/net/officefloor/tutorial/resthttpserver/RestHttpServerTest.java|ignoreDownloadError=false}
+
+  However, as the logic is a POJO (plain old java object), the logic can also be unit tested as follows:
+  
+%{snippet|id=pojo|file=${basedir}/src/test/java/net/officefloor/tutorial/resthttpserver/RestHttpServerTest.java|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../StaticContentHttpServer/index.html}next tutorial}} covers serving static (files) content for single page applications.

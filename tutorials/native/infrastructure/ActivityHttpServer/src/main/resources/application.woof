@@ -1,0 +1,40 @@
+<woof>
+  <http-continuations>
+    <http-continuation path="/" secure="false" x="50" y="47">
+      <procedure name="initiate"/>
+    </http-continuation>
+  </http-continuations>
+  <http-inputs>
+  </http-inputs>
+  <templates>
+  </templates>
+  <sections>
+    <section name="LevelOne" source="net.officefloor.activity.ActivitySectionSource" location="LevelOne.activity" x="325" y="25">
+      <input name="Input" parameter-type="net.officefloor.tutorial.activityhttpserver.Depth"/>
+      <output name="Output" argument-type="net.officefloor.tutorial.activityhttpserver.Depth">
+        <procedure name="send"/>
+      </output>
+    </section>
+  </sections>
+  <procedures>
+    <procedure name="initiate" resource="net.officefloor.tutorial.activityhttpserver.InitiateDepthLogic" source="Class" procedure="initiate" x="153" y="44">
+      <next argument-type="net.officefloor.tutorial.activityhttpserver.Depth">
+        <section name="LevelOne" input="Input"/>
+      </next>
+    </procedure>
+    <procedure name="send" resource="net.officefloor.tutorial.activityhttpserver.SendDepthLogic" source="Class" procedure="send" x="558" y="41">
+      <next argument-type="">
+      </next>
+    </procedure>
+  </procedures>
+  <securities>
+  </securities>
+  <governances>
+  </governances>
+  <resources>
+  </resources>
+  <exceptions>
+  </exceptions>
+  <starting>
+  </starting>
+</woof>

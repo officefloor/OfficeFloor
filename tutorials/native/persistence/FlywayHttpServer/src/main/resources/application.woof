@@ -1,0 +1,29 @@
+<woof>
+  <http-continuations>
+    <http-continuation path="/migration" secure="false" x="48" y="54">
+      <procedure name="getMigration"/>
+    </http-continuation>
+  </http-continuations>
+  <http-inputs>
+  </http-inputs>
+  <templates>
+  </templates>
+  <sections>
+  </sections>
+  <procedures>
+    <procedure name="getMigration" resource="net.officefloor.tutorial.flywayhttpserver.FlywayLogic" source="Class" procedure="getMigration" x="205" y="52">
+      <next argument-type="">
+      </next>
+    </procedure>
+  </procedures>
+  <securities>
+  </securities>
+  <governances>
+  </governances>
+  <resources>
+  </resources>
+  <exceptions>
+  </exceptions>
+  <starting>
+  </starting>
+</woof>

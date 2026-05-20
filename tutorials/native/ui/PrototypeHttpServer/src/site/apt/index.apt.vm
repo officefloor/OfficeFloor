@@ -1,0 +1,78 @@
+~~~
+~~ #%L
+~~ Prototype HTTP Server Tutorial
+~~ %%
+~~ Copyright (C) 2005 - 2020 Daniel Sagenschneider
+~~ %%
+~~ Licensed under the Apache License, Version 2.0 (the "License");
+~~ you may not use this file except in compliance with the License.
+~~ You may obtain a copy of the License at
+~~ 
+~~      http://www.apache.org/licenses/LICENSE-2.0
+~~ 
+~~ Unless required by applicable law or agreed to in writing, software
+~~ distributed under the License is distributed on an "AS IS" BASIS,
+~~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~~ See the License for the specific language governing permissions and
+~~ limitations under the License.
+~~ #L%
+~~~
+
+                                               -----------------------
+                                              Wire Frame Prototype Tutorial 
+                                               -----------------------
+                                                Daniel Sagenschneider
+                                               -----------------------
+
+Wireframe Prototype Tutorial
+
+  This tutorial demonstrates the ease of building a web application prototype that can be later extended to fully a functional web application.  This is demonstrated by providing wire frame navigation back and forth between the following two pages:
+  
+[./images/PrototypeHttpServer-href-screenshot.png] PrototypeHttpServer href screen shot.
+
+[./images/PrototypeHttpServer-form-screenshot.png] PrototypeHttpServer form screen shot.
+
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/PrototypeHttpServer}Tutorial Source}}
+
+  WoOF provides the ability to wire frame the web pages into a working prototype.  This allows users to provide feedback on the web application before any code needs to be written.  Having this feedback catches issues very early in the development life-cycle leading to reduced overall effort/cost in building the web application.
+  
+  Once the users are happy with the web application, the later tutorials will show how to easily extend the prototype into a working application.
+
+
+
+*HTML pages
+
+  The web pages have the following HTML.
+
+*Page with href link  
+
+%{snippet|file=${basedir}/src/main/resources/href.woof.html|ignoreDownloadError=false}
+
+*Page with form link
+
+%{snippet|file=${basedir}/src/main/resources/form.woof.html|ignoreDownloadError=false}
+
+*#\{link\}
+
+  Each of the above pages will render in a web browser.  The HTML does contain the non-intrusive <<<#\{link\}>>> tags which are used by WoOF to determine the links to configure for the page.
+  
+  WoOF focuses on non-intrusive instrumentation of the web pages so the raw HTML can be rendered in a browser.  This makes for quick turn-around in tweaking pages, as the application need not be run - nor even built.
+
+
+
+*Configuring the links
+
+  The following configuration shows wiring up the links within the <<<application.woof>>>.
+
+[./images/prototype-woof.png] application.woof configuration.
+
+  The names of the links are the tag names.  Later tutorials will show how to map the form submission to a server POJO (plain old java object) method.
+  
+  As the WoOF HTML pages do not contain the actual link URIs, changing the navigation of the web application is controlled by the <<<application.woof>>> configuration.  This allows keeping navigation details out of the web page design.  It also makes changing web application navigation simple as the application evolves.
+  
+  
+
+Next
+
+  The {{{../DynamicHttpServer/index.html}next tutorial}} looks at rending dynamic content.
+

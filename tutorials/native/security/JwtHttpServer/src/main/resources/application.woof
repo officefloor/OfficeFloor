@@ -1,0 +1,73 @@
+<woof>
+  <http-continuations>
+    <http-continuation path="/resource" secure="true" x="103" y="213">
+      <procedure name="secure"/>
+    </http-continuation>
+  </http-continuations>
+  <http-inputs>
+    <http-input path="/login" method="POST" secure="true" x="39" y="51">
+      <procedure name="login"/>
+    </http-input>
+    <http-input path="/refresh" method="POST" secure="true" x="32" y="106">
+      <procedure name="refreshAccessToken"/>
+    </http-input>
+  </http-inputs>
+  <templates>
+  </templates>
+  <sections>
+    <section name="JwtChallenge" source="net.officefloor.web.jwt.DefaultJwtChallengeSectionSource" location="" x="703" y="35">
+      <input name="EXPIRED_JWT" parameter-type=""/>
+      <input name="INVALID_JWT" parameter-type=""/>
+      <input name="NO_JWT" parameter-type=""/>
+    </section>
+    <section name="RetrieveKeys" source="net.officefloor.web.jwt.authority.combined.CombinedServerRetrieveValidateKeysSectionSource" location="" x="707" y="149">
+      <input name="retrieveKeys" parameter-type="net.officefloor.web.jwt.validate.JwtValidateKeyCollector"/>
+    </section>
+  </sections>
+  <procedures>
+    <procedure name="login" resource="net.officefloor.tutorial.jwthttpserver.JwtTokens" source="Class" procedure="login" x="195" y="46">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="refreshAccessToken" resource="net.officefloor.tutorial.jwthttpserver.JwtTokens" source="Class" procedure="refreshAccessToken" x="196" y="102">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="retrieveRoles" resource="net.officefloor.tutorial.jwthttpserver.JwtRoles" source="Class" procedure="retrieveRoles" x="709" y="220">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="secure" resource="net.officefloor.tutorial.jwthttpserver.SecuredResource" source="Class" procedure="secure" x="246" y="208">
+      <next argument-type="">
+      </next>
+    </procedure>
+  </procedures>
+  <securities>
+    <security name="JWT" source="net.officefloor.web.jwt.JwtHttpSecuritySource" timeout="5000" x="437" y="30">
+      <property name="claims.class" value="net.officefloor.tutorial.jwthttpserver.Claims"/>
+      <output name="EXPIRED_JWT" argument-type="java.lang.Void">
+        <section name="JwtChallenge" input="EXPIRED_JWT"/>
+      </output>
+      <output name="INVALID_JWT" argument-type="java.lang.Void">
+        <section name="JwtChallenge" input="INVALID_JWT"/>
+      </output>
+      <output name="NO_JWT" argument-type="java.lang.Void">
+        <section name="JwtChallenge" input="NO_JWT"/>
+      </output>
+      <output name="RETRIEVE_KEYS" argument-type="net.officefloor.web.jwt.validate.JwtValidateKeyCollector">
+        <section name="RetrieveKeys" input="retrieveKeys"/>
+      </output>
+      <output name="RETRIEVE_ROLES" argument-type="net.officefloor.web.jwt.role.JwtRoleCollector">
+        <procedure name="retrieveRoles"/>
+      </output>
+    </security>
+  </securities>
+  <governances>
+  </governances>
+  <resources>
+  </resources>
+  <exceptions>
+  </exceptions>
+  <starting>
+  </starting>
+</woof>

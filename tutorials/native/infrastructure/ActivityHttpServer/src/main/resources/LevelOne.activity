@@ -1,0 +1,27 @@
+<activity>
+  <inputs>
+    <input name="Input" argument-type="net.officefloor.tutorial.activityhttpserver.Depth" x="38" y="35">
+      <procedure name="increase"/>
+    </input>
+  </inputs>
+  <sections>
+    <section name="LevelTwo" source="net.officefloor.activity.ActivitySectionSource" location="LevelTwo.activity" x="301" y="14">
+      <input name="Input" parameter-type="net.officefloor.tutorial.activityhttpserver.Depth"/>
+      <output name="Output" argument-type="net.officefloor.tutorial.activityhttpserver.Depth">
+        <output name="Output"/>
+      </output>
+    </section>
+  </sections>
+  <procedures>
+    <procedure name="increase" resource="net.officefloor.tutorial.activityhttpserver.IncreaseDepthLogic" source="Class" procedure="increase" x="136" y="32">
+      <next argument-type="net.officefloor.tutorial.activityhttpserver.Depth">
+        <section name="LevelTwo" input="Input"/>
+      </next>
+    </procedure>
+  </procedures>
+  <exceptions>
+  </exceptions>
+  <outputs>
+    <output name="Output" parameter-type="net.officefloor.tutorial.activityhttpserver.Depth" x="504" y="32"/>
+  </outputs>
+</activity>

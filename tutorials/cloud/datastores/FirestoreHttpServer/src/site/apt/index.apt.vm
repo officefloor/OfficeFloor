@@ -1,0 +1,85 @@
+~~~
+~~ #%L
+~~ Firestore Tutorial
+~~ %%
+~~ Copyright (C) 2005 - 2021 Daniel Sagenschneider
+~~ %%
+~~ Licensed under the Apache License, Version 2.0 (the "License");
+~~ you may not use this file except in compliance with the License.
+~~ You may obtain a copy of the License at
+~~ 
+~~      http://www.apache.org/licenses/LICENSE-2.0
+~~ 
+~~ Unless required by applicable law or agreed to in writing, software
+~~ distributed under the License is distributed on an "AS IS" BASIS,
+~~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~~ See the License for the specific language governing permissions and
+~~ limitations under the License.
+~~ #L%
+~~~
+
+                                               -----------------------
+                                                  Firestore Tutorial 
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+Firestore Tutorial
+
+  This tutorial demonstrates using {{{https://cloud.google.com/firestore}Firestore}} to read/write data from Google Firestore.
+ 
+  The example used in this tutorial is three end points:
+  
+   * <<<POST /posts>>> <<<\{"message":"Message to post"}>>> to create a post  
+      
+   * <<<GET /posts/\{id\}>>> to obtain a particular post
+   
+   * <<<GET /posts>>> to obtain all posts
+   
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/FirestoreHttpServer}Tutorial Source}}
+
+
+
+*WoOF configuration
+
+  The configuration of the end points are as follows:
+  
+[./images/FirestoreHttpServer-configuration.png] FirestoreHttpServer screen shot.
+
+  With the implementation as follows:
+    
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/firestorehttpserver/FirestoreLogic.java|ignoreDownloadError=false}
+  
+  The Firestore entity is as follows:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/firestorehttpserver/Post.java|ignoreDownloadError=false}
+
+
+
+*Configuring Firestore
+
+  The following dependency is required:
+  
+%{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+  Firetore is configured in <<<application.objects>>> as follows:
+  
+%{snippet|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
+    
+
+
+*Testing
+
+  To make local testing easier, the following unit tests demonstrate automatically setting up a local data store for testing.
+  
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/firestorehttpserver/FirestoreHttpServerTest.java|ignoreDownloadError=false}
+
+  JUnit 4 example:
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/firestorehttpserver/FirestoreHttpServerJUnit4Test.java|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../ObjectifyHttpServer/index.html}next tutorial}} covers using Objectify for the Google App Engine DataStore.

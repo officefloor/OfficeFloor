@@ -1,0 +1,21 @@
+		<profile>
+			<id>open_java.base</id>
+			<activation>
+				<file>
+					<exists>${basedir}/open_java.base</exists>
+				</file>
+			</activation>
+			<build>
+				<pluginManagement>
+					<plugins>
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-surefire-plugin</artifactId>
+							<configuration>
+								<argLine>--add-opens java.base/java.util=ALL-UNNAMED</argLine>
+							</configuration>
+						</plugin>
+					</plugins>
+				</pluginManagement>
+			</build>
+		</profile>

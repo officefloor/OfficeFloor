@@ -1,0 +1,29 @@
+<woof>
+  <http-continuations>
+    <http-continuation path="/message" secure="false" x="40" y="47">
+      <procedure name="service"/>
+    </http-continuation>
+  </http-continuations>
+  <http-inputs>
+  </http-inputs>
+  <templates>
+  </templates>
+  <sections>
+  </sections>
+  <procedures>
+    <procedure name="service" resource="net.officefloor.tutorial.startbeforehttpserver.StartBeforeLogic" source="Class" procedure="service" x="201" y="44">
+      <next argument-type="">
+      </next>
+    </procedure>
+  </procedures>
+  <securities>
+  </securities>
+  <governances>
+  </governances>
+  <resources>
+  </resources>
+  <exceptions>
+  </exceptions>
+  <starting>
+  </starting>
+</woof>
