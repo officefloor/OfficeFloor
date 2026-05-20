@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
 
+import net.officefloor.frame.test.FileTestSupport;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -48,14 +50,16 @@ public class JaxRsWarHttpServerTest {
 	// END SNIPPET: tutorial
 
 	private static String getWarPath() {
-		File currentDir = new File(".");
 		final String WAR_APP_NAME = "JaxRsApp";
-		File warHttpServerProjectDir = new File(currentDir, "../../tutorials/" + WAR_APP_NAME);
-		for (File file : new File(warHttpServerProjectDir, "target").listFiles()) {
+		File tutorialsDir = new File(".", "../../../tutorials");
+		File warAppDir = new FileTestSupport().findDirectoryRecursive(tutorialsDir, WAR_APP_NAME);
+		if (warAppDir == null) {
+			fail("INVALID TEST: can not find " + WAR_APP_NAME + " project directory under " + tutorialsDir.getAbsolutePath());
+			return null;
+		}
+		for (File file : new File(warAppDir, "target").listFiles()) {
 			String fileName = file.getName();
 			if (fileName.startsWith(WAR_APP_NAME) && fileName.toLowerCase().endsWith(".war")) {
-
-				// Found WAR file
 				return file.getAbsolutePath();
 			}
 		}
