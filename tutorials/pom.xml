@@ -15,69 +15,12 @@
 	<description>Tutorials for OfficeFloor</description>
 	<modules>
 		<module>springboot</module>
-		<module>ActivityHttpServer</module>
-		<module>AuthenticationHttpServer</module>
-		<module>AwsSamHttpServer</module>
-		<module>AzureWebAppsHttpServer</module>
-		<module>CatsHttpServer</module>
-		<module>ConstantCacheHttpServer</module>
-		<module>CorsHttpServer</module>
-		<module>CosmosAsyncDbHttpServer</module>
-		<module>CosmosDbHttpServer</module>
-		<module>DatabaseHttpServer</module>
-		<module>DeployHttpServer</module>
-		<module>DiPojoHttpServer</module>
-		<module>DynamicHttpServer</module>
-		<module>DynamoDbHttpServer</module>
-		<module>EnvironmentHttpServer</module>
-		<module>ExceptionHttpServer</module>
-		<module>FirestoreHttpServer</module>
-		<module>FlywayHttpServer</module>
-		<module>GoogleFunctionHttpServer</module>
-		<module>GraphicalConfigurationExample</module>
-		<module>HttpServletHttpServer</module>
-		<module>InheritHttpServer</module>
-		<module>InteractiveHttpServer</module>
-		<module>JavaScriptApp</module>
-		<module>JavaScriptHttpServer</module>
-		<module>JaxRsApp</module>
-		<module>JaxRsHttpServer</module>
-		<module>JaxRsWarHttpServer</module>
-		<module>JwtAuthorityHttpServer</module>
-		<module>JwtHttpServer</module>
-		<module>JwtResourceHttpServer</module>
-		<module>KotlinHttpServer</module>
-		<module>LoggerHttpServer</module>
-		<module>NavigateHttpServer</module>
-		<module>ObjectifyHttpServer</module>
-		<module>PrototypeHttpServer</module>
-		<module>R2dbcHttpServer</module>
-		<module>RawHttpServer</module>
-		<module>ReactorHttpServer</module>
-		<module>RestHttpServer</module>
-		<module>ScalaHttpServer</module>
-		<module>SectionHttpServer</module>
-		<module>SecurePageHttpServer</module>
-		<module>SecureLinkHttpServer</module>
-		<module>ServletHttpServer</module>
-		<module>SessionHttpServer</module>
-		<module>SpringWebFluxApp</module>
-		<module>SpringWebFluxHttpServer</module>
-		<module>SpringWebMvcApp</module>
-		<module>SpringWebMvcHttpServer</module>
-		<module>SpringHttpServer</module>
-		<module>StartBeforeHttpServer</module>
-		<module>StaticContentHttpServer</module>
-		<module>SwaggerHttpServer</module>
-		<module>TeamHttpServer</module>
-		<module>TestHttpServer</module>
-		<module>ThreadAffinityHttpServer</module>
-		<module>TransactionHttpServer</module>
-		<module>VariableHttpServer</module>
-		<module>VertxSqlClientHttpServer</module>
-		<module>WarApp</module>
-		<module>WarHttpServer</module>
-		<module>ZioHttpServer</module>
+		<module>features</module>
+		<module>spring_migration</module>
+		<module>native</module>
+		<module>cloud</module>
+		<module>legacy</module>
+		<module>reference</module>
 	</modules>
 	<build>
 		<plugins>

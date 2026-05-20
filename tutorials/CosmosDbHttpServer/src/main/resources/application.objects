@@ -1,7 +1,0 @@
-<objects>
-	
-	<supplier source="net.officefloor.nosql.cosmosdb.CosmosDbSupplierSource">
-		<property name="cosmos.entity.locators" value="net.officefloor.tutorial.cosmosdbhttpserver.CosmosDbEntities" />		
-	</supplier>
-	
-</objects>
