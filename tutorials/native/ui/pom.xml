@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>net.officefloor.tutorial</groupId>
+		<artifactId>native</artifactId>
+		<version>${revision}</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+	<artifactId>native-ui</artifactId>
+	<packaging>pom</packaging>
+	<name>OfficeFloor Native UI Tutorials</name>
+	<modules>
+		<module>StaticContentHttpServer</module>
+		<module>DynamicHttpServer</module>
+		<module>NavigateHttpServer</module>
+		<module>InheritHttpServer</module>
+		<module>SectionHttpServer</module>
+		<module>RawHttpServer</module>
+		<module>InteractiveHttpServer</module>
+		<module>JavaScriptApp</module>
+		<module>PrototypeHttpServer</module>
+	</modules>
+</project>

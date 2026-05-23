@@ -22,6 +22,8 @@ package net.officefloor.servlet.archive;
 
 import java.io.File;
 
+import net.officefloor.frame.test.FileTestSupport;
+
 /**
  * <p>
  * Locates an archive within the tutorials.
@@ -41,11 +43,12 @@ public class TutorialArchiveLocatorUtil {
 
 		// Locate tutorial directory containing the archive
 		// (note: dependency on it should build it first)
-		File currentDir = new File(".");
-		File archiveTutorialProjectDir = new File(currentDir, "../../tutorials/" + artifactId);
-		if (!archiveTutorialProjectDir.isDirectory()) {
-			throw new IllegalStateException("INVALID TEST: can not find " + artifactId + " project directory at "
-					+ archiveTutorialProjectDir.getAbsolutePath());
+		// Search recursively to support sub-folder tutorial organisation
+		File tutorialsDir = new File(".", "../../tutorials");
+		File archiveTutorialProjectDir = new FileTestSupport().findDirectoryRecursive(tutorialsDir, artifactId);
+		if (archiveTutorialProjectDir == null) {
+			throw new IllegalStateException("INVALID TEST: can not find " + artifactId + " project directory under "
+					+ tutorialsDir.getAbsolutePath());
 		}
 
 		// Locate the archive file

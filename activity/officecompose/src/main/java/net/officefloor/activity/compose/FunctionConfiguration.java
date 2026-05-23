@@ -18,6 +18,8 @@ public class FunctionConfiguration {
 
     private String method;
 
+    private String next;
+
     /*
      * ======== SectionSource ==========
      */
@@ -25,6 +27,10 @@ public class FunctionConfiguration {
     private String source;
 
     private String location;
+
+    private String input;
+
+    private Map<String, String> properties;
 
     /*
      * ========= Govern ===========
@@ -35,8 +41,6 @@ public class FunctionConfiguration {
     /*
      * ========= Composition ===========
      */
-
-    private String next;
 
     private Map<String, String> outputs;
 

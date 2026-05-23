@@ -61,6 +61,20 @@ public class ComposeArchitectTest {
     }
 
     @Test
+    public void sectionSource() throws Throwable {
+        MockSectionSource.clear();
+        this.doTest("sectionSource.yaml", null);
+        assertTrue(MockSectionSource.isInvoked("function"), "Should be invoked");
+    }
+
+    @Test
+    public void sectionMultipleFunctions() throws Throwable {
+        MockSectionSource.clear();
+        this.doTest("sectionMultipleFunctions.yaml", null);
+        assertTrue(MockSectionSource.isInvoked("one"), "Should be invoked");
+    }
+
+    @Test
     public void parameter() throws Throwable {
         final String PARAMETER = "TEST";
         ParameterProcedure.parameter = null;
@@ -178,11 +192,6 @@ public class ComposeArchitectTest {
         public void procedure(MockManagedObject managedObject) {
             ManagedObjectProcedure.managedObject = managedObject;
         }
-    }
-
-    @Test @Disabled
-    public void sectionSource() throws Throwable {
-        this.doTest("sectionSource.yaml", null);
     }
 
     /**

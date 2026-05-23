@@ -119,8 +119,38 @@ public class FileTestSupport implements TestSupport {
 	}
 
 	/**
+	 * Recursively searches <code>root</code> for the first directory whose name
+	 * equals <code>name</code>.
+	 *
+	 * @param root Directory to search within.
+	 * @param name Directory name to find.
+	 * @return Matching {@link File} directory, or <code>null</code> if not found.
+	 */
+	public File findDirectoryRecursive(File root, String name) {
+		if (!root.isDirectory()) {
+			return null;
+		}
+		File[] children = root.listFiles();
+		if (children == null) {
+			return null;
+		}
+		for (File child : children) {
+			if (child.isDirectory()) {
+				if (child.getName().equals(name)) {
+					return child;
+				}
+				File found = findDirectoryRecursive(child, name);
+				if (found != null) {
+					return found;
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * Creates the input directory.
-	 * 
+	 *
 	 * @param directory Directory to be cleared.
 	 */
 	public void clearDirectory(File directory) {
