@@ -1,5 +1,6 @@
 section:
   source: net.officefloor.activity.compose.MockSectionSource
+  input: one
   location: mock
   properties:
-    functions: function
+    functions: one,two
