@@ -15,6 +15,10 @@ import net.officefloor.activity.procedure.build.ProcedureArchitect;
 import net.officefloor.activity.procedure.build.ProcedureEmployer;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.section.SectionInputType;
+import net.officefloor.compile.section.SectionObjectType;
+import net.officefloor.compile.section.SectionOutputType;
+import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.section.SectionDesigner;
@@ -24,6 +28,7 @@ import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.SubSectionInput;
 import net.officefloor.compile.spi.section.SubSectionOutput;
+import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 
@@ -189,11 +194,10 @@ public class ComposeSectionSource extends AbstractSectionSource {
 
             } else {
 
-                // Obtain the section
-                String sectionSourceClassName = functionConfiguration.getSource();
-
-                // Load the section type
-                throw new UnsupportedOperationException("TODO implement");
+                // Capture the composed function
+                composedFunction = ComposeSectionSource.loadSectionSource(functionName, functionConfiguration,
+                        sectionDesigner, sectionSourceContext, externalObjects);
+                functions.put(functionName, composedFunction);
             }
         }
 
@@ -471,5 +475,148 @@ public class ComposeSectionSource extends AbstractSectionSource {
             return this.procedure.getSubSectionOutput(outputName);
         }
     }
+
+    private static ComposedFunction loadSectionSource(String functionName, FunctionConfiguration functionConfiguration,
+                               SectionDesigner sectionDesigner, SectionSourceContext sectionSourceContext,
+                               Map<String, SectionObject> externalObjects) {
+
+        String sectionSourceClassName = functionConfiguration.getSource();
+        String location = functionConfiguration.getLocation();
+
+        // Build the properties
+        PropertyList properties = new PropertyListImpl();
+        Map<String, String> configProperties = functionConfiguration.getProperties();
+        if (configProperties != null) {
+            for (Map.Entry<String, String> entry : configProperties.entrySet()) {
+                properties.addProperty(entry.getKey()).setValue(entry.getValue());
+            }
+        }
+
+        // Load the section type to determine inputs
+        SectionType sectionType = sectionSourceContext.loadSectionType(functionName, sectionSourceClassName, location, properties);
+
+        // Determine the input to use
+        SectionInputType[] inputTypes = sectionType.getSectionInputTypes();
+        SectionInputType inputType;
+        String inputName;
+        if (inputTypes.length == 1) {
+            inputType = inputTypes[0];
+            inputName = inputType.getSectionInputName();
+        } else {
+            inputName = functionConfiguration.getInput();
+            if (inputName == null) {
+                throw sectionDesigner.addIssue("Require configuring input for " + functionName
+                        + " (" + sectionSourceClassName + ") as it contains multiple inputs ("
+                        + Arrays.stream(inputTypes).map(SectionInputType::getSectionInputName).collect(Collectors.joining(", ")) + ")");
+            }
+            final String finalInputName = inputName;
+            inputType = Arrays.stream(inputTypes)
+                    .filter(it -> finalInputName.equals(it.getSectionInputName()))
+                    .findFirst().orElse(null);
+            if (inputType == null) {
+                throw sectionDesigner.addIssue("Configured input '" + inputName + "' not found in " + functionName
+                        + " (" + sectionSourceClassName + ")");
+            }
+        }
+
+        // Create the subsection
+        SubSection subSection = sectionDesigner.addSubSection(functionName, sectionSourceClassName, location);
+        properties.configureProperties(subSection);
+
+        // Load the object dependencies
+        for (SectionObjectType objectType : sectionType.getSectionObjectTypes()) {
+            String objectTypeName = objectType.getObjectType();
+            String typeQualifier = objectType.getTypeQualifier();
+            String objectName = ((typeQualifier != null) ? typeQualifier + "_" : "") + objectTypeName;
+            SectionObject externalObject = externalObjects.computeIfAbsent(objectName, (key) -> {
+                SectionObject object = sectionDesigner.addSectionObject(objectName, objectTypeName);
+                if (typeQualifier != null) {
+                    object.setTypeQualifier(typeQualifier);
+                }
+                return object;
+            });
+            sectionDesigner.link(subSection.getSubSectionObject(objectType.getSectionObjectName()), externalObject);
+        }
+
+        return new SectionSourceComposedFunction(functionConfiguration, sectionType, inputName, inputType, subSection, sectionDesigner);
+    }
+
+    /**
+     * Composed function for the {@link SectionSource}.
+     */
+    private static class SectionSourceComposedFunction implements ComposedFunction {
+
+        private final FunctionConfiguration functionConfiguration;
+
+        private final String inputName;
+
+        private final SectionInputType inputType;
+
+        private final SubSection subSection;
+
+        private final ComposedFunctionOutput[] outputs;
+
+        private final ComposedFunctionOutput[] escalations;
+
+        private final SectionDesigner sectionDesigner;
+
+        public SectionSourceComposedFunction(FunctionConfiguration functionConfiguration, SectionType sectionType,
+                                             String inputName, SectionInputType inputType, SubSection subSection,
+                                             SectionDesigner sectionDesigner) {
+            this.functionConfiguration = functionConfiguration;
+            this.inputName = inputName;
+            this.inputType = inputType;
+            this.subSection = subSection;
+            this.sectionDesigner = sectionDesigner;
+            this.outputs = Arrays.stream(sectionType.getSectionOutputTypes())
+                    .filter(outputType -> !outputType.isEscalationOnly())
+                    .map(outputType -> new ComposedFunctionOutput(outputType.getSectionOutputName(), outputType.getArgumentType()))
+                    .toArray(ComposedFunctionOutput[]::new);
+            this.escalations = Arrays.stream(sectionType.getSectionOutputTypes())
+                    .filter(SectionOutputType::isEscalationOnly)
+                    .map(outputType -> new ComposedFunctionOutput(outputType.getSectionOutputName(), outputType.getArgumentType()))
+                    .toArray(ComposedFunctionOutput[]::new);
+        }
+
+        /*
+         * ================ ComposeFunction ===================
+         */
+
+        @Override
+        public FunctionConfiguration getConfiguration() {
+            return this.functionConfiguration;
+        }
+
+        @Override
+        public SubSectionInput getInput() {
+            return this.subSection.getSubSectionInput(this.inputName);
+        }
+
+        @Override
+        public String getParameterType() {
+            return this.inputType.getParameterType();
+        }
+
+        @Override
+        public SubSectionOutput getNextOutput() {
+            throw this.sectionDesigner.addIssue("Can not configure next for " + SectionSource.class.getSimpleName());
+        }
+
+        @Override
+        public ComposedFunctionOutput[] getOutputs() {
+            return this.outputs;
+        }
+
+        @Override
+        public ComposedFunctionOutput[] getEscalations() {
+            return this.escalations;
+        }
+
+        @Override
+        public SubSectionOutput getOutput(String outputName) {
+            return this.subSection.getSubSectionOutput(outputName);
+        }
+    }
+
 
 }

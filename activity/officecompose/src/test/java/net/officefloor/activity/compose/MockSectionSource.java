@@ -47,7 +47,8 @@ public class MockSectionSource extends AbstractSectionSource {
 
             // Add the function
             SectionFunctionNamespace namespace = designer.addSectionFunctionNamespace(functionName, MockManagedFunctionSource.class.getName());
-            SectionFunction function = namespace.addSectionFunction(functionNames, functionName);
+            namespace.addProperty(MockManagedFunctionSource.PROPERTY_FUNCTION_NAME, functionName);
+            SectionFunction function = namespace.addSectionFunction(functionName, functionName);
 
             // Link input
             designer.link(designer.addSectionInput(functionName, null), function);

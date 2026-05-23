@@ -28,6 +28,8 @@ public class FunctionConfiguration {
 
     private String location;
 
+    private String input;
+
     private Map<String, String> properties;
 
     /*
