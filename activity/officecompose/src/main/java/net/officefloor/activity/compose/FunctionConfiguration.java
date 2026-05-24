@@ -21,6 +21,14 @@ public class FunctionConfiguration {
     private String next;
 
     /*
+     * ======== Custom ProcedureSource ==========
+     */
+
+    private String resource;
+
+    private String procedure;
+
+    /*
      * ======== SectionSource ==========
      */
 

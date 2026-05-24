@@ -66,12 +66,10 @@ Cats Tutorial
    
    [[1]] Provides the success as parameter to next procedure.  Or throws any exception to be handled by configured OfficeFloor exception handlers
    
-  This allows Cats Effect to be used for writing modular functions of the application.  Then lets OfficeFloor compose these functions graphically together to form the application.
-  
-  As per the WoOF configuration of the application:
-  
-[./images/CatsHttpServer-configuration.png] CatsHttpServer screen shot.
-  
+  This allows Cats Effect to be used for writing modular functions of the application.  The REST endpoint configuration then composes these functions to service the request:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/index.POST.yml|ignoreDownloadError=false}
+
   The next configured procedure sends the response:
   
 %{snippet|id=send|file=${basedir}/src/main/scala/net/officefloor/tutorial/catshttpserver/ServiceLogic.scala|ignoreDownloadError=false}

@@ -42,11 +42,17 @@ JAX-RS Procedure Tutorial
 
 *Configuring as a Procedure
 
-  Select the JAX-RS resource as a class when adding a procedure.
+  JAX-RS resource methods are configured as procedures via REST endpoint YAML files.  The following configures the GET <<<officefloor>>> endpoint:
 
-  The tutorial configuration is as follows:
-  
-[./images/JaxRsWarHttpServer-configuration.png] JaxRsWarHttpServer configuration.
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/officefloor.GET.yml|ignoreDownloadError=false}
+
+  The path parameter endpoint:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/officefloor/changed/{param}.GET.yml|ignoreDownloadError=false}
+
+  The PUT endpoint:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/officefloor/update.PUT.yml|ignoreDownloadError=false}
 
   Note that the WoOF configured paths can be different to the JAX-RS end point mappings.  The only constraint on this is that the path parameters must match.
 

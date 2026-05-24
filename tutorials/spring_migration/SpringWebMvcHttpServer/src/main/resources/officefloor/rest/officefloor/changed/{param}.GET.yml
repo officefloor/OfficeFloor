@@ -1,0 +1,4 @@
+path:
+  resource: net.officefloor.tutorial.springwebmvchttpserver.SpringRestController
+  procedure: SpringWebMvcController
+  method: path

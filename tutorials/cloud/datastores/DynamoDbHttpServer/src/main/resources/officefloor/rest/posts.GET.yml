@@ -1,0 +1,3 @@
+retrieveAllPosts:
+  class: net.officefloor.tutorial.dynamodbhttpserver.DynamoDbLogic
+  method: retrieveAllPosts

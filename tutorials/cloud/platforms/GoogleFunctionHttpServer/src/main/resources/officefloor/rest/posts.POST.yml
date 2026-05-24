@@ -1,0 +1,3 @@
+createPost:
+  class: net.officefloor.tutorial.googlefunctionhttpserver.GoogleFunctionLogic
+  method: createPost

@@ -42,13 +42,21 @@ Spring Web MVC Procedure Tutorial
 
 *Configuring as a Procedure
 
-  Select the Spring Web MVC Controller as a class when adding a procedure.
-  
-  Note: the Controller must be on the application's Spring scan path.
-  
-  The tutorial configuration is as follows:
-  
-[./images/SpringWebMvcHttpServer-configuration.png] SpringWebMvcHttpServer configuration.
+  Spring Web MVC Controller methods are configured as procedures via REST endpoint YAML files.  The following configures the GET <<<rest>>> endpoint:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/officefloor/rest.GET.yml|ignoreDownloadError=false}
+
+  The path parameter endpoint:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/officefloor/changed/{param}.GET.yml|ignoreDownloadError=false}
+
+  The PUT endpoint:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/officefloor/update.PUT.yml|ignoreDownloadError=false}
+
+  The HTML page endpoint:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/officefloor/html.GET.yml|ignoreDownloadError=false}
 
   Note that the WoOF configured paths can be different to the Spring Web MVC Controller request mappings.  The only constraint on this is that the path parameters must match.
 

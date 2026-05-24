@@ -184,10 +184,19 @@ public class ComposeSectionSource extends AbstractSectionSource {
             // Obtain details of function
             ComposedFunction composedFunction;
             String className = functionConfiguration.getClassName();
+            String procedureSource = functionConfiguration.getProcedure();
             if (className != null) {
 
                 // Capture the composed function
                 composedFunction = ComposeSectionSource.loadProcedure(functionName, className,
+                        functionConfiguration, sectionDesigner, sectionSourceContext,
+                        procedureLoader, procedureArchitect, externalObjects);
+                functions.put(functionName, composedFunction);
+
+            } else if (procedureSource != null) {
+
+                // Capture the composed function (custom procedure source)
+                composedFunction = ComposeSectionSource.loadCustomProcedure(functionName, procedureSource,
                         functionConfiguration, sectionDesigner, sectionSourceContext,
                         procedureLoader, procedureArchitect, externalObjects);
                 functions.put(functionName, composedFunction);
@@ -474,6 +483,60 @@ public class ComposeSectionSource extends AbstractSectionSource {
         public SubSectionOutput getOutput(String outputName) {
             return this.procedure.getSubSectionOutput(outputName);
         }
+    }
+
+    private static ComposedFunction loadCustomProcedure(String functionName, String procedureSourceName,
+                               FunctionConfiguration functionConfiguration,
+                               SectionDesigner sectionDesigner, SectionSourceContext sectionSourceContext,
+                               ProcedureLoader procedureLoader, ProcedureArchitect<SubSection> procedureArchitect,
+                               Map<String, SectionObject> externalObjects) {
+
+        // Resource is optional for custom procedure sources
+        String resource = functionConfiguration.getResource();
+
+        // Determine the method name
+        String methodName = functionConfiguration.getMethod();
+        if (methodName == null) {
+            Procedure[] allProcedures = procedureLoader.listProcedures(resource);
+            Procedure[] sourceProcedures = Arrays.stream(allProcedures)
+                    .filter(p -> procedureSourceName.equals(p.getServiceName()))
+                    .toArray(Procedure[]::new);
+            if (sourceProcedures.length == 1) {
+                methodName = sourceProcedures[0].getProcedureName();
+            } else {
+                throw sectionDesigner.addIssue("Require configuring method for " + functionName
+                        + " (procedure source: " + procedureSourceName + ") as it contains multiple procedures ("
+                        + Arrays.stream(sourceProcedures).map(Procedure::getProcedureName).collect(Collectors.joining(", ")) + ")");
+            }
+        }
+
+        // Determine if next
+        String next = functionConfiguration.getNext();
+        boolean isNext = ((next != null) && (!next.isEmpty()));
+
+        // Load the procedure
+        PropertyList properties = new PropertyListImpl();
+        SubSection procedure = procedureArchitect.addProcedure(functionName, resource, procedureSourceName, methodName, isNext, properties);
+
+        // Load the procedure type
+        ProcedureType procedureType = procedureLoader.loadProcedureType(resource, procedureSourceName, methodName, properties);
+
+        // Load the object dependencies
+        for (ProcedureObjectType procedureObjectType : procedureType.getObjectTypes()) {
+            String objectType = procedureObjectType.getObjectType().getName();
+            String objectTypeQualifier = procedureObjectType.getTypeQualifier();
+            String objectName = ((objectTypeQualifier != null) ? objectTypeQualifier + "_" : "") + objectType;
+            SectionObject externalObject = externalObjects.computeIfAbsent(objectName, (key) -> {
+                SectionObject object = sectionDesigner.addSectionObject(objectName, objectType);
+                if (objectTypeQualifier != null) {
+                    object.setTypeQualifier(objectTypeQualifier);
+                }
+                return object;
+            });
+            sectionDesigner.link(procedure.getSubSectionObject(objectName), externalObject);
+        }
+
+        return new ProcedureComposedFunction(functionConfiguration, procedureType, procedure);
     }
 
     private static ComposedFunction loadSectionSource(String functionName, FunctionConfiguration functionConfiguration,

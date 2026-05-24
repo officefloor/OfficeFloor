@@ -40,11 +40,15 @@ JWT Authority Tutorial
 
 
 
-*WoOF configuration
+*REST endpoint configuration
 
-  The configuration is the following:
-  
-[./images/JwtAuthorityHttpServer-configuration.png] JwtAuthorityHttpServer screen shot.
+  The REST endpoints are configured as follows:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/login.POST.yml|ignoreDownloadError=false}
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/refresh.POST.yml|ignoreDownloadError=false}
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/jwks.json.GET.yml|ignoreDownloadError=false}
 
   with the following objects:
   

@@ -40,11 +40,15 @@ Firestore Tutorial
 
 
 
-*WoOF configuration
+*REST endpoint configuration
 
-  The configuration of the end points are as follows:
-  
-[./images/FirestoreHttpServer-configuration.png] FirestoreHttpServer screen shot.
+  The REST endpoints are configured as follows:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/posts.POST.yml|ignoreDownloadError=false}
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/posts.GET.yml|ignoreDownloadError=false}
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/posts/{id}.GET.yml|ignoreDownloadError=false}
 
   With the implementation as follows:
     

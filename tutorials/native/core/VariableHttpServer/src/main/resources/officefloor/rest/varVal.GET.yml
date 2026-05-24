@@ -1,0 +1,7 @@
+VarSet:
+  class: net.officefloor.tutorial.variablehttpserver.VarLogic
+  method: setValues
+  next: ValUse
+ValUse:
+  class: net.officefloor.tutorial.variablehttpserver.ValLogic
+  method: useValues

@@ -56,7 +56,17 @@ Spring Web Flux Tutorial
   
 %{snippet|id=tutorial|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
 
-  This will have all the Spring Web Flux Controllers available at their request mapped paths.
+  The Spring Web Flux Controllers are then configured as REST endpoints.  The following configures the GET <<<rest>>> endpoint:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/officefloor/rest.GET.yml|ignoreDownloadError=false}
+
+  The path parameter endpoint:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/officefloor/changed/{param}.GET.yml|ignoreDownloadError=false}
+
+  The PUT endpoint:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/officefloor/update.PUT.yml|ignoreDownloadError=false}
 
 
 

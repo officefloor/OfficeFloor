@@ -1,0 +1,4 @@
+post:
+  resource: net.officefloor.tutorial.springwebfluxhttpserver.SpringRestController
+  procedure: SpringWebFluxController
+  method: post

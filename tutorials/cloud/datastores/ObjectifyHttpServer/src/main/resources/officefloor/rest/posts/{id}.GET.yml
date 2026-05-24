@@ -1,0 +1,3 @@
+retrievePost:
+  class: net.officefloor.tutorial.objectifyhttpserver.ObjectifyLogic
+  method: retrievePost

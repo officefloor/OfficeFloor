@@ -28,10 +28,10 @@ R2DBC Tutorial
 
   This tutorial demonstrates using {{{https://r2dbc.io}R2DBC}} logic within WoOF.
   
-  It is a simple application to retrieve data from a database.  As such, the configuration for this tutorial is the following:
+  It is a simple application to retrieve data from a database.  The REST endpoint configuration for this tutorial is the following:
 
-[./images/R2dbcHttpServer-configuration.png] ReactorHttpServer screen shot.
-   
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/message/{id}.GET.yml|ignoreDownloadError=false}
+
   {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/R2dbcHttpServer}Tutorial Source}}
 
 

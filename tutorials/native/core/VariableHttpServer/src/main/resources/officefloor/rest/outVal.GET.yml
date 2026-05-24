@@ -1,0 +1,7 @@
+OutToValSet:
+  class: net.officefloor.tutorial.variablehttpserver.OutLogic
+  method: setValues
+  next: OutToValUse
+OutToValUse:
+  class: net.officefloor.tutorial.variablehttpserver.ValLogic
+  method: useValues

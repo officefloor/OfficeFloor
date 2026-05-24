@@ -1,0 +1,8 @@
+reactive:
+  class: net.officefloor.tutorial.reactorhttpserver.ReactorLogic
+  method: reactive
+  next: send
+
+send:
+  class: net.officefloor.tutorial.reactorhttpserver.ReactorLogic
+  method: send

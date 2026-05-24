@@ -38,21 +38,17 @@ REST Tutorial
 
 
 
-*WoOF configuration
+*REST endpoint configuration
 
-  To configure REST end-points with WoOF, use the following from the palette:
-  
-   * <<<HTTP Continuation>>> to provide GET end points
-   
-   * <<<HTTP Input>>> to provide other HTTP method end points
-   
-  The <<<HTTP Continuation>>> is separate, as HTTP redirects are <continuations> via GET methods.  Therefore, it is possible to connect to this to trigger a redirect to the respective URL.
-   
-  The configuration of the two end points are as follows:
-  
-[./images/RestHttpServer-configuration.png] RestHttpServer screen shot.
+  REST end-points are configured via YAML files in <<<officefloor/rest/>>>.  The file name encodes the path and HTTP method (e.g. <<<vehicle.POST.yml>>> for <<<POST /vehicle>>>).
 
-  The handling of the end-points is provided by connecting them to other items.  In this case, <<<procedures>>> provide the implementation of the end points.
+  The <<<POST /vehicle>>> end point is:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/vehicle.POST.yml|ignoreDownloadError=false}
+
+  The <<<GET /vehicle/\{id\}>>> end point is:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/vehicle/{id}.GET.yml|ignoreDownloadError=false}
   
 
 

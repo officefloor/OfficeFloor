@@ -28,10 +28,10 @@ Constant Cache Tutorial
 
   This tutorial demonstrates using {{{/apidocs/net/officefloor/cache/Cache.html}Cache}} to provide caching of <fairly> constant data.  In other words, cached data that may be refreshed by occasional reloading from source (e.g. reference data).
   
-  It is a simple application to retrieve data from two caches.  As such, the configuration for this tutorial is the following:
+  It is a simple application to retrieve data from two caches.  The REST endpoint is:
 
-[./images/ConstantCacheHttpServer-configuration.png] ConstantCacheHttpServer screen shot.
-   
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/cached/{key}.GET.yml|ignoreDownloadError=false}
+
   {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/ConstantCacheHttpServer}Tutorial Source}}
 
 
