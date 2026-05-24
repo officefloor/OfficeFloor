@@ -380,7 +380,7 @@ OfficeFloor Tutorials
 
   These applications exist to confirm integration correctness and demonstrate the graphical configuration tooling.  They are not step-by-step tutorials.
 
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+*--------------------------------------------------------------+------------------------------------------------------------+
 || Application                                                 || Description
 *--------------------------------------------------------------+------------------------------------------------------------+
 | {{{./reference/GraphicalConfigurationExample/index.html}Graphical Configuration}} | Example demonstrating the OfficeFloor graphical configuration editor.

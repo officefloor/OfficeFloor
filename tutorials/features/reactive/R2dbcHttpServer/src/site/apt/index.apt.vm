@@ -30,7 +30,7 @@ R2DBC Tutorial
   
   It is a simple application to retrieve data from a database.  The REST endpoint configuration for this tutorial is the following:
 
-%{snippet|file=${basedir}/src/main/resources/officefloor/rest/message/{id}.GET.yml|ignoreDownloadError=false}
+%{snippet|file=${project.build.directory}/site-snippets/message/id.GET.yml|ignoreDownloadError=false}
 
   {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/R2dbcHttpServer}Tutorial Source}}
 

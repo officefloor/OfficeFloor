@@ -48,7 +48,7 @@ REST Tutorial
 
   The <<<GET /vehicle/\{id\}>>> end point is:
 
-%{snippet|file=${basedir}/src/main/resources/officefloor/rest/vehicle/{id}.GET.yml|ignoreDownloadError=false}
+%{snippet|file=${project.build.directory}/site-snippets/vehicle/id.GET.yml|ignoreDownloadError=false}
   
 
 

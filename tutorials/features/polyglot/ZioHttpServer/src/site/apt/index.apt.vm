@@ -40,10 +40,6 @@ ZIO Tutorial
   
 %{snippet|id=tutorial|file=${basedir}/src/main/scala/net/officefloor/tutorial/ziohttpserver/MessageService.scala|ignoreDownloadError=false}
 
-  with the following environment:
-  
-%{snippet|id=tutorial|file=${basedir}/src/main/scala/net/officefloor/tutorial/ziohttpserver/InjectMessageRepository.scala|ignoreDownloadError=false}
-  
   The effect is tested with the following code:
   
 %{snippet|id=tutorial|file=${basedir}/src/test/scala/net/officefloor/tutorial/ziohttpserver/MessageServiceTest.scala|ignoreDownloadError=false}

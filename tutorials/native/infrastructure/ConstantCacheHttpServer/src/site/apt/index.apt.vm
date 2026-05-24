@@ -30,7 +30,7 @@ Constant Cache Tutorial
   
   It is a simple application to retrieve data from two caches.  The REST endpoint is:
 
-%{snippet|file=${basedir}/src/main/resources/officefloor/rest/cached/{key}.GET.yml|ignoreDownloadError=false}
+%{snippet|file=${project.build.directory}/site-snippets/cached/key.GET.yml|ignoreDownloadError=false}
 
   {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/ConstantCacheHttpServer}Tutorial Source}}
 

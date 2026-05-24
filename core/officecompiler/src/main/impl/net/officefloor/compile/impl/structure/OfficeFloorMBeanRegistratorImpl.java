@@ -87,7 +87,7 @@ public class OfficeFloorMBeanRegistratorImpl implements OfficeFloorMBeanRegistra
 
 			// Create the name for the MBean
 			ObjectName name = new ObjectName(
-					"net.officefloor:type=" + possibleMBean.type.getName() + ",name=" + possibleMBean.name);
+					"net.officefloor:type=" + possibleMBean.type.getName() + ",name=" + ObjectName.quote(possibleMBean.name));
 
 			// Determine if MBean factory
 			Object mbean = possibleMBean.mbean;

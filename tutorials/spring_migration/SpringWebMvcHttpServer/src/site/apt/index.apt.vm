@@ -62,7 +62,7 @@ Spring Web MVC Tutorial
 
   The path parameter endpoint:
 
-%{snippet|file=${basedir}/src/main/resources/officefloor/rest/officefloor/changed/{param}.GET.yml|ignoreDownloadError=false}
+%{snippet|file=${project.build.directory}/site-snippets/officefloor/changed/param.GET.yml|ignoreDownloadError=false}
 
   The PUT endpoint:
 

@@ -48,7 +48,7 @@ CosmosDB Async Tutorial
 
 %{snippet|file=${basedir}/src/main/resources/officefloor/rest/posts.GET.yml|ignoreDownloadError=false}
 
-%{snippet|file=${basedir}/src/main/resources/officefloor/rest/posts/{id}.GET.yml|ignoreDownloadError=false}
+%{snippet|file=${project.build.directory}/site-snippets/posts/id.GET.yml|ignoreDownloadError=false}
 
   With the implementation as follows:
     
