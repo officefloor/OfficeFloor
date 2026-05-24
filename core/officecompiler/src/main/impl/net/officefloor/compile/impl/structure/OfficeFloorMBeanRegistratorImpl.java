@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.management.MBeanServer;
+import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 
@@ -86,8 +87,15 @@ public class OfficeFloorMBeanRegistratorImpl implements OfficeFloorMBeanRegistra
 		for (PossibleMBean possibleMBean : this.possibleMBeans) {
 
 			// Create the name for the MBean
+			String mBeanNameValue;
+			try {
+				new ObjectName("x:name=" + possibleMBean.name);
+				mBeanNameValue = possibleMBean.name;
+			} catch (MalformedObjectNameException ex) {
+				mBeanNameValue = ObjectName.quote(possibleMBean.name);
+			}
 			ObjectName name = new ObjectName(
-					"net.officefloor:type=" + possibleMBean.type.getName() + ",name=" + ObjectName.quote(possibleMBean.name));
+					"net.officefloor:type=" + possibleMBean.type.getName() + ",name=" + mBeanNameValue);
 
 			// Determine if MBean factory
 			Object mbean = possibleMBean.mbean;
