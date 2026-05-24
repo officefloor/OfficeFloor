@@ -78,7 +78,7 @@
 		<google-libraaries-version>26.23.0</google-libraaries-version>
 		<gpg-version>3.2.8</gpg-version>
 		<graalvm-js-version>23.0.4</graalvm-js-version>
-		<h2database-version>2.2.224</h2database-version>
+		<h2database-version>2.4.240</h2database-version>
 		<hibernate-version>6.2.4.Final</hibernate-version>
 		<hikari-version>5.0.1</hikari-version>
 		<hsqldb-version>2.7.3</hsqldb-version>
