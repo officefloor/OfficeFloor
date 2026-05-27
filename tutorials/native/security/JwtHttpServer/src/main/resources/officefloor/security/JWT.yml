@@ -1,0 +1,24 @@
+security:
+  source: net.officefloor.web.jwt.JwtHttpSecuritySource
+  properties:
+    claims.class: net.officefloor.tutorial.jwthttpserver.Claims
+  flows:
+    EXPIRED_JWT: jwtChallenge_EXPIRED
+    INVALID_JWT: jwtChallenge_INVALID
+    NO_JWT: jwtChallenge_NO
+    RETRIEVE_KEYS: retrieveKeys
+    RETRIEVE_ROLES: retrieveRoles
+jwtChallenge_EXPIRED:
+  source: net.officefloor.web.jwt.DefaultJwtChallengeSectionSource
+  input: EXPIRED_JWT
+jwtChallenge_INVALID:
+  source: net.officefloor.web.jwt.DefaultJwtChallengeSectionSource
+  input: INVALID_JWT
+jwtChallenge_NO:
+  source: net.officefloor.web.jwt.DefaultJwtChallengeSectionSource
+  input: NO_JWT
+retrieveKeys:
+  source: net.officefloor.web.jwt.authority.combined.CombinedServerRetrieveValidateKeysSectionSource
+  input: retrieveKeys
+retrieveRoles:
+  class: net.officefloor.tutorial.jwthttpserver.JwtRoles

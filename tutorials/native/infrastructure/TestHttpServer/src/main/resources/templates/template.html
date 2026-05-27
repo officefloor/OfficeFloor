@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html>
+<body>
+	<form action="/add" method="post">
+		<p><input type="text" name="a" th:value="${model.a}" />
+		+ <input type="text" name="b" th:value="${model.b}" />
+		= <span th:text="${model.result}">result</span></p>
+		<input type="submit" value="add" />
+	</form>
+</body>
+</html>

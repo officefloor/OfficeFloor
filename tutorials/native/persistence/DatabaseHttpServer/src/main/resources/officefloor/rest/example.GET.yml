@@ -1,0 +1,6 @@
+getRows:
+  class: net.officefloor.tutorial.databasehttpserver.Template
+  next: render
+render:
+  procedure: Thymeleaf
+  resource: example

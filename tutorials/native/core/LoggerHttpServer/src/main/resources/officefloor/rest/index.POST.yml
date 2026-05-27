@@ -1,0 +1,2 @@
+log:
+  class: net.officefloor.tutorial.loggerhttpserver.LogLogic

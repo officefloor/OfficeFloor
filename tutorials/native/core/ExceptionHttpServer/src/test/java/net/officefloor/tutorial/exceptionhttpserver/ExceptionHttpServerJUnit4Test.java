@@ -6,7 +6,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -45,7 +45,7 @@ public class ExceptionHttpServerJUnit4Test {
 		System.setErr(new PrintStream(error, true));
 
 		// Submit to trigger the exception
-		HttpResponse response = this.client.execute(new HttpGet(this.client.url("/template+submit")));
+		HttpResponse response = this.client.execute(new HttpPost(this.client.url("/submit")));
 		assertEquals("Should be successful", 200, response.getStatusLine().getStatusCode());
 
 		// Ensure handling by logging the failure

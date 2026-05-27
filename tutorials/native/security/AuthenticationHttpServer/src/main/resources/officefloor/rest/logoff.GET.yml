@@ -1,0 +1,2 @@
+logout:
+  class: net.officefloor.tutorial.authenticationhttpserver.HelloLogic

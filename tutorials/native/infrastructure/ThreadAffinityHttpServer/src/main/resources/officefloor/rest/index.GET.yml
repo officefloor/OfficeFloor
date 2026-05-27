@@ -1,0 +1,6 @@
+getTemplateData:
+  class: net.officefloor.tutorial.threadaffinityhttpserver.Template
+  next: render
+render:
+  procedure: Thymeleaf
+  resource: index

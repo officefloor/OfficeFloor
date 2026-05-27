@@ -1,0 +1,3 @@
+deleteRow:
+  class: net.officefloor.tutorial.databasehttpserver.Template
+  method: deleteRow

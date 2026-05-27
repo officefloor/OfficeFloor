@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<body>
+<br />
+<table border="1">
+    <tr>
+        <td>Name</td>
+        <td>Description</td>
+        <td>Remove</td>
+    </tr>
+    <tr th:each="row : ${model}">
+        <td th:text="${row.name}">name</td>
+        <td th:text="${row.description}">description</td>
+        <td><a th:href="@{/deleteRow(id=${row.id})}">delete</a></td>
+    </tr>
+</table>
+<br />
+<form action="/addRow" method="POST">
+    Name: <input name="name" type="text" />
+    Description: <input name="description" type="text" />
+    <input type="submit" value="Add" />
+</form>
+</body>
+</html>

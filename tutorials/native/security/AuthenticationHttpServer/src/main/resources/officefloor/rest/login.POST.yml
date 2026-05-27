@@ -1,0 +1,2 @@
+login:
+  class: net.officefloor.tutorial.authenticationhttpserver.LoginLogic

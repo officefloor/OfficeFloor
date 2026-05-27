@@ -36,15 +36,19 @@ Dependency Injection Tutorial
 
 
 
-*Template
-  
-  The following is the content of the template.
+*Service Function
 
-%{snippet|file=${basedir}/src/main/resources/Template.woof.html|ignoreDownloadError=false}
-
-  With the template logic.
+  The following service function retrieves the injected POJO as the model:
 
 %{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/dipojohttpserver/TemplateLogic.java|ignoreDownloadError=false}
+
+  The REST YAML endpoint chains the function to Thymeleaf for rendering:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/template.GET.yml|ignoreDownloadError=false}
+
+  The Thymeleaf template renders the model:
+
+%{snippet|file=${basedir}/src/main/resources/templates/template.html|ignoreDownloadError=false}
 
   WoOF (via its underlying OfficeFloor framework) injects dependencies into methods.  By injecting dependencies into methods, WoOF makes development of applications simpler.  This is because the application logic is written as loosely coupled methods rather than highly coupled objects.  See {{{https://sagenschneider.blogspot.com/2019/02/inversion-of-coupling-control.html}Inversion of Coupling Control}} for more details.
   

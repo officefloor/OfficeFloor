@@ -1,0 +1,2 @@
+secure:
+  class: net.officefloor.tutorial.jwtresourcehttpserver.SecuredResource

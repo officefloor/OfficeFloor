@@ -1,0 +1,6 @@
+getTemplateData:
+  class: net.officefloor.tutorial.dipojohttpserver.TemplateLogic
+  next: render
+render:
+  procedure: Thymeleaf
+  resource: template

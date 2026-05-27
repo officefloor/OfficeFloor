@@ -1,0 +1,3 @@
+render:
+  procedure: Thymeleaf
+  resource: index

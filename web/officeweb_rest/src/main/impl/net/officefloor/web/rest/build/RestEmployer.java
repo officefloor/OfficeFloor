@@ -64,6 +64,9 @@ public class RestEmployer {
             this.webArchitect = webArchitect;
             this.composeArchitect = composeArchitect;
             this.officeSourceContext = officeSourceContext;
+
+            // Add secure decorator
+            this.decorators.add(new SecureRestMethodDecorator());
         }
 
         /*

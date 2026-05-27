@@ -1,0 +1,16 @@
+rollback:
+  class: net.officefloor.tutorial.transactionhttpserver.TransactionLogic
+  method: rollback
+  next: fail
+  govern:
+    - Transaction
+fail:
+  class: net.officefloor.tutorial.transactionhttpserver.TransactionLogic
+  method: fail
+  govern:
+    - Transaction
+composition:
+  escalations:
+    java.lang.IllegalArgumentException: handleRollbackException
+handleRollbackException:
+  class: net.officefloor.tutorial.transactionhttpserver.RollbackExceptionHandler

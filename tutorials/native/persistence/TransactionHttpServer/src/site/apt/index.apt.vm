@@ -36,9 +36,17 @@ Transaction HTTP Server Tutorial
 
 *Configuration
 
-  The following is the <<<application.woof>>> configuration for the example application.
+  The transaction is configured via a governance YAML file in the <<<officefloor/govern/>>> directory:
 
-[./images/transaction-woof.png] application.woof configuration.
+%{snippet|file=${basedir}/src/main/resources/officefloor/govern/Transaction.yml|ignoreDownloadError=false}
+
+  The REST endpoints are configured in the <<<officefloor/rest/>>> directory.  The commit endpoint chains procedures and applies governance:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/commit.POST.yml|ignoreDownloadError=false}
+
+  The rollback endpoint is similar, but the exception handler is outside the governance area to trigger a rollback:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/rollback.POST.yml|ignoreDownloadError=false}
 
 
 **Transaction (Governance) configuration

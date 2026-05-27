@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<body>
+	<form action="/encrypt" method="post">
+		Letter: <input name="letter" th:value="${model.display.letter}" type="text" />
+		<input type="submit" value="Code" />
+	</form>
+	<p>Encrypted code: <span th:text="${model.display.code}">code</span></p>
+	<br />
+	<p>Cache thread: <span th:text="${model.cacheThreadName}">thread</span></p>
+	<p>Database I/O thread: <span th:text="${model.databaseThreadName}">thread</span></p>
+</body>
+</html>

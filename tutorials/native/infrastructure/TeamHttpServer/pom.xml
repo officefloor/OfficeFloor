@@ -23,6 +23,10 @@
 			<artifactId>woof</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>net.officefloor.web</groupId>
+			<artifactId>officeweb_thymeleaf</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>net.officefloor.persistence</groupId>
 			<artifactId>officejpa</artifactId>
 		</dependency>

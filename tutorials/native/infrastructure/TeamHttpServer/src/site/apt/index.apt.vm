@@ -34,14 +34,12 @@ Thread Injection Tutorial
   
   The example's web page is as follows and has been kept simple to focus on thread injection.
 
-[./images/TeamHttpServer-screenshot.png] TeamHttpServer screen shot.
-  
   The example displays the names of two threads to show the different thread pools servicing the request.
-  
+
    * thread to obtain cached letter encryption
-   
+
    * thread (pool) to look up letter encryption within the database
-   
+
   {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/TeamHttpServer}Tutorial Source}}
 
 
@@ -70,9 +68,9 @@ Thread Injection Tutorial
   
   The following is the content of the template.
 
-%{snippet|file=${basedir}/src/main/resources/Template.woof.html|ignoreDownloadError=false}
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/encrypt.POST.yml|ignoreDownloadError=false}
 
-  The following provides the values for the <<< $\{property\} >>> entries from the template logic.  
+  The following provides the session state object and the encrypt/retrieve logic.
 
 %{snippet|id=values|file=${basedir}/src/main/java/net/officefloor/tutorial/teamhttpserver/Template.java|ignoreDownloadError=false}
   

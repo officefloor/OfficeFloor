@@ -22,6 +22,10 @@
 			<groupId>net.officefloor.web</groupId>
 			<artifactId>woof</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>net.officefloor.web</groupId>
+			<artifactId>officeweb_thymeleaf</artifactId>
+		</dependency>
 		<!-- START SNIPPET: tutorial -->
 		<dependency>
 			<groupId>net.officefloor.web</groupId>
