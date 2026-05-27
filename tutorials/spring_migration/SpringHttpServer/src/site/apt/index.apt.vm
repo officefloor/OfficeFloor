@@ -7,9 +7,9 @@
 ~~ Licensed under the Apache License, Version 2.0 (the "License");
 ~~ you may not use this file except in compliance with the License.
 ~~ You may obtain a copy of the License at
-~~ 
+~~
 ~~      http://www.apache.org/licenses/LICENSE-2.0
-~~ 
+~~
 ~~ Unless required by applicable law or agreed to in writing, software
 ~~ distributed under the License is distributed on an "AS IS" BASIS,
 ~~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,7 +19,7 @@
 ~~~
 
                                                -----------------------
-                                             Spring HTTP Server Tutorial 
+                                             Spring HTTP Server Tutorial
                                                -----------------------
                                                 Daniel Sagenschneider
                                                -----------------------
@@ -28,10 +28,11 @@ Spring HTTP Server Tutorial
 
   This tutorial demonstrates wiring Spring beans into an OfficeFloor application.
 
-  The following simple output is provided via a Spring bean injected into a WoOF template:
-  
+  The following simple output is provided via a Spring bean injected into a service function,
+  with the result rendered by Thymeleaf:
+
 [./images/SpringHttpServer-screenshot.png] SpringHttpServer screen shot.
-    
+
   {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/SpringHttpServer}Tutorial Source}}
 
 
@@ -66,13 +67,9 @@ Spring HTTP Server Tutorial
 
   The {{{/apidocs/net/officefloor/spring/SpringSupplierSource.html}SpringSupplierSource}} interogates all the registered Spring beans and makes them available for auto-wiring within OfficeFloor.
 
-  Therefore, the template logic to use the Spring beans is no different to WoOF dependency injection of {{{/apidocs/net/officefloor/frame/api/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} instances:
+  Therefore, the service function that uses the Spring bean is no different to any other OfficeFloor dependency injection:
 
 %{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springhttpserver/Template.java|ignoreDownloadError=false}
-
-  with the very simple template to output the bean's introduction as follows:
-
-%{snippet|file=${basedir}/src/main/resources/Template.woof.html|ignoreDownloadError=false}
 
 
 
@@ -102,10 +99,26 @@ Spring HTTP Server Tutorial
 
 
 
+*REST endpoint
+
+  The <<<GET />>> endpoint is configured via a REST YAML file.  The service function fetches the Spring bean model, which is then passed to Thymeleaf for rendering:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/index.GET.yml|ignoreDownloadError=false}
+
+
+
+*Thymeleaf template
+
+  The Thymeleaf template renders the model returned by the service function.  <<<\$\{model.introduction\}>>> resolves to <<<HelloBean.getIntroduction()>>>:
+
+%{snippet|file=${basedir}/src/main/resources/templates/greeting.html|ignoreDownloadError=false}
+
+
+
 *Building the application
 
   Due to Spring Boot generating meta-data about the application to run, the following should be used to build the executable jar:
-  
+
 %{snippet|id=spring|file=${basedir}/pom.xml|ignoreDownloadError=false}
 
   This ensures Spring Boot can generate the necessary meta-data, while still allowing OfficeFloor to manage the execution.  It also keeps the original jar (via the classifier) to allow using as a dependency in larger applications.
@@ -114,7 +127,7 @@ Spring HTTP Server Tutorial
 *Unit Test
 
   Suppliers are integrated into OfficeFloor, so the application can be tested just like any other WoOF application:
-  
+
 %{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springhttpserver/SpringHttpServerTest.java|ignoreDownloadError=false}
 
 

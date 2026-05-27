@@ -13,7 +13,6 @@
 	<packaging>pom</packaging>
 	<name>OfficeFloor Reference Applications</name>
 	<modules>
-		<module>GraphicalConfigurationExample</module>
 		<module>SpringWebMvcApp</module>
 		<module>SpringWebFluxApp</module>
 		<module>JaxRsApp</module>
