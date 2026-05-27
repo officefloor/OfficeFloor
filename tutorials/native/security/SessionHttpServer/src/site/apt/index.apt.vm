@@ -28,19 +28,17 @@ Session HTTP Server Tutorial
 
   This tutorial demonstrates maintaining state within the HTTP session.
   
-  The example application for this tutorial will show a simple list of postings as follows:
-  
-[./images/SessionHttpServer-screenshot.png] SessionHttpServer screen shot.
-    
+  The example application for this tutorial will show a simple list of postings.
+
   {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/SessionHttpServer}Tutorial Source}}
 
 
-  
-*Template.woof.html
+
+*Template
 
   The template for displaying the posts and adding posts is as follows:
 
-%{snippet|file=${basedir}/src/main/resources/Template.woof.html|ignoreDownloadError=false}
+%{snippet|file=${basedir}/src/main/resources/templates/post.html|ignoreDownloadError=false}
 
   This is similar HTML as per previous tutorials.
 

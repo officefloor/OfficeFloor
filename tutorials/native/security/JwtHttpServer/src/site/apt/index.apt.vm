@@ -34,11 +34,17 @@ Combined JWT Resource and Authority Tutorial
 
 
 
-*WoOF configuration
+*Configuration
 
   The configuration contains both the {{{../JwtResourceHttpServer/index.html}JWT Resource}} and {{{../JwtAuthorityHttpServer/index.html}JWT Authority}}.  It is joined by the {{{/apidocs/net/officefloor/web/jwt/authority/combined/CombinedServerRetrieveValidateKeysSectionSource.html}CombinedServerRetrieveValidateKeysSectionSource}} that handles the JWT keys being loaded from the {{{/apidocs/net/officefloor/web/jwt/authority/JwtAuthority.html}JwtAuthority}}.
 
-[./images/JwtHttpServer-configuration.png] JwtHttpServer screen shot.
+  The security YAML configuration is:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/security/JWT.yml|ignoreDownloadError=false}
+
+  All endpoints are configured to require HTTPS:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/resource.yml|ignoreDownloadError=false}
 
   As the JWT Authority can be clustered, it allows the application to also be clustered.
     
