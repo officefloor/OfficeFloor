@@ -20,7 +20,9 @@
 
 package net.officefloor.woof;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.ServiceConfigurationError;
 import java.util.function.Function;
@@ -146,9 +148,26 @@ public class WoofLoaderOfficeExtensionService implements OfficeExtensionService,
 		String governDirectory = interpolateRestDirectory(officeFloorDirectory, context.getProperty(GOVERN_DIRECTORY_PROPERTY, GOVERN_DEFAULT_DIRECTORY));
 		String securityDirectory = interpolateRestDirectory(officeFloorDirectory, context.getProperty(SECURITY_DIRECTORY_PROPERTY, SECURITY_DEFAULT_DIRECTORY));
 
-		// Determine if WoOF application
+		// Pre-load external WoOF extension services (also used for WoOF application detection)
+		List<WoofExtensionService> externalWoofExtensions = null;
+		if (configuration.isLoadWoofExtensions()) {
+			externalWoofExtensions = new ArrayList<>();
+			Iterator<WoofExtensionService> checkIterator = context
+					.loadOptionalServices(WoofExtensionServiceFactory.class).iterator();
+			while (checkIterator.hasNext()) {
+				try {
+					externalWoofExtensions.add(checkIterator.next());
+				} catch (ServiceConfigurationError ex) {
+					officeArchitect.addIssue(ex.getMessage(), ex);
+				}
+			}
+		}
+
+		// Determine if WoOF application (including check for external WoOF extensions)
 		if ((!configuration.isWoofApplication(context)) && (!rest.isRestAvailable(restDirectory))) {
-			return; // not WoOF application
+			if (externalWoofExtensions == null || externalWoofExtensions.isEmpty()) {
+				return; // not WoOF application
+			}
 		}
 
 		// Load the default object parser / responders
@@ -333,23 +352,9 @@ public class WoofLoaderOfficeExtensionService implements OfficeExtensionService,
 			}
 		}
 
-		// Load the woof extensions
-		if (configuration.isLoadWoofExtensions()) {
-			Iterator<WoofExtensionService> extensionIterator = context
-					.loadOptionalServices(WoofExtensionServiceFactory.class).iterator();
-			while (extensionIterator.hasNext()) {
-
-				// Obtain the next extension service
-				WoofExtensionService extensionService;
-				try {
-					extensionService = extensionIterator.next();
-				} catch (ServiceConfigurationError ex) {
-					// Issue loading service
-					officeArchitect.addIssue(ex.getMessage(), ex);
-
-					// Not loaded, so continue onto next
-					continue;
-				}
+		// Load the woof extensions (use pre-loaded services to avoid double-loading)
+		if (externalWoofExtensions != null) {
+			for (WoofExtensionService extensionService : externalWoofExtensions) {
 
 				// Extend the application
 				try {

@@ -374,7 +374,26 @@ public class ComposeSectionSource extends AbstractSectionSource {
         }
 
         // Load the configuration
-        PropertyList properties = new PropertyListImpl();
+        PropertyList properties = sectionSourceContext.createPropertyList();
+
+        // Load procedure properties from context (convention: "{functionName}.procedure.{propertyName}")
+        String procedurePropertyPrefix = functionName + ".procedure.";
+        for (String propName : sectionSourceContext.getPropertyNames()) {
+            if (propName.startsWith(procedurePropertyPrefix)) {
+                String propKey = propName.substring(procedurePropertyPrefix.length());
+                properties.addProperty(propKey).setValue(sectionSourceContext.getProperty(propName));
+            }
+        }
+
+        // Load inline properties from YAML (as fallback if not already set from context)
+        Map<String, String> configProperties = functionConfiguration.getProperties();
+        if (configProperties != null) {
+            for (Map.Entry<String, String> entry : configProperties.entrySet()) {
+                if (properties.getProperty(entry.getKey()) == null) {
+                    properties.addProperty(entry.getKey()).setValue(entry.getValue());
+                }
+            }
+        }
 
         // Determine if next
         String next = functionConfiguration.getNext();

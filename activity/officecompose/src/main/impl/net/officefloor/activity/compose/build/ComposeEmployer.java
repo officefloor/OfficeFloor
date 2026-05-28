@@ -209,6 +209,7 @@ public class ComposeEmployer {
             // Add the composition
             ComposeSectionSource composeSectionSource = new ComposeSectionSource(composeConfiguration);
             OfficeSection composition = architect.addOfficeSection(sectionName, composeSectionSource, resourceName);
+            properties.configureProperties(composition);
 
             // Build the item
             T item;
