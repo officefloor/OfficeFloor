@@ -1,0 +1,8 @@
+managed-object:
+  source: net.officefloor.jdbc.postgresql.PostgreSqlDataSourceManagedObjectSource
+  properties:
+    server: localhost
+    port: "5433"
+    database: test
+    user: sa
+    password: password

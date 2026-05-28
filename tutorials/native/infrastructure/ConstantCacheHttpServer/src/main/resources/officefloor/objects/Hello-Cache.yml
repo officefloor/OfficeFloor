@@ -1,0 +1,5 @@
+managed-object:
+  source: net.officefloor.cache.constant.ConstantCacheManagedObjectSource
+  qualifier: net.officefloor.tutorial.constantcachehttpserver.Hello
+  properties:
+    qualifier: net.officefloor.tutorial.constantcachehttpserver.Hello

@@ -1,0 +1,2 @@
+managed-object:
+  source: net.officefloor.tutorial.catshttpserver.TransactorManagedObjectSource

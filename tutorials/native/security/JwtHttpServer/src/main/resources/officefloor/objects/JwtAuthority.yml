@@ -1,0 +1,4 @@
+managed-object:
+  source: net.officefloor.web.jwt.authority.JwtAuthorityManagedObjectSource
+  properties:
+    identity.class: net.officefloor.tutorial.jwthttpserver.Identity

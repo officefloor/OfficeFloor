@@ -1,0 +1,3 @@
+managed-object:
+  class: net.officefloor.tutorial.constantcachehttpserver.DatabaseConstantCacheDataRetriever
+  qualifier: net.officefloor.tutorial.constantcachehttpserver.World

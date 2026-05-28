@@ -1,0 +1,4 @@
+supplier:
+  source: net.officefloor.nosql.cosmosdb.CosmosAsyncDbSupplierSource
+  properties:
+    cosmos.entity.locators: net.officefloor.tutorial.azurewebappshttpserver.AzureEntities

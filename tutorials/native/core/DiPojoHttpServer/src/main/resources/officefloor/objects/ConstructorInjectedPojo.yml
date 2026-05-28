@@ -1,0 +1,2 @@
+managed-object:
+  class: net.officefloor.tutorial.dipojohttpserver.constructor.ConstructorInjectedPojo
