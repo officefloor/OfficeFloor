@@ -213,6 +213,9 @@ public class ComposeSectionSource extends AbstractSectionSource {
         // SectionOutputs created for #-prefixed external input references (deduplicated by name)
         Map<String, SectionOutput> externalSectionOutputs = new HashMap<>();
 
+        // SectionOutputs created for unhandled escalations (deduplicated by type name)
+        Map<String, SectionOutput> sectionEscalations = new HashMap<>();
+
         // Map composition (following deterministic order)
         for (String composedFunctionName : new ArrayList<>(functions.keySet()).stream().sorted().toList()) {
             ComposedFunction composedFunction = functions.get(composedFunctionName);
@@ -267,7 +270,6 @@ public class ComposeSectionSource extends AbstractSectionSource {
                     });
 
             // Map escalations
-            Map<String, SectionOutput> sectionEscalations = new HashMap<>();
             link(composedFunction.getConfiguration().getEscalations(), composeConfiguration.getComposition(),
                     composedFunction.getEscalations(), ComposedFunctionOutput::getOutputName,
                     (handlerName) -> {

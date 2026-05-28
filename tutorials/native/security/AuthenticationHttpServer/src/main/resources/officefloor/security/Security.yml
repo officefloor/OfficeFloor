@@ -3,6 +3,6 @@ security:
   properties:
     realm: Test
   flows:
-    FORM_LOGIN_PAGE: loginRedirect
+    form: loginRedirect
 loginRedirect:
   class: net.officefloor.tutorial.authenticationhttpserver.LoginRedirect

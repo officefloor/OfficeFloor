@@ -11,6 +11,6 @@ fail:
     - Transaction
 composition:
   escalations:
-    java.lang.IllegalArgumentException: handleRollbackException
+    java.lang.Exception: handleRollbackException
 handleRollbackException:
   class: net.officefloor.tutorial.transactionhttpserver.RollbackExceptionHandler

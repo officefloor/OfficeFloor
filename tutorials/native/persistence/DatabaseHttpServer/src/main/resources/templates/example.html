@@ -11,7 +11,7 @@
     <tr th:each="row : ${model}">
         <td th:text="${row.name}">name</td>
         <td th:text="${row.description}">description</td>
-        <td><a th:href="@{/deleteRow(id=${row.id})}">delete</a></td>
+        <td><a th:href="'/deleteRow?id=' + ${row.id}">delete</a></td>
     </tr>
 </table>
 <br />

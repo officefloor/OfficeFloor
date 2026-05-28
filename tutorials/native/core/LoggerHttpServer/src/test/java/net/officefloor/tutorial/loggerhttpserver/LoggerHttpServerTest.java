@@ -32,7 +32,7 @@ public class LoggerHttpServerTest {
 		response.assertResponse(204, "");
 
 		// Ensure log input message (from procedure)
-		this.log.assertLog("log.procedure", Level.INFO, "PROCEDURE: TEST");
+		this.log.assertLog("REST:REST_index.POST.log.procedure", Level.INFO, "PROCEDURE: TEST");
 
 		// Ensure log from object
 		this.log.assertLog("OFFICE.net_officefloor_tutorial_loggerhttpserver_LogObject", Level.INFO, "OBJECT: TEST");

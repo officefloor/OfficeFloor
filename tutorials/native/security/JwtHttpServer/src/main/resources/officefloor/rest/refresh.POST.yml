@@ -1,2 +1,3 @@
 refreshAccessToken:
   class: net.officefloor.tutorial.jwthttpserver.JwtTokens
+  method: refreshAccessToken

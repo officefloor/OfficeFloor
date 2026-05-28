@@ -1,2 +1,3 @@
 logout:
   class: net.officefloor.tutorial.authenticationhttpserver.HelloLogic
+  method: logout

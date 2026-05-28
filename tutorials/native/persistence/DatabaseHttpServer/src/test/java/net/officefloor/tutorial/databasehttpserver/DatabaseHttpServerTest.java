@@ -74,7 +74,7 @@ public class DatabaseHttpServerTest {
 		assertEquals(200, response.getStatus().getStatusCode(), "Should be successful");
 		String body = response.getEntity(null);
 		assertTrue(body.contains("WoOF"), "Should have row from database: " + body);
-		assertTrue(body.endsWith("</html>"), "Should have full request: " + body);
+		assertTrue(body.stripTrailing().endsWith("</html>"), "Should have full request: " + body);
 	}
 
 	// START SNIPPET: test

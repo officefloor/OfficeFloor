@@ -11,7 +11,7 @@ fail:
     - Transaction
 composition:
   escalations:
-    java.io.EOFException: handleCommitException
+    java.lang.Exception: handleCommitException
 handleCommitException:
   class: net.officefloor.tutorial.transactionhttpserver.CommitExceptionHandler
   govern:
