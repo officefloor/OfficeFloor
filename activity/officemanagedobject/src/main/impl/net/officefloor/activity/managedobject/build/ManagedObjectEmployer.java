@@ -6,6 +6,7 @@ import net.officefloor.activity.compose.build.ComposeLinkHandler;
 import net.officefloor.activity.compose.build.ComposeSource;
 import net.officefloor.activity.managedobject.ManagedObjectConfiguration;
 import net.officefloor.activity.managedobject.ManagedObjectSourceConfiguration;
+import net.officefloor.activity.managedobject.SupplierSourceConfiguration;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
@@ -15,12 +16,14 @@ import net.officefloor.compile.spi.office.OfficeManagedObjectDependency;
 import net.officefloor.compile.spi.office.OfficeManagedObjectFlow;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
+import net.officefloor.compile.spi.office.OfficeSupplier;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ManagedObjectEmployer {
@@ -69,6 +72,18 @@ public class ManagedObjectEmployer {
             OfficeManagedObjectSource managedObjectSource;
             ManagedObjectType<?> managedObjectType;
             ManagedObjectConfiguration moConfiguration = context.getConfiguration();
+
+            // Check if supplier configuration
+            SupplierSourceConfiguration supplierConfig = moConfiguration.getSupplier();
+            if (supplierConfig != null) {
+                OfficeSupplier officeSupplier = officeArchitect.addSupplier(managedObjectName, supplierConfig.getSource());
+                Map<String, String> supplierProperties = supplierConfig.getProperties();
+                if (supplierProperties != null) {
+                    supplierProperties.forEach(officeSupplier::addProperty);
+                }
+                return null;
+            }
+
             ManagedObjectSourceConfiguration configuration = moConfiguration.getManagedObject();
 
             // Determine if class
@@ -100,6 +115,14 @@ public class ManagedObjectEmployer {
 
                 // Load the managed object type
                 managedObjectType = officeContext.loadManagedObjectType(managedObjectName, source, propertyList);
+            }
+
+            // Handle start-after ordering
+            List<String> startAfterTypes = configuration.getStartAfter();
+            if (startAfterTypes != null) {
+                for (String type : startAfterTypes) {
+                    officeArchitect.startAfter(managedObjectSource, type);
+                }
             }
 
             // Load the composition handling
@@ -137,8 +160,9 @@ public class ManagedObjectEmployer {
 
             // Provide the type qualifications
             String objectType = managedObjectType.getObjectType().getName();
+            String qualifier = configuration.getQualifier();
             managedObject.addTypeQualification(null, objectType);
-            managedObject.addTypeQualification(managedObjectName, objectType);
+            managedObject.addTypeQualification(qualifier != null ? qualifier : managedObjectName, objectType);
 
             // Return the managed object
             return managedObject;

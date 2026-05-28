@@ -10,4 +10,7 @@ public class ManagedObjectConfiguration extends ComposeConfiguration {
     @JsonProperty("managed-object")
     ManagedObjectSourceConfiguration managedObject;
 
+    @JsonProperty("supplier")
+    SupplierSourceConfiguration supplier;
+
 }

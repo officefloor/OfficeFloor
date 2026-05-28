@@ -1,5 +1,0 @@
-<objects>
-
-	<managed-object source="net.officefloor.spring.webclient.WebClientManagedObjectSource" />
-
-</objects>
