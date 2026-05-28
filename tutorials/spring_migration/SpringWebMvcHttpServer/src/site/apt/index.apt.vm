@@ -52,9 +52,9 @@ Spring Web MVC Tutorial
   
 %{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
 
-  Spring will also need to be configured in <<<application.objects>>>:
-  
-%{snippet|id=tutorial|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
+  Spring will also need to be configured in <<<officefloor/suppliers/Spring.yml>>>:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/suppliers/Spring.yml|ignoreDownloadError=false}
 
   The Spring Web MVC Controllers are then configured as REST endpoints.  The following configures the GET <<<rest>>> endpoint:
 

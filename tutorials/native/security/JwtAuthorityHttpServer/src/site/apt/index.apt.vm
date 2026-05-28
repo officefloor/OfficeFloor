@@ -50,9 +50,11 @@ JWT Authority Tutorial
 
 %{snippet|file=${basedir}/src/main/resources/officefloor/rest/jwks.json.GET.yml|ignoreDownloadError=false}
 
-  with the following objects:
-  
-%{snippet|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
+  with the following objects in the <<<officefloor/objects/>>> directory:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/objects/JwtAuthorityRepository.yml|ignoreDownloadError=false}
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/objects/JwtAuthority.yml|ignoreDownloadError=false}
 
 
 

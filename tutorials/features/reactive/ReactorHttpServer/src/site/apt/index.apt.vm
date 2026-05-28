@@ -78,9 +78,9 @@ Reactive Tutorial
   
 %{snippet|id=webclient|file=${basedir}/pom.xml|ignoreDownloadError=false}
 
-  then configure as follows in <<<application.objects>>>:
-  
-%{snippet|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
+  then configure as follows in <<<officefloor/objects/WebClient.yml>>>:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/objects/WebClient.yml|ignoreDownloadError=false}
 
 
 

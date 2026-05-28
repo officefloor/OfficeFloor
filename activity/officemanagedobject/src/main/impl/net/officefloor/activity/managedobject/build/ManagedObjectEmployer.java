@@ -6,7 +6,6 @@ import net.officefloor.activity.compose.build.ComposeLinkHandler;
 import net.officefloor.activity.compose.build.ComposeSource;
 import net.officefloor.activity.managedobject.ManagedObjectConfiguration;
 import net.officefloor.activity.managedobject.ManagedObjectSourceConfiguration;
-import net.officefloor.activity.managedobject.SupplierSourceConfiguration;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
@@ -16,7 +15,6 @@ import net.officefloor.compile.spi.office.OfficeManagedObjectDependency;
 import net.officefloor.compile.spi.office.OfficeManagedObjectFlow;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
-import net.officefloor.compile.spi.office.OfficeSupplier;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -72,17 +70,6 @@ public class ManagedObjectEmployer {
             OfficeManagedObjectSource managedObjectSource;
             ManagedObjectType<?> managedObjectType;
             ManagedObjectConfiguration moConfiguration = context.getConfiguration();
-
-            // Check if supplier configuration
-            SupplierSourceConfiguration supplierConfig = moConfiguration.getSupplier();
-            if (supplierConfig != null) {
-                OfficeSupplier officeSupplier = officeArchitect.addSupplier(managedObjectName, supplierConfig.getSource());
-                Map<String, String> supplierProperties = supplierConfig.getProperties();
-                if (supplierProperties != null) {
-                    supplierProperties.forEach(officeSupplier::addProperty);
-                }
-                return null;
-            }
 
             ManagedObjectSourceConfiguration configuration = moConfiguration.getManagedObject();
 

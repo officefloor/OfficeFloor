@@ -78,9 +78,13 @@ Cats Tutorial
 
 *Injected doobie Transactor
 
-  To enable the <<<Transactor>>> to be injected, the following is the <<<application.objects>>> configuration:
+  To enable the <<<Transactor>>> to be injected, the following is the <<<officefloor/objects/>>> configuration:
 
-%{snippet|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
+%{snippet|file=${basedir}/src/main/resources/officefloor/objects/DataSource.yml|ignoreDownloadError=false}
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/objects/Connection.yml|ignoreDownloadError=false}
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/objects/Transactor.yml|ignoreDownloadError=false}
 
   The <<<Connection>>> is provided by the <<<H2>>> managed object.  The <<<Transactor>>> managed object then wraps the <<<Connection>>> in a <<<Transactor>>>:
     

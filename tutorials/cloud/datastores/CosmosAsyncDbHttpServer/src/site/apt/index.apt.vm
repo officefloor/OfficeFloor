@@ -71,9 +71,9 @@ CosmosDB Async Tutorial
   
 %{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
 
-  CosmosDB is configured in <<<application.objects>>> as follows:
-  
-%{snippet|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
+  CosmosDB is configured in <<<officefloor/suppliers/CosmosAsyncDb.yml>>> as follows:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/suppliers/CosmosAsyncDb.yml|ignoreDownloadError=false}
 
   For performance reasons, the entities are not dynamically discovered.  As Azure starts instances as required, the application must be brought up quickly to service the first request.  Having to inspect all jars and classes for entities is typically too slow.  Therefore, CosmosDB requires registering all entities with it manually.
   

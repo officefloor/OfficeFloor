@@ -48,8 +48,10 @@ Constant Cache Tutorial
 **Hello Cache
 
   The <<<@Hello>>> {{{/apidocs/net/officefloor/cache/Cache.html}Cache}} is configured as follows:
-  
-%{snippet|id=hello|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/objects/Hello-Cache.yml|ignoreDownloadError=false}
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/objects/Hello-Retriever.yml|ignoreDownloadError=false}
   
   The {{{/apidocs/net/officefloor/cache/constant/ConstantCacheManagedObjectSource.html}ConstantCacheManagedObjectSource}} provides the {{{/apidocs/net/officefloor/cache/Cache.html}Cache}}.  The configured property identifies the qualifier for the qualified {{{/apidocs/net/officefloor/cache/constant/ConstantCacheDataRetriever.html}ConstantCacheDataRetriever}} dependency.
   
@@ -63,8 +65,10 @@ Constant Cache Tutorial
   The {{{/apidocs/net/officefloor/cache/constant/ConstantCacheDataRetriever.html}ConstantCacheDataRetriever}} may inject dependencies to retrieve data from various sources.
   
   The <<<@World>>> {{{/apidocs/net/officefloor/cache/Cache.html}Cache}} retrieves data from a database.  It is configured as follows:
-  
-%{snippet|id=world|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/objects/World-Cache.yml|ignoreDownloadError=false}
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/objects/World-Retriever.yml|ignoreDownloadError=false}
 
   Note that the poll interval can be configured to indicate frequency in milliseconds to refresh the data.
   

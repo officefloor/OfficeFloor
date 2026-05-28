@@ -64,8 +64,8 @@ Servlet Tutorial
 %{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/servlethttpserver/InjectedDependency.java|ignoreDownloadError=false}
   
   Configured via OfficeFloor as follows:
-  
-%{snippet|id=tutorial|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/objects/InjectedDependency.yml|ignoreDownloadError=false}
 
 
 

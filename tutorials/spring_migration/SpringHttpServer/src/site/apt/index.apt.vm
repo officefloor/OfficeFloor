@@ -51,11 +51,15 @@ Spring HTTP Server Tutorial
 
   Similar to suppliers providing items to a business, a {{{/apidocs/net/officefloor/compile/spi/supplier/source/SupplierSource.html}SupplierSource}} supplies objects to OfficeFloor dependency injection.  This is a convenient means for Dependency Injection frameworks, such as Spring, to provide their objects to OfficeFloor.
 
-  The following is the object configuration for this tutorial:
+  The Spring supplier is configured via <<<officefloor/suppliers/Spring.yml>>>:
 
-%{snippet|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
+%{snippet|file=${basedir}/src/main/resources/officefloor/suppliers/Spring.yml|ignoreDownloadError=false}
 
   The {{{/apidocs/net/officefloor/spring/SpringSupplierSource.html}SpringSupplierSource}} is configured via it's {{{/apidocs/net/officefloor/spring/SpringSupplierSourceService.html}SPRING}} alias.
+
+  The OfficeFloor managed object that Spring depends on is configured in <<<officefloor/objects/World.yml>>>:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/objects/World.yml|ignoreDownloadError=false}
 
   Similar to {{{http://spring.io/projects/spring-boot}Spring Boot}} applications, a configuration class loads the Spring beans.  The configured class is as follows:
 
@@ -87,7 +91,7 @@ Spring HTTP Server Tutorial
 
   The dependency is provided from the {{{/apidocs/net/officefloor/spring/SpringSupplierSource.html}SpringSupplierSource}}.  This enables Spring factory methods to create beans from {{{/apidocs/net/officefloor/frame/api/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} instances within OfficeFloor.
 
-  From the application object configuration above, this resolves to the following:
+  From the object configuration above, this resolves to the following:
 
 %{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springhttpserver/World.java|ignoreDownloadError=false}
 

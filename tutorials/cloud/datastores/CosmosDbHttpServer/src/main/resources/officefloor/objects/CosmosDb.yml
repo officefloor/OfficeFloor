@@ -1,4 +1,0 @@
-supplier:
-  source: net.officefloor.nosql.cosmosdb.CosmosDbSupplierSource
-  properties:
-    cosmos.entity.locators: net.officefloor.tutorial.cosmosdbhttpserver.CosmosDbEntities

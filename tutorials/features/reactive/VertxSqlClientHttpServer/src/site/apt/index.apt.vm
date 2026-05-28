@@ -42,9 +42,11 @@ Vertx SQL Client Tutorial
   
 %{snippet|id=sqlclient|file=${basedir}/pom.xml|ignoreDownloadError=false}
 
-  then configure as follows in <<<application.objects>>>:
-  
-%{snippet|id=tutorial|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
+  then configure as follows in the <<<officefloor/objects/>>> directory:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/objects/PostgreSqlDataSource.yml|ignoreDownloadError=false}
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/objects/VertxSqlPool.yml|ignoreDownloadError=false}
 
   with example properties:
   

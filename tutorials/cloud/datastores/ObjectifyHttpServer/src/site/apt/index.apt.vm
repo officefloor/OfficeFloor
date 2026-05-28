@@ -64,9 +64,9 @@ Objectify Tutorial
 
 *Configuring Objectify
 
-  Objectify is configured in <<<application.objects>>> as follows:
-  
-%{snippet|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
+  Objectify is configured in <<<officefloor/suppliers/Objectify.yml>>> as follows:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/suppliers/Objectify.yml|ignoreDownloadError=false}
 
   For performance reasons, the entities are not dynamically discovered.  As Google App Engine allows scaling to zero instances, the application must be brought up quickly to service the first request.  Having to inspect all jars and classes for entities is typically too slow.  Therefore, Objectify requires registering all entities with it manually.
   

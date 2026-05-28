@@ -40,13 +40,15 @@ Dependency Injection of Managed Object Tutorial
 
 *Configuring Objects
 
-  Objects for dependency injection are configured in the <<<application.objects>>> file contained at the root of the class path.  
-  
-  Providing this file is optional.  It is anticipated that features such as WoOF annotations and {{{/apidocs/net/officefloor/compile/spi/supplier/source/SupplierSource.html}SupplierSource}} implementations will provide the necessary dependencies for running a web application.  See the {{{../index.html}other tutorials}} for more information.  The file is however supported to extend WoOF web applications with additional custom dependencies.
-  
+  Objects for dependency injection are configured as YAML files in the <<<officefloor/objects/>>> directory on the class path.
+
+  Providing these files is optional.  It is anticipated that features such as WoOF annotations and {{{/apidocs/net/officefloor/compile/spi/supplier/source/SupplierSource.html}SupplierSource}} implementations will provide the necessary dependencies for running a web application.  See the {{{../index.html}other tutorials}} for more information.  The files are however supported to extend WoOF web applications with additional custom dependencies.
+
   The configuration of the dependency injected <<<Connection>>> is as follows.
 
-%{snippet|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
+%{snippet|file=${basedir}/src/main/resources/officefloor/objects/Connection.yml|ignoreDownloadError=false}
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/objects/DataSource.yml|ignoreDownloadError=false}
 
   The <<<Connection>>> is provided by a {{{/apidocs/net/officefloor/frame/api/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} implementation that closes the connection on completion of the request.  This depends on the <<<DataSource>>> to provide a managed <<<Connection>>>.
   

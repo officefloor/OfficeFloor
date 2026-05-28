@@ -1,4 +1,0 @@
-supplier:
-  source: SPRING
-  properties:
-    configuration.class: net.officefloor.tutorial.springwebfluxhttpserver.Application

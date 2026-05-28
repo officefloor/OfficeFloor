@@ -33,6 +33,8 @@ import net.officefloor.activity.govern.build.GovernanceArchitect;
 import net.officefloor.activity.govern.build.GovernanceEmployer;
 import net.officefloor.activity.managedobject.build.ManagedObjectArchitect;
 import net.officefloor.activity.managedobject.build.ManagedObjectEmployer;
+import net.officefloor.activity.supplier.build.SupplierArchitect;
+import net.officefloor.activity.supplier.build.SupplierEmployer;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.activity.procedure.build.ProcedureArchitect;
@@ -84,6 +86,7 @@ public class WoofLoaderOfficeExtensionService implements OfficeExtensionService,
 	public static final String OFFICE_FLOOR_DIRECTORY_PROPERTY = "officefloor.directory";
 	public static final String REST_DIRECTORY_PROPERTY = "officefloor.rest.directory";
 	public static final String OBJECTS_DIRECTORY_PROPERTY = "officefloor.objects.directory";
+	public static final String SUPPLIERS_DIRECTORY_PROPERTY = "officefloor.suppliers.directory";
 	public static final String GOVERN_DIRECTORY_PROPERTY = "officefloor.govern.directory";
 	public static final String SECURITY_DIRECTORY_PROPERTY = "officefloor.security.directory";
 
@@ -92,6 +95,7 @@ public class WoofLoaderOfficeExtensionService implements OfficeExtensionService,
 	public static final String OFFICE_FLOOR_DEFAULT_DIRECTORY = "officefloor";
 	public static final String REST_DEFAULT_DIRECTORY = OFFICE_FLOOR_DIRECTORY_TAG + "/rest";
 	public static final String OBJECTS_DEFAULT_DIRECTORY = OFFICE_FLOOR_DIRECTORY_TAG + "/objects";
+	public static final String SUPPLIERS_DEFAULT_DIRECTORY = OFFICE_FLOOR_DIRECTORY_TAG + "/suppliers";
 	public static final String GOVERN_DEFAULT_DIRECTORY = OFFICE_FLOOR_DIRECTORY_TAG + "/govern";
 	public static final String SECURITY_DEFAULT_DIRECTORY = OFFICE_FLOOR_DIRECTORY_TAG + "/security";
 
@@ -145,6 +149,7 @@ public class WoofLoaderOfficeExtensionService implements OfficeExtensionService,
 		String officeFloorDirectory = context.getProperty(OFFICE_FLOOR_DIRECTORY_PROPERTY, OFFICE_FLOOR_DEFAULT_DIRECTORY);
 		String restDirectory = interpolateRestDirectory(officeFloorDirectory, context.getProperty(REST_DIRECTORY_PROPERTY, REST_DEFAULT_DIRECTORY));
 		String objectsDirectory = interpolateRestDirectory(officeFloorDirectory, context.getProperty(OBJECTS_DIRECTORY_PROPERTY, OBJECTS_DEFAULT_DIRECTORY));
+		String suppliersDirectory = interpolateRestDirectory(officeFloorDirectory, context.getProperty(SUPPLIERS_DIRECTORY_PROPERTY, SUPPLIERS_DEFAULT_DIRECTORY));
 		String governDirectory = interpolateRestDirectory(officeFloorDirectory, context.getProperty(GOVERN_DIRECTORY_PROPERTY, GOVERN_DEFAULT_DIRECTORY));
 		String securityDirectory = interpolateRestDirectory(officeFloorDirectory, context.getProperty(SECURITY_DIRECTORY_PROPERTY, SECURITY_DEFAULT_DIRECTORY));
 
@@ -280,6 +285,10 @@ public class WoofLoaderOfficeExtensionService implements OfficeExtensionService,
 			// Load the composition managed objects
 			ManagedObjectArchitect managedObjectArchitect = ManagedObjectEmployer.employManagedObjectArchitect(officeArchitect, compose, context);
 			managedObjectArchitect.addManagedObjects(objectsDirectory, composeProperties);
+
+			// Load the composition suppliers
+			SupplierArchitect supplierArchitect = SupplierEmployer.employSupplierArchitect(officeArchitect, context);
+			supplierArchitect.addSuppliers(suppliersDirectory, composeProperties);
 		}
 
 		// Load the optional resources configuration to the application

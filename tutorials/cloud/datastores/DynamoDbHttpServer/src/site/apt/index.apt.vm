@@ -66,9 +66,9 @@ DynamoDB Tutorial
   
 %{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
 
-  DynamoDB is configured in <<<application.objects>>> as follows:
-  
-%{snippet|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
+  DynamoDB is configured in <<<officefloor/suppliers/DynamoDb.yml>>> as follows:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/suppliers/DynamoDb.yml|ignoreDownloadError=false}
 
   For performance reasons, the entities are not dynamically discovered.  As Amazon Lambda starts instances as required, the application must be brought up quickly to service the first request.  Having to inspect all jars and classes for entities is typically too slow.  Therefore, DynamoDB requires registering all entities with it manually.
   

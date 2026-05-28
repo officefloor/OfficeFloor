@@ -81,13 +81,19 @@ Dependency Injection Tutorial
 
 *Configuring Dependency Injection
 
-  Objects for dependency injection are configured in the <<<application.objects>>> file contained at the root of the class path.  Providing this file is optional, as it is anticipated that WoOF annotations will provide most POJO dependency configuration.  However, it is supported to extend WoOF applications with additional dependencies as required.
+  Objects for dependency injection are configured as YAML files in the <<<officefloor/objects/>>> directory on the class path.  Providing these files is optional, as it is anticipated that WoOF annotations will provide most POJO dependency configuration.  However, it is supported to extend WoOF applications with additional dependencies as required.
 
   Note that OfficeFloor does not do class path scanning.  While this is convenient, any decent sized application will be slow to start.  This makes class path scanning not appropriate for scale to zero applications due to slow start up times.  Hence, OfficeFloor avoids class path scanning.
-      
-  The configuration of dependency injecting the POJO is as follows.
 
-%{snippet|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
+  The configuration of dependency injecting the POJOs is as follows.
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/objects/Pojo.yml|ignoreDownloadError=false}
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/objects/FieldInjectedPojo.yml|ignoreDownloadError=false}
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/objects/SetterInjectedPojo.yml|ignoreDownloadError=false}
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/objects/ConstructorInjectedPojo.yml|ignoreDownloadError=false}
   
   The configuration above instantiates the POJOs.  Should more complex logic be required, please see the tutorial on {{{../DatabaseHttpServer/index.html}managed object source}}.
 

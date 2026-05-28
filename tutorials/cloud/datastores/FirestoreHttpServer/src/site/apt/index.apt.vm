@@ -66,9 +66,9 @@ Firestore Tutorial
   
 %{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
 
-  Firetore is configured in <<<application.objects>>> as follows:
-  
-%{snippet|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
+  Firestore is configured in <<<officefloor/suppliers/Firestore.yml>>> as follows:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/suppliers/Firestore.yml|ignoreDownloadError=false}
     
 
 
