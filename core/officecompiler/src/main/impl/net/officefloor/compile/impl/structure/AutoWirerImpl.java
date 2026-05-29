@@ -159,13 +159,13 @@ public class AutoWirerImpl<N extends Node> implements AutoWirer<N> {
 						String sourceQualifier = sourceAutoWire.getQualifier();
 
 						// Determine if match target auto-wire
-						for (AutoWire targetAutoWire : target.autoWires) {
+						NEXT_TARGET: for (AutoWire targetAutoWire : target.autoWires) {
 
 							// Must always match on type
 							if ((index % 2) == 0) {
 								// Match on exact type
 								if (!(sourceType.equals(targetAutoWire.getType()))) {
-									continue NEXT_AUTO_WIRE;
+									continue NEXT_TARGET;
 								}
 
 							} else {
@@ -191,20 +191,20 @@ public class AutoWirerImpl<N extends Node> implements AutoWirer<N> {
 										this.issues.addIssue(sourceNode,
 												"Unable to load target auto-wire type " + targetType);
 									}
-									continue NEXT_AUTO_WIRE;
+									continue NEXT_TARGET;
 								}
 
 								// Match on child type (respecting direction)
 								switch (this.direction) {
 								case SOURCE_REQUIRES_TARGET:
 									if (!sourceClass.isAssignableFrom(targetClass)) {
-										continue NEXT_AUTO_WIRE;
+										continue NEXT_TARGET;
 									}
 									break;
 
 								case TARGET_CATEGORISES_SOURCE:
 									if (!targetClass.isAssignableFrom(sourceClass)) {
-										continue NEXT_AUTO_WIRE;
+										continue NEXT_TARGET;
 									}
 									break;
 

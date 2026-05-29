@@ -52,11 +52,12 @@ public class TeamTest {
 
     @Test
     public void qualified() throws Throwable {
+        QualifiedSection.invokedThread = null;
         this.doTest(QualifiedSection.class,
                 (office) -> office.addManagedObject("qualified", QualifiedObject.class, ManagedObjectScope.THREAD).addTypeQualification("qualified", QualifiedObject.class.getName()),
-                (deployer, properties) -> deployer.addTeam("MultiQualified", "officefloor/teams/qualified.yml", properties));
-        assertNotSame(Thread.currentThread(), SimpleSection.invokedThread, "Should be different thread");
-        assertEquals("thread_qualified", SimpleSection.invokedThread.getName(), "Incorrect thread invoked");
+                (deployer, properties) -> deployer.addTeam("qualified", "officefloor/teams/qualified.yml", properties));
+        assertNotSame(Thread.currentThread(), QualifiedSection.invokedThread, "Should be different thread");
+        assertEquals("thread_qualified", QualifiedSection.invokedThread.getName(), "Incorrect thread invoked");
     }
 
     public static class QualifiedSection {
@@ -89,6 +90,8 @@ public class TeamTest {
         CompileOfficeFloor compile = new CompileOfficeFloor();
         compile.office((office) -> {
             office.addSection("SECTION", sectionClass);
+
+            office.getOfficeArchitect().enableAutoWireTeams();
         });
         compile.office(setupObjects);
         compile.officeFloor((officeFloor) -> {
@@ -107,7 +110,7 @@ public class TeamTest {
         try (OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor()) {
 
             // Invoke the function for testing
-            CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.function", null);
+            CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.service", null);
         }
     }
 

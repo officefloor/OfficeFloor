@@ -1,4 +1,4 @@
 source: ${TestClass}$MockTeamSource
 type: ${TestClass}$SimpleObject
 properties:
-  thread.naem: thread_simple
+  thread.name: thread_simple

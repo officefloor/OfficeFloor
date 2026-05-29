@@ -363,6 +363,9 @@ public class WoofLoaderOfficeExtensionService implements OfficeExtensionService,
 					}
 				});
 			}
+
+			// Enable auto-wiring of teams
+			officeArchitect.enableAutoWireTeams();
 		}
 
 		// Load the woof extensions (use pre-loaded services to avoid double-loading)
