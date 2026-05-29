@@ -36,7 +36,7 @@ public class TeamTest {
 
     private void assertSimple() {
         assertNotSame(Thread.currentThread(), SimpleSection.invokedThread, "Should be different thread");
-        assertEquals("simple", SimpleSection.invokedThread.getName(), "Incorrect thread invoked");
+        assertEquals("thread_simple", SimpleSection.invokedThread.getName(), "Incorrect thread invoked");
     }
 
     public static class SimpleSection {
@@ -56,7 +56,7 @@ public class TeamTest {
                 (office) -> office.addManagedObject("qualified", QualifiedObject.class, ManagedObjectScope.THREAD).addTypeQualification("qualified", QualifiedObject.class.getName()),
                 (deployer, properties) -> deployer.addTeam("MultiQualified", "officefloor/teams/qualified.yml", properties));
         assertNotSame(Thread.currentThread(), SimpleSection.invokedThread, "Should be different thread");
-        assertEquals("qualifier", SimpleSection.invokedThread.getName(), "Incorrect thread invoked");
+        assertEquals("thread_qualified", SimpleSection.invokedThread.getName(), "Incorrect thread invoked");
     }
 
     public static class QualifiedSection {

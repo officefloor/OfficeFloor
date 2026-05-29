@@ -4,4 +4,4 @@ type-qualifications:
   - qualifier: qualified
     type: ${TestClass}$QualifiedObject
 properties:
-  test.property: qualifier
+  thread.name: thread_qualified
