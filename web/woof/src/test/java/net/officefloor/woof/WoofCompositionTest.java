@@ -31,6 +31,10 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.TestSource;
+import net.officefloor.frame.api.team.Job;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.source.TeamSourceContext;
+import net.officefloor.frame.api.team.source.impl.AbstractTeamSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.plugin.governance.clazz.Enforce;
 import net.officefloor.plugin.governance.clazz.Govern;
@@ -235,6 +239,50 @@ public class WoofCompositionTest {
     public static class SuppliersService {
         public void service(MockSupplied supplied, ObjectResponse<String> response) {
             response.send(supplied.getValue());
+        }
+    }
+
+    /**
+     * Verifies that composition team files are loaded and auto-wired to services.
+     */
+    @Test
+    public void teamsLoaded() throws Exception {
+        this.doTest("/team", "\"team_thread\"", null);
+    }
+
+    public static class MockTeamObject {
+    }
+
+    public static class TeamsService {
+        public void service(MockTeamObject mo, ObjectResponse<String> response) {
+            response.send(Thread.currentThread().getName());
+        }
+    }
+
+    @TestSource
+    public static class MockTeamSource extends AbstractTeamSource {
+
+        @Override
+        protected void loadSpecification(SpecificationContext context) {
+        }
+
+        @Override
+        public Team createTeam(TeamSourceContext context) throws Exception {
+            String threadName = context.getProperty("thread.name");
+            return new Team() {
+                @Override
+                public void startWorking() {
+                }
+
+                @Override
+                public void assignJob(Job job) throws Exception {
+                    new Thread(job::run, threadName).start();
+                }
+
+                @Override
+                public void stopWorking() {
+                }
+            };
         }
     }
 

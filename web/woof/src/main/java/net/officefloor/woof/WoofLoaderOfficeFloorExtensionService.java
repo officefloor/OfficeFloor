@@ -144,10 +144,17 @@ public class WoofLoaderOfficeFloorExtensionService
 				context.getLogger().info("Extending Office " + officeName + " with WoOF");
 			}
 
-			// Build property list for interpolation
+			// Build property list for interpolation (OfficeFloor-level properties first,
+			// then override properties so they take precedence and are available for
+			// property substitution in YAML team files)
 			PropertyList officeFloorProperties = context.createPropertyList();
 			for (String propName : context.getPropertyNames()) {
 				officeFloorProperties.addProperty(propName).setValue(context.getProperty(propName));
+			}
+			if (finalOverrideProperties != null) {
+				for (String propName : finalOverrideProperties.stringPropertyNames()) {
+					officeFloorProperties.addProperty(propName).setValue(finalOverrideProperties.getProperty(propName));
+				}
 			}
 
 			// Load the optional teams configuration for the application

@@ -1,0 +1,4 @@
+source: ${TestClass}$MockTeamSource
+type: ${TestClass}$MockTeamObject
+properties:
+  thread.name: team_thread
