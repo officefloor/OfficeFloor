@@ -35,6 +35,7 @@ import net.officefloor.activity.managedobject.build.ManagedObjectArchitect;
 import net.officefloor.activity.managedobject.build.ManagedObjectEmployer;
 import net.officefloor.activity.supplier.build.SupplierArchitect;
 import net.officefloor.activity.supplier.build.SupplierEmployer;
+import net.officefloor.activity.team.build.TeamEmployer;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.activity.procedure.build.ProcedureArchitect;
@@ -89,6 +90,7 @@ public class WoofLoaderOfficeExtensionService implements OfficeExtensionService,
 	public static final String SUPPLIERS_DIRECTORY_PROPERTY = "officefloor.suppliers.directory";
 	public static final String GOVERN_DIRECTORY_PROPERTY = "officefloor.govern.directory";
 	public static final String SECURITY_DIRECTORY_PROPERTY = "officefloor.security.directory";
+	public static final String TEAMS_DIRECTORY_PROPERTY = "officefloor.teams.directory";
 
 	public static final String OFFICE_FLOOR_DIRECTORY_TAG = "${officefloor}";
 
@@ -98,6 +100,7 @@ public class WoofLoaderOfficeExtensionService implements OfficeExtensionService,
 	public static final String SUPPLIERS_DEFAULT_DIRECTORY = OFFICE_FLOOR_DIRECTORY_TAG + "/suppliers";
 	public static final String GOVERN_DEFAULT_DIRECTORY = OFFICE_FLOOR_DIRECTORY_TAG + "/govern";
 	public static final String SECURITY_DEFAULT_DIRECTORY = OFFICE_FLOOR_DIRECTORY_TAG + "/security";
+	public static final String TEAMS_DEFAULT_DIRECTORY = OFFICE_FLOOR_DIRECTORY_TAG + "/teams";
 
 	public static String interpolateRestDirectory(String officeFloorDirectory, String interpolateDirectory) {
 		return interpolateDirectory.replace(OFFICE_FLOOR_DIRECTORY_TAG, officeFloorDirectory);
@@ -152,6 +155,7 @@ public class WoofLoaderOfficeExtensionService implements OfficeExtensionService,
 		String suppliersDirectory = interpolateRestDirectory(officeFloorDirectory, context.getProperty(SUPPLIERS_DIRECTORY_PROPERTY, SUPPLIERS_DEFAULT_DIRECTORY));
 		String governDirectory = interpolateRestDirectory(officeFloorDirectory, context.getProperty(GOVERN_DIRECTORY_PROPERTY, GOVERN_DEFAULT_DIRECTORY));
 		String securityDirectory = interpolateRestDirectory(officeFloorDirectory, context.getProperty(SECURITY_DIRECTORY_PROPERTY, SECURITY_DEFAULT_DIRECTORY));
+		String teamsDirectory = interpolateRestDirectory(officeFloorDirectory, context.getProperty(TEAMS_DIRECTORY_PROPERTY, TEAMS_DEFAULT_DIRECTORY));
 
 		// Pre-load external WoOF extension services (also used for WoOF application detection)
 		List<WoofExtensionService> externalWoofExtensions = null;
@@ -334,7 +338,7 @@ public class WoofLoaderOfficeExtensionService implements OfficeExtensionService,
 		// Load the optional teams configuration for the application
 		if (configuration.isLoadTeams()) {
 
-			// Load via model (if available)
+			// Load via model (application.teams XML) if available
 			ConfigurationItem teamsConfiguration = configuration.getTeamsConfiguration(context);
 			if (teamsConfiguration != null) {
 

@@ -33,6 +33,10 @@
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.activity</groupId>
+			<artifactId>officeteam</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.activity</groupId>
 			<artifactId>officegovern</artifactId>
 		</dependency>
 		<dependency>
