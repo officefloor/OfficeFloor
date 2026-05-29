@@ -1,4 +1,4 @@
-source: ${TestClass}$MockTeamSource
-type: ${TestClass}$MockTeamObject
+source: net.officefloor.woof.WoofCompositionTest$MockTeamSource
+type: net.officefloor.woof.WoofCompositionTest$MockTeamObject
 properties:
   thread.name: team_thread

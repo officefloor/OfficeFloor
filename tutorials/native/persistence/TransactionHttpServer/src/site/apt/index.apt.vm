@@ -85,7 +85,7 @@ Transaction HTTP Server Tutorial
 
   The application also has the following {{{/apidocs/net/officefloor/frame/api/team/Team.html}Team}} configuration to demonstrate Spring Data transaction working across threads.
   
-%{snippet|file=${basedir}/src/main/resources/application.teams}
+%{snippet|file=${basedir}/src/main/resources/officefloor/teams/TeamMarkerBean.yml}
 
   To enable use of Spring data in OfficeFloor's multi-threaded {{{/apidocs/net/officefloor/frame/api/team/Team.html}Team}} environment, add the following dependency:
   
