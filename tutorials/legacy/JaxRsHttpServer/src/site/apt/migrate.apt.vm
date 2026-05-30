@@ -68,4 +68,4 @@ Migrate JAX-RS Tutorial
 
 Next
 
-  The {{{../PrototypeHttpServer/index.html}next tutorial}} covers creating quick prototype applications.
+  The {{{../HttpServletHttpServer/index.html}next tutorial}} covers embedding WoOF inside an existing HttpServlet container.

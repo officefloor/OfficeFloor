@@ -21,5 +21,6 @@
 		<module>SwaggerHttpServer</module>
 		<module>CorsHttpServer</module>
 		<module>ExceptionHttpServer</module>
+		<module>StaticContentHttpServer</module>
 	</modules>
 </project>

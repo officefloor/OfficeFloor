@@ -269,35 +269,15 @@ OfficeFloor Tutorials
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 
 
-** UI and Templates
+** Static Content
 
-  These tutorials demonstrate OfficeFloor's server-side template rendering capabilities.  Note: for
-  modern single-page applications the REST YAML approach from Phase 1 is the recommended pattern;
-  the tutorials below use the WoOF template system for server-side rendering use cases.
+  For modern single-page applications, the REST YAML endpoints provide the API and static assets
+  are served directly from the classpath.
 
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 || Tutorial                                                    || Description                                               || Covered
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./native/ui/StaticContentHttpServer/index.html}Static Content}} | Serve single page application files and other static assets. | /PUBLIC
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./native/ui/PrototypeHttpServer/index.html}Wireframe Prototyping}} | Build working wireframe prototypes and extend them into full applications. | #\{link\}
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./native/ui/DynamicHttpServer/index.html}Dynamic Web Page}} | Render dynamic content into WoOF templates. | $\{bean ... $\} , $\{property\}
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./native/ui/InteractiveHttpServer/index.html}Interactive Web Page}} | Handle form submissions and link clicks in interactive pages. | #\{link\} , @HttpParameters
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./native/ui/RawHttpServer/index.html}Generating HTML}}    | Render raw generated HTML into a WoOF template. | @UnescapedHtml
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./native/ui/JavaScriptApp/index.html}AJAX}}               | Service AJAX requests from JavaScript within a WoOF template page. | @HttpObject , ObjectResponse\
-|                                                              |                                                            | @NotRenderTemplateAfter
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./native/ui/SectionHttpServer/index.html}Sectioning Content}} | Render sections of a WoOF template independently. | \<!-- \{section\} --\>
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./native/ui/InheritHttpServer/index.html}Template Inheritance}} | Inherit and override sections across WoOF templates. | \<!-- \{:override\} --\>\
-|                                                              |                                                            | \<!-- \{!\} --\>
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./native/ui/NavigateHttpServer/index.html}Continuation Injection}} | Control execution flow across procedures without tight coupling. | @Next , @FlowInterface\
-|                                                              |                                                            | Continuation Injection
+| {{{./native/core/StaticContentHttpServer/index.html}Static Content}} | Serve SPA assets (HTML, CSS, JavaScript) from the <<<PUBLIC/>>> classpath directory alongside REST endpoints. | /PUBLIC
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 
 

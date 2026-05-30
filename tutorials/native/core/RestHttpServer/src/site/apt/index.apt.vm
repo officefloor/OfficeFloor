@@ -54,7 +54,7 @@ REST Tutorial
 
 *Object parsing / responding
 
-  Similar to {{{../JavaScriptApp/index.html}AJAX with templates tutorial}} object parsing and responding is via the {{{/apidocs/net/officefloor/web/HttpObject.html}@HttpObject}} and {{{/apidocs/net/officefloor/web/ObjectResponse.html}ObjectResponse}}.  The below is the object used in this tutorial:
+  Object parsing and responding is via the {{{/apidocs/net/officefloor/web/HttpObject.html}@HttpObject}} and {{{/apidocs/net/officefloor/web/ObjectResponse.html}ObjectResponse}}.  The below is the object used in this tutorial:
   
 %{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/resthttpserver/Vehicle.java|ignoreDownloadError=false}
 
