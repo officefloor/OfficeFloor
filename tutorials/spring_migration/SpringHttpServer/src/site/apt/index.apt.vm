@@ -26,7 +26,22 @@
 
 Spring HTTP Server Tutorial
 
-  This tutorial demonstrates wiring Spring beans into an OfficeFloor application.
+  This tutorial demonstrates the next stage of the OfficeFloor migration path: replacing Spring Boot
+  as the application container with OfficeFloor itself while keeping all existing Spring beans.
+
+  If you have been following the {{{../../springboot/SpringRestHttpServer/index.html}Spring Boot starter tutorials}},
+  your application currently looks like this:
+
+   * <<<@SpringBootApplication>>> launches Spring Boot, which hosts OfficeFloor as a handler interceptor
+
+   * YAML files in <<<officefloor/rest/>>> declare your REST endpoints
+
+   * Spring beans are injected into your service methods as plain parameters
+
+  This tutorial shows how to <<flip the container>>: OfficeFloor becomes the host and Spring becomes
+  a {{{/apidocs/net/officefloor/compile/spi/supplier/source/SupplierSource.html}SupplierSource}} —
+  a provider of dependency-injected objects.  Your YAML REST files, your service classes, and your
+  Spring beans all carry over unchanged.  Only the startup wiring changes.
 
   The following simple output is provided via a Spring bean injected into a service function,
   with the result rendered by Thymeleaf:
@@ -138,4 +153,6 @@ Spring HTTP Server Tutorial
 
 Next
 
-  The {{{../FlywayHttpServer/index.html}next tutorial}} covers migrating databases on start up via {{{https://flywaydb.org/}Flyway}}.
+  The {{{../../native/core/RestHttpServer/index.html}REST Tutorial}} shows the final stage of the
+  migration path: pure OfficeFloor with no Spring dependency at all.  Service classes become plain
+  POJOs and all dependency injection is handled natively by OfficeFloor.

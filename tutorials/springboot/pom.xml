@@ -24,5 +24,6 @@
 		<module>SpringRestServletHttpServer</module>
 		<module>SpringRestQualifierHttpServer</module>
 		<module>SpringRestDataJpaHttpServer</module>
+		<module>SpringRestTeamHttpServer</module>
 	</modules>
 </project>

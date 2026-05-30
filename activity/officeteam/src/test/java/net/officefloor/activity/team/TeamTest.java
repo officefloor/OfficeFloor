@@ -3,6 +3,7 @@ package net.officefloor.activity.team;
 import net.officefloor.activity.team.build.TeamDeployer;
 import net.officefloor.activity.team.build.TeamEmployer;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
@@ -15,15 +16,43 @@ import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSourceContext;
 import net.officefloor.frame.api.team.source.impl.AbstractTeamSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.test.MockTestSupport;
+import net.officefloor.frame.test.TestSupportExtension;
 import net.officefloor.plugin.clazz.Qualified;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@ExtendWith(TestSupportExtension.class)
 public class TeamTest {
+
+    private final MockTestSupport mocks = new MockTestSupport();
+
+    @Test
+    public void enableOfficeAutoWireTeamsWhenTeamsConfigured() throws Exception {
+        OfficeArchitect architect = this.mocks.createMock(OfficeArchitect.class);
+        architect.enableAutoWireTeams();
+        this.mocks.replayMockObjects();
+
+        TeamEmployer.enableOfficeAutoWireTeams("officefloor/teams", architect);
+
+        this.mocks.verifyMockObjects();
+    }
+
+    @Test
+    public void enableOfficeAutoWireTeamsWhenNoTeamsConfigured() throws Exception {
+        OfficeArchitect architect = this.mocks.createMock(OfficeArchitect.class);
+        // no expectations — enableAutoWireTeams must not be called
+        this.mocks.replayMockObjects();
+
+        TeamEmployer.enableOfficeAutoWireTeams("officefloor/no-teams", architect);
+
+        this.mocks.verifyMockObjects();
+    }
 
     @Test
     public void simple() throws Throwable {

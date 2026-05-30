@@ -1,0 +1,9 @@
+service:
+  class: ${officefloor.package}.TeamService
+  method: socketThread
+  outputs:
+    team: team
+
+team:
+  class: ${officefloor.package}.TeamService
+  method: teamThread

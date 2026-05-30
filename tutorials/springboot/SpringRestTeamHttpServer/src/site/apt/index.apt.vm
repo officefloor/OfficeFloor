@@ -1,0 +1,161 @@
+~~~
+~~ Spring REST Team HTTP Server Tutorial
+~~~
+
+                                               -----------------------
+                                     Spring REST Team Tutorial
+                                               -----------------------
+                                                Daniel Sagenschneider
+                                               -----------------------
+
+Thread Injection in OfficeFloor
+
+  This tutorial demonstrates Thread Injection: the ability for OfficeFloor to automatically assign
+  specific thread pools to steps based on the dependencies those steps require.
+
+  All the tutorials so far have focused on <<what>> executes — composing service methods, injecting
+  Spring beans, governing transactions.  This tutorial introduces <<who>> executes each step: the
+  thread pool, or in OfficeFloor's terminology, the <<Team>>.
+
+  The central idea is simple: a step that depends on a <<<JdbcTemplate>>> is almost certainly going
+  to perform blocking database I/O.  OfficeFloor detects this at start-up and routes that step to a
+  dedicated database thread pool automatically.  The socket (request) thread is freed immediately and
+  never blocks.
+
+  The tutorial exposes a single <<<GET /thread>>> endpoint with two composed steps.  The response
+  records which thread executed each step so you can see them differ.
+
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestTeamHttpServer}Tutorial Source}}
+
+
+
+*Maven dependency
+
+%{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+
+
+*Application class
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestteam/SpringRestTeamApplication.java|ignoreDownloadError=false}
+
+
+
+*Why thread injection?
+
+  Consider a typical REST endpoint that calls a database.  With a traditional thread-per-request
+  model the request thread blocks for the entire duration of the database call.  Under load, all
+  threads block and the server stalls — even requests that need no database access.
+
+  OfficeFloor's Thread Injection solves this by assigning a dedicated thread pool (a <<<Team>>>) to
+  every step that performs blocking I/O.  The socket threads that receive HTTP requests hand off to
+  the database team the moment a blocking step is reached, then pick up new requests.  When the
+  database call completes the continuation runs on whichever thread is next available.
+
+  The benefit compounds: cached reads and lightweight steps never wait behind database calls, and the
+  number of socket threads needed is much smaller because they are almost never blocked.
+
+
+
+*Configuring a Team — <<<officefloor/teams/>>>
+
+  Teams are configured as YAML files in <<<src/main/resources/officefloor/teams/>>>.  The file name
+  is the team label.  The <<<type>>> field names the fully-qualified class whose presence as a
+  method parameter triggers assignment to this team.
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/teams/JdbcTemplate.yml|ignoreDownloadError=false}
+
+  <<<ExecutorCachedTeamSource>>> provides an <<<Executor>>>-backed cached thread pool.  Any number of
+  team files may be placed in <<<officefloor/teams/>>>; each one defines an independent pool.
+
+  Including the directory is optional.  When no team files are present all steps execute on the
+  default team (the socket thread), which is the correct behaviour for CPU-bound or non-blocking work.
+
+
+
+*The endpoint — two steps, two threads
+
+  The REST YAML composes two steps:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/thread.GET.yml|ignoreDownloadError=false}
+
+  The first step (<<<request>>>) runs on the socket thread.  Its return value — the socket thread
+  name — is passed as a <<<@Parameter>>> to the second step (<<<query>>>).
+
+  The second step (<<<query>>>) has a <<<JdbcTemplate>>> dependency and is therefore automatically
+  routed to the <<<JdbcTemplate>>> team.  It records the database thread name, performs a query, and
+  writes the response.
+
+
+
+*Step 1 — socket thread, no blocking dependencies
+
+  <<<RequestThreadService>>> is a plain Java class.  It captures the current thread name and returns
+  it.  Because it has no blocking dependencies it always runs on the socket thread:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestteam/RequestThreadService.java|ignoreDownloadError=false}
+
+
+
+*Step 2 — database team, JdbcTemplate dependency
+
+  <<<DatabaseQueryService>>> is a Spring <<<@Service>>> with an auto-wired <<<JdbcTemplate>>>.
+  Because <<<JdbcTemplate>>> is named in the team file, OfficeFloor assigns this step to the database
+  thread pool automatically — no annotation or explicit wiring is needed beyond the dependency itself:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestteam/DatabaseQueryService.java|ignoreDownloadError=false}
+
+  The <<<@Parameter>>> annotation receives the socket thread name passed from step 1.
+
+
+
+*Response
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestteam/ThreadDemoResponse.java|ignoreDownloadError=false}
+
+  A typical response when both teams are active:
+
++--
+{
+  "socketThread"   : "ofhttp-3",
+  "databaseThread" : "JdbcTemplate-0",
+  "tableCount"     : 12
+}
++--
+
+  The thread names are different, proving that the blocking database call never ran on the socket thread.
+
+
+
+*Testing
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springrestteam/SpringRestTeamHttpServerTest.java|ignoreDownloadError=false}
+
+  <<<threadDemoReturnsThreadNames>>> verifies the endpoint returns a valid response.
+  <<<differentThreadsServiceEachStep>>> asserts that <<<socketThread>>> and <<<databaseThread>>> are
+  different thread names — demonstrating that the blocking step was routed away from the socket
+  thread.
+
+
+
+*What you have now
+
+  After completing this tutorial you can:
+
+   * Declare one YAML file per blocking-dependency type to create a dedicated thread pool
+
+   * Rely on OfficeFloor to route steps to the correct pool based solely on their dependencies
+
+   * Keep socket threads free of blocking I/O without changing a line of business logic
+
+  The Spring Boot application is still the container.  All Spring features remain available.  The
+  only additions are the YAML files in <<<officefloor/teams/>>>.
+
+
+
+Next
+
+  The {{{../../spring_migration/SpringHttpServer/index.html}Spring HTTP Server tutorial}} shows the
+  next stage of the migration: replacing Spring Boot as the container with OfficeFloor itself while
+  keeping your existing Spring beans as a supplier.  Your YAML REST files, your service classes, and
+  your Spring beans all carry over unchanged.

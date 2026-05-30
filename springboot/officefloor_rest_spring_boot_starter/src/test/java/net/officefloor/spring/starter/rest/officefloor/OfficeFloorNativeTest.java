@@ -1,12 +1,16 @@
 package net.officefloor.spring.starter.rest.officefloor;
 
 import net.officefloor.spring.starter.rest.AbstractMockMvcVerification;
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -69,6 +73,26 @@ public class OfficeFloorNativeTest extends AbstractMockMvcVerification {
         this.mvc.perform(get(this.getPath("/httpServletResponse")))
                 .andExpect(status().isOk())
                 .andExpect(content().string(equalTo("Servlet")));
+    }
+
+    @Test
+    public void team() throws Exception {
+        this.mvc.perform(get(this.getPath("/team")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(new BaseMatcher<String>() {
+                    @Override
+                    public boolean matches(Object actual) {
+                        String[] threadNames = ((String) actual).split("---");
+                        assertEquals(2, threadNames.length, "Should be only two thread names");
+                        assertNotEquals(threadNames[0], threadNames[1], "Should be different threads");
+                        return true;
+                    }
+
+                    @Override
+                    public void describeTo(Description description) {
+                        description.appendText("Should be different threads");
+                    }
+                }));
     }
 
 }

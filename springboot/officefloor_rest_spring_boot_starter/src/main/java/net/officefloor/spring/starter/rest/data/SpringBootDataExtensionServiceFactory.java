@@ -6,7 +6,7 @@ public class SpringBootDataExtensionServiceFactory extends AbstractExtraSpringBo
 
     @Override
     public String getExtraKeyClassName() {
-        return "org.springframework.transaction.PlatformTransactionManager";
+        return "org.springframework.data.repository.Repository";
     }
 
     @Override

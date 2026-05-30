@@ -81,6 +81,34 @@ public class TeamEmployer {
         };
     }
 
+    /**
+     * Enables auto-wiring of {@link OfficeFloorTeam} instances to managed functions at the
+     * {@link OfficeArchitect} level, but only when at least one team YAML file is present
+     * in the given classpath directory.  Callers must separately load the teams at the
+     * {@link OfficeFloorDeployer} level via {@link #employTeamDeployer}.
+     *
+     * @param teamsDirectory Classpath directory to scan for team YAML files.
+     * @param officeArchitect {@link OfficeArchitect} to enable auto-wire on when teams exist.
+     * @throws Exception If the classpath scan fails.
+     */
+    public static void enableOfficeAutoWireTeams(String teamsDirectory,
+                                                 OfficeArchitect officeArchitect) throws Exception {
+        String dir = teamsDirectory;
+        while (dir.endsWith("/")) {
+            dir = dir.substring(0, dir.length() - 1);
+        }
+        dir = dir + "/";
+
+        try (ScanResult result = new ClassGraph().acceptPaths(dir).scan()) {
+            for (String ext : new String[]{"yml", "yaml"}) {
+                if (!result.getResourcesWithExtension(ext).isEmpty()) {
+                    officeArchitect.enableAutoWireTeams();
+                    return;
+                }
+            }
+        }
+    }
+
     private static OfficeFloorTeam createTeam(String teamName, TeamConfiguration config,
                                               OfficeFloorDeployer deployer) {
         OfficeFloorTeam team = deployer.addTeam(teamName, config.getSource());
