@@ -9,14 +9,12 @@
 		<version>${revision}</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
-	<artifactId>spring-migration</artifactId>
+	<artifactId>spring-officefloor</artifactId>
 	<packaging>pom</packaging>
-	<name>OfficeFloor Spring Migration Tutorials</name>
+	<name>OfficeFloor with Spring Tutorials</name>
 	<modules>
 		<module>SpringHttpServer</module>
 		<module>SpringWebMvcHttpServer</module>
 		<module>SpringWebFluxHttpServer</module>
-		<module>JaxRsHttpServer</module>
-		<module>JaxRsWarHttpServer</module>
 	</modules>
 </project>

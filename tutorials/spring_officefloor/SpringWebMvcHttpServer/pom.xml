@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>net.officefloor.tutorial</groupId>
-		<artifactId>spring-migration</artifactId>
+		<artifactId>spring-officefloor</artifactId>
 		<version>${revision}</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>

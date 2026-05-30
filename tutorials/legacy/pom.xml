@@ -17,5 +17,7 @@
 		<module>HttpServletHttpServer</module>
 		<module>WarHttpServer</module>
 		<module>WarApp</module>
+		<module>JaxRsHttpServer</module>
+		<module>JaxRsWarHttpServer</module>
 	</modules>
 </project>

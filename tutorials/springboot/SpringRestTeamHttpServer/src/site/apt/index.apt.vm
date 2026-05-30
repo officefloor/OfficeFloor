@@ -155,7 +155,6 @@ Thread Injection in OfficeFloor
 
 Next
 
-  The {{{../../spring_migration/SpringHttpServer/index.html}Spring HTTP Server tutorial}} shows the
-  next stage of the migration: replacing Spring Boot as the container with OfficeFloor itself while
-  keeping your existing Spring beans as a supplier.  Your YAML REST files, your service classes, and
-  your Spring beans all carry over unchanged.
+  The {{{../SpringRestActuatorHttpServer/index.html}Spring Actuator tutorial}} demonstrates that
+  Spring Boot Actuator health, info, and metrics endpoints continue to work unchanged alongside
+  OfficeFloor REST YAML endpoints.

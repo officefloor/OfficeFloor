@@ -5,50 +5,50 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>net.officefloor.tutorial</groupId>
-		<artifactId>spring-migration</artifactId>
+		<artifactId>springboot</artifactId>
 		<version>${revision}</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
-	<artifactId>SpringHttpServer</artifactId>
-	<name>Spring HTTP Server Tutorial</name>
-	<description>Tutorial of using OfficeFloor for a HTTP Server incorporating Spring beans</description>
+	<artifactId>SpringRestActuatorHttpServer</artifactId>
+	<name>Spring REST Actuator HTTP Server Tutorial</name>
+	<description>Tutorial demonstrating Spring Actuator endpoints coexisting with OfficeFloor REST YAML configuration</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<basedir>${basedir}</basedir>
-		<projectVersion>${project.version}</projectVersion>
 	</properties>
 	<dependencies>
+		<!-- START SNIPPET: tutorial -->
 		<dependency>
-			<groupId>net.officefloor.web</groupId>
-			<artifactId>woof</artifactId>
+			<groupId>net.officefloor.springboot</groupId>
+			<artifactId>officefloor-rest-spring-boot-starter</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>net.officefloor.spring</groupId>
-			<artifactId>officespring</artifactId>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>net.officefloor.web</groupId>
-			<artifactId>officeweb_thymeleaf</artifactId>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>net.officefloor.web</groupId>
-			<artifactId>woof_test</artifactId>
-			<scope>test</scope>
-		</dependency>
+		<!-- END SNIPPET: tutorial -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
-			<!-- START SNIPPET: spring -->
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
-					<mainClass>net.officefloor.OfficeFloorMain</mainClass>
+					<mainClass>net.officefloor.tutorial.springrestactuator.SpringRestActuatorApplication</mainClass>
 					<classifier>exec</classifier>
 				</configuration>
 				<executions>
@@ -59,7 +59,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!-- END SNIPPET: spring -->
 		</plugins>
 	</build>
 </project>
