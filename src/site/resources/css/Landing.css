@@ -75,7 +75,7 @@ header a.link-button {
 }
 
 .banner .ioc a {
-	font-size: x-large;
+	font-weight: bold;
 }
 
 
@@ -119,8 +119,27 @@ header a.link-button {
 	padding: 2em 8em 2em 2em;
 }
 
-.performance-image {
-	width: 100%;
+/*
+ * ----------- Code blocks ----------------
+ */
+.code-block {
+	background-color: #1e1e1e;
+	color: #d4d4d4;
+	border-radius: 6px;
+	padding: 1.2em 1.5em;
+	font-size: 0.82em;
+	line-height: 1.7;
+	overflow-x: auto;
+	margin: 0;
+}
+
+.code-comment {
+	color: #6a9955;
+}
+
+.section-subtitle {
+	color: #606060;
+	margin-bottom: 1.5em;
 }
 
 /*

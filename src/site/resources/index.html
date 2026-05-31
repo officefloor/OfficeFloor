@@ -7,9 +7,9 @@
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
-  
+
        http://www.apache.org/licenses/LICENSE-2.0
-  
+
   Unless required by applicable law or agreed to in writing, software
   distributed under the License is distributed on an "AS IS" BASIS,
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,7 +21,7 @@
 <!doctype html>
 <html>
 <head>
-<title>OfficeFloor - Inversion of Coupling Control</title>
+<title>OfficeFloor - Function Orchestration for Spring Boot</title>
 <meta name="author" content="Daniel Sagenschneider" />
 <meta http-equiv="Content-Language" content="en" />
 <link rel="shortcut icon" href="./favicon.ico" />
@@ -39,14 +39,14 @@
 
 <!-- Social Media sharing -->
 <meta name="description"
-	content="OfficeFloor is inversion of coupling control" />
+	content="OfficeFloor adds explicit function injection and orchestration to Spring Boot via YAML endpoint files. Progressive adoption — Spring beans, security, and persistence work unchanged." />
 
 <!-- Twitter Card data -->
 <meta name="twitter:card" content="summary">
 <meta name="twitter:site" content="@sagenschneider">
 <meta name="twitter:title" content="OfficeFloor">
 <meta name="twitter:description"
-	content="OfficeFloor is inversion of coupling control">
+	content="Explicit function orchestration for Spring Boot. Declare REST endpoints as YAML files — Spring beans, security, and persistence work unchanged.">
 <meta name="twitter:creator" content="@sagenschneider">
 <meta name="twitter:image"
 	content="http://officefloor.net/images/OfficeFloorBannerImage.png">
@@ -58,7 +58,7 @@
 <meta property="og:image"
 	content="http://officefloor.net/images/OfficeFloorBannerImage.png" />
 <meta property="og:description"
-	content="OfficeFloor is inversion of coupling control" />
+	content="Explicit function orchestration for Spring Boot. Declare REST endpoints as YAML files — Spring beans, security, and persistence work unchanged." />
 <meta property="og:site_name" content="OfficeFloor" />
 
 </head>
@@ -78,9 +78,7 @@
 				<span id="version">v@VERSION</span> &nbsp; <a class="link-button"
 					href="./about.html">About</a>&nbsp;&nbsp;&nbsp;<a
 					class="link-button" href="./tutorials/index.html">Tutorials</a>&nbsp;&nbsp;&nbsp;<a
-					class="link-button" href="http://sagenschneider.blogspot.com">Blog</a>&nbsp;&nbsp;&nbsp;<a
-					class="link-button" href="./install.html" target="_blank">Install&nbsp;Now</a>
-			</div>
+					class="link-button" href="http://sagenschneider.blogspot.com">Blog</a>			</div>
 			<div class="col-hidden col-sm-1"></div>
 		</div>
 	</header>
@@ -91,17 +89,13 @@
 				<h1>OfficeFloor</h1>
 				<div class="ioc">
 					<p>
-						OfficeFloor is <a
-							href="https://sagenschneider.blogspot.com/2019/02/inversion-of-coupling-control.html"
-							target="_blank">inversion of coupling control</a> that enables
-						building applications via <a
-							href="https://sagenschneider.blogspot.com/2019/04/oo-functional-imperative-reactive.html"
-							target="_blank">First-Class Procedures</a>
+						Explicit <strong>function injection</strong> and orchestration for
+						<a href="https://spring.io/projects/spring-boot"
+							target="_blank">Spring Boot</a>
 					</p>
 					<p>
-						In other words, <a
-							href="https://sagenschneider.blogspot.com/2019/06/local-microservices-first-class.html"
-							target="_blank">local microservices</a>
+						Add OfficeFloor REST endpoints progressively to your existing Spring
+						application — Spring beans, security, and persistence work unchanged
 					</p>
 				</div>
 			</div>
@@ -109,60 +103,90 @@
 	</section>
 
 	<section class="container">
-		<div class="row">
-			<div class="col-12 videocenter">
-				<iframe width="937" height="527"
-					src="https://www.youtube.com/embed/2BMkRDrvK58" frameborder="0"
-					allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-					allowfullscreen></iframe>
+		<div class="row align-items-center">
+			<div class="col-12 col-md-6 info-text">
+				<h3>One starter, progressive adoption</h3>
+				<p>Add a single dependency to your existing Spring Boot
+					<code>pom.xml</code> and start declaring REST endpoints as YAML
+					files alongside your existing controllers.</p>
+				<p>Spring's dependency injection, security, persistence, and
+					actuator configuration remain completely intact at every stage.
+					OfficeFloor enriches Spring — it does not replace it.</p>
+				<p>
+					<a href="./tutorials/index.html">Get started with the tutorials &rarr;</a>
+				</p>
+			</div>
+			<div class="col-12 col-md-6">
+				<pre class="code-block"><span class="code-comment">&lt;!-- Add to existing pom.xml --&gt;</span>
+&lt;dependency&gt;
+  &lt;groupId&gt;net.officefloor.springboot&lt;/groupId&gt;
+  &lt;artifactId&gt;
+    officefloor-rest-spring-boot-starter
+  &lt;/artifactId&gt;
+  &lt;version&gt;@VERSION&lt;/version&gt;
+&lt;/dependency&gt;</pre>
 			</div>
 		</div>
 	</section>
 
 	<section class="container">
-		<div class="row">
-			<div class="col-12 col-md-6 text-right">
-				<img class="graphical-configuration-image"
-					src="./images/GraphicalConfiguration.png" />
+		<div class="row align-items-center">
+			<div class="col-12 col-md-6">
+				<pre class="code-block"><span class="code-comment"># File name = HTTP method + URL path</span>
+src/main/resources/officefloor/rest/
+  greeting.GET.yml       &rarr;  GET  /greeting
+  greeting.POST.yml      &rarr;  POST /greeting
+  greeting/{name}.GET.yml &rarr; GET  /greeting/{name}
+
+<span class="code-comment"># greeting.POST.yml — three composed functions</span>
+validate:
+  class: ValidateGreetingLogic
+  outputs:
+    valid: build
+
+build:
+  class: PostGreetingLogic
+  next: audit
+
+audit:
+  class: AuditGreetingLogic</pre>
 			</div>
 			<div class="col-12 col-md-6 info-text">
-				<p>Dependency Injection was an evolution in the way objects are
-					managed.</p>
-				<p>OfficeFloor is another evolution with:</p>
-				<ul>
-					<li>Continuation Injection managing the functions</li>
-					<li>Thread Injection managing the threads</li>
-				</ul>
-				<p>These new dimensions do not mean more complexity in your
-					code.</p>
-				<p>The more complete paradigm means less "work around" code you
-					need to manage. Plus new capabilities are introduced such as
-					complete graphical configuration of your applications.</p>
+				<h3>Orchestrate functions in YAML</h3>
+				<p>Each REST endpoint is a YAML file. The file name encodes the
+					HTTP method and URL path. The YAML entries name the plain Java
+					methods that handle the request — in sequence.</p>
+				<p>Each function declares only its own injected dependencies.
+					OfficeFloor wires the functions together exactly as the YAML
+					specifies. No function knows about the others.</p>
+				<p>Conditional branching, sequential composition, and error flows
+					are all declared in the same file — the complete endpoint logic is
+					readable without opening a single Java file.</p>
 				<p>
-					<a
-						href="https://sagenschneider.blogspot.com/2019/02/inversion-of-coupling-control.html"
-						target="_blank">Read more ...</a>
+					<a href="./tutorials/index.html">See the full tutorial series &rarr;</a>
 				</p>
 			</div>
 		</div>
 	</section>
 
 	<section class="container">
-		<div class="row">
+		<div class="row align-items-center">
 			<div class="col-12 col-md-6 info-text">
-				<p>OfficeFloor is a fundamental change to blend:</p>
-				<ul>
-					<li>functional and object-oriented techniques</li>
-					<li>blocking and non-blocking I/O patterns</li>
-					<li>a host of new more complete concepts</li>
-				</ul>
-				<p>into a unified First-Class Procedure model.</p>
-				<p>First-Class Procedures give you all the benefits of
-					microservices, without the heavy overheads!</p>
+				<h3>Built for AI-augmented development</h3>
+				<p>Spring's implicit dependency injection requires tracing
+					annotations across many files and understanding framework wiring
+					rules — this is opaque to AI coding tools.</p>
+				<p>OfficeFloor's YAML files are the specification. Every
+					endpoint's structure — its steps, their order, and their conditional
+					branches — is explicit in one file. An AI tool can read, generate,
+					and refactor endpoints from the YAML alone, without needing to
+					understand the full codebase.</p>
+				<p>Explicit orchestration gives AI a reliable, unambiguous surface
+					to work with instead of implicit framework conventions.</p>
 				<p>
 					<a
-						href="https://sagenschneider.blogspot.com/2019/04/oo-functional-imperative-reactive.html"
-						target="_blank">Read more ...</a>
+						href="https://sagenschneider.blogspot.com/2019/02/inversion-of-coupling-control.html"
+						target="_blank">Read more about the underlying approach &rarr;</a>
 				</p>
 			</div>
 			<div class="col-12 col-md-6 text-left">
@@ -174,21 +198,19 @@
 
 	<section class="container">
 		<div class="row">
-			<div class="col-12 col-md-6">
-				<img class="performance-image" src="./images/performance.png" />
+			<div class="col-12 text-center">
+				<h3>Inversion of Coupling Control</h3>
+				<p class="section-subtitle">The paradigm behind OfficeFloor —
+					separating dependency, continuation, and thread concerns from
+					application logic</p>
 			</div>
-			<div class="col-12 col-md-6">
-				<p>OfficeFloor measures performance in two key aspects</p>
-				<ul>
-					<li>rapid application development and ease of changes (<a
-						href="./tutorials/index.html">see tutorials</a>)
-					</li>
-					<li>runtime performance (<a
-						href="https://www.techempower.com/benchmarks"
-						target="_blank">see comparisons</a>)
-					</li>
-				</ul>
-				<p>OfficeFloor enables faster building of faster applications.</p>
+		</div>
+		<div class="row">
+			<div class="col-12 videocenter">
+				<iframe width="937" height="527"
+					src="https://www.youtube.com/embed/2BMkRDrvK58" frameborder="0"
+					allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+					allowfullscreen></iframe>
 			</div>
 		</div>
 	</section>
@@ -197,11 +219,6 @@
 		<div class="container">
 			<div class="row">
 				<div class="col-xs-hidden col-md-2"></div>
-				<div class="col-xs-12 col-md-2 footer-link-col">
-					<a href="./install.html">Install</a>
-					<p>Try out OfficeFloor</p>
-				</div>
-				<div class="col-xs-hidden col-md-1"></div>
 				<div class="col-xs-12 col-md-2 footer-link-col">
 					<a href="./tutorials/index.html">Tutorials</a>
 					<p>Check out the tutorials covering various features of
