@@ -30,7 +30,7 @@ jobs:
         gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
         gpg-passphrase: GPG_PASSPHRASE
 
-    - name: Deploy to Maven Central
+    - name: Release to Maven Central
       run: |
         mvn -V -B -e \
           -Dofficefloor-deploy=sonatype \

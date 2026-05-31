@@ -1,0 +1,38 @@
+name: Deploy Site to GitHub Pages
+
+on:
+  workflow_dispatch:
+
+env:
+  BUILD_MAVEN_VERSION: 3.9.2
+
+jobs:
+  deploy-site:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Set up Maven
+      uses: stCarolas/setup-maven@v4.5
+      with:
+        maven-version: ${{ env.BUILD_MAVEN_VERSION }}
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: 17
+
+    - name: Build
+      run: mvn -V -B -e -DskipTests clean install --file bom/pom.xml
+
+    - name: Deploy Site
+      run: |
+        mvn -V -B -e \
+          -Dofficefloor-deploy=site \
+          -Dgithub.oauth="${SITE_GITHUB_TOKEN}" \
+          site-deploy
+      env:
+        SITE_GITHUB_TOKEN: ${{ secrets.SITE_GITHUB_TOKEN }}
