@@ -55,10 +55,11 @@ public class ClassDependenciesManager implements ClassDependencies {
 	/**
 	 * Creates the {@link ClassDependenciesManager} to inject both
 	 * {@link ManagedObject} and {@link Flow} instances.
-	 * 
+	 *
 	 * @param clazz               {@link Class} being interrogated for injection.
 	 * @param sourceContext       {@link SourceContext}.
 	 * @param dependenciesContext {@link ClassDependenciesContext}.
+	 * @return {@link ClassDependenciesManager}.
 	 */
 	public static ClassDependenciesManager create(Class<?> clazz, SourceContext sourceContext,
 			ClassDependenciesContext dependenciesContext) {
@@ -68,10 +69,11 @@ public class ClassDependenciesManager implements ClassDependencies {
 	/**
 	 * Creates the {@link ClassDependenciesManager} to inject both
 	 * {@link ManagedObject} and {@link Flow} instances.
-	 * 
+	 *
 	 * @param clazz         {@link Class} being interrogated for injection.
 	 * @param sourceContext {@link SourceContext}.
 	 * @param flowsContext  {@link ClassDependenciesFlowContext}.
+	 * @return {@link ClassDependenciesManager}.
 	 */
 	public static ClassDependenciesManager createNoObjects(Class<?> clazz, SourceContext sourceContext,
 			ClassDependenciesFlowContext flowsContext) {

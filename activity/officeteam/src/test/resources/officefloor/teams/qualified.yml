@@ -1,0 +1,7 @@
+source: ${TestClass}$MockTeamSource
+type-qualifications:
+  - type: java.sql.Connection
+  - qualifier: qualified
+    type: ${TestClass}$QualifiedObject
+properties:
+  thread.name: thread_qualified

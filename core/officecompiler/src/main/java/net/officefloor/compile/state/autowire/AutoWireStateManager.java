@@ -44,7 +44,8 @@ public interface AutoWireStateManager extends AutoCloseable {
 
 	/**
 	 * Loads the object from the {@link ManagedObject} asynchronously.
-	 * 
+	 *
+	 * @param <O>        Object type.
 	 * @param qualifier  Qualifier. May be <code>null</code>.
 	 * @param objectType Required object type.
 	 * @param user       {@link ObjectUser} to receive the loaded object (or
@@ -55,7 +56,8 @@ public interface AutoWireStateManager extends AutoCloseable {
 
 	/**
 	 * Obtains the object for the {@link ManagedObject} synchronously.
-	 * 
+	 *
+	 * @param <O>                   Object type.
 	 * @param qualifier             Qualifier. May be <code>null</code>.
 	 * @param objectType            Required object type.
 	 * @param timeoutInMilliseconds Time out in milliseconds to wait for the

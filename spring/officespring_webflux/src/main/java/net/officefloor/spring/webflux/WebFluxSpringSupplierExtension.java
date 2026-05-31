@@ -67,6 +67,7 @@ public class WebFluxSpringSupplierExtension implements SpringSupplierExtensionSe
 	@Configuration(proxyBeanMethods = false)
 	public static class OfficeFloorEmbeddedWebFluxConfiguration {
 
+		/** @return {@link ReactiveWebServerFactory} for OfficeFloor. */
 		@Bean
 		@Primary
 		public ReactiveWebServerFactory reactiveWebServerFactory() {

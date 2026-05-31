@@ -240,6 +240,12 @@ public class MockTestSupport implements TestSupport {
 	 * @param <T> Possible {@link Throwable}.
 	 */
 	protected static interface TestLogic<R, T extends Throwable> {
+		/**
+		 * Runs the test logic.
+		 *
+		 * @return Result.
+		 * @throws T Possible {@link Throwable}.
+		 */
 		R run() throws T;
 	}
 

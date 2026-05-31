@@ -1,0 +1,3 @@
+source: net.officefloor.nosql.objectify.ObjectifySupplierSource
+properties:
+  objectify.entity.locators: net.officefloor.tutorial.objectifyhttpserver.ObjectifyEntities

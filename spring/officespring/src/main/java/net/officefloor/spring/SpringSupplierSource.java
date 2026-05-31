@@ -134,6 +134,8 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 	 * 
 	 * @param capture {@link Consumer} to receive the
 	 *                {@link ConfigurableApplicationContext}.
+	 * @param <S>     Return type.
+	 * @param <E>     Throwable type.
 	 * @param loader  {@link SpringLoader}.
 	 * @return Loaded context.
 	 * @throws E Possible failure in loading.

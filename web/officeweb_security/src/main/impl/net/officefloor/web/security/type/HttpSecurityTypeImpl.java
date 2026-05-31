@@ -73,9 +73,10 @@ public class HttpSecurityTypeImpl<A, AC extends Serializable, C, O extends Enum<
 
 	/**
 	 * Initiate.
-	 * 
+	 *
 	 * @param authenticationType           Authentication type.
 	 * @param httpAuthenticationFactory    {@link HttpAccessControlFactory}.
+	 * @param accessControlType            Access control type.
 	 * @param moAccessControlType          {@link ManagedObjectType}.
 	 * @param httpAccessControlFactory     {@link HttpAccessControlFactory}.
 	 * @param credentialsType              Credentials type.

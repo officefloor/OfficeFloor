@@ -40,11 +40,15 @@ Objectify Tutorial
 
 
 
-*WoOF configuration
+*REST endpoint configuration
 
-  The configuration of the end points are as follows:
-  
-[./images/ObjectifyHttpServer-configuration.png] ObjectifyHttpServer screen shot.
+  The REST endpoints are configured as follows:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/posts.POST.yml|ignoreDownloadError=false}
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/posts.GET.yml|ignoreDownloadError=false}
+
+%{snippet|file=${project.build.directory}/site-snippets/posts/id.GET.yml|ignoreDownloadError=false}
 
   With the implementation as follows:
     
@@ -60,9 +64,9 @@ Objectify Tutorial
 
 *Configuring Objectify
 
-  Objectify is configured in <<<application.objects>>> as follows:
-  
-%{snippet|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
+  Objectify is configured in <<<officefloor/suppliers/Objectify.yml>>> as follows:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/suppliers/Objectify.yml|ignoreDownloadError=false}
 
   For performance reasons, the entities are not dynamically discovered.  As Google App Engine allows scaling to zero instances, the application must be brought up quickly to service the first request.  Having to inspect all jars and classes for entities is typically too slow.  Therefore, Objectify requires registering all entities with it manually.
   

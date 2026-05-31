@@ -61,6 +61,13 @@ public class ComposeArchitectTest {
     }
 
     @Test
+    public void customProcedure() throws Throwable {
+        MockCustomProcedureSource.isRun = false;
+        this.doTest("customProcedure.yaml", null);
+        assertTrue(MockCustomProcedureSource.isRun, "Should run custom procedure");
+    }
+
+    @Test
     public void sectionSource() throws Throwable {
         MockSectionSource.clear();
         this.doTest("sectionSource.yaml", null);

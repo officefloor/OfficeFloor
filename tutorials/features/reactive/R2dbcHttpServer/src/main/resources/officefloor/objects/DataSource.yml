@@ -1,0 +1,6 @@
+managed-object:
+  source: net.officefloor.jdbc.h2.H2DataSourceManagedObjectSource
+  properties:
+    url: "jdbc:h2:mem:exampleDb;DB_CLOSE_DELAY=-1"
+    user: sa
+    password: password

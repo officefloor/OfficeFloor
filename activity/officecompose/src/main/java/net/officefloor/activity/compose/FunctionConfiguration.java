@@ -6,6 +6,7 @@ import lombok.Data;
 import java.util.List;
 import java.util.Map;
 
+/** Function configuration. */
 @Data
 public class FunctionConfiguration {
 
@@ -19,6 +20,14 @@ public class FunctionConfiguration {
     private String method;
 
     private String next;
+
+    /*
+     * ======== Custom ProcedureSource ==========
+     */
+
+    private String resource;
+
+    private String procedure;
 
     /*
      * ======== SectionSource ==========

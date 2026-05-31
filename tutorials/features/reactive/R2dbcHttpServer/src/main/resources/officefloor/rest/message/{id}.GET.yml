@@ -1,0 +1,8 @@
+retrieveData:
+  class: net.officefloor.tutorial.r2dbchttpserver.R2dbcLogic
+  method: retrieveData
+  next: send
+
+send:
+  class: net.officefloor.tutorial.r2dbchttpserver.R2dbcLogic
+  method: send

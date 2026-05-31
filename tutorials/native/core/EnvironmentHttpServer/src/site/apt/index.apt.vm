@@ -29,9 +29,7 @@ Environment Tutorial
   This tutorial covers configuring WoOF within different environments.  It will look at configuring individual properties and then discuss profiles for easier grouping of properties.
       
   The example used in this tutorial is the following simple server to provide an environment specific response.
-  
-[./images/EnvironmentHttpServer-configuration.png] EnvironmentHttpServer configuration.
-    
+
   {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/EnvironmentHttpServer}Tutorial Source}}
 
 

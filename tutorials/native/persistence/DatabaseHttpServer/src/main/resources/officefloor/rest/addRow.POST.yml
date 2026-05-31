@@ -1,0 +1,3 @@
+addRow:
+  class: net.officefloor.tutorial.databasehttpserver.Template
+  method: addRow

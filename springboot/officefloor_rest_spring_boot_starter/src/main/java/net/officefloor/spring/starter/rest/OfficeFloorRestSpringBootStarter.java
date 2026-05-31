@@ -38,6 +38,13 @@ public class OfficeFloorRestSpringBootStarter {
 
     private OfficeFloor officeFloor;
 
+    /**
+     * Instantiate.
+     *
+     * @param properties         {@link OfficeFloorRestProperties}.
+     * @param applicationContext {@link ConfigurableApplicationContext}.
+     * @param mapper             {@link ObjectMapper}.
+     */
     public OfficeFloorRestSpringBootStarter(OfficeFloorRestProperties properties,
                                             ConfigurableApplicationContext applicationContext,
                                             ObjectMapper mapper) {
@@ -49,6 +56,11 @@ public class OfficeFloorRestSpringBootStarter {
         this.openApi.setPaths(new Paths());
     }
 
+    /**
+     * Destroys the {@link OfficeFloor} on shutdown.
+     *
+     * @throws Exception If fails to close.
+     */
     @PreDestroy
     public void destroy() throws Exception {
         if (this.officeFloor != null) {
@@ -62,6 +74,8 @@ public class OfficeFloorRestSpringBootStarter {
 
     /**
      * Ensures {@link OfficeFloor} is started.
+     *
+     * @throws Exception If fails to start the {@link OfficeFloor}.
      */
     public void startOfficeFloor() throws Exception {
 

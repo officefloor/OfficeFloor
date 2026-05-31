@@ -74,9 +74,13 @@ Variable Tutorial
 
 *Composing Flows
 
-  The following demonstrates weaving together different combinations of the above.
+  The following REST endpoint YAML files demonstrate weaving together different combinations of the above.
 
-[./images/VariableHttpServer-configuration.png] VariableHttpServer screen shot.
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/outIn.GET.yml|ignoreDownloadError=false}
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/varVal.GET.yml|ignoreDownloadError=false}
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/outVal.GET.yml|ignoreDownloadError=false}
 
 
 

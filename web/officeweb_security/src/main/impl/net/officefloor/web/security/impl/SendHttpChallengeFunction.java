@@ -35,8 +35,12 @@ import net.officefloor.server.http.ServerHttpConnection;
  */
 public class SendHttpChallengeFunction extends StaticManagedFunction<SendHttpChallengeFunction.Dependencies, None> {
 
+	/** Dependency keys. */
 	public static enum Dependencies {
-		HTTP_CHALLENGE_CONTEXT, SERVER_HTTP_CONNECTION
+		/** HTTP challenge context. */
+		HTTP_CHALLENGE_CONTEXT,
+		/** Server HTTP connection. */
+		SERVER_HTTP_CONNECTION
 	}
 
 	/*

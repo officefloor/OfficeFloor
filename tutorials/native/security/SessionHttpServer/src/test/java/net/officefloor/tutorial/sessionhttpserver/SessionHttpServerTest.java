@@ -56,7 +56,7 @@ public class SessionHttpServerTest {
 		assertEquals(200, response.getStatus().getStatusCode(), "Should obtain page");
 
 		// Add a post
-		response = this.server.send(MockHttpServer.mockRequest("/post+post?text=TEST"));
+		response = this.server.send(MockHttpServer.mockRequest("/post?text=TEST").method(net.officefloor.server.http.HttpMethod.POST));
 		assertEquals(200, response.getStatus().getStatusCode(), "Should add post");
 	}
 

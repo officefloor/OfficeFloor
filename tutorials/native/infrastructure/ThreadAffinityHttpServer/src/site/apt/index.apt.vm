@@ -31,8 +31,6 @@ Thread Affinity Tutorial
 
   To demonstrate the thread affinity, the following simple application is used.
 
-[./images/threadaffinity-screenshot.png] Thread Affinity screen shot.
-
   {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/ThreadAffinityHttpServer}Tutorial Source}}
 
 

@@ -1,0 +1,13 @@
+encrypt:
+  class: net.officefloor.tutorial.teamhttpserver.EncryptLogic
+  method: encrypt
+  next: setDisplayCode
+  outputs:
+    retrieveFromDatabase: retrieveFromDatabase
+retrieveFromDatabase:
+  class: net.officefloor.tutorial.teamhttpserver.EncryptLogic
+  method: retrieveFromDatabase
+  next: setDisplayCode
+setDisplayCode:
+  class: net.officefloor.tutorial.teamhttpserver.EncryptLogic
+  method: setDisplayCode

@@ -41,7 +41,10 @@ public class ServiceHttpRequestFunction extends StaticManagedFunction<ServiceHtt
 	 * Dependencies.
 	 */
 	public static enum Dependencies {
-		SERVER_HTTP_CONNECTION, WEB_SERVICER
+		/** Server HTTP connection. */
+		SERVER_HTTP_CONNECTION,
+		/** Web servicer. */
+		WEB_SERVICER
 	}
 
 	/*

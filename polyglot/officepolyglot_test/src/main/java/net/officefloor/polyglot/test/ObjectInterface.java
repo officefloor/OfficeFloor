@@ -27,8 +27,10 @@ package net.officefloor.polyglot.test;
  */
 public interface ObjectInterface {
 
+	/** @return Value. */
 	String getValue();
 
+	/** @return Dependency. */
 	JavaObject getDependency();
 
 }

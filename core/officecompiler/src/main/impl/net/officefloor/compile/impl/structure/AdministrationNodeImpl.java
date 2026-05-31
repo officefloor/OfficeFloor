@@ -313,6 +313,11 @@ public class AdministrationNodeImpl implements AdministrationNode {
 						autoWires, compileContext, this.context.getCompilerIssues()));
 		AutoWire[] sourceAutoWires = autoWires.stream().toArray(AutoWire[]::new);
 
+		// No administered objects resolved (e.g. enableAutoWireExtensions() pending) — skip
+		if (sourceAutoWires.length == 0) {
+			return;
+		}
+
 		// Determine if auto wire the team
 		AutoWireLink<AdministrationNode, LinkTeamNode>[] links = autoWirer.findAutoWireLinks(this, sourceAutoWires);
 		if (links.length == 1) {

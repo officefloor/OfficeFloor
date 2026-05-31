@@ -17,6 +17,5 @@
 		<module>persistence</module>
 		<module>security</module>
 		<module>infrastructure</module>
-		<module>ui</module>
 	</modules>
 </project>

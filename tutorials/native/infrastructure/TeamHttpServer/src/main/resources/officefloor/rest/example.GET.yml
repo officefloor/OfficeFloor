@@ -1,0 +1,6 @@
+getTemplateData:
+  class: net.officefloor.tutorial.teamhttpserver.ExampleService
+  next: render
+render:
+  procedure: Thymeleaf
+  resource: example

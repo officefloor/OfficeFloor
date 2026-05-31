@@ -81,6 +81,7 @@ public class HttpFunctionSectionSource extends AbstractSectionSource {
 	 * Keys for dependencies.
 	 */
 	public static enum DependencyKey {
+		/** Server HTTP connection dependency. */
 		SERVER_HTTP_CONNECTION
 	}
 

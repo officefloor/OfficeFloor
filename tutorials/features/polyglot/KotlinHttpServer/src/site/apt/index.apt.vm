@@ -47,8 +47,16 @@ Kotlin Polyglot Tutorial
 *Kotlin
 
   The Kotlin to service the request is:
-  
+
 %{snippet|file=${basedir}/src/main/kotlin/net/officefloor/tutorial/kotlinhttpserver/KotlinLogic.kt|ignoreDownloadError=false}
+
+
+
+*REST Endpoint
+
+  The REST endpoint routing POST requests to <<<'/'>>> to the Kotlin function is configured as follows:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/index.POST.yml|ignoreDownloadError=false}
 
 
 

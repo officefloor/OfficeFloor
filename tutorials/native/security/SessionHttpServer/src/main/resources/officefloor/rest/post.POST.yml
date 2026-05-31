@@ -1,0 +1,11 @@
+post:
+  class: net.officefloor.tutorial.sessionhttpserver.TemplateLogic
+  method: post
+  next: getTemplateData
+getTemplateData:
+  class: net.officefloor.tutorial.sessionhttpserver.TemplateLogic
+  method: getTemplateData
+  next: render
+render:
+  procedure: Thymeleaf
+  resource: post

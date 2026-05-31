@@ -46,6 +46,7 @@ public class HttpAccessControlManagedObjectSource<AC extends Serializable>
 	 * Dependency keys.
 	 */
 	public static enum Dependencies {
+		/** Access control dependency. */
 		ACCESS_CONTROL
 	}
 

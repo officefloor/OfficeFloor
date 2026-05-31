@@ -101,7 +101,10 @@ public class JwtAuthorityManagedObjectSource
 	 * {@link Flow} keys.
 	 */
 	public static enum Flows {
-		RETRIEVE_ENCODE_KEYS, RETRIEVE_REFRESH_KEYS
+		/** Retrieve encode keys flow. */
+		RETRIEVE_ENCODE_KEYS,
+		/** Retrieve refresh keys flow. */
+		RETRIEVE_REFRESH_KEYS
 	}
 
 	/**

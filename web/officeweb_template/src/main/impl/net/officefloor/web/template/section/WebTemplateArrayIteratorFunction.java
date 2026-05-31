@@ -37,6 +37,7 @@ public class WebTemplateArrayIteratorFunction extends
 	 * {@link WebTemplateArrayIteratorManagedFunctionSource} dependency keys.
 	 */
 	public static enum DependencyKeys {
+		/** Array to iterate. */
 		ARRAY
 	}
 
@@ -44,7 +45,10 @@ public class WebTemplateArrayIteratorFunction extends
 	 * {@link WebTemplateArrayIteratorManagedFunctionSource} flow keys.
 	 */
 	public static enum FlowKeys {
-		RENDER_ELEMENT, CONTINUE_TEMPLATE
+		/** Render element flow. */
+		RENDER_ELEMENT,
+		/** Continue template flow. */
+		CONTINUE_TEMPLATE
 	}
 
 	/*

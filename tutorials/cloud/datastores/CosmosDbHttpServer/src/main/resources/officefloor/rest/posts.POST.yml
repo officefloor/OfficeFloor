@@ -1,0 +1,3 @@
+savePost:
+  class: net.officefloor.tutorial.cosmosdbhttpserver.CosmosDbLogic
+  method: savePost

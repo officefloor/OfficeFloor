@@ -9,6 +9,7 @@ import net.officefloor.plugin.section.clazz.Flow;
 
 import java.lang.annotation.Annotation;
 
+/** {@link ClassDependencyManufacturerContext} implementation for flows. */
 public class FlowClassDependencyManufacturer extends AbstractFlowClassDependencyManufacturer {
 
     /**

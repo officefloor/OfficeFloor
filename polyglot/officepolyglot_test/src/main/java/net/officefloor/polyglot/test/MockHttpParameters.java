@@ -39,5 +39,6 @@ import net.officefloor.web.HttpParameters;
 public class MockHttpParameters implements Serializable {
 	private static final long serialVersionUID = 1L;
 
+	/** Mock parameter value. */
 	private String mock;
 }

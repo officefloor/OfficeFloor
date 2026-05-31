@@ -29,14 +29,14 @@ import net.officefloor.frame.internal.structure.Flow;
 /**
  * Context in which the {@link ManagedFunction} is done.
  * 
- * @param O Type providing the keys for the dependency {@link ManagedObject}
- *          instances. Dependencies may either be:
- *          <ol>
- *          <li>{@link Object} of a {@link ManagedObject}</li>
- *          <li>Parameter for the {@link ManagedFunction}</li>
- *          </ol>
- * @param F Type providing the keys to the possible {@link Flow} instances
- *          instigated by this {@link ManagedFunction}.
+ * @param <O> Type providing the keys for the dependency {@link ManagedObject}
+ *            instances. Dependencies may either be:
+ *            <ol>
+ *            <li>{@link Object} of a {@link ManagedObject}</li>
+ *            <li>Parameter for the {@link ManagedFunction}</li>
+ *            </ol>
+ * @param <F> Type providing the keys to the possible {@link Flow} instances
+ *            instigated by this {@link ManagedFunction}.
  * 
  * @author Daniel Sagenschneider
  */

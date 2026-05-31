@@ -1,0 +1,7 @@
+add:
+  class: net.officefloor.tutorial.testhttpserver.TemplateLogic
+  method: add
+  next: redirectToTemplate
+redirectToTemplate:
+  class: net.officefloor.tutorial.testhttpserver.TemplateLogic
+  method: redirectToTemplate

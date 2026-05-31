@@ -46,6 +46,7 @@ public class WebTemplateInitialFunction extends
 	 * Keys for the {@link WebTemplateInitialFunction} dependencies.
 	 */
 	public static enum WebTemplateInitialDependencies {
+		/** Server HTTP connection. */
 		SERVER_HTTP_CONNECTION
 	}
 
@@ -53,7 +54,10 @@ public class WebTemplateInitialFunction extends
 	 * Keys for the {@link WebTemplateInitialFunction} flows.
 	 */
 	public static enum Flows {
-		REDIRECT, RENDER
+		/** Redirect flow. */
+		REDIRECT,
+		/** Render flow. */
+		RENDER
 	}
 
 	/**

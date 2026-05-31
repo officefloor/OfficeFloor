@@ -39,6 +39,7 @@ public class JwtClaimsManagedObjectSource
 	 * Dependency keys.
 	 */
 	public static enum Dependencies {
+		/** Access control dependency. */
 		ACCESS_CONTROL
 	}
 

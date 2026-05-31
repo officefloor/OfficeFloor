@@ -112,6 +112,11 @@ public abstract class AbstractObjectifyJUnit {
 
 		private static final long serialVersionUID = 1L;
 
+		/**
+		 * Instantiate.
+		 *
+		 * @param message Message.
+		 */
 		public TimeoutException(String message) {
 			super(message);
 		}
@@ -127,6 +132,7 @@ public abstract class AbstractObjectifyJUnit {
 	 * <p>
 	 * Will retry to obtain the entity or timeout.
 	 * 
+	 * @param <E>  Entity type.
 	 * @param type Type of entity.
 	 * @return First entity.
 	 * @throws TimeoutException If waited too long for the entity.
@@ -141,6 +147,7 @@ public abstract class AbstractObjectifyJUnit {
 	 * <p>
 	 * Will retry to obtain the entity or timeout.
 	 * 
+	 * @param <E>  Entity type.
 	 * @param type Type of entity.
 	 * @param id   Id of entity.
 	 * @return Entity.
@@ -154,6 +161,11 @@ public abstract class AbstractObjectifyJUnit {
 	 * Loads the entity.
 	 */
 	public static interface ResultLoader<E> {
+		/** Loads the result.
+		 *
+		 * @param loadType {@link LoadType}.
+		 * @return {@link LoadResult}.
+		 */
 		LoadResult<E> load(LoadType<E> loadType);
 	}
 
@@ -163,6 +175,7 @@ public abstract class AbstractObjectifyJUnit {
 	 * <p>
 	 * Will retry to obtain the entity or timeout.
 	 * 
+	 * @param <E>    Entity type.
 	 * @param type   Type of entity.
 	 * @param loader {@link QueryLoader}.
 	 * @return Entity.
@@ -179,12 +192,19 @@ public abstract class AbstractObjectifyJUnit {
 	 * Loads the entity.
 	 */
 	public static interface QueryLoader<E> {
+		/**
+		 * Loads the query.
+		 *
+		 * @param loadType {@link LoadType}.
+		 * @return {@link Query}.
+		 */
 		Query<E> load(LoadType<E> loadType);
 	}
 
 	/**
 	 * Obtains a list of entities.
-	 * 
+	 *
+	 * @param <E>          Entity type.
 	 * @param type         Type of entity.
 	 * @param expectedSize Expected list size.
 	 * @param loader       {@link QueryLoader}.
@@ -200,7 +220,9 @@ public abstract class AbstractObjectifyJUnit {
 
 	/**
 	 * Obtains a list of entities.
-	 * 
+	 *
+	 * @param <E>          Entity type.
+	 * @param type         Type of entity.
 	 * @param expectedSize Expected list size.
 	 * @param loader       Loads the entities.
 	 * @return List of entities.
@@ -288,7 +310,8 @@ public abstract class AbstractObjectifyJUnit {
 
 	/**
 	 * Stores the entities.
-	 * 
+	 *
+	 * @param <E>      Entity type.
 	 * @param entities Entities to store.
 	 * @throws TimeoutException If waited too long to store the entities in
 	 *                          consistent exising state.

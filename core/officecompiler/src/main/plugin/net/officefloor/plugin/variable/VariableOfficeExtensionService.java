@@ -67,8 +67,11 @@ public class VariableOfficeExtensionService implements OfficeExtensionService, O
 	/**
 	 * Runs within context.
 	 * 
+	 * @param <R>        Return type.
+	 * @param <T>        Throwable type.
 	 * @param decorators {@link Map} of decorators by variable name.
 	 * @param logic      {@link ContextLogic}.
+	 * @return Result of the logic.
 	 * @throws T Possible failure.
 	 */
 	public static <R, T extends Throwable> R runInContext(Map<String, Consumer<Var<?>>> decorators,

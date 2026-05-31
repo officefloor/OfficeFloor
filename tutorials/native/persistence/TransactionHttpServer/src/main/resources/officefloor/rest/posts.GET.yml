@@ -1,0 +1,3 @@
+getPosts:
+  class: net.officefloor.tutorial.transactionhttpserver.PostLogic
+  method: getPosts

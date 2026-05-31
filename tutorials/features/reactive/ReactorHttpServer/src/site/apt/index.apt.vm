@@ -30,10 +30,12 @@ Reactive Tutorial
 
   It will use the {{{/apidocs/net/officefloor/spring/webclient/WebClientManagedObjectSource.html}WebClientManagedObjectSource}} to make an asynchronous call to another REST end point.
   
-  To avoid having to start multiple servers, the call will be back onto a REST end point of the same server.  As such, the configuration for this tutorial is the following:
+  To avoid having to start multiple servers, the call will be back onto a REST end point of the same server.  The REST endpoint configuration for this tutorial is the following:
 
-[./images/ReactorHttpServer-configuration.png] ReactorHttpServer screen shot.
-   
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/server.GET.yml|ignoreDownloadError=false}
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/reactive.GET.yml|ignoreDownloadError=false}
+
   {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/ReactorHttpServer}Tutorial Source}}
 
 
@@ -76,9 +78,9 @@ Reactive Tutorial
   
 %{snippet|id=webclient|file=${basedir}/pom.xml|ignoreDownloadError=false}
 
-  then configure as follows in <<<application.objects>>>:
-  
-%{snippet|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
+  then configure as follows in <<<officefloor/objects/WebClient.yml>>>:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/objects/WebClient.yml|ignoreDownloadError=false}
 
 
 

@@ -1,0 +1,2 @@
+source: net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource
+type: org.springframework.jdbc.core.JdbcTemplate

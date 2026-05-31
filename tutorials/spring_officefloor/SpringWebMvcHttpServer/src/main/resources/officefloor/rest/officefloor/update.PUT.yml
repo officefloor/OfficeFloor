@@ -1,0 +1,4 @@
+post:
+  resource: net.officefloor.tutorial.springwebmvchttpserver.SpringRestController
+  procedure: SpringWebMvcController
+  method: post

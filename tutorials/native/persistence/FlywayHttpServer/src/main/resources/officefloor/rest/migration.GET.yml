@@ -1,0 +1,3 @@
+getMigration:
+  class: net.officefloor.tutorial.flywayhttpserver.FlywayLogic
+  method: getMigration

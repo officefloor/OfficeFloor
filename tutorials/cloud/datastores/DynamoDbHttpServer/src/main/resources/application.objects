@@ -1,7 +1,0 @@
-<objects>
-	
-	<supplier source="net.officefloor.nosql.dynamodb.DynamoDbSupplierSource">
-		<property name="dynamo.entity.locators" value="net.officefloor.tutorial.dynamodbhttpserver.DynamoDbEntities" />		
-	</supplier>
-	
-</objects>

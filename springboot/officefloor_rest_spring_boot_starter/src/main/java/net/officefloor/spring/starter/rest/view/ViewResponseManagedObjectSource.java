@@ -15,10 +15,14 @@ import org.springframework.web.servlet.ModelAndView;
 /**
  * {@link net.officefloor.frame.api.managedobject.source.ManagedObjectSource} for the {@link ViewResponse}.
  */
+/** {@link AbstractManagedObjectSource} for view responses. */
 public class ViewResponseManagedObjectSource extends AbstractManagedObjectSource<ViewResponseManagedObjectSource.DependencyKeys, None> {
 
+    /** Dependency keys. */
     public static enum DependencyKeys {
+        /** Server HTTP connection. */
         SERVER_HTTP_CONNECTION,
+        /** HTTP external response. */
         HTTP_EXTERNAL_RESPONSE
     }
 

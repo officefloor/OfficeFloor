@@ -29,7 +29,7 @@ public class TemplateLogicCallingTest {
 	public void callingSystemTest() throws Exception {
 
 		// Send request to add
-		HttpResponse response = this.client.execute(new HttpPost(this.client.url("/template+add?a=1&b=2")));
+		HttpResponse response = this.client.execute(new HttpPost(this.client.url("/add?a=1&b=2")));
 		assertEquals(200, response.getStatusLine().getStatusCode(), "Should be successful");
 
 		// Ensure added the values

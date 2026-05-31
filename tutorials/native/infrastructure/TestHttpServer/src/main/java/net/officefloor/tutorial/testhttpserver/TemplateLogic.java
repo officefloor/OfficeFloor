@@ -1,8 +1,11 @@
 package net.officefloor.tutorial.testhttpserver;
 
+import java.io.IOException;
 import java.io.Serializable;
 
 import lombok.Data;
+import net.officefloor.server.http.HttpStatus;
+import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.HttpParameters;
 
 /**
@@ -30,6 +33,12 @@ public class TemplateLogic {
 
 	public Parameters getTemplateData(Parameters parameters) {
 		return parameters;
+	}
+
+	public void redirectToTemplate(Parameters parameters, ServerHttpConnection connection) throws IOException {
+		connection.getResponse().setStatus(HttpStatus.SEE_OTHER);
+		connection.getResponse().getHeaders().addHeader("location",
+				"/template?a=" + parameters.getA() + "&b=" + parameters.getB() + "&result=" + parameters.getResult());
 	}
 
 }

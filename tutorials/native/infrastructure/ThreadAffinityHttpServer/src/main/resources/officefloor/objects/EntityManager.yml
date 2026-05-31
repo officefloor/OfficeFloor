@@ -1,0 +1,5 @@
+managed-object:
+  source: net.officefloor.jpa.hibernate.HibernateJpaManagedObjectSource
+  properties:
+    persistence.unit.name: test
+    persistence.dependency: connection

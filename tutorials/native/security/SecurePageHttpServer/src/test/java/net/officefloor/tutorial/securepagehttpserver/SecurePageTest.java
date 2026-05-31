@@ -32,9 +32,6 @@ public class SecurePageTest {
 
 		// Ensure redirect to secure access to page
 		this.assertHttpRequest("http://localhost:7878/card");
-
-		// Ensure redirect to secure link access to page
-		this.assertHttpRequest("http://localhost:7878/main+card");
 	}
 
 	private void assertHttpRequest(String url) throws IOException {

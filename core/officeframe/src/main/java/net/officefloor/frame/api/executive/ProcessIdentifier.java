@@ -27,10 +27,11 @@ import net.officefloor.frame.internal.structure.ProcessState;
  * Identifier for {@link ProcessState}.
  * <p>
  * The requirements are that:
+ * </p>
  * <ul>
  * <li>the same {@link ProcessIdentifier} equals itself</li>
  * <li>no two separate {@link ProcessIdentifier} instance equal each other</li>
- * <ul>
+ * </ul>
  * <p>
  * The easiest way to ensure this is create a new instance each time and allow
  * default {@link Object} equality.

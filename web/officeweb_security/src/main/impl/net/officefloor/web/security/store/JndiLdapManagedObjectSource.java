@@ -57,6 +57,7 @@ public class JndiLdapManagedObjectSource
 	 * Keys for dependencies.
 	 */
 	public static enum DependencyKeys {
+		/** Directory context dependency. */
 		DIR_CONTEXT
 	}
 

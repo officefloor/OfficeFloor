@@ -40,7 +40,10 @@ public class NotHandledFunction implements ManagedFunctionFactory<NotHandledFunc
 	 * Dependency keys.
 	 */
 	public static enum NotHandledDependencies {
-		SERVER_HTTP_CONNECTION, WEB_SERVICER
+		/** Server HTTP connection. */
+		SERVER_HTTP_CONNECTION,
+		/** Web servicer. */
+		WEB_SERVICER
 	}
 
 	/*

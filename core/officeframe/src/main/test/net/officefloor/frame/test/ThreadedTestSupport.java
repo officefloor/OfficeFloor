@@ -74,7 +74,8 @@ public class ThreadedTestSupport implements TestSupport {
 
 	/**
 	 * Undertakes multi-threaded testing of {@link MultithreadedTestLogic}.
-	 * 
+	 *
+	 * @param <T>            Possible {@link Throwable} type.
 	 * @param threadCount    Number of {@link Thread} instances to run in parallel.
 	 * @param iterationCount Number of iterations of {@link MultithreadedTestLogic}
 	 *                       per {@link Thread}.
@@ -88,7 +89,8 @@ public class ThreadedTestSupport implements TestSupport {
 
 	/**
 	 * Undertakes multi-threaded testing of {@link MultithreadedTestLogic}.
-	 * 
+	 *
+	 * @param <T>            Possible {@link Throwable} type.
 	 * @param threadCount    Number of {@link Thread} instances to run in parallel.
 	 * @param iterationCount Number of iterations of {@link MultithreadedTestLogic}
 	 *                       per {@link Thread}.
@@ -137,7 +139,8 @@ public class ThreadedTestSupport implements TestSupport {
 
 	/**
 	 * Triggers single threaded testing of {@link MultithreadedTestLogic}.
-	 * 
+	 *
+	 * @param <T>  Possible {@link Throwable} type.
 	 * @param test {@link MultithreadedTestLogic}.
 	 * @return {@link MultiThreadedExecution}.
 	 * @throws T Possible failure from failing {@link MultithreadedTestLogic}.
@@ -149,7 +152,8 @@ public class ThreadedTestSupport implements TestSupport {
 
 	/**
 	 * Triggers multi-threaded testing of {@link MultithreadedTestLogic}.
-	 * 
+	 *
+	 * @param <T>            Possible {@link Throwable} type.
 	 * @param threadCount    Number of {@link Thread} instances to run in parallel.
 	 * @param iterationCount Number of iterations of {@link MultithreadedTestLogic}
 	 *                       per {@link Thread}.
@@ -164,7 +168,8 @@ public class ThreadedTestSupport implements TestSupport {
 
 	/**
 	 * Triggers multi-threaded testing of {@link MultithreadedTestLogic}.
-	 * 
+	 *
+	 * @param <T>            Possible {@link Throwable} type.
 	 * @param threadCount    Number of {@link Thread} instances to run in parallel.
 	 * @param iterationCount Number of iterations of {@link MultithreadedTestLogic}
 	 *                       per {@link Thread}.

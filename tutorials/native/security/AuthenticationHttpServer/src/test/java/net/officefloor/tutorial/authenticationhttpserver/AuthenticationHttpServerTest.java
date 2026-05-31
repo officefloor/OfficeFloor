@@ -46,8 +46,10 @@ public class AuthenticationHttpServerTest {
 		this.session = loginRedirect.getCookie(HttpSessionManagedObjectSource.DEFAULT_SESSION_ID_COOKIE_NAME);
 
 		// Login
-		MockHttpRequestBuilder loginRequest = MockHttpServer.mockRequest("/login+login?username=Daniel&password=Daniel")
-				.secure(true).cookie(this.session.getName(), this.session.getValue());
+		MockHttpRequestBuilder loginRequest = MockHttpServer
+				.mockRequest("/login?username=Daniel&password=Daniel")
+				.method(net.officefloor.server.http.HttpMethod.POST).secure(true)
+				.cookie(this.session.getName(), this.session.getValue());
 		MockHttpResponse loggedInRedirect = this.server.send(loginRequest);
 		assertEquals(200, loggedInRedirect.getStatus().getStatusCode(),
 				"Ensure successful login: " + loggedInRedirect.getEntity(null));
@@ -68,7 +70,7 @@ public class AuthenticationHttpServerTest {
 
 		// Logout
 		MockHttpResponse logoutRedirect = this.server.send(
-				MockHttpServer.mockRequest("/hello+logout").cookie(this.session.getName(), this.session.getValue()));
+				MockHttpServer.mockRequest("/logoff").cookie(this.session.getName(), this.session.getValue()));
 		assertEquals(303, logoutRedirect.getStatus().getStatusCode(),
 				"Ensure logout: " + logoutRedirect.getEntity(null));
 		logoutRedirect.assertHeader("location", "/logout");

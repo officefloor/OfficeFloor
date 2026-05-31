@@ -1,0 +1,93 @@
+~~~
+~~ Spring REST Actuator HTTP Server Tutorial
+~~~
+
+                                               -----------------------
+                                   Spring Actuator with OfficeFloor REST
+                                               -----------------------
+                                                Daniel Sagenschneider
+                                               -----------------------
+
+Spring Actuator with OfficeFloor REST
+
+  Spring Boot Actuator provides production-ready endpoints — <<<health>>>, <<<info>>>, <<<metrics>>>
+  and more — that operations teams depend on for monitoring and readiness checks.
+
+  Adding OfficeFloor REST YAML endpoints alongside Actuator requires no extra configuration.
+  OfficeFloor registers its endpoints via Spring MVC's <<<HandlerInterceptor>>> mechanism, which sits
+  completely outside Actuator's endpoint management.  Both route through the same servlet without
+  interfering with each other.
+
+  This tutorial demonstrates a Spring Boot application that exposes a custom OfficeFloor REST endpoint
+  at <<<GET /status>>> while Actuator's <<<GET /actuator/health>>> continues to work unchanged.
+
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/spring/SpringRestActuatorHttpServer}Tutorial Source}}
+
+
+
+*Maven dependency
+
+  Add <<<spring-boot-starter-actuator>>> alongside the OfficeFloor starter:
+
+%{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+
+
+*Exposing Actuator endpoints
+
+  By default Spring Boot only exposes the <<<health>>> and <<<info>>> endpoints over HTTP.  Expand
+  the set in <<<application.properties>>> as needed:
+
+%{snippet|file=${basedir}/src/main/resources/application.properties|ignoreDownloadError=false}
+
+
+
+*Application class
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestactuator/SpringRestActuatorApplication.java|ignoreDownloadError=false}
+
+
+
+*OfficeFloor REST endpoint
+
+  The YAML file declares the <<<GET /status>>> endpoint in the usual way:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/status.GET.yml|ignoreDownloadError=false}
+
+  The logic class is a plain Java method:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestactuator/StatusLogic.java|ignoreDownloadError=false}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestactuator/StatusResponse.java|ignoreDownloadError=false}
+
+
+
+*Testing
+
+  Both the OfficeFloor REST endpoint and the Actuator health endpoint are verified in the same test:
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springrestactuator/SpringRestActuatorHttpServerTest.java|ignoreDownloadError=false}
+
+  <<<officefloorEndpointWorks>>> confirms the YAML-declared endpoint is reachable.
+  <<<actuatorHealthEndpointWorks>>> confirms Actuator remains fully operational alongside it.
+
+
+
+*What you have now
+
+  After completing this tutorial you can:
+
+   * Add <<<spring-boot-starter-actuator>>> to an application that already uses the OfficeFloor
+     REST starter without any additional configuration
+
+   * Rely on <<<health>>>, <<<info>>>, and other Actuator endpoints working unchanged
+
+   * Expose Actuator endpoints selectively via <<<management.endpoints.web.exposure.include>>>
+
+
+
+Next
+
+  The {{{../../spring_officefloor/SpringHttpServer/index.html}Spring HTTP Server tutorial}} shows how
+  to host your Spring beans inside the OfficeFloor runtime, unlocking further OfficeFloor capabilities
+  while keeping all existing Spring configuration.

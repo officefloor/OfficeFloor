@@ -79,7 +79,8 @@ public interface ClassDependencyManufacturerContext extends StatePoint {
 
 	/**
 	 * Obtains the {@link Annotation} by the input type.
-	 * 
+	 *
+	 * @param <A>            Annotation type.
 	 * @param annotationType Required {@link Annotation} type.
 	 * @return {@link Annotation} or <code>null</code> if no {@link Annotation} by
 	 *         the required type.

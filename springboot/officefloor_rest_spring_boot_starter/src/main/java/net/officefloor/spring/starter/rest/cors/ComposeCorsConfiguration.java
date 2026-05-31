@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.util.List;
 
+/** CORS configuration for composition. */
 @Data
 public class ComposeCorsConfiguration {
 

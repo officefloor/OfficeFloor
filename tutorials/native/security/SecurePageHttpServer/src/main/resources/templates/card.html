@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <h1>Enter card details</h1>
+    <form action="/card" method="POST">
+        Card number: <input type="text" name="number" th:value="${model.number}" size="19" /> <br />
+        Expiry date: <input type="text" name="month" th:value="${model.month}" size="2" /> /
+                    <input type="text" name="year" th:value="${model.year}" size="4" />
+        CSC: <input type="text" name="csc" th:value="${model.csc}" size="3" /> <br />
+        <input type="submit" value="save" />
+    </form>
+    <a href="/main">Back to main page</a>
+</body>
+</html>

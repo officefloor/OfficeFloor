@@ -35,8 +35,8 @@ public interface Profiler {
 	 * <p>
 	 * Enables the {@link Profiler} to profile the completed
 	 * {@link ProcessState}.
-	 * <p>
-	 * 
+	 * </p>
+	 *
 	 * @param process
 	 *            {@link ProfiledProcessState}.
 	 */

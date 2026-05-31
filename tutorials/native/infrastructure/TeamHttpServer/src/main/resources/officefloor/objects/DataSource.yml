@@ -1,0 +1,6 @@
+managed-object:
+  source: net.officefloor.jdbc.DataSourceManagedObjectSource
+  properties:
+    datasource.class: org.h2.jdbcx.JdbcDataSource
+    url: jdbc:h2:mem:exampleDb
+    user: sa

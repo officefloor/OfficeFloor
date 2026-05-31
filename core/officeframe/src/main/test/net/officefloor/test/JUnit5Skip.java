@@ -15,10 +15,11 @@ public class JUnit5Skip {
 	/**
 	 * Undertakes best attempt to cause skip of test via the
 	 * {@link ExtensionContext}.
-	 * 
+	 *
 	 * @param context       {@link ExtensionContext}.
 	 * @param skipMessage   Message for skipping.
 	 * @param optionalCause Optional cause.
+	 * @return {@link RuntimeException} to throw to complete the skip.
 	 */
 	public static RuntimeException skip(ExtensionContext context, String skipMessage, Throwable optionalCause) {
 

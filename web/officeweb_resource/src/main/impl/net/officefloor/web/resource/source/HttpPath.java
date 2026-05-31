@@ -53,8 +53,9 @@ public class HttpPath {
 
 	/**
 	 * Instantiate.
-	 * 
-	 * @param request {@link HttpRequest} to extract the path.
+	 *
+	 * @param request      {@link HttpRequest} to extract the path.
+	 * @param webServicer  {@link WebServicer} for the path.
 	 */
 	public HttpPath(HttpRequest request, WebServicer webServicer) {
 		this.path = request.getUri();

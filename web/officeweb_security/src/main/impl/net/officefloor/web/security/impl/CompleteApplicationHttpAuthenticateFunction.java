@@ -45,7 +45,14 @@ public class CompleteApplicationHttpAuthenticateFunction<AC extends Serializable
 	 * Dependency keys.
 	 */
 	public static enum Dependencies {
-		ACCESS_CONTROL, SERVER_HTTP_CONNECTION, HTTP_SESSION, REQUEST_STATE
+		/** Access control dependency. */
+		ACCESS_CONTROL,
+		/** Server HTTP connection dependency. */
+		SERVER_HTTP_CONNECTION,
+		/** HTTP session dependency. */
+		HTTP_SESSION,
+		/** Request state dependency. */
+		REQUEST_STATE
 	}
 
 	/*

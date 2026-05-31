@@ -51,9 +51,9 @@ Servlet Tutorial
   
 %{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
 
-  Once added, select the Servlet / Filter as a class when adding a procedure.  The tutorial configuration is as follows:
-  
-[./images/ServletHttpServer-configuration.png] ServletHttpServer configuration.
+  Once added, the Servlet / Filter is configured as a procedure in the REST YAML endpoint file:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/index.GET.yml|ignoreDownloadError=false}
 
 
 
@@ -64,8 +64,8 @@ Servlet Tutorial
 %{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/servlethttpserver/InjectedDependency.java|ignoreDownloadError=false}
   
   Configured via OfficeFloor as follows:
-  
-%{snippet|id=tutorial|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/objects/InjectedDependency.yml|ignoreDownloadError=false}
 
 
 

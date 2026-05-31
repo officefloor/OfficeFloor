@@ -28,10 +28,8 @@ Secure Link Tutorial
   
   This tutorial looks at configuring a specific link for a page to only be accessed via a secure channel (HTTPS).
   
-  The below example for this tutorial will implement a simple non-secure page to provide login credentials via a secure link.  The simple page for this tutorial is as follows:
-    
-[./images/SecureLinkHttpServer-screenshot.png] SecureLinkHttpServer screen shot.
-  
+  The below example for this tutorial will implement a simple non-secure page to provide login credentials via a secure link.
+
   {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/SecureLinkHttpServer}Tutorial Source}}
 
 
@@ -40,19 +38,17 @@ Secure Link Tutorial
 
   The page template content is as follows.  Please note the link in the form action.
 
-%{snippet|file=${basedir}/src/main/resources/template.woof.html|ignoreDownloadError=false}
+%{snippet|file=${basedir}/src/main/resources/templates/index.html|ignoreDownloadError=false}
 
 
 
 *Secure Link
 
-  To configure the link (form action) to always be communicated via a secure channel, the following is the configuration:
-  
-[./images/SecureLinkHttpServer-configuration.png] Secure Link configuration screen shot.
+  To configure the <<<login>>> path to only be accessible via a secure channel (HTTPS), the following REST YAML configuration is used:
 
-  Adding the link and flagging it secure will ensure WoOF renders the link URL on the page to communicate over a secure channel (HTTPS).  WoOF also prevents non-secure access to the link servicing by responding with a redirect to use a secure channel.
-  
-  The configuration of links also works in reverse.  Should the template be configured as secure, adding the link and leaving it unchecked indicates a non-secure link.  Note that unless configured, links will follow the template secure setting.
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/login.yml|ignoreDownloadError=false}
+
+  Setting <<<secure: true>>> in the path-level YAML file ensures that any HTTP request to that path is automatically redirected (307) to HTTPS before the handler runs.  This means <<<connection.isSecure()>>> will always be <<<true>>> when the handler executes.
 
 
 

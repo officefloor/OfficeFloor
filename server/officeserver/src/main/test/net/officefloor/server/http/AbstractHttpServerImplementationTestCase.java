@@ -255,6 +255,12 @@ public abstract class AbstractHttpServerImplementationTestCase {
 	 */
 	private DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
 
+	/**
+	 * Sets up the test.
+	 *
+	 * @param testInfo {@link TestInfo}.
+	 * @throws Exception On test failure.
+	 */
 	@BeforeEach
 	public void setUp(TestInfo testInfo) throws Exception {
 
@@ -272,6 +278,11 @@ public abstract class AbstractHttpServerImplementationTestCase {
 		CompareResult.reset(this.getClass());
 	}
 
+	/**
+	 * Tears down the test.
+	 *
+	 * @throws Exception On test failure.
+	 */
 	@AfterEach
 	public void tearDown() throws Exception {
 		LocalDateTime shutdownTime = LocalDateTime.now();
@@ -402,18 +413,36 @@ public abstract class AbstractHttpServerImplementationTestCase {
 		return mos.addOfficeFloorManagedObject(managedObjectName, scope);
 	}
 
+	/**
+	 * Test fixture for servicing requests.
+	 */
 	public static class Servicer {
+		/**
+		 * Services the request.
+		 *
+		 * @param connection {@link ServerHttpConnection}.
+		 * @throws Exception On servicing failure.
+		 */
 		public void service(ServerHttpConnection connection) throws Exception {
 			assertEquals("/test", connection.getRequest().getUri(), "Incorrect request URI");
 			connection.getResponse().getEntityWriter().write("hello world");
 		}
 	}
 
+	/**
+	 * Test fixture for servicing requests with raw bytes.
+	 */
 	public static class BytesServicer {
 		private static final byte[] HELLO_WORLD = "hello world"
 				.getBytes(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET);
 		private static final HttpHeaderValue TEXT_PLAIN = new HttpHeaderValue("text/plain");
 
+		/**
+		 * Services the request.
+		 *
+		 * @param connection {@link ServerHttpConnection}.
+		 * @throws Exception On servicing failure.
+		 */
 		public void service(ServerHttpConnection connection) throws Exception {
 			assertEquals("/test", connection.getRequest().getUri(), "Incorrect request URI");
 			net.officefloor.server.http.HttpResponse response = connection.getResponse();
@@ -422,6 +451,9 @@ public abstract class AbstractHttpServerImplementationTestCase {
 		}
 	}
 
+	/**
+	 * Test fixture for servicing requests with a {@link ByteBuffer}.
+	 */
 	public static class BufferServicer {
 		private static final ByteBuffer HELLO_WORLD;
 		static {
@@ -431,6 +463,12 @@ public abstract class AbstractHttpServerImplementationTestCase {
 			BufferJvmFix.flip(HELLO_WORLD);
 		}
 
+		/**
+		 * Services the request.
+		 *
+		 * @param connection {@link ServerHttpConnection}.
+		 * @throws Exception On servicing failure.
+		 */
 		public void service(ServerHttpConnection connection) throws Exception {
 			assertEquals("/test", connection.getRequest().getUri(), "Incorrect request URI");
 			net.officefloor.server.http.HttpResponse response = connection.getResponse();
@@ -451,7 +489,16 @@ public abstract class AbstractHttpServerImplementationTestCase {
 		HELLO_WORLD_FILE = helloWorldFile;
 	}
 
+	/**
+	 * Test fixture for servicing requests with a file.
+	 */
 	public static class FileServicer {
+		/**
+		 * Services the request.
+		 *
+		 * @param connection {@link ServerHttpConnection}.
+		 * @throws Exception On servicing failure.
+		 */
 		public void service(ServerHttpConnection connection) throws Exception {
 			assertEquals("/test", connection.getRequest().getUri(), "Incorrect request URI");
 			net.officefloor.server.http.HttpResponse response = connection.getResponse();
@@ -460,7 +507,16 @@ public abstract class AbstractHttpServerImplementationTestCase {
 		}
 	}
 
+	/**
+	 * Test fixture for servicing requests that fail.
+	 */
 	public static class FailServicer {
+		/**
+		 * Services the request.
+		 *
+		 * @param connection {@link ServerHttpConnection}.
+		 * @throws Exception On servicing failure.
+		 */
 		public void service(ServerHttpConnection connection) throws Exception {
 			assertEquals("/test", connection.getRequest().getUri(), "Incorrect request URI");
 
@@ -476,7 +532,16 @@ public abstract class AbstractHttpServerImplementationTestCase {
 		}
 	}
 
+	/**
+	 * Test fixture for servicing requests with encoded URLs.
+	 */
 	public static class EncodedUrlServicer {
+		/**
+		 * Services the request.
+		 *
+		 * @param connection {@link ServerHttpConnection}.
+		 * @throws IOException On servicing failure.
+		 */
 		public void service(ServerHttpConnection connection) throws IOException {
 			String requestUri = connection.getRequest().getUri();
 			assertEquals("/encoded-%3F-%23-+?query=string", requestUri, "Should have encoded ? #");
@@ -484,20 +549,47 @@ public abstract class AbstractHttpServerImplementationTestCase {
 		}
 	}
 
+	/**
+	 * Marker managed object for threaded servicing.
+	 */
 	public static class ThreadedManagedObject {
 	}
 
+	/**
+	 * Test fixture for servicing requests on a different thread.
+	 */
 	public static class ThreadedServicer {
 
+		/**
+		 * Flow interface.
+		 */
 		@FlowInterface
 		public static interface Flows {
+			/**
+			 * Handles the flow.
+			 *
+			 * @param thread originating {@link Thread}.
+			 */
 			void doFlow(Thread thread);
 		}
 
+		/**
+		 * Services the request.
+		 *
+		 * @param flows {@link Flows}.
+		 */
 		public void service(Flows flows) {
 			flows.doFlow(Thread.currentThread());
 		}
 
+		/**
+		 * Handles the flow on a different thread.
+		 *
+		 * @param connection    {@link ServerHttpConnection}.
+		 * @param thread        originating {@link Thread}.
+		 * @param managedObject {@link ThreadedManagedObject}.
+		 * @throws IOException On servicing failure.
+		 */
 		public void doFlow(ServerHttpConnection connection, @Parameter Thread thread,
 				ThreadedManagedObject managedObject) throws IOException {
 			assertEquals("/test", connection.getRequest().getUri(), "Incorrect request URI");
@@ -506,7 +598,16 @@ public abstract class AbstractHttpServerImplementationTestCase {
 		}
 	}
 
+	/**
+	 * Test fixture for asynchronous servicing.
+	 */
 	public static class AsyncServicer {
+		/**
+		 * Services the request asynchronously.
+		 *
+		 * @param async      {@link AsynchronousFlow}.
+		 * @param connection {@link ServerHttpConnection}.
+		 */
 		public void service(AsynchronousFlow async, ServerHttpConnection connection) {
 			new Thread(() -> {
 
@@ -524,7 +625,16 @@ public abstract class AbstractHttpServerImplementationTestCase {
 		}
 	}
 
+	/**
+	 * Test fixture for verifying full HTTP request and response functionality.
+	 */
 	public static class FunctionalityServicer {
+		/**
+		 * Services the request.
+		 *
+		 * @param connection {@link ServerHttpConnection}.
+		 * @throws IOException On servicing failure.
+		 */
 		public void service(ServerHttpConnection connection) throws IOException {
 
 			// Assert has all content of request
@@ -555,11 +665,27 @@ public abstract class AbstractHttpServerImplementationTestCase {
 		}
 	}
 
+	/**
+	 * Qualifier for the first {@link ServerHttpConnection}.
+	 */
 	public static final String CONNECTION_QUALIFIER_ONE = "QUALIFIED_ONE";
 
+	/**
+	 * Qualifier for the second {@link ServerHttpConnection}.
+	 */
 	public static final String CONNECTION_QUALIFIER_TWO = "QUALIFIED_TWO";
 
+	/**
+	 * Test fixture for servicing requests with qualified connections.
+	 */
 	public static class QualifiedServicer {
+		/**
+		 * Services the request.
+		 *
+		 * @param connectionOne first qualified {@link ServerHttpConnection}.
+		 * @param connectionTwo second qualified {@link ServerHttpConnection}.
+		 * @throws IOException On servicing failure.
+		 */
 		public void service(@Qualified(CONNECTION_QUALIFIER_ONE) ServerHttpConnection connectionOne,
 				@Qualified(CONNECTION_QUALIFIER_TWO) ServerHttpConnection connectionTwo) throws IOException {
 			assertNull(connectionTwo, "Should not have other qualified connection");
@@ -779,7 +905,16 @@ public abstract class AbstractHttpServerImplementationTestCase {
 
 	private volatile static FileChannel CLOSE_FILE = null;
 
+	/**
+	 * Test fixture for servicing requests that closes a file channel after writing.
+	 */
 	public static class CloseFileServicer {
+		/**
+		 * Services the request.
+		 *
+		 * @param connection {@link ServerHttpConnection}.
+		 * @throws Exception On servicing failure.
+		 */
 		public void service(ServerHttpConnection connection) throws Exception {
 			assertEquals("/test", connection.getRequest().getUri(), "Incorrect request URI");
 			net.officefloor.server.http.HttpResponse response = connection.getResponse();
@@ -1063,11 +1198,24 @@ public abstract class AbstractHttpServerImplementationTestCase {
 	 */
 	public static class PressureOverloadServicer {
 
+		/**
+		 * Services the request.
+		 *
+		 * @return Current {@link Thread}.
+		 */
 		@Next("backPressure")
 		public Thread service() {
 			return Thread.currentThread();
 		}
 
+		/**
+		 * Handles back pressure (should not be invoked).
+		 *
+		 * @param serviceThread the originating service {@link Thread}.
+		 * @param connection    {@link ServerHttpConnection}.
+		 * @param marker        {@link TeamMarker}.
+		 * @throws Exception On servicing failure.
+		 */
 		public void backPressure(@Parameter Thread serviceThread, ServerHttpConnection connection, TeamMarker marker)
 				throws Exception {
 			fail("Should not be invoked, as back pressure from Team");
@@ -1183,12 +1331,21 @@ public abstract class AbstractHttpServerImplementationTestCase {
 		}
 	}
 
+	/**
+	 * Test fixture for servicing requests that wait for connection cancellation.
+	 */
 	public static class CancelConnectionServicer {
 
 		private static boolean isBlocked = false;
 
 		private static final boolean[] isContinue = new boolean[] { false };
 
+		/**
+		 * Services the request.
+		 *
+		 * @param mos {@link CancelConnectionManagedObjectSource}.
+		 * @throws Throwable On servicing failure.
+		 */
 		@Next("loopOne")
 		public void service(CancelConnectionManagedObjectSource mos) throws Throwable {
 
@@ -1210,18 +1367,30 @@ public abstract class AbstractHttpServerImplementationTestCase {
 			}
 		}
 
+		/**
+		 * Loops on team one.
+		 *
+		 * @param marker {@link TeamMarker}.
+		 * @throws Exception On failure.
+		 */
 		@Next("loopTwo")
 		public void loopOne(TeamMarker marker) throws Exception {
 			// loops around (on different team to allow socket listener to close connection)
 			Thread.sleep(1);
 		}
 
+		/**
+		 * Loops on team two.
+		 *
+		 * @param marker {@link TeamTwoMarker}.
+		 */
 		@Next("loopOne")
 		public void loopTwo(TeamTwoMarker marker) {
 			// loop
 		}
 	}
 
+	/** {@link AbstractManagedObjectSource} to cancel connections. */
 	public static class CancelConnectionManagedObjectSource extends AbstractManagedObjectSource<None, None>
 			implements ManagedObject, ManagedObjectPool {
 
@@ -2011,6 +2180,13 @@ public abstract class AbstractHttpServerImplementationTestCase {
 
 		private int requestCount;
 
+		/**
+		 * Creates the {@link PipelineResult}.
+		 *
+		 * @param startTime    start time in milliseconds.
+		 * @param endTime      end time in milliseconds.
+		 * @param requestCount number of requests completed.
+		 */
 		public PipelineResult(long startTime, long endTime, int requestCount) {
 			this.startTime = startTime;
 			this.endTime = endTime;
@@ -2046,6 +2222,14 @@ public abstract class AbstractHttpServerImplementationTestCase {
 			testClass = testClazz;
 		}
 
+		/**
+		 * Sets the {@link PipelineResult} for the given prefix and servicer class.
+		 *
+		 * @param prefix         result prefix label.
+		 * @param servicerClass  the servicer {@link Class}, or <code>null</code> for raw result.
+		 * @param pipelineResult {@link PipelineResult}.
+		 * @return <code>true</code> if all results are available for comparison.
+		 */
 		public static boolean setResult(String prefix, Class<?> servicerClass, PipelineResult pipelineResult) {
 
 			// Obtain the compare result

@@ -9,7 +9,7 @@ import net.officefloor.server.google.function.OfficeFloorHttpFunction;
 import net.officefloor.server.google.function.wrap.AbstractSetupGoogleHttpFunctionJUnit;
 
 /**
- * {@link OfficeExtension} to run Google Function.
+ * {@link OfficeExtensionService} to run Google Function.
  * 
  * @author Daniel Sagenschneider
  */

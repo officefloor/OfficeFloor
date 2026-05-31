@@ -6,6 +6,7 @@ import lombok.Data;
 
 import java.util.Map;
 
+/** Composition configuration. */
 @Data
 public class CompositionConfiguration {
 

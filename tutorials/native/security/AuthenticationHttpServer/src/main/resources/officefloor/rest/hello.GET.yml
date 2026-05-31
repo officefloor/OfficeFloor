@@ -1,0 +1,7 @@
+getTemplateData:
+  class: net.officefloor.tutorial.authenticationhttpserver.HelloLogic
+  method: getTemplateData
+  next: render
+render:
+  procedure: Thymeleaf
+  resource: hello

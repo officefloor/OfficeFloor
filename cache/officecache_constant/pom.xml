@@ -15,5 +15,9 @@
 			<groupId>${project.groupId}</groupId>
 			<artifactId>officecache</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>net.officefloor.core</groupId>
+			<artifactId>officecompiler</artifactId>
+		</dependency>
 	</dependencies>
 </project>

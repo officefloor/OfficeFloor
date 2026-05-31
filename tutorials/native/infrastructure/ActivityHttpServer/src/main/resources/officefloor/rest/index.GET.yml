@@ -1,0 +1,12 @@
+initiate:
+  class: net.officefloor.tutorial.activityhttpserver.InitiateDepthLogic
+  method: initiate
+  next: LevelOne
+LevelOne:
+  source: net.officefloor.activity.ActivitySectionSource
+  location: LevelOne.activity
+  outputs:
+    Output: send
+send:
+  class: net.officefloor.tutorial.activityhttpserver.SendDepthLogic
+  method: send

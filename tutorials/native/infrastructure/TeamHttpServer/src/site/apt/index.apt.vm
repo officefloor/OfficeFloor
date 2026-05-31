@@ -34,35 +34,33 @@ Thread Injection Tutorial
   
   The example's web page is as follows and has been kept simple to focus on thread injection.
 
-[./images/TeamHttpServer-screenshot.png] TeamHttpServer screen shot.
-  
   The example displays the names of two threads to show the different thread pools servicing the request.
-  
+
    * thread to obtain cached letter encryption
-   
+
    * thread (pool) to look up letter encryption within the database
-   
+
   {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/TeamHttpServer}Tutorial Source}}
 
 
 
 *Thread Injection Configuration
-  
-  The Thread Injection configuration is contained in the <<<application.teams>>> file at the root of the class path.  For the example application it is as follows.
+
+  The Thread Injection configuration is contained in YAML files within the <<<officefloor/teams/>>> directory.  For the example application it is as follows.
 
   Note that OfficeFloor refers to a thread pool as a {{{/apidocs/net/officefloor/frame/api/team/Team.html}Team}}.  The naming comes from OfficeFloor basing it's modeling on a business.
-    
-%{snippet|file=${basedir}/src/main/resources/application.teams|ignoreDownloadError=false}
-  
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/teams/DataSource.yml|ignoreDownloadError=false}
+
   The team is a {{{/apidocs/net/officefloor/frame/api/team/source/TeamSource.html}TeamSource}} implementation that provides a thread pool via Java's concurrent <<<Executor>>>.
-  
+
   OfficeFloor uses the method's dependencies to determine the type of functionality being undertaken by the method.  The method's dependencies give an indicator of what the method is likely to be doing.  In this case if the method requires a <<<Connection>>> it is very likely that it will be doing blocking database I/O calls.  This means of classifying methods allows OfficeFloor to auto-magically use the appropriate thread pool to execute the method.  It is what OfficeFloor considers <<<Thread Injection>>>.
 
   All other methods are executed by the default <<<Team>>>.  Running stand-alone this would be the socket listener thread.
-  
-  Note: the default <<<Team>>> actually re-uses the invoking thread of the previous method.  This reduces thread context switching and improves performance.  For a full explanation of <<<Thread Injection>>> please read the {{{../../about.html}paper on OfficeFloor}}. 
-  
-  Adding thread pools is optional and therefore the inclusion of the <<<application.teams>>> file is optional.  It is anticipated that threading will be configured closely to the dependencies available within an environment.  The file however is supported for extending WoOF web applications by customising the thread pools.
+
+  Note: the default <<<Team>>> actually re-uses the invoking thread of the previous method.  This reduces thread context switching and improves performance.  For a full explanation of <<<Thread Injection>>> please read the {{{../../about.html}paper on OfficeFloor}}.
+
+  Adding thread pools is optional and therefore the inclusion of YAML files in the <<<officefloor/teams/>>> directory is optional.  It is anticipated that threading will be configured closely to the dependencies available within an environment.  The directory however is supported for extending WoOF web applications by customising the thread pools.
 
 
 
@@ -70,9 +68,9 @@ Thread Injection Tutorial
   
   The following is the content of the template.
 
-%{snippet|file=${basedir}/src/main/resources/Template.woof.html|ignoreDownloadError=false}
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/encrypt.POST.yml|ignoreDownloadError=false}
 
-  The following provides the values for the <<< $\{property\} >>> entries from the template logic.  
+  The following provides the session state object and the encrypt/retrieve logic.
 
 %{snippet|id=values|file=${basedir}/src/main/java/net/officefloor/tutorial/teamhttpserver/Template.java|ignoreDownloadError=false}
   

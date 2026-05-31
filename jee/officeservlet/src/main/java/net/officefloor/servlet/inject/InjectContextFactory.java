@@ -68,6 +68,7 @@ public class InjectContextFactory {
 	/**
 	 * Injects the dependencies onto the {@link Object}.
 	 * 
+	 * @param <T>    Type of the object.
 	 * @param object {@link Object} to receive dependencies.
 	 * @return Input {@link Object} to allow easy factory creation.
 	 * @throws IllegalArgumentException If failure to inject.

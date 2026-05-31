@@ -204,7 +204,8 @@ public interface SourceContext extends SourceProperties {
 
 	/**
 	 * Obtains the {@link Clock}.
-	 * 
+	 *
+	 * @param <T>        Type of time.
 	 * @param translator Translate the seconds since Epoch to "time" returned from
 	 *                   the {@link Clock}.
 	 * @return {@link Clock}.

@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.util.Map;
 
+/** HTTP security configuration. */
 @Data
 public class HttpSecurityConfiguration {
 

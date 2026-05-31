@@ -1,0 +1,3 @@
+getPosts:
+  class: net.officefloor.tutorial.awssamhttpserver.SamLogic
+  method: getPosts

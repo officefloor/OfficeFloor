@@ -62,13 +62,13 @@ public class TeamHttpServerJUnit4Test {
 
 		// Retrieving from database (will have value cached)
 		MockHttpResponse response = this.server
-				.sendFollowRedirect(MockHttpServer.mockRequest("/example+encrypt?letter=A").method(HttpMethod.POST));
+				.sendFollowRedirect(MockHttpServer.mockRequest("/encrypt?letter=A").method(HttpMethod.POST));
 		assertEquals("Should be successful after POST/GET pattern", 200, response.getStatus().getStatusCode());
 		assertFalse("Ensure not cached (obtain from database)", response.getEntity(null).contains("[cached]"));
 
 		// Looking up within cache (referencing session in cookies)
 		response = this.server.sendFollowRedirect(
-				MockHttpServer.mockRequest("/example+encrypt?letter=A").method(HttpMethod.POST).cookies(response));
+				MockHttpServer.mockRequest("/encrypt?letter=A").method(HttpMethod.POST).cookies(response));
 		assertEquals("Should be successful after POST/GET pattern", 200, response.getStatus().getStatusCode());
 		assertTrue("Ensure cached", response.getEntity(null).contains("[cached]"));
 	}

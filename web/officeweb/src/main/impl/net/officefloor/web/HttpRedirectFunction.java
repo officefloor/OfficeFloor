@@ -60,7 +60,14 @@ public class HttpRedirectFunction<T>
 	 * Dependency keys.
 	 */
 	public static enum HttpRedirectDependencies {
-		PATH_VALUES, SERVER_HTTP_CONNECTION, REQUEST_STATE, SESSION_STATE
+		/** Path values dependency. */
+		PATH_VALUES,
+		/** Server HTTP connection dependency. */
+		SERVER_HTTP_CONNECTION,
+		/** Request state dependency. */
+		REQUEST_STATE,
+		/** Session state dependency. */
+		SESSION_STATE
 	}
 
 	/**

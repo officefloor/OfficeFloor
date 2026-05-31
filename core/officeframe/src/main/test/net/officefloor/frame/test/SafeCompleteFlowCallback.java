@@ -38,8 +38,9 @@ public class SafeCompleteFlowCallback extends CompleteFlowCallback {
 
 	/**
 	 * Waits until {@link FlowCallback} is complete.
-	 * 
+	 *
 	 * @param maxWaitTimeInMilliseconds Maximum wait time in milliseconds.
+	 * @return {@link Thread} that completed the {@link FlowCallback}.
 	 */
 	public synchronized Thread waitUntilComplete(int maxWaitTimeInMilliseconds) {
 

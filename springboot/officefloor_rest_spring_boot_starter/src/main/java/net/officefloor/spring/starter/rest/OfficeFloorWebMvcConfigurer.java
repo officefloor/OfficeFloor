@@ -25,6 +25,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+/** {@link WebMvcConfigurer} for OfficeFloor REST Spring Boot integration. */
 public class OfficeFloorWebMvcConfigurer implements WebMvcConfigurer {
 
     private final OfficeFloorRestSpringBootStarter starter;
@@ -35,6 +36,12 @@ public class OfficeFloorWebMvcConfigurer implements WebMvcConfigurer {
 
     private final ObjectProvider<ApplicationContext> applicationContextProvider;
 
+    /** Instantiate.
+     * @param starter {@link OfficeFloorRestSpringBootStarter}.
+     * @param handlerAdapterProvider {@link RequestMappingHandlerAdapter} provider.
+     * @param dispatcherServletProvider {@link DispatcherServlet} provider.
+     * @param applicationContextProvider {@link ApplicationContext} provider.
+     */
     public OfficeFloorWebMvcConfigurer(OfficeFloorRestSpringBootStarter starter,
                                        ObjectProvider<RequestMappingHandlerAdapter> handlerAdapterProvider,
                                        ObjectProvider<DispatcherServlet> dispatcherServletProvider,

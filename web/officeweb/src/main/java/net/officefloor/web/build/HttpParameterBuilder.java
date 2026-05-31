@@ -21,13 +21,24 @@
 package net.officefloor.web.build;
 
 /**
+ * Builder for an HTTP parameter.
  *
  * @author Daniel Sagenschneider
  */
 public interface HttpParameterBuilder {
 
+	/**
+	 * Sets whether the parameter is required.
+	 *
+	 * @param isRequired Whether the parameter is required.
+	 */
 	void setRequired(boolean isRequired);
-	
+
+	/**
+	 * Sets an alias name for the parameter.
+	 *
+	 * @param aliasName Alias name.
+	 */
 	void setAlias(String aliasName);
 
 }

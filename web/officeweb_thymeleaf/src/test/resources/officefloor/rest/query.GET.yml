@@ -1,0 +1,7 @@
+service:
+  class: ${TestClass}$QueryService
+  next: render
+
+render:
+  procedure: Thymeleaf
+  resource: query

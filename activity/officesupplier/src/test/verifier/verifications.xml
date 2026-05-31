@@ -1,0 +1,9 @@
+<verifications>
+	<files>
+		<file>
+			<!-- Ensure using latest version -->
+			<location>${basedir}/../../bom/pom.xml</location>
+			<contains><![CDATA[<dependencyManagement>[^;]*<artifactId>${project.artifactId}</artifactId>[^;]*</dependencyManagement>]]></contains>
+		</file>
+	</files>
+</verifications>

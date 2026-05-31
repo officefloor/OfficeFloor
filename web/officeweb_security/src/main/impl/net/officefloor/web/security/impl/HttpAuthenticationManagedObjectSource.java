@@ -44,6 +44,7 @@ public class HttpAuthenticationManagedObjectSource<A, C>
 	 * Dependency keys.
 	 */
 	public static enum Dependencies {
+		/** Authentication dependency. */
 		AUTHENTICATION
 	}
 

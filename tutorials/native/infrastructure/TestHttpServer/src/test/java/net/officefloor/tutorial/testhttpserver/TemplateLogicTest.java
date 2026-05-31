@@ -55,7 +55,7 @@ public class TemplateLogicTest {
 
 		// Send request to add
 		MockHttpResponse response = this.server
-				.sendFollowRedirect(MockHttpServer.mockRequest("/template+add?a=1&b=2").method(HttpMethod.POST));
+				.sendFollowRedirect(MockHttpServer.mockRequest("/add?a=1&b=2").method(HttpMethod.POST));
 		assertEquals(200, response.getStatus().getStatusCode(), "Should be successful");
 
 		// Ensure added the values
