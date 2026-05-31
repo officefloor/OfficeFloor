@@ -41,7 +41,10 @@ public class InitialiseHttpRequestStateFunction implements
 	 * Dependency keys.
 	 */
 	public static enum InitialiseHttpRequestStateDependencies {
-		PATH_ARGUMENTS, HTTP_REQUEST_STATE
+		/** Path arguments dependency. */
+		PATH_ARGUMENTS,
+		/** HTTP request state dependency. */
+		HTTP_REQUEST_STATE
 	}
 
 	/*

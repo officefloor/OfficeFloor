@@ -97,6 +97,8 @@ public class StatePoller<S, F extends Enum<F>> {
 	 * @param flowKey              {@link Flow} key to use to invoke the polling
 	 *                             {@link ProcessState} from the
 	 *                             {@link ManagedObjectExecuteContext}.
+	 * @param <S>                  State type.
+	 * @param <F>                  Flow key type.
 	 * @param executeContext       {@link ManagedObjectExecuteContext}.
 	 * @param managedObjectFactory Factory to create the {@link ManagedObject}.
 	 * @return {@link Builder}.
@@ -118,6 +120,7 @@ public class StatePoller<S, F extends Enum<F>> {
 	 * @param flowIndex            {@link Flow} index to use to invoke the polling
 	 *                             {@link ProcessState} from the
 	 *                             {@link ManagedObjectExecuteContext}.
+	 * @param <S>                  State type.
 	 * @param executeContext       {@link ManagedObjectExecuteContext}.
 	 * @param managedObjectFactory Factory to create the {@link ManagedObject}.
 	 * @return {@link Builder}.
@@ -141,6 +144,7 @@ public class StatePoller<S, F extends Enum<F>> {
 	 * 
 	 * @param stateType   State type.
 	 * @param clock       {@link Clock}.
+	 * @param <S>         State type.
 	 * @param initialiser {@link Initialiser}.
 	 * @param poller      {@link Poller}.
 	 * @return {@link Builder}.
@@ -329,7 +333,7 @@ public class StatePoller<S, F extends Enum<F>> {
 		 * 
 		 * @param defaultPollInterval Default poll interval.
 		 * @param unit                {@link TimeUnit} for the default poll interval.
-		 * @return <cod>this</code>.
+		 * @return {@code this}.
 		 */
 		public Builder<S, F> defaultPollInterval(long defaultPollInterval, TimeUnit unit) {
 			unit = unit != null ? unit : TimeUnit.MILLISECONDS;

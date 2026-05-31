@@ -350,12 +350,28 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 
 	/**
 	 * Ensure can use primitive types.
+	 *
+	 * @throws Exception On test failure.
 	 */
 	public void testDirectPrimitives() throws Exception {
 		PrimitiveTypes types = this.primitives(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0);
 		assertPrimitives(types);
 	}
 
+	/**
+	 * Invokes primitive types directly.
+	 *
+	 * @param _boolean Boolean primitive.
+	 * @param _byte    Byte primitive.
+	 * @param _short   Short primitive.
+	 * @param _char    Char primitive.
+	 * @param _int     Int primitive.
+	 * @param _long    Long primitive.
+	 * @param _float   Float primitive.
+	 * @param _double  Double primitive.
+	 * @return {@link PrimitiveTypes} result.
+	 * @throws Exception If fails.
+	 */
 	protected abstract PrimitiveTypes primitives(boolean _boolean, byte _byte, short _short, char _char, int _int,
 			long _long, float _float, double _double) throws Exception;
 
@@ -380,6 +396,8 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 
 	/**
 	 * Ensure can invoke primitive types.
+	 *
+	 * @throws Throwable On test failure.
 	 */
 	public void testInvokePrimitives() throws Throwable {
 		CompileOfficeFloor compiler = new CompileOfficeFloor();
@@ -409,12 +427,26 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 		assertPrimitives(primitives.getValue());
 	}
 
+	/** Handles the return of primitive types. */
 	public static class PrimitiveReturn {
+		/**
+		 * Captures the primitive types result.
+		 *
+		 * @param result {@link PrimitiveTypes} result.
+		 * @param out    Output for the result.
+		 */
 		public void service(@Parameter PrimitiveTypes result, Out<PrimitiveTypes> out) {
 			out.set(result);
 		}
 	}
 
+	/**
+	 * Invokes primitives via the procedure.
+	 *
+	 * @param context      {@link CompileOfficeContext}.
+	 * @param handleResult {@link OfficeSectionInput} to handle the result.
+	 * @return Name of the managed function.
+	 */
 	protected String primitives(CompileOfficeContext context, OfficeSectionInput handleResult) {
 		ProcedureBuildImpl builder = new ProcedureBuildImpl();
 		this.primitives(builder);
@@ -425,6 +457,11 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 		return builder.getManagedFunctionName();
 	}
 
+	/**
+	 * Builds the primitives procedure.
+	 *
+	 * @param builder {@link ProcedureBuilder}.
+	 */
 	protected abstract void primitives(ProcedureBuilder builder);
 
 	private static void assertPrimitives(PrimitiveTypes types) {
@@ -440,6 +477,8 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 
 	/**
 	 * Ensure can pass in a Java object.
+	 *
+	 * @throws Exception On test failure.
 	 */
 	public void testDirectObject() throws Exception {
 		String string = "TEST";
@@ -450,6 +489,16 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 		assertObjects(types, string, object, primitiveArray, objectArray);
 	}
 
+	/**
+	 * Invokes object types directly.
+	 *
+	 * @param string         String value.
+	 * @param object         {@link JavaObject} value.
+	 * @param primitiveArray Primitive array value.
+	 * @param objectArray    Object array value.
+	 * @return {@link ObjectTypes} result.
+	 * @throws Exception If fails.
+	 */
 	protected abstract ObjectTypes objects(String string, JavaObject object, int[] primitiveArray,
 			JavaObject[] objectArray) throws Exception;
 
@@ -470,6 +519,8 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 
 	/**
 	 * Ensure can invoke object types.
+	 *
+	 * @throws Throwable On test failure.
 	 */
 	public void testInvokeObject() throws Throwable {
 		CompileOfficeFloor compiler = new CompileOfficeFloor();
@@ -500,12 +551,26 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 		assertObjects(types, string, object, primitiveArray, objectArray);
 	}
 
+	/** Handles the return of object types. */
 	public static class ObjectReturn {
+		/**
+		 * Captures the object types result.
+		 *
+		 * @param result {@link ObjectTypes} result.
+		 * @param out    Output for the result.
+		 */
 		public void service(@Parameter ObjectTypes result, Out<ObjectTypes> out) {
 			out.set(result);
 		}
 	}
 
+	/**
+	 * Invokes objects via the procedure.
+	 *
+	 * @param context      {@link CompileOfficeContext}.
+	 * @param handleResult {@link OfficeSectionInput} to handle the result.
+	 * @return Name of the managed function.
+	 */
 	protected String objects(CompileOfficeContext context, OfficeSectionInput handleResult) {
 		ProcedureBuildImpl builder = new ProcedureBuildImpl();
 		this.objects(builder);
@@ -516,6 +581,11 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 		return builder.getManagedFunctionName();
 	}
 
+	/**
+	 * Builds the objects procedure.
+	 *
+	 * @param builder {@link ProcedureBuilder}.
+	 */
 	protected abstract void objects(ProcedureBuilder builder);
 
 	private static void assertObjects(ObjectTypes types, String string, JavaObject object, int[] primitiveArray,
@@ -528,6 +598,8 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 
 	/**
 	 * Ensure can pass collections.
+	 *
+	 * @throws Exception On test failure.
 	 */
 	public void testDirectCollections() throws Exception {
 		List<Integer> list = new LinkedList<>();
@@ -537,6 +609,15 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 		assertCollections(types, list, set, map);
 	}
 
+	/**
+	 * Invokes collection types directly.
+	 *
+	 * @param list {@link List} value.
+	 * @param set  {@link Set} value.
+	 * @param map  {@link Map} value.
+	 * @return {@link CollectionTypes} result.
+	 * @throws Exception If fails.
+	 */
 	protected abstract CollectionTypes collections(List<Integer> list, Set<Character> set, Map<String, JavaObject> map)
 			throws Exception;
 
@@ -556,6 +637,8 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 
 	/**
 	 * Ensure can invoke collections.
+	 *
+	 * @throws Throwable On test failure.
 	 */
 	public void testInvokeCollections() throws Throwable {
 		CompileOfficeFloor compiler = new CompileOfficeFloor();
@@ -583,12 +666,26 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 		assertCollections(var.getValue(), list, set, map);
 	}
 
+	/** Handles the return of collection types. */
 	public static class CollectionReturn {
+		/**
+		 * Captures the collection types result.
+		 *
+		 * @param result {@link CollectionTypes} result.
+		 * @param out    Output for the result.
+		 */
 		public void service(@Parameter CollectionTypes result, Out<CollectionTypes> out) {
 			out.set(result);
 		}
 	}
 
+	/**
+	 * Invokes collections via the procedure.
+	 *
+	 * @param context      {@link CompileOfficeContext}.
+	 * @param handleResult {@link OfficeSectionInput} to handle the result.
+	 * @return Name of the managed function.
+	 */
 	protected String collections(CompileOfficeContext context, OfficeSectionInput handleResult) {
 		ProcedureBuildImpl builder = new ProcedureBuildImpl();
 		this.collections(builder);
@@ -599,6 +696,11 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 		return builder.getManagedFunctionName();
 	}
 
+	/**
+	 * Builds the collections procedure.
+	 *
+	 * @param builder {@link ProcedureBuilder}.
+	 */
 	protected abstract void collections(ProcedureBuilder builder);
 
 	private static void assertCollections(CollectionTypes types, List<Integer> list, Set<Character> set,
@@ -610,6 +712,8 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 
 	/**
 	 * Ensure can handle variables.
+	 *
+	 * @throws Exception On test failure.
 	 */
 	public void testDirectVariables() throws Exception {
 		MockVar<String> in = new MockVar<>("2");
@@ -619,6 +723,16 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 		assertVariables(types, out.get(), var.get());
 	}
 
+	/**
+	 * Invokes variable types directly.
+	 *
+	 * @param val Variable character value.
+	 * @param in  Input variable.
+	 * @param out Output variable.
+	 * @param var In/out variable.
+	 * @return {@link VariableTypes} result.
+	 * @throws Exception If fails.
+	 */
 	protected abstract VariableTypes variables(char val, In<String> in, Out<JavaObject> out, Var<Integer> var)
 			throws Exception;
 
@@ -666,6 +780,8 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 
 	/**
 	 * Ensure can using variables.
+	 *
+	 * @throws Throwable On test failure.
 	 */
 	public void testInvokeVariables() throws Throwable {
 
@@ -680,19 +796,40 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 		assertVariables(capture.value, out.getValue(), var.getValue());
 	}
 
+	/** Passes variables through to the procedure. */
 	public static class VariablePass {
+		/**
+		 * Passes the variable capture closure along.
+		 *
+		 * @param capture {@link Closure} to capture the result.
+		 * @param out     Output for the closure.
+		 */
 		@Next("use")
 		public void service(@Parameter Closure<VariableTypes> capture, Out<Closure<VariableTypes>> out) {
 			out.set(capture);
 		}
 	}
 
+	/** Returns variable types from the procedure. */
 	public static class VariableReturn {
+		/**
+		 * Captures the variable types result.
+		 *
+		 * @param result {@link VariableTypes} result.
+		 * @param in     Input closure to capture the result into.
+		 */
 		public void service(@Parameter VariableTypes result, In<Closure<VariableTypes>> in) {
 			in.get().value = result;
 		}
 	}
 
+	/**
+	 * Invokes variables via the procedure.
+	 *
+	 * @param pass         {@link OfficeSectionOutput} to pass into the procedure.
+	 * @param context      {@link CompileOfficeContext}.
+	 * @param handleResult {@link OfficeSectionInput} to handle the result.
+	 */
 	protected void variables(OfficeSectionOutput pass, CompileOfficeContext context, OfficeSectionInput handleResult) {
 		ProcedureBuildImpl builder = new ProcedureBuildImpl();
 		this.variables(builder);
@@ -703,6 +840,11 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 		office.link(procedure.getOfficeSectionOutput(ProcedureArchitect.NEXT_OUTPUT_NAME), handleResult);
 	}
 
+	/**
+	 * Builds the variables procedure.
+	 *
+	 * @param builder {@link ProcedureBuilder}.
+	 */
 	protected abstract void variables(ProcedureBuilder builder);
 
 	private static void assertVariables(VariableTypes types, JavaObject out, Integer var) {
@@ -721,12 +863,21 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 
 	/**
 	 * Ensure can provide {@link Parameter}.
+	 *
+	 * @throws Exception On test failure.
 	 */
 	public void testDirectParameter() throws Exception {
 		ParameterTypes types = this.parameter("test");
 		assertParameter(types);
 	}
 
+	/**
+	 * Invokes parameter types directly.
+	 *
+	 * @param parameter Parameter string value.
+	 * @return {@link ParameterTypes} result.
+	 * @throws Exception If fails.
+	 */
 	protected abstract ParameterTypes parameter(String parameter) throws Exception;
 
 	/**
@@ -743,6 +894,8 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 
 	/**
 	 * Ensure can use parameter.
+	 *
+	 * @throws Throwable On test failure.
 	 */
 	public void testInvokeParameter() throws Throwable {
 		CompileOfficeFloor compiler = new CompileOfficeFloor();
@@ -765,19 +918,39 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 		assertParameter(result.getValue());
 	}
 
+	/** Passes a parameter to the procedure. */
 	public static class ParameterPass {
+		/**
+		 * Provides the test parameter string.
+		 *
+		 * @return Test parameter string.
+		 */
 		@Next("use")
 		public String service() {
 			return "test";
 		}
 	}
 
+	/** Returns parameter types from the procedure. */
 	public static class ParameterReturn {
+		/**
+		 * Captures the parameter types result.
+		 *
+		 * @param result {@link ParameterTypes} result.
+		 * @param out    Output for the result.
+		 */
 		public void service(@Parameter ParameterTypes result, Out<ParameterTypes> out) {
 			out.set(result);
 		}
 	}
 
+	/**
+	 * Invokes parameter via the procedure.
+	 *
+	 * @param pass         {@link OfficeSectionOutput} to pass into the procedure.
+	 * @param context      {@link CompileOfficeContext}.
+	 * @param handleResult {@link OfficeSectionInput} to handle the result.
+	 */
 	protected void parameter(OfficeSectionOutput pass, CompileOfficeContext context, OfficeSectionInput handleResult) {
 		ProcedureBuildImpl builder = new ProcedureBuildImpl();
 		this.parameter(builder);
@@ -788,6 +961,11 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 		office.link(procedure.getOfficeSectionOutput(ProcedureArchitect.NEXT_OUTPUT_NAME), handleResult);
 	}
 
+	/**
+	 * Builds the parameter procedure.
+	 *
+	 * @param builder {@link ProcedureBuilder}.
+	 */
 	protected abstract void parameter(ProcedureBuilder builder);
 
 	private static void assertParameter(ParameterTypes types) {
@@ -796,6 +974,8 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 
 	/**
 	 * Ensure safe to run directly multi-threaded.
+	 *
+	 * @throws Exception On test failure.
 	 */
 	@StressTest
 	public void testDirectMultiThreaded() throws Exception {
@@ -804,6 +984,8 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 
 	/**
 	 * Ensure safe to run invoked multi-threaded.
+	 *
+	 * @throws Throwable On test failure.
 	 */
 	@StressTest
 	public void testInvokeMultiThreaded() throws Throwable {
@@ -823,6 +1005,8 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 
 	/**
 	 * Ensure can run direct for web.
+	 *
+	 * @throws Exception On test failure.
 	 */
 	public void testDirectWeb() throws Exception {
 		MockObjectResponse<WebTypes> types = new MockObjectResponse<>();
@@ -831,12 +1015,26 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 		assertWeb(types.getObject());
 	}
 
+	/**
+	 * Invokes web types directly.
+	 *
+	 * @param pathParameter   Path parameter value.
+	 * @param queryParameter  Query parameter value.
+	 * @param headerParameter Header parameter value.
+	 * @param cookieParameter Cookie parameter value.
+	 * @param httpParameters  {@link MockHttpParameters}.
+	 * @param httpObject      {@link MockHttpObject}.
+	 * @param response        {@link ObjectResponse} for the result.
+	 * @throws Exception If fails.
+	 */
 	protected abstract void web(String pathParameter, String queryParameter, String headerParameter,
 			String cookieParameter, MockHttpParameters httpParameters, MockHttpObject httpObject,
 			ObjectResponse<WebTypes> response) throws Exception;
 
 	/**
 	 * Ensure can invoke for web.
+	 *
+	 * @throws Throwable On test failure.
 	 */
 	public void testInvokeWeb() throws Throwable {
 		WebCompileOfficeFloor compiler = new WebCompileOfficeFloor();
@@ -856,6 +1054,12 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 		assertWeb(types);
 	}
 
+	/**
+	 * Invokes web via the procedure.
+	 *
+	 * @param pass    {@link OfficeFlowSourceNode} to pass into the procedure.
+	 * @param context {@link CompileWebContext}.
+	 */
 	protected void web(OfficeFlowSourceNode pass, CompileWebContext context) {
 		ProcedureBuildImpl builder = new ProcedureBuildImpl();
 		this.web(builder);
@@ -864,6 +1068,11 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 		context.getOfficeArchitect().link(pass, procedure.getOfficeSectionInput(ProcedureArchitect.INPUT_NAME));
 	}
 
+	/**
+	 * Builds the web procedure.
+	 *
+	 * @param builder {@link ProcedureBuilder}.
+	 */
 	protected abstract void web(ProcedureBuilder builder);
 
 	private static void assertWeb(WebTypes types) {
@@ -883,6 +1092,8 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 
 	/**
 	 * Ensure can run direct for {@link HttpException}.
+	 *
+	 * @throws Throwable On test failure.
 	 */
 	public void testDirectHttpException() throws Throwable {
 		try {
@@ -897,6 +1108,11 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 		}
 	}
 
+	/**
+	 * Invokes http exception directly.
+	 *
+	 * @throws Throwable On test failure.
+	 */
 	protected abstract void httpException() throws Throwable;
 
 	/**
@@ -914,6 +1130,8 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 
 	/**
 	 * Ensure can invoke to handle {@link HttpException}.
+	 *
+	 * @throws Throwable On test failure.
 	 */
 	public void testInvokeHttpException() throws Throwable {
 		WebCompileOfficeFloor compiler = new WebCompileOfficeFloor();
@@ -928,6 +1146,12 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 		response.assertResponse(422, "test");
 	}
 
+	/**
+	 * Invokes http exception via the procedure.
+	 *
+	 * @param pass    {@link OfficeFlowSourceNode} to pass into the procedure.
+	 * @param context {@link CompileWebContext}.
+	 */
 	protected void httpException(OfficeFlowSourceNode pass, CompileWebContext context) {
 		ProcedureBuildImpl builder = new ProcedureBuildImpl();
 		this.httpException(builder);
@@ -936,6 +1160,11 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 		context.getOfficeArchitect().link(pass, procedure.getOfficeSectionInput(ProcedureArchitect.INPUT_NAME));
 	}
 
+	/**
+	 * Builds the http exception procedure.
+	 *
+	 * @param builder {@link ProcedureBuilder}.
+	 */
 	protected abstract void httpException(ProcedureBuilder builder);
 
 	/**
@@ -958,6 +1187,8 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 
 	/**
 	 * Ensure can invoke flow.
+	 *
+	 * @throws Throwable On test failure.
 	 */
 	public void testFlow() throws Throwable {
 		CompileOfficeFloor compiler = new CompileOfficeFloor();
@@ -990,32 +1221,77 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 		assertEquals("exception", result.getValue());
 	}
 
+	/** Handles various flow outputs from the procedure. */
 	public static class FlowHandlers {
+		/**
+		 * Handles the next function flow.
+		 *
+		 * @param result Output for the result.
+		 */
 		public void nextFunction(Out<String> result) {
 			result.set("nextFunction");
 		}
 
+		/**
+		 * Handles the flow output.
+		 *
+		 * @param result Output for the result.
+		 */
 		public void flow(Out<String> result) {
 			result.set("flow");
 		}
 
+		/**
+		 * Handles the flow with callback output.
+		 *
+		 * @param result Output for the result.
+		 */
 		public void flowWithCallback(Out<String> result) {
 			result.set("flowWithCallback");
 		}
 
+		/**
+		 * Handles the flow with parameter and callback output.
+		 *
+		 * @param param  Flow parameter.
+		 * @param result Output for the result.
+		 */
 		public void flowWithParameterAndCallback(@Parameter String param, Var<String> result) {
 			result.set(result.get() + "-flowWithParameterAndCallback-" + param);
 		}
 
+		/**
+		 * Handles the flow with parameter output.
+		 *
+		 * @param param  Flow parameter.
+		 * @param result Output for the result.
+		 */
 		public void flowWithParameter(@Parameter String param, Var<String> result) {
 			result.set(result.get() + "-flowWithParameter-" + param);
 		}
 
+		/**
+		 * Handles the exception flow.
+		 *
+		 * @param result Output for the result.
+		 */
 		public void exception(Out<String> result) {
 			result.set("exception");
 		}
 	}
 
+	/**
+	 * Invokes flow via the procedure.
+	 *
+	 * @param context                        {@link CompileOfficeContext}.
+	 * @param next                           {@link OfficeSectionInput} for next output.
+	 * @param flow                           {@link OfficeSectionInput} for flow output.
+	 * @param flowWithCallback               {@link OfficeSectionInput} for flow with callback output.
+	 * @param flowWithParameterAndCallback   {@link OfficeSectionInput} for flow with parameter and callback output.
+	 * @param flowWithParameter              {@link OfficeSectionInput} for flow with parameter output.
+	 * @param exception                      {@link OfficeSectionInput} for exception output.
+	 * @return Name of the managed function.
+	 */
 	protected String flow(CompileOfficeContext context, OfficeSectionInput next, OfficeSectionInput flow,
 			OfficeSectionInput flowWithCallback, OfficeSectionInput flowWithParameterAndCallback,
 			OfficeSectionInput flowWithParameter, OfficeSectionInput exception) {
@@ -1038,10 +1314,17 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 		return builder.getManagedFunctionName();
 	}
 
+	/**
+	 * Builds the flow procedure.
+	 *
+	 * @param builder {@link ProcedureBuilder}.
+	 */
 	protected abstract void flow(ProcedureBuilder builder);
 
 	/**
 	 * Validate direct {@link AsynchronousFlow}.
+	 *
+	 * @throws Throwable On test failure.
 	 */
 	public void testDirectAsynchronousFlow() throws Throwable {
 		MockAsynchronousFlow flowOne = new MockAsynchronousFlow();
@@ -1054,6 +1337,13 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 		assertNull("Should not have flow two completion", flowTwo.getCompletion());
 	}
 
+	/**
+	 * Invokes asynchronous flow directly.
+	 *
+	 * @param flowOne First {@link AsynchronousFlow}.
+	 * @param flowTwo Second {@link AsynchronousFlow}.
+	 * @throws Exception If fails.
+	 */
 	protected abstract void asynchronousFlow(AsynchronousFlow flowOne, AsynchronousFlow flowTwo) throws Exception;
 
 	/**
@@ -1068,6 +1358,8 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 
 	/**
 	 * Ensure can invoke {@link AsynchronousFlow}.
+	 *
+	 * @throws Throwable On test failure.
 	 */
 	public void testInvokeAsynchronousFlow() throws Throwable {
 		CompileOfficeFloor compiler = new CompileOfficeFloor();
@@ -1079,6 +1371,12 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 		CompileOfficeFloor.invokeProcess(this.officeFloor, functionName.value, null);
 	}
 
+	/**
+	 * Invokes asynchronous flow via the procedure.
+	 *
+	 * @param context {@link CompileOfficeContext}.
+	 * @return Function name.
+	 */
 	protected String asynchronousFlow(CompileOfficeContext context) {
 		ProcedureBuildImpl builder = new ProcedureBuildImpl();
 		this.asynchronousFlow(builder);
@@ -1087,6 +1385,11 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 		return builder.getManagedFunctionName();
 	}
 
+	/**
+	 * Builds the asynchronous flow procedure.
+	 *
+	 * @param builder {@link ProcedureBuilder}.
+	 */
 	protected abstract void asynchronousFlow(ProcedureBuilder builder);
 
 	/**

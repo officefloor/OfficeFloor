@@ -58,6 +58,7 @@ public class HttpRequestStateManagedObjectSource
 	 * Dependency keys.
 	 */
 	public static enum HttpRequestStateDependencies {
+		/** Server HTTP connection dependency. */
 		SERVER_HTTP_CONNECTION
 	}
 

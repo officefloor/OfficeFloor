@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/** Employs {@link ManagedObjectArchitect} instances. */
 public class ManagedObjectEmployer {
 
     /**
@@ -56,6 +57,7 @@ public class ManagedObjectEmployer {
         };
     }
 
+    /** {@link ComposeSource} for managed objects. */
     protected static class ManagedObjectComposeSource implements ComposeSource<OfficeManagedObject, ManagedObjectConfiguration> {
 
         @Override

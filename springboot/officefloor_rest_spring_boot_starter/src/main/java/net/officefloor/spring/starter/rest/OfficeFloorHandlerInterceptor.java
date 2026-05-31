@@ -27,6 +27,7 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
+/** {@link HandlerInterceptor} to bridge OfficeFloor REST handling. */
 public class OfficeFloorHandlerInterceptor implements HandlerInterceptor {
 
     /**
@@ -47,6 +48,15 @@ public class OfficeFloorHandlerInterceptor implements HandlerInterceptor {
 
     private final ObjectProvider<ApplicationContext> applicationContextProvider;
 
+    /**
+     * Instantiate.
+     *
+     * @param bridge                       {@link HttpServletOfficeFloorBridge}.
+     * @param restEndpoint                 {@link OfficeFloorRestEndpoint}.
+     * @param handlerAdapterProvider       {@link ObjectProvider} for {@link RequestMappingHandlerAdapter}.
+     * @param dispatcherServletProvider    {@link ObjectProvider} for {@link DispatcherServlet}.
+     * @param applicationContextProvider   {@link ObjectProvider} for {@link ApplicationContext}.
+     */
     public OfficeFloorHandlerInterceptor(HttpServletOfficeFloorBridge bridge,
                                          OfficeFloorRestEndpoint restEndpoint,
                                          ObjectProvider<RequestMappingHandlerAdapter> handlerAdapterProvider,

@@ -299,7 +299,8 @@ public class ClassCompatibility {
 
 		/**
 		 * Obtains the object value.
-		 * 
+		 *
+		 * @param <T>  Type expected.
 		 * @param type Type expected.
 		 * @return Object value.
 		 */

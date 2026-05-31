@@ -32,10 +32,13 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+/** Employs compose architecture. */
 public class ComposeEmployer {
 
+    /** Prefix for added inputs. */
     public static String ADDED_INPUT_PREFIX = "#";
 
+    /** {@link ObjectMapper} for YAML. */
     public static final ObjectMapper MAPPER = new ObjectMapper(new YAMLFactory());
 
     /**
@@ -104,6 +107,7 @@ public class ComposeEmployer {
         return new ComposeArchitectImpl(architect, sourceContext);
     }
 
+    /** Implementation of {@link ComposeArchitect}. */
     protected static class ComposeArchitectImpl implements ComposeArchitect {
 
         private final OfficeArchitect architect;
@@ -114,6 +118,12 @@ public class ComposeEmployer {
 
         private final Map<String, OfficeGovernance> governances = new HashMap<>();
 
+        /**
+         * Instantiate.
+         *
+         * @param architect     {@link OfficeArchitect}.
+         * @param sourceContext {@link OfficeSourceContext}.
+         */
         protected ComposeArchitectImpl(OfficeArchitect architect, OfficeSourceContext sourceContext) {
             this.architect = architect;
             this.sourceContext = sourceContext;
@@ -195,6 +205,20 @@ public class ComposeEmployer {
             }
         }
 
+        /**
+         * Adds a composition.
+         *
+         * @param <C>             Configuration type.
+         * @param <T>             Composition result type.
+         * @param namespace       Namespace for the composition.
+         * @param itemName        Name of the item.
+         * @param source          {@link ComposeSource}.
+         * @param resourceName    Name of the resource.
+         * @param properties      {@link PropertyList}.
+         * @param configurationClass {@link Class} of the configuration.
+         * @return Composition result.
+         * @throws Exception If fails to add composition.
+         */
         protected <C extends ComposeConfiguration, T> T addComposition(
                 String namespace, String itemName, ComposeSource<T, C> source,
                 String resourceName, PropertyList properties,

@@ -54,6 +54,11 @@ public class ListMetaData extends AbstractPropertyMetaData {
 	 */
 	private String plural;
 
+	/**
+	 * Obtains the plural name.
+	 *
+	 * @return Plural name.
+	 */
 	public String getPluralName() {
 		if (plural == null) {
 			return this.getCamelCaseName() + "s";
@@ -62,6 +67,11 @@ public class ListMetaData extends AbstractPropertyMetaData {
 		}
 	}
 
+	/**
+	 * Specifies the plural name.
+	 *
+	 * @param plural Plural name.
+	 */
 	public void setPlural(String plural) {
 		this.plural = plural;
 	}

@@ -12,12 +12,14 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
  */
 public class ThymeleafManagedObjectSource extends AbstractManagedObjectSource<None, None> {
 
+	/** Property name for the template prefix. */
 	public static final String PROPERTY_PREFIX = "officefloor.thymeleaf.prefix";
-
+	/** Property name for the template suffix. */
 	public static final String PROPERTY_SUFFIX = "officefloor.thymeleaf.suffix";
-
+	/** Default template prefix. */
 	public static final String DEFAULT_PREFIX = "templates/";
 
+	/** Default template suffix. */
 	public static final String DEFAULT_SUFFIX = ".html";
 
 	private TemplateEngine templateEngine;

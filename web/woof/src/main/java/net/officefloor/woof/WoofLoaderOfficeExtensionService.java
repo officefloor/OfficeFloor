@@ -84,24 +84,44 @@ import net.officefloor.woof.teams.WoofTeamsUsageContext;
  */
 public class WoofLoaderOfficeExtensionService implements OfficeExtensionService, OfficeExtensionServiceFactory {
 
+	/** Property name for the OfficeFloor directory. */
 	public static final String OFFICE_FLOOR_DIRECTORY_PROPERTY = "officefloor.directory";
+	/** Property name for the REST directory. */
 	public static final String REST_DIRECTORY_PROPERTY = "officefloor.rest.directory";
+	/** Property name for the objects directory. */
 	public static final String OBJECTS_DIRECTORY_PROPERTY = "officefloor.objects.directory";
+	/** Property name for the suppliers directory. */
 	public static final String SUPPLIERS_DIRECTORY_PROPERTY = "officefloor.suppliers.directory";
+	/** Property name for the governance directory. */
 	public static final String GOVERN_DIRECTORY_PROPERTY = "officefloor.govern.directory";
+	/** Property name for the security directory. */
 	public static final String SECURITY_DIRECTORY_PROPERTY = "officefloor.security.directory";
+	/** Property name for the teams directory. */
 	public static final String TEAMS_DIRECTORY_PROPERTY = "officefloor.teams.directory";
 
+	/** OfficeFloor directory tag for interpolation. */
 	public static final String OFFICE_FLOOR_DIRECTORY_TAG = "${officefloor}";
 
+	/** Default OfficeFloor directory name. */
 	public static final String OFFICE_FLOOR_DEFAULT_DIRECTORY = "officefloor";
+	/** Default REST directory. */
 	public static final String REST_DEFAULT_DIRECTORY = OFFICE_FLOOR_DIRECTORY_TAG + "/rest";
+	/** Default objects directory. */
 	public static final String OBJECTS_DEFAULT_DIRECTORY = OFFICE_FLOOR_DIRECTORY_TAG + "/objects";
+	/** Default suppliers directory. */
 	public static final String SUPPLIERS_DEFAULT_DIRECTORY = OFFICE_FLOOR_DIRECTORY_TAG + "/suppliers";
+	/** Default governance directory. */
 	public static final String GOVERN_DEFAULT_DIRECTORY = OFFICE_FLOOR_DIRECTORY_TAG + "/govern";
+	/** Default security directory. */
 	public static final String SECURITY_DEFAULT_DIRECTORY = OFFICE_FLOOR_DIRECTORY_TAG + "/security";
+	/** Default teams directory. */
 	public static final String TEAMS_DEFAULT_DIRECTORY = OFFICE_FLOOR_DIRECTORY_TAG + "/teams";
 
+	/**
+	 * @param officeFloorDirectory  OfficeFloor directory.
+	 * @param interpolateDirectory  Directory with interpolation tag.
+	 * @return Interpolated directory.
+	 */
 	public static String interpolateRestDirectory(String officeFloorDirectory, String interpolateDirectory) {
 		return interpolateDirectory.replace(OFFICE_FLOOR_DIRECTORY_TAG, officeFloorDirectory);
 	}

@@ -285,7 +285,9 @@ public class HttpSecurityLoaderUtil {
 
 	/**
 	 * Creates an {@link AuthenticationContext} for testing.
-	 * 
+	 *
+	 * @param <AC>               Access control type.
+	 * @param <C>                Credentials type.
 	 * @param connection         {@link ServerHttpConnection}.
 	 * @param security           {@link HttpSecurity}.
 	 * @param handleAuthenticate Handles the authentication.
@@ -340,7 +342,8 @@ public class HttpSecurityLoaderUtil {
 
 	/**
 	 * Undertakes authentication.
-	 * 
+	 *
+	 * @param <C>            Credentials type.
 	 * @param authentication {@link HttpAuthentication}.
 	 * @param credentials    Credentials.
 	 * @throws Throwable If fails to authenticate or times out authenticating.
@@ -353,7 +356,8 @@ public class HttpSecurityLoaderUtil {
 
 	/**
 	 * Undertakes logout.
-	 * 
+	 *
+	 * @param <C>            Credentials type.
 	 * @param authentication {@link HttpAuthentication}.
 	 * @throws Throwable If fails to logout or times out.
 	 */

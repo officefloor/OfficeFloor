@@ -55,7 +55,7 @@ public class OfficeFloorSocketWrapper extends SocketWrapperBase<Void> {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param endpoint
+	 * @param endpoint {@link AbstractEndpoint}.
 	 */
 	public OfficeFloorSocketWrapper(AbstractEndpoint<Void, ?> endpoint) {
 		super(null, endpoint);

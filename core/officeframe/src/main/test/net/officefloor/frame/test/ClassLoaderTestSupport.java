@@ -76,6 +76,7 @@ public class ClassLoaderTestSupport implements TestSupport {
 		this.fileTestSupport = fileTestSupport;
 	}
 
+	/** Default constructor. */
 	public ClassLoaderTestSupport() {
 		// Initialised via test support
 	}

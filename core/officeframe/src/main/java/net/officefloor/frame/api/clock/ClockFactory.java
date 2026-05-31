@@ -31,7 +31,8 @@ public interface ClockFactory {
 
 	/**
 	 * Creates a {@link Clock}.
-	 * 
+	 *
+	 * @param <T>        Type of time.
 	 * @param translator Translate the seconds since Epoch to {@link Clock} time.
 	 * @return {@link Clock}.
 	 */

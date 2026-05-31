@@ -43,13 +43,19 @@ public abstract class AbstractSendHttpFileFunction<R>
 	 * Dependency keys.
 	 */
 	public static enum Dependencies {
-		HTTP_PATH, HTTP_RESOURCES, SERVER_HTTP_CONNECTION
+		/** {@link HttpPath}. */
+		HTTP_PATH,
+		/** HTTP resources. */
+		HTTP_RESOURCES,
+		/** {@link ServerHttpConnection}. */
+		SERVER_HTTP_CONNECTION
 	}
 
 	/**
 	 * {@link Flow} keys.
 	 */
 	public static enum Flows {
+		/** Resource not available. */
 		NOT_AVAILABLE
 	}
 

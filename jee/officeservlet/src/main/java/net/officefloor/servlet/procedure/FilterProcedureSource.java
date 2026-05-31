@@ -126,6 +126,7 @@ public class FilterProcedureSource implements ManagedFunctionProcedureSource, Pr
 	 * Flow keys.
 	 */
 	public static enum FlowKeys {
+		/** Next flow key. */
 		NEXT
 	}
 

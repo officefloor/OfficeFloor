@@ -6,6 +6,7 @@ import lombok.Data;
 import java.util.List;
 import java.util.Map;
 
+/** Function configuration. */
 @Data
 public class FunctionConfiguration {
 

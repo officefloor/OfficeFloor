@@ -12,6 +12,7 @@ import net.officefloor.server.http.ServerHttpConnection;
  */
 public class CommitExceptionHandler {
 
+	/** Handles the exception. */
 	public void handle(@Parameter Exception exception, ServerHttpConnection connection) throws Exception {
 		HttpResponse response = connection.getResponse();
 		response.setStatus(HttpStatus.CREATED);

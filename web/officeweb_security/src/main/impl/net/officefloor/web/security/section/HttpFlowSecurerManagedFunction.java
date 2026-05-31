@@ -40,7 +40,10 @@ public class HttpFlowSecurerManagedFunction
 	 * Flow keys.
 	 */
 	public static enum Flows {
-		SECURE, INSECURE
+		/** Secure flow. */
+		SECURE,
+		/** Insecure flow. */
+		INSECURE
 	}
 
 	/**

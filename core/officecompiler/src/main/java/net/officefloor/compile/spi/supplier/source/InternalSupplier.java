@@ -52,6 +52,7 @@ public interface InternalSupplier {
 	/**
 	 * Loads the object asynchronously.
 	 * 
+	 * @param <O>        Object type.
 	 * @param qualifier  Qualifier. May be <code>null</code>.
 	 * @param objectType Required object type.
 	 * @param user       {@link ObjectUser} to receive the loaded object (or

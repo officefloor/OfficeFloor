@@ -96,10 +96,16 @@ public class FieldMetaData extends AbstractPropertyMetaData {
 	 */
 	private String endField;
 
+	/**
+	 * @return End field.
+	 */
 	public String getEndField() {
 		return this.endField;
 	}
 
+	/**
+	 * @param endField End field.
+	 */
 	public void setEndField(String endField) {
 		this.endField = endField;
 	}
@@ -109,10 +115,16 @@ public class FieldMetaData extends AbstractPropertyMetaData {
 	 */
 	private String endList;
 
+	/**
+	 * @return End list.
+	 */
 	public String getEndList() {
 		return this.endList;
 	}
 
+	/**
+	 * @param endList End list.
+	 */
 	public void setEndList(String endList) {
 		this.endList = endList;
 	}

@@ -6,6 +6,7 @@ import lombok.Data;
 
 import java.util.Map;
 
+/** REST endpoint configuration. */
 @Data
 public class RestEndpointConfig {
 

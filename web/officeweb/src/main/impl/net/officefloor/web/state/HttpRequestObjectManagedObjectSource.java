@@ -52,6 +52,7 @@ public class HttpRequestObjectManagedObjectSource
 	 * Dependency keys.
 	 */
 	public static enum HttpRequestObjectDependencies {
+		/** HTTP request state dependency. */
 		HTTP_REQUEST_STATE
 	}
 

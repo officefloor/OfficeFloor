@@ -18,6 +18,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 
 import java.util.List;
 
+/** {@link AbstractOfficeFloorSource} for Spring Boot. */
 public class SpringBootOfficeFloorSource extends AbstractOfficeFloorSource {
 
     private final ObjectMapper objectMapper;
@@ -28,6 +29,12 @@ public class SpringBootOfficeFloorSource extends AbstractOfficeFloorSource {
 
     private final OpenAPI openApi;
 
+    /**
+     * @param objectMapper       {@link ObjectMapper}.
+     * @param restEndpoints      REST endpoints.
+     * @param applicationContext {@link ConfigurableApplicationContext}.
+     * @param openApi            {@link OpenAPI}.
+     */
     public SpringBootOfficeFloorSource(ObjectMapper objectMapper,
                                        List<OfficeFloorRestEndpoint> restEndpoints,
                                        ConfigurableApplicationContext applicationContext,

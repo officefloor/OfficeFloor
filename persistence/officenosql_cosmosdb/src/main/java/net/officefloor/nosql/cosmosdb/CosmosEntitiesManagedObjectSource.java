@@ -88,7 +88,8 @@ public class CosmosEntitiesManagedObjectSource extends AbstractManagedObjectSour
 
 	/**
 	 * Loads the entity types.
-	 * 
+	 *
+	 * @param sourceContext {@link SourceContext}.
 	 * @throws Exception If fails to load the entity types.
 	 */
 	public void loadEntityTypes(SourceContext sourceContext) throws Exception {
@@ -104,8 +105,9 @@ public class CosmosEntitiesManagedObjectSource extends AbstractManagedObjectSour
 
 	/**
 	 * Sets up the entities.
-	 * 
+	 *
 	 * @param database {@link CosmosDatabase}.
+	 * @param logger   {@link Logger}.
 	 * @throws Exception If fails to create entities.
 	 */
 	public void setupEntities(CosmosDatabase database, Logger logger) throws Exception {

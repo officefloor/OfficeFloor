@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
+/** {@link ProcessAwareServerHttpConnectionManagedObject} for Spring MVC. */
 public class SpringServerHttpConnection extends ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> {
 
     private final HttpServletRequest request;
@@ -53,28 +54,34 @@ public class SpringServerHttpConnection extends ProcessAwareServerHttpConnection
      * @param serverLocation                  {@link HttpServerLocation}.
      * @param isSecure                        Indicates if secure.
      * @param methodSupplier                  {@link Supplier} for the
-     *                                        {@link HttpRequest}
+     *                                        <code>HttpRequest</code>
      *                                        {@link HttpMethod}.
      * @param requestUriSupplier              {@link Supplier} for the
-     *                                        {@link HttpRequest} URI.
+     *                                        <code>HttpRequest</code> URI.
      * @param version                         {@link HttpVersion} for the
-     *                                        {@link HttpRequest}.
+     *                                        <code>HttpRequest</code>.
      * @param requestHeaders                  {@link NonMaterialisedHttpHeaders} for
-     *                                        the {@link HttpRequest}.
+     *                                        the <code>HttpRequest</code>.
      * @param requestEntity                   {@link ByteSequence} for the
-     *                                        {@link HttpRequest} entity.
+     *                                        <code>HttpRequest</code> entity.
      * @param serverName                      Name of the server. May be
      *                                        <code>null</code> if not sending
      *                                        <code>Server</code>
-     *                                        {@link HttpHeader}.
+     *                                        <code>HttpHeader</code>.
      * @param dateHttpHeaderClock             {@link DateHttpHeaderClock}. May be
      *                                        <code>null</code> to not send
-     *                                        <code>Date</code> {@link HttpHeader}.
+     *                                        <code>Date</code> <code>HttpHeader</code>.
      * @param isIncludeStackTraceOnEscalation <code>true</code> to include the
-     *                                        {@link Escalation} stack trace in the
-     *                                        {@link HttpResponse}.
+     *                                        <code>Escalation</code> stack trace in the
+     *                                        <code>HttpResponse</code>.
      * @param writer                          {@link HttpResponseWriter}.
      * @param bufferPool                      {@link StreamBufferPool}.
+     * @param request                         {@link HttpServletRequest}.
+     * @param response                        {@link HttpServletResponse}.
+     * @param handler                         Handler object.
+     * @param handlerAdapter                  {@link RequestMappingHandlerAdapter}.
+     * @param dispatcherServlet               {@link DispatcherServlet}.
+     * @param applicationContext              {@link ApplicationContext}.
      */
     public SpringServerHttpConnection(HttpServerLocation serverLocation,
                                       boolean isSecure, Supplier<HttpMethod> methodSupplier, Supplier<String> requestUriSupplier,

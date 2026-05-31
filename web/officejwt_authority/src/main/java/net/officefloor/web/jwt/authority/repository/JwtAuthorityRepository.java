@@ -104,7 +104,6 @@ public interface JwtAuthorityRepository {
 	 * 
 	 * @param context     {@link SaveKeysContext}.
 	 * @param refreshKeys New {@link JwtRefreshKey} instances.
-	 * @throws Exception If fails to save the {@link JwtRefreshKey} instance.
 	 */
 	void saveJwtRefreshKeys(SaveKeysContext context, JwtRefreshKey... refreshKeys);
 

@@ -42,6 +42,7 @@ public class HttpRouteFunction implements ManagedFunctionFactory<HttpRouteFuncti
 	 * Dependency keys.
 	 */
 	public static enum HttpRouteDependencies {
+		/** Server HTTP connection dependency. */
 		SERVER_HTTP_CONNECTION
 	}
 

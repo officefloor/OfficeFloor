@@ -8,6 +8,7 @@ package net.officefloor.tutorial.testhttpserver;
 // START SNIPPET: tutorial
 public class Calculator {
 
+	/** Adds two integers together. */
 	public int plus(int a, int b) {
 		return a + b;
 	}

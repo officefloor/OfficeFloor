@@ -20,11 +20,20 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
+/** Auto-configuration for OfficeFloor REST integration. */
 @AutoConfiguration
 @EnableConfigurationProperties(OfficeFloorRestProperties.class)
 @ConditionalOnProperty(prefix = "officefloor.rest", name="enabled", havingValue = "true", matchIfMissing = true)
 public class OfficeFloorRestAutoConfiguration {
 
+    /**
+     * Provides the {@link OfficeFloorRestSpringBootStarter} bean.
+     *
+     * @param properties         {@link OfficeFloorRestProperties}.
+     * @param applicationContext {@link ConfigurableApplicationContext}.
+     * @param mapper             {@link ObjectMapper}.
+     * @return {@link OfficeFloorRestSpringBootStarter}.
+     */
     @Bean
     @ConditionalOnMissingBean
     public OfficeFloorRestSpringBootStarter getOfficeFloorRestSpringBootStarter(OfficeFloorRestProperties properties,
@@ -33,6 +42,16 @@ public class OfficeFloorRestAutoConfiguration {
         return new OfficeFloorRestSpringBootStarter(properties, applicationContext, mapper);
     }
 
+    /**
+     * Provides the {@link OfficeFloorWebMvcConfigurer} bean.
+     *
+     * @param starter                    {@link OfficeFloorRestSpringBootStarter}.
+     * @param handlerAdapterProvider     {@link ObjectProvider} for {@link RequestMappingHandlerAdapter}.
+     * @param dispatcherServletProvider  {@link ObjectProvider} for {@link DispatcherServlet}.
+     * @param applicationContextProvider {@link ObjectProvider} for {@link ApplicationContext}.
+     * @return {@link OfficeFloorWebMvcConfigurer}.
+     * @throws Exception If fails to create the configurer.
+     */
     @Bean
     public OfficeFloorWebMvcConfigurer officeFloorWebMvcConfigurer(
             OfficeFloorRestSpringBootStarter starter,

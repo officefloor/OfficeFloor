@@ -14,6 +14,7 @@ import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import java.util.HashMap;
 import java.util.Map;
 
+/** Employs the supplier architecture. */
 public class SupplierEmployer {
 
     private static final ObjectMapper MAPPER = new ObjectMapper(new YAMLFactory());

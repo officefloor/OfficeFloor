@@ -121,11 +121,24 @@ public class AutoWirerImpl<N extends Node> implements AutoWirer<N> {
 		return this.sourceAutoWireLinks(false, true, sourceNode, sourceAutoWires);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public <S extends Node> AutoWireLink<S, N>[] getAutoWireLinks(final S sourceNode, AutoWire... sourceAutoWires) {
 		return this.sourceAutoWireLinks(true, true, sourceNode, sourceAutoWires);
 	}
 
+	/**
+	 * Sources the auto-wire links.
+	 *
+	 * @param <S>               Source node type.
+	 * @param isMustMatch       Whether a match is required.
+	 * @param isMultipleAllowed Whether multiple matches are allowed.
+	 * @param sourceNode        Source node.
+	 * @param sourceAutoWires   Source {@link AutoWire} instances.
+	 * @return {@link AutoWireLink} instances.
+	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected <S extends Node> AutoWireLink<S, N>[] sourceAutoWireLinks(boolean isMustMatch, boolean isMultipleAllowed, final S sourceNode,
 			AutoWire... sourceAutoWires) {

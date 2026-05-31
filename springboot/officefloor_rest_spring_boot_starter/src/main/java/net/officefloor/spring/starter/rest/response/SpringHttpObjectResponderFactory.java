@@ -28,11 +28,14 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 
+/** {@link HttpObjectResponderFactory} for Spring. */
 public class SpringHttpObjectResponderFactory implements HttpObjectResponderFactory,
         HttpObjectResponder<Object>, HttpEscalationResponder<Throwable> {
 
     /**
      * {@link Method} to use if no {@link MethodParameterAnnotation}.
+     *
+     * @param response {@link ObjectResponse}.
      */
     public static void methodParameter(ObjectResponse<Object> response) {
     }

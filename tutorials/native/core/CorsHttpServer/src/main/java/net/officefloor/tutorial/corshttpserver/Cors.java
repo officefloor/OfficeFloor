@@ -20,8 +20,10 @@ public class Cors {
 
 	private static HttpHeaderName ALLOW_HEADERS = new HttpHeaderName("Access-Control-Allow-Headers");
 
+	/** All origins/methods/headers value. */
 	public static HttpHeaderValue ALL = new HttpHeaderValue("*");
 
+	/** Adds CORS headers to the response. */
 	@Next("service")
 	public static void cors(ServerHttpConnection connection) {
 		HttpResponseHeaders headers = connection.getResponse().getHeaders();

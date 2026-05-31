@@ -2,6 +2,7 @@ package net.officefloor.spring.starter.rest.data;
 
 import net.officefloor.spring.starter.rest.AbstractExtraSpringBootExtensionServiceFactory;
 
+/** {@link AbstractExtraSpringBootExtensionServiceFactory} for Spring Boot Data. */
 public class SpringBootDataExtensionServiceFactory extends AbstractExtraSpringBootExtensionServiceFactory {
 
     @Override

@@ -67,6 +67,7 @@ public class InjectionRegistry {
 	/**
 	 * Obtains the dependency.
 	 * 
+	 * @param <T>             Type of the dependency.
 	 * @param qualifier       Qualifier. May be <code>null</code>.
 	 * @param type            Type.
 	 * @param supplierContext {@link SupplierSourceContext}.

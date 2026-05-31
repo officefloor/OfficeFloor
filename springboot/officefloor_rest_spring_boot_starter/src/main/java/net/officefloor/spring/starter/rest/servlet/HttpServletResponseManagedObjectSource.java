@@ -19,7 +19,9 @@ public class HttpServletResponseManagedObjectSource extends AbstractManagedObjec
      * Dependency keys.
      */
     public static enum DependencyKeys {
+        /** Server HTTP connection dependency. */
         SERVER_HTTP_CONNECTION,
+        /** HTTP external response dependency. */
         HTTP_EXTERNAL_RESPONSE
     }
 

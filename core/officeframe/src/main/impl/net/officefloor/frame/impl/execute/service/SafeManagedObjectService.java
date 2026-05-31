@@ -134,7 +134,8 @@ public class SafeManagedObjectService<F extends Enum<F>> implements ManagedObjec
 
 	/**
 	 * Undertakes servicing.
-	 * 
+	 *
+	 * @param <T>      Possible {@link Exception} type.
 	 * @param servicer Logic for servicing.
 	 * @return <code>true</code> if servicing invoked. <code>false</code> is stopped
 	 *         servicing.

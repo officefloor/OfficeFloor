@@ -65,6 +65,7 @@ public class VariableManagedObjectSource<T> extends AbstractManagedObjectSource<
 	 * Obtains {@link Var} from dependency object.
 	 * 
 	 * @param object Dependency object.
+	 * @param <T>    Variable type.
 	 * @return {@link Var} wrapper on dependency object.
 	 * @throws IllegalStateException If fails to convert.
 	 */
@@ -79,6 +80,7 @@ public class VariableManagedObjectSource<T> extends AbstractManagedObjectSource<
 	/**
 	 * Obtains {@link Out} from dependency object.
 	 * 
+	 * @param <T>    Variable type.
 	 * @param object Dependency object.
 	 * @return {@link Out} wrapper on dependency object.
 	 */
@@ -90,6 +92,7 @@ public class VariableManagedObjectSource<T> extends AbstractManagedObjectSource<
 	/**
 	 * Obtains {@link In} from dependency object.
 	 * 
+	 * @param <T>    Variable type.
 	 * @param object Dependency object.
 	 * @return {@link In} wrapper on dependency object.
 	 */
@@ -101,6 +104,7 @@ public class VariableManagedObjectSource<T> extends AbstractManagedObjectSource<
 	/**
 	 * Obtains the value from dependency object.
 	 * 
+	 * @param <T>    Variable type.
 	 * @param object Dependency object.
 	 * @return Value extracted from dependency object.
 	 */

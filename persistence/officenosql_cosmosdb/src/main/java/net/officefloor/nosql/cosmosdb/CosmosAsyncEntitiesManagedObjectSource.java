@@ -88,7 +88,8 @@ public class CosmosAsyncEntitiesManagedObjectSource extends AbstractManagedObjec
 
 	/**
 	 * Loads the entity types.
-	 * 
+	 *
+	 * @param sourceContext {@link SourceContext}.
 	 * @throws Exception If fails to load the entity types.
 	 */
 	public void loadEntityTypes(SourceContext sourceContext) throws Exception {

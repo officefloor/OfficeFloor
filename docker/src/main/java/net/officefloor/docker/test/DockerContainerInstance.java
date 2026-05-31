@@ -71,9 +71,11 @@ public class DockerContainerInstance implements AutoCloseable {
 
 	/**
 	 * Instantiate.
-	 * 
-	 * @param containerId Identifier for the container of the docker instance.
-	 * @param docker      {@link DockerClient}.
+	 *
+	 * @param containerName Name of the container.
+	 * @param imageName     Name of the docker image.
+	 * @param containerId   Identifier for the container of the docker instance.
+	 * @param docker        {@link DockerClient}.
 	 */
 	public DockerContainerInstance(String containerName, String imageName, String containerId, DockerClient docker) {
 		this.containerName = containerName;

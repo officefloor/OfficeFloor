@@ -1,5 +1,6 @@
 package net.officefloor.web.rest.build;
 
+/** {@link MomentoKey} implementation. */
 public class MomentoKeyImpl<M> implements MomentoKey<M> {
 
     static int getMomentoIndex(MomentoKey<?> momentoKey) {

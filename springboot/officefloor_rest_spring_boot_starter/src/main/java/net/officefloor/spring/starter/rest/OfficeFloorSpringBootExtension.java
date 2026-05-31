@@ -1,5 +1,6 @@
 package net.officefloor.spring.starter.rest;
 
+/** Extension for OfficeFloor Spring Boot support. */
 public interface OfficeFloorSpringBootExtension {
 
     /**

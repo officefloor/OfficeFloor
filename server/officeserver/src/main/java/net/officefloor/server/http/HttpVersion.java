@@ -64,9 +64,14 @@ public class HttpVersion implements Serializable {
 	public enum HttpVersionEnum {
 
 		/**
-		 * Common {@link HttpVersion} instances.
+		 * HTTP/1.0 version.
 		 */
-		HTTP_1_0(HTTP_1_0_NAME), HTTP_1_1(HTTP_1_1_NAME),
+		HTTP_1_0(HTTP_1_0_NAME),
+
+		/**
+		 * HTTP/1.1 version.
+		 */
+		HTTP_1_1(HTTP_1_1_NAME),
 
 		/**
 		 * Non common {@link HttpVersion}.

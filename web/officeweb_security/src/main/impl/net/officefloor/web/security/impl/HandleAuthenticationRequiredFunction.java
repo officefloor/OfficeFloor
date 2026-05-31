@@ -55,7 +55,14 @@ public class HandleAuthenticationRequiredFunction
 	 * Dependency keys.
 	 */
 	public static enum Dependencies {
-		AUTHENTICATION_REQUIRED_EXCEPTION, SERVER_HTTP_CONNECTION, HTTP_SESSION, REQUEST_STATE
+		/** Authentication required exception dependency. */
+		AUTHENTICATION_REQUIRED_EXCEPTION,
+		/** Server HTTP connection dependency. */
+		SERVER_HTTP_CONNECTION,
+		/** HTTP session dependency. */
+		HTTP_SESSION,
+		/** Request state dependency. */
+		REQUEST_STATE
 	}
 
 	/**

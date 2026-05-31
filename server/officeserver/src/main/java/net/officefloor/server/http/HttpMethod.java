@@ -67,10 +67,20 @@ public class HttpMethod implements Serializable {
 	 */
 	public enum HttpMethodEnum {
 
-		/**
-		 * Common {@link HttpMethod} instances.
-		 */
-		CONNECT("CONNECT"), DELETE("DELETE"), GET("GET"), HEAD("HEAD"), OPTIONS("OPTIONS"), PUT("PUT"), POST("POST"),
+		/** CONNECT HTTP method. */
+		CONNECT("CONNECT"),
+		/** DELETE HTTP method. */
+		DELETE("DELETE"),
+		/** GET HTTP method. */
+		GET("GET"),
+		/** HEAD HTTP method. */
+		HEAD("HEAD"),
+		/** OPTIONS HTTP method. */
+		OPTIONS("OPTIONS"),
+		/** PUT HTTP method. */
+		PUT("PUT"),
+		/** POST HTTP method. */
+		POST("POST"),
 
 		/**
 		 * Non common {@link HttpMethod}.

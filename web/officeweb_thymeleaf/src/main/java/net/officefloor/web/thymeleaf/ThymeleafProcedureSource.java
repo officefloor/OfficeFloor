@@ -29,8 +29,9 @@ import java.nio.charset.StandardCharsets;
  */
 public class ThymeleafProcedureSource implements ManagedFunctionProcedureSource, ProcedureSourceServiceFactory {
 
+	/** Source name. */
 	public static final String SOURCE_NAME = "Thymeleaf";
-
+	/** Procedure name. */
 	public static final String PROCEDURE_NAME = "render";
 
 	/*

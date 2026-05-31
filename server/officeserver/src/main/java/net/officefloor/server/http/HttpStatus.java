@@ -195,94 +195,133 @@ public class HttpStatus {
 		 */
 		CONTINUE(SC_CONTINUE, "Continue"),
 
+		/** HTTP 101 Switching Protocols. */
 		SWITCHING_PROTOCOLS(SC_SWITCHING_PROTOCOLS, "Switching Protocols"),
 
 		/**
 		 * 2xx
 		 */
+		/** HTTP 200 OK. */
 		OK(SC_OK, "OK"),
 
+		/** HTTP 201 Created. */
 		CREATED(SC_CREATED, "Created"),
 
+		/** HTTP 202 Accepted. */
 		ACCEPTED(SC_ACCEPTED, "Accepted"),
 
+		/** HTTP 203 Non-Authoritative Information. */
 		NON_AUTHORITATIVE_INFORMATION(SC_NON_AUTHORITATIVE_INFORMATION, "Non-Authoritative Information"),
 
+		/** HTTP 204 No Content. */
 		NO_CONTENT(SC_NO_CONTENT, "No Content"),
 
+		/** HTTP 205 Reset Content. */
 		RESET_CONTENT(SC_RESET_CONTENT, "Reset Content"),
 
+		/** HTTP 206 Partial Content. */
 		PARTIAL_CONTENT(SC_PARTIAL_CONTENT, "Partial Content"),
 
 		/**
 		 * 3xx
 		 */
+		/** HTTP 300 Multiple Choices. */
 		MULTIPLE_CHOICES(SC_MULTIPLE_CHOICES, "Multiple Choices"),
 
+		/** HTTP 301 Moved Permanently. */
 		MOVED_PERMANENTLY(SC_MOVED_PERMANENTLY, "Moved Permanently"),
 
+		/** HTTP 302 Found. */
 		FOUND(SC_FOUND, "Found"),
 
+		/** HTTP 303 See Other. */
 		SEE_OTHER(SC_SEE_OTHER, "See Other"),
 
+		/** HTTP 304 Not Modified. */
 		NOT_MODIFIED(SC_NOT_MODIFIED, "Not Modified"),
 
+		/** HTTP 305 Use Proxy. */
 		USE_PROXY(SC_USE_PROXY, "Use Proxy"),
 
+		/** HTTP 307 Temporary Redirect. */
 		TEMPORARY_REDIRECT(SC_TEMPORARY_REDIRECT, "Temporary Redirect"),
 
 		/**
 		 * 4xx
 		 */
+		/** HTTP 400 Bad Request. */
 		BAD_REQUEST(SC_BAD_REQUEST, "Bad Request"),
 
+		/** HTTP 401 Unauthorized. */
 		UNAUTHORIZED(SC_UNAUTHORIZED, "Unauthorized"),
 
+		/** HTTP 402 Payment Required. */
 		PAYMENT_REQUIRED(SC_PAYMENT_REQUIRED, "Payment Required"),
 
+		/** HTTP 403 Forbidden. */
 		FORBIDDEN(SC_FORBIDDEN, "Forbidden"),
 
+		/** HTTP 404 Not Found. */
 		NOT_FOUND(SC_NOT_FOUND, "Not Found"),
 
+		/** HTTP 405 Method Not Allowed. */
 		METHOD_NOT_ALLOWED(SC_METHOD_NOT_ALLOWED, "Method Not Allowed"),
 
+		/** HTTP 406 Not Acceptable. */
 		NOT_ACCEPTABLE(SC_NOT_ACCEPTABLE, "Not Acceptable"),
 
+		/** HTTP 407 Proxy Authentication Required. */
 		PROXY_AUTHENTICATION_REQUIRED(SC_PROXY_AUTHENTICATION_REQUIRED, "Proxy Authentication Required"),
 
+		/** HTTP 408 Request Time-out. */
 		REQUEST_TIME_OUT(SC_REQUEST_TIME_OUT, "Request Time-out"),
 
+		/** HTTP 409 Conflict. */
 		CONFLICT(SC_CONFLICT, "Conflict"),
 
+		/** HTTP 410 Gone. */
 		GONE(SC_GONE, "Gone"),
 
+		/** HTTP 411 Length Required. */
 		LENGTH_REQUIRED(SC_LENGTH_REQUIRED, "Length Required"),
 
+		/** HTTP 412 Precondition Failed. */
 		PRECONDITION_FAILED(SC_PRECONDITION_FAILED, "Precondition Failed"),
 
+		/** HTTP 413 Request Entity Too Large. */
 		REQUEST_ENTITY_TOO_LARGE(SC_REQUEST_ENTITY_TOO_LARGE, "Request Entity Too Large"),
 
+		/** HTTP 414 Request-URI Too Large. */
 		REQUEST_URI_TOO_LARGE(SC_REQUEST_URI_TOO_LARGE, "Request-URI Too Large"),
 
+		/** HTTP 415 Unsupported Media Type. */
 		UNSUPPORTED_MEDIA_TYPE(SC_UNSUPPORTED_MEDIA_TYPE, "Unsupported Media Type"),
 
+		/** HTTP 416 Requested Range Not Satisfiable. */
 		REQUESTED_RANGE_NOT_SATISFIABLE(SC_REQUESTED_RANGE_NOT_SATISFIABLE, "Requested range not satisfiable"),
 
+		/** HTTP 417 Expectation Failed. */
 		EXPECTATION_FAILED(SC_EXPECTATION_FAILED, "Expectation Failed"),
 
 		/**
 		 * 5xx
 		 */
+		/** HTTP 500 Internal Server Error. */
 		INTERNAL_SERVER_ERROR(SC_INTERNAL_SERVER_ERROR, "Internal Server Error"),
 
+		/** HTTP 501 Not Implemented. */
 		NOT_IMPLEMENTED(SC_NOT_IMPLEMENTED, "Not Implemented"),
 
+		/** HTTP 502 Bad Gateway. */
 		BAD_GATEWAY(SC_BAD_GATEWAY, "Bad Gateway"),
 
+		/** HTTP 503 Service Unavailable. */
 		SERVICE_UNAVAILABLE(SC_SERVICE_UNAVAILABLE, "Service Unavailable"),
 
+		/** HTTP 504 Gateway Time-out. */
 		GATEWAY_TIME_OUT(SC_GATEWAY_TIME_OUT, "Gateway Time-out"),
 
+		/** HTTP 505 HTTP Version Not Supported. */
 		HTTP_VERSION_NOT_SUPPORTED(SC_HTTP_VERSION_NOT_SUPPORTED, "HTTP Version not supported"),
 
 		/**
@@ -318,56 +357,96 @@ public class HttpStatus {
 	}
 
 	// 1xx
+	/** HTTP 100 Continue status. */
 	public static final HttpStatus CONTINUE = HttpStatusEnum.CONTINUE.getHttpStatus();
+	/** HTTP 101 Switching Protocols status. */
 	public static final HttpStatus SWITCHING_PROTOCOLS = HttpStatusEnum.SWITCHING_PROTOCOLS.getHttpStatus();
 
 	// 2xx
+	/** HTTP 200 OK status. */
 	public static final HttpStatus OK = HttpStatusEnum.OK.getHttpStatus();
+	/** HTTP 201 Created status. */
 	public static final HttpStatus CREATED = HttpStatusEnum.CREATED.getHttpStatus();
+	/** HTTP 202 Accepted status. */
 	public static final HttpStatus ACCEPTED = HttpStatusEnum.ACCEPTED.getHttpStatus();
+	/** HTTP 203 Non-Authoritative Information status. */
 	public static final HttpStatus NON_AUTHORITATIVE_INFORMATION = HttpStatusEnum.NON_AUTHORITATIVE_INFORMATION
 			.getHttpStatus();
+	/** HTTP 204 No Content status. */
 	public static final HttpStatus NO_CONTENT = HttpStatusEnum.NO_CONTENT.getHttpStatus();
+	/** HTTP 205 Reset Content status. */
 	public static final HttpStatus RESET_CONTENT = HttpStatusEnum.RESET_CONTENT.getHttpStatus();
+	/** HTTP 206 Partial Content status. */
 	public static final HttpStatus PARTIAL_CONTENT = HttpStatusEnum.PARTIAL_CONTENT.getHttpStatus();
 
 	// 3xx
+	/** HTTP 300 Multiple Choices status. */
 	public static final HttpStatus MULTIPLE_CHOICES = HttpStatusEnum.MULTIPLE_CHOICES.getHttpStatus();
+	/** HTTP 301 Moved Permanently status. */
 	public static final HttpStatus MOVED_PERMANENTLY = HttpStatusEnum.MOVED_PERMANENTLY.getHttpStatus();
+	/** HTTP 302 Found status. */
 	public static final HttpStatus FOUND = HttpStatusEnum.FOUND.getHttpStatus();
+	/** HTTP 303 See Other status. */
 	public static final HttpStatus SEE_OTHER = HttpStatusEnum.SEE_OTHER.getHttpStatus();
+	/** HTTP 304 Not Modified status. */
 	public static final HttpStatus NOT_MODIFIED = HttpStatusEnum.NOT_MODIFIED.getHttpStatus();
+	/** HTTP 305 Use Proxy status. */
 	public static final HttpStatus USE_PROXY = HttpStatusEnum.USE_PROXY.getHttpStatus();
+	/** HTTP 307 Temporary Redirect status. */
 	public static final HttpStatus TEMPORARY_REDIRECT = HttpStatusEnum.TEMPORARY_REDIRECT.getHttpStatus();
 
 	// 4xx
+	/** HTTP 400 Bad Request status. */
 	public static final HttpStatus BAD_REQUEST = HttpStatusEnum.BAD_REQUEST.getHttpStatus();
+	/** HTTP 401 Unauthorized status. */
 	public static final HttpStatus UNAUTHORIZED = HttpStatusEnum.UNAUTHORIZED.getHttpStatus();
+	/** HTTP 402 Payment Required status. */
 	public static final HttpStatus PAYMENT_REQUIRED = HttpStatusEnum.PAYMENT_REQUIRED.getHttpStatus();
+	/** HTTP 403 Forbidden status. */
 	public static final HttpStatus FORBIDDEN = HttpStatusEnum.FORBIDDEN.getHttpStatus();
+	/** HTTP 404 Not Found status. */
 	public static final HttpStatus NOT_FOUND = HttpStatusEnum.NOT_FOUND.getHttpStatus();
+	/** HTTP 405 Method Not Allowed status. */
 	public static final HttpStatus METHOD_NOT_ALLOWED = HttpStatusEnum.METHOD_NOT_ALLOWED.getHttpStatus();
+	/** HTTP 406 Not Acceptable status. */
 	public static final HttpStatus NOT_ACCEPTABLE = HttpStatusEnum.NOT_ACCEPTABLE.getHttpStatus();
+	/** HTTP 407 Proxy Authentication Required status. */
 	public static final HttpStatus PROXY_AUTHENTICATION_REQUIRED = HttpStatusEnum.PROXY_AUTHENTICATION_REQUIRED
 			.getHttpStatus();
+	/** HTTP 408 Request Time-Out status. */
 	public static final HttpStatus REQUEST_TIME_OUT = HttpStatusEnum.REQUEST_TIME_OUT.getHttpStatus();
+	/** HTTP 409 Conflict status. */
 	public static final HttpStatus CONFLICT = HttpStatusEnum.CONFLICT.getHttpStatus();
+	/** HTTP 410 Gone status. */
 	public static final HttpStatus GONE = HttpStatusEnum.GONE.getHttpStatus();
+	/** HTTP 411 Length Required status. */
 	public static final HttpStatus LENGTH_REQUIRED = HttpStatusEnum.LENGTH_REQUIRED.getHttpStatus();
+	/** HTTP 412 Precondition Failed status. */
 	public static final HttpStatus PRECONDITION_FAILED = HttpStatusEnum.PRECONDITION_FAILED.getHttpStatus();
+	/** HTTP 413 Request Entity Too Large status. */
 	public static final HttpStatus REQUEST_ENTITY_TOO_LARGE = HttpStatusEnum.REQUEST_ENTITY_TOO_LARGE.getHttpStatus();
+	/** HTTP 414 Request-URI Too Large status. */
 	public static final HttpStatus REQUEST_URI_TOO_LARGE = HttpStatusEnum.REQUEST_URI_TOO_LARGE.getHttpStatus();
+	/** HTTP 415 Unsupported Media Type status. */
 	public static final HttpStatus UNSUPPORTED_MEDIA_TYPE = HttpStatusEnum.UNSUPPORTED_MEDIA_TYPE.getHttpStatus();
+	/** HTTP 416 Requested Range Not Satisfiable status. */
 	public static final HttpStatus REQUESTED_RANGE_NOT_SATISFIABLE = HttpStatusEnum.REQUESTED_RANGE_NOT_SATISFIABLE
 			.getHttpStatus();
+	/** HTTP 417 Expectation Failed status. */
 	public static final HttpStatus EXPECTATION_FAILED = HttpStatusEnum.EXPECTATION_FAILED.getHttpStatus();
 
 	// 5xx
+	/** HTTP 500 Internal Server Error status. */
 	public static final HttpStatus INTERNAL_SERVER_ERROR = HttpStatusEnum.INTERNAL_SERVER_ERROR.getHttpStatus();
+	/** HTTP 501 Not Implemented status. */
 	public static final HttpStatus NOT_IMPLEMENTED = HttpStatusEnum.NOT_IMPLEMENTED.getHttpStatus();
+	/** HTTP 502 Bad Gateway status. */
 	public static final HttpStatus BAD_GATEWAY = HttpStatusEnum.BAD_GATEWAY.getHttpStatus();
+	/** HTTP 503 Service Unavailable status. */
 	public static final HttpStatus SERVICE_UNAVAILABLE = HttpStatusEnum.SERVICE_UNAVAILABLE.getHttpStatus();
+	/** HTTP 504 Gateway Time-Out status. */
 	public static final HttpStatus GATEWAY_TIME_OUT = HttpStatusEnum.GATEWAY_TIME_OUT.getHttpStatus();
+	/** HTTP 505 HTTP Version Not Supported status. */
 	public static final HttpStatus HTTP_VERSION_NOT_SUPPORTED = HttpStatusEnum.HTTP_VERSION_NOT_SUPPORTED
 			.getHttpStatus();
 

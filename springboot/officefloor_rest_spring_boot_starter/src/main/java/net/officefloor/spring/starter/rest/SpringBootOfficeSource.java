@@ -53,6 +53,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+/** {@link AbstractOfficeSource} for Spring Boot. */
 public class SpringBootOfficeSource extends AbstractOfficeSource {
 
     private final ObjectMapper objectMapper;
@@ -65,6 +66,12 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
 
     private final OpenAPI openApi;
 
+    /**
+     * @param objectMapper       {@link ObjectMapper}.
+     * @param restEndpoints      REST endpoints.
+     * @param applicationContext {@link ConfigurableApplicationContext}.
+     * @param openApi            {@link OpenAPI}.
+     */
     public SpringBootOfficeSource(ObjectMapper objectMapper,
                                   List<OfficeFloorRestEndpoint> restEndpoints,
                                   ConfigurableApplicationContext applicationContext,

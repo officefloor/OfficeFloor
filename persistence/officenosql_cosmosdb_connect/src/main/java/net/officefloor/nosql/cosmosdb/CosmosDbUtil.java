@@ -39,6 +39,12 @@ public class CosmosDbUtil {
 	 */
 	@FunctionalInterface
 	public static interface CosmosOperation<R, E extends Throwable> {
+		/**
+		 * Runs the operation.
+		 *
+		 * @return Result.
+		 * @throws E If fails to run the operation.
+		 */
 		R run() throws E;
 	}
 
