@@ -21,7 +21,7 @@
 <!doctype html>
 <html>
 <head>
-<title>OfficeFloor - Function Orchestration for Spring Boot</title>
+<title>OfficeFloor - AI-Augmented Spring Boot REST via Explicit YAML Orchestration</title>
 <meta name="author" content="Daniel Sagenschneider" />
 <meta http-equiv="Content-Language" content="en" />
 <link rel="shortcut icon" href="./favicon.ico" />
@@ -39,26 +39,26 @@
 
 <!-- Social Media sharing -->
 <meta name="description"
-	content="OfficeFloor adds explicit function injection and orchestration to Spring Boot via YAML endpoint files. Progressive adoption — Spring beans, security, and persistence work unchanged." />
+	content="Spring Boot REST endpoints as explicit YAML orchestration — AI tools can read, write, and refactor endpoints without parsing Java. Add OfficeFloor progressively to your existing Spring app." />
 
 <!-- Twitter Card data -->
 <meta name="twitter:card" content="summary">
 <meta name="twitter:site" content="@sagenschneider">
-<meta name="twitter:title" content="OfficeFloor">
+<meta name="twitter:title" content="OfficeFloor - AI-Augmented Spring Boot REST via Explicit YAML Orchestration">
 <meta name="twitter:description"
-	content="Explicit function orchestration for Spring Boot. Declare REST endpoints as YAML files — Spring beans, security, and persistence work unchanged.">
+	content="Spring Boot REST as explicit YAML orchestration — AI tools can read and generate endpoints without parsing Java. Add OfficeFloor progressively to your existing Spring app.">
 <meta name="twitter:creator" content="@sagenschneider">
 <meta name="twitter:image"
 	content="http://officefloor.net/images/OfficeFloorBannerImage.png">
 
 <!-- Open Graph data -->
-<meta property="og:title" content="OfficeFloor" />
+<meta property="og:title" content="OfficeFloor - AI-Augmented Spring Boot REST via Explicit YAML Orchestration" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="http://officefloor.net" />
 <meta property="og:image"
 	content="http://officefloor.net/images/OfficeFloorBannerImage.png" />
 <meta property="og:description"
-	content="Explicit function orchestration for Spring Boot. Declare REST endpoints as YAML files — Spring beans, security, and persistence work unchanged." />
+	content="Spring Boot REST as explicit YAML orchestration — AI tools can read and generate endpoints without parsing Java. Add OfficeFloor progressively to your existing Spring app." />
 <meta property="og:site_name" content="OfficeFloor" />
 
 </head>
@@ -87,15 +87,20 @@
 		<div class="row text-center">
 			<div class="col-12">
 				<h1>OfficeFloor</h1>
+				<h2 class="banner-subtitle">Explicit YAML orchestration for AI-augmented Spring Boot REST</h2>
 				<div class="ioc">
 					<p>
-						Explicit <strong>function injection</strong> and orchestration for
-						<a href="https://spring.io/projects/spring-boot"
-							target="_blank">Spring Boot</a>
+						Each <a href="https://spring.io/projects/spring-boot"
+							target="_blank">Spring Boot</a> REST endpoint is one YAML file.
+						Each function is one concern. OfficeFloor wires them together.
+						AI tools can read, write, and refactor endpoints without parsing your codebase.
 					</p>
 					<p>
-						Add OfficeFloor REST endpoints progressively to your existing Spring
-						application — Spring beans, security, and persistence work unchanged
+						Add OfficeFloor progressively to your existing Spring application —
+						Spring beans, security, and persistence work unchanged
+					</p>
+					<p>
+						<a class="start-now" href="./tutorials/index.html">View Tutorials &rarr;</a>
 					</p>
 				</div>
 			</div>
@@ -152,13 +157,14 @@ audit:
   class: AuditGreetingLogic</pre>
 			</div>
 			<div class="col-12 col-md-6 info-text">
-				<h3>Orchestrate functions in YAML</h3>
-				<p>Each REST endpoint is a YAML file. The file name encodes the
-					HTTP method and URL path. The YAML entries name the plain Java
-					methods that handle the request — in sequence.</p>
-				<p>Each function declares only its own injected dependencies.
-					OfficeFloor wires the functions together exactly as the YAML
-					specifies. No function knows about the others.</p>
+				<h3>Explicit YAML orchestration — the AI-readable alternative to <code>@RestController</code></h3>
+				<p>A traditional Spring <code>@RestController</code> tangles
+					validation, business logic, and auditing into one class. The YAML
+					keeps each concern in its own function — OfficeFloor wires them
+					together in the order the file declares.</p>
+				<p>Each function declares only its own injected Spring bean
+					dependencies. No function knows about the others, and no annotation
+					describes the wiring — the YAML file is the complete specification.</p>
 				<p>Conditional branching, sequential composition, and error flows
 					are all declared in the same file — the complete endpoint logic is
 					readable without opening a single Java file.</p>
@@ -172,7 +178,7 @@ audit:
 	<section class="container">
 		<div class="row align-items-center">
 			<div class="col-12 col-md-6 info-text">
-				<h3>Built for AI-augmented development</h3>
+				<h3>Why explicit YAML orchestration makes AI development reliable</h3>
 				<p>Spring's implicit dependency injection requires tracing
 					annotations across many files and understanding framework wiring
 					rules — this is opaque to AI coding tools.</p>
