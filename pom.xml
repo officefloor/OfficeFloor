@@ -758,6 +758,7 @@
 					<supportedPackagings>
 						<supportedPackaging>pom</supportedPackaging>
 					</supportedPackagings>
+					<deployMode>FORK</deployMode>
 					<httpConnector>
 						<port>9999</port>
 					</httpConnector>
@@ -774,9 +775,6 @@
 						<goals>
 							<goal>start</goal>
 						</goals>
-						<configuration>
-							<daemon>true</daemon>
-						</configuration>
 					</execution>
 					<execution>
 						<id>Stop HTTP Server of staged site for linkcheck</id>
