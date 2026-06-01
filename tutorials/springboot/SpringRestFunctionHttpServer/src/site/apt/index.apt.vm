@@ -28,7 +28,7 @@ Function Injection
 
    * <<<save>>> — persists the order using a Spring <<<OrderService>>> and writes the <<<OrderResponse>>>
 
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/spring/SpringRestFunctionHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestFunctionHttpServer}Tutorial Source}}
 
 
 

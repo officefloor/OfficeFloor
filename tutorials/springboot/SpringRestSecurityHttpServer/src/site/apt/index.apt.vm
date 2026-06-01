@@ -34,7 +34,7 @@ Spring Security Integration Tutorial
 
    * <<<GET /security/rolesallowed>>> — requires <<<ADMIN>>> role, enforced by <<<@RolesAllowed>>>
 
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/spring/SpringRestSecurityHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestSecurityHttpServer}Tutorial Source}}
 
 
 

@@ -26,12 +26,7 @@
 		<href>https://officefloor.net/</href>
 	</bannerLeft>
 	<googleAnalyticsAccountId>UA-23477455-1</googleAnalyticsAccountId>
-	<poweredBy>
-		<logo name="Support"
-			href="https://github.com/sponsors/sagenschneider"
-			img="https://officefloor.net/images/sponsor.jpg" />
-	</poweredBy>
-	<publishDate position="right" />
+<publishDate position="right" />
 	<version position="right" />
 	<skin>
 		<groupId>org.apache.maven.skins</groupId>

@@ -86,7 +86,7 @@ ZIO Tutorial
   
 %{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/ziohttpserver/MessageRepository.java|ignoreDownloadError=false}
   
-  See the {{{../TransactionHttpServer/index.html}Transaction Tutorial}} for further information on configuring Spring repositories.
+  See the {{{../../../native/native-persistence/TransactionHttpServer/index.html}Transaction Tutorial}} for further information on configuring Spring repositories.
 
 
 
@@ -100,4 +100,4 @@ ZIO Tutorial
 
 Next
 
-  The {{{../ConstantCacheHttpServer/index.html}next tutorial}} covers simple caching.
+  The {{{../../../native/native-infrastructure/ConstantCacheHttpServer/index.html}next tutorial}} covers simple caching.

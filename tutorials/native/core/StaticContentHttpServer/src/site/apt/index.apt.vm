@@ -72,5 +72,5 @@ Static Content
 
 Next
 
-  The {{{../../../features/reactive/ReactorHttpServer/index.html}Reactor tutorial}} shows how to
+  The {{{../../../features/features-reactive/ReactorHttpServer/index.html}Reactor tutorial}} shows how to
   integrate Project Reactor publishers and subscribers as OfficeFloor procedures.

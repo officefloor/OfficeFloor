@@ -21,7 +21,7 @@ Exception Handling in OfficeFloor REST YAML Composition
 
   [[3]] <<Spring ControllerAdvice>> - the exception propagates out of the composition and is handled by Spring's <<<@RestControllerAdvice>>> / <<<@ExceptionHandler>>> mechanism.
 
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/spring/SpringRestExceptionHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestExceptionHttpServer}Tutorial Source}}
 
 
 

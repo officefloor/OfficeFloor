@@ -73,4 +73,4 @@ CMD ["java", "-Dhttp.port=8080", "-jar", "server.jar"]
 
 *Next
 
-  The {{{../HttpServletHttpServer/index.html}next tutorial}} looks at deploying to Servlet container (useful for PaaS cloud providers).
+  The {{{../../legacy/HttpServletHttpServer/index.html}next tutorial}} looks at deploying to Servlet container (useful for PaaS cloud providers).

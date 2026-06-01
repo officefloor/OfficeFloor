@@ -95,7 +95,7 @@ Dependency Injection Tutorial
 
 %{snippet|file=${basedir}/src/main/resources/officefloor/objects/ConstructorInjectedPojo.yml|ignoreDownloadError=false}
   
-  The configuration above instantiates the POJOs.  Should more complex logic be required, please see the tutorial on {{{../DatabaseHttpServer/index.html}managed object source}}.
+  The configuration above instantiates the POJOs.  Should more complex logic be required, please see the tutorial on {{{../../native-persistence/DatabaseHttpServer/index.html}managed object source}}.
 
   WoOF auto-wires dependency injection based on type.  Auto-wiring dependencies based on type is adequate (and much easier) for the majority of applications.  WoOF's underlying OfficeFloor framework does provide manual dependency configuration, however this is seldom used as WoOF allows qualifying dependencies for auto-wiring.
 
@@ -114,4 +114,4 @@ Dependency Injection Tutorial
 
 Next
 
-  The {{{../TeamHttpServer/index.html}next tutorial}} covers thread injection.
+  The {{{../../native-infrastructure/TeamHttpServer/index.html}next tutorial}} covers thread injection.

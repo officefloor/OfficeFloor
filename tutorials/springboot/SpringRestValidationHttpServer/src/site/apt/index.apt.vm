@@ -22,7 +22,7 @@ Bean Validation in OfficeFloor REST YAML Composition
    * <<<POST /order/binding>>> — uses <<<BindingResult>>> to receive validation errors inside the
      service method and build a structured error response.
 
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/spring/SpringRestValidationHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestValidationHttpServer}Tutorial Source}}
 
 
 

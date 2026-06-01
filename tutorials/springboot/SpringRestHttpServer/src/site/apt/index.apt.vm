@@ -38,7 +38,7 @@ Spring REST HTTP Server Tutorial
 
    * <<<POST /greeting>>> validates the request, conditionally routes via a custom flow interface to a build step, then audits. This is via three composed methods, each with its own concern and Spring bean dependencies
 
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/spring/SpringRestHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestHttpServer}Tutorial Source}}
 
 
 

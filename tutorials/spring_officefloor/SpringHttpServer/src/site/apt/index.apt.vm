@@ -153,6 +153,6 @@ Spring HTTP Server Tutorial
 
 Next
 
-  The {{{../../native/core/RestHttpServer/index.html}REST Tutorial}} shows the final stage of the
+  The {{{../../native/native-core/RestHttpServer/index.html}REST Tutorial}} shows the final stage of the
   migration path: pure OfficeFloor with no Spring dependency at all.  Service classes become plain
   POJOs and all dependency injection is handled natively by OfficeFloor.
