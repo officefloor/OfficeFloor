@@ -1,6 +1,6 @@
 /*-
  * #%L
- * Provides testing using HttpServlet
+ * Testing of HTTP Server
  * %%
  * Copyright (C) 2005 - 2021 Daniel Sagenschneider
  * %%
