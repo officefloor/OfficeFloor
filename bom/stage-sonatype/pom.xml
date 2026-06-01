@@ -18,6 +18,7 @@
 				<artifactId>flatten-maven-plugin</artifactId>
 				<version>${flatten-maven-version}</version>
 				<configuration>
+					<updatePomFile>true</updatePomFile>
 					<flattenMode>ossrh</flattenMode>
 				</configuration>
 				<executions>
