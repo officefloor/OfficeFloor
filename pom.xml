@@ -953,37 +953,10 @@
 			<distributionManagement>
 				<site>
 					<id>github-pages-site</id>
-					<name>GitHub pages - deployed by GitHub site plugin</name>
+					<name>GitHub pages - deployed by GitHub Action</name>
 					<url>docs</url>
 				</site>
 			</distributionManagement>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>com.github.github</groupId>
-						<artifactId>site-maven-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>release-site-to-github</id>
-								<goals>
-									<goal>site</goal>
-								</goals>
-								<phase>site-deploy</phase>
-								<configuration>
-									<repositoryOwner>officefloor</repositoryOwner>
-									<repositoryName>officefloor.github.io</repositoryName>
-									<server>github</server>
-									<path>
-										${project.distributionManagement.site.url}</path>
-									<merge>true</merge>
-									<message>Site version ${project.version}</message>
-									<noJekyll>true</noJekyll>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
 		</profile>
 		<profile>
 			<id>continuous-integration</id>

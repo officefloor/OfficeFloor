@@ -28,11 +28,15 @@ jobs:
     - name: Build
       run: mvn -V -B -e -DskipTests clean install --file bom/pom.xml
 
+    - name: Generate Site
+      run: mvn -V -B -e -Dofficefloor-deploy=site site site:stage
+
     - name: Deploy Site
-      run: |
-        mvn -V -B -e \
-          -Dofficefloor-deploy=site \
-          -Dgithub.oauth="${SITE_GITHUB_TOKEN}" \
-          site-deploy
-      env:
-        SITE_GITHUB_TOKEN: ${{ secrets.SITE_GITHUB_TOKEN }}
+      uses: peaceiris/actions-gh-pages@v4
+      with:
+        personal_token: ${{ secrets.SITE_GITHUB_TOKEN }}
+        external_repository: officefloor/officefloor.github.io
+        publish_dir: ./target/staging
+        destination_dir: docs
+        keep_files: true
+        publish_branch: gh-pages
