@@ -21,6 +21,10 @@
 
 <project>
 	<body>
-		<menu ref="parent" />
+		<menu name="Getting Started">
+			<item name="About" href="../about.html" />
+			<item name="Tutorials" href="./index.html" />
+			<item name="Getting Help" href="../getting-help.html" />
+		</menu>
 	</body>
 </project>
