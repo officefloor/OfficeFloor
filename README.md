@@ -58,7 +58,7 @@ Add a single dependency to your existing Spring Boot `pom.xml`:
 <dependency>
   <groupId>net.officefloor.springboot</groupId>
   <artifactId>officefloor-rest-spring-boot-starter</artifactId>
-  <version><!-- latest version --></version>
+  <version>4.0.0</version>
 </dependency>
 ```
 

@@ -58,7 +58,7 @@ Migrate Spring Web MVC Tutorial
 
    [[1]] Any @PostContruct / @PreDestroy moved to {{{/apidocs/net/officefloor/frame/api/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} as injected object.
    
-   [[1]] See {{{../TransactionHttpServer/index.html}Transaction Tutorial}} for graphically configuring transactions (removing need for Spring's @Transactional).
+   [[1]] See {{{../../native/native-persistence/TransactionHttpServer/index.html}Transaction Tutorial}} for configuring transactions via YAML (removing need for Spring's @Transactional).
    
    [[1]] Remove the remaining Spring annotations.
          
@@ -68,27 +68,6 @@ Migrate Spring Web MVC Tutorial
   
 %{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springwebmvchttpserver/migrated/MigratedRestController.java|ignoreDownloadError=false}
 
-
-*Migrating a Spring web page
-
-  The Spring web page is again taken from the {{{./index.html}previous tutorial}}:
-
-%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springwebmvchttpserver/SpringController.java|ignoreDownloadError=false}
-
-%{snippet|file=${basedir}/src/main/resources/templates/simple.html|ignoreDownloadError=false}
-
-  To migrate the web page, can either:
-  
-   * embed the rendering engine as a {{{/apidocs/net/officefloor/compile/spi/managedfunction/source/ManagedFunctionSource.html}ManagedFunctionSource}}
-
-   * rewrite the web page as a WoOF template
-   
-  The rewritten WoOF logic object and template are as follows:
-  
-%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springwebmvchttpserver/migrated/MigratedController.java|ignoreDownloadError=false}
-
-%{snippet|file=${basedir}/src/main/resources/migrated/simple.woof.html|ignoreDownloadError=false}
-  
 
 Next
 

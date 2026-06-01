@@ -60,7 +60,7 @@ Activity Tutorial
 
   Modularising the configuration is undertaken with the {{{/apidocs/net/officefloor/activity/ActivitySectionSource.html}ActivitySectionSource}}.  The name <<<Activity>>> comes from business.  An <<<Activity>>> is a composition of many <<<Procedures>>>.
   
-  The IDE plugins natively support <<<Activities>>> so this only becomes a selection when adding a <<<Section>>>.  However, the application must add support via the following dependency:
+  The application must add support via the following dependency:
   
 %{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
   
@@ -101,14 +101,6 @@ Complex Modularising
   Furthermore, as the <<<Activity>>> is loaded from the class path, <<<Activities>>> may be built as libraries.  Applications can then import the resulting built jars to re-use the modularised <<<Activity>>> functionality.
 
 
-Section
-
-  The <<<Activity>>> is actually an implementation of a {{{/apidocs/net/officefloor/compile/spi/section/source/SectionSource.html}SectionSource}}.  The <<<Section>>> is the generic modularisation of all configurations.  Many of plugins are implemented through <<<Sections>>>.
-  
-  It is beyond this tutorial to give a full explanation of the {{{/apidocs/net/officefloor/compile/spi/section/source/SectionSource.html}SectionSource}}.  See existing plugins for examples of implementations.
-
-
-
 *Testing
 
   The following tests the increased depth of configuration modularisation:
@@ -120,4 +112,4 @@ Section
 
 Next
 
-  The {{{../TransactionHttpServer/index.html}next tutorial}} covers transaction ({{{/apidocs/net/officefloor/compile/spi/governance/source/GovernanceSource.html}GovernanceSource}}) within a WoOF web application.
+  The {{{../../native-persistence/TransactionHttpServer/index.html}next tutorial}} covers transaction ({{{/apidocs/net/officefloor/compile/spi/governance/source/GovernanceSource.html}GovernanceSource}}) within a WoOF web application.

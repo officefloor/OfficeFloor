@@ -68,7 +68,7 @@ Reactive Tutorial
   
 %{snippet|id=send|file=${basedir}/src/main/java/net/officefloor/tutorial/reactorhttpserver/ReactorLogic.java|ignoreDownloadError=false}
 
-  Should the <<<Mono>>> fail, OfficeFloor will route the exception to the appropriate exception handler.  See {{{../ExceptionHttpServer/index.html}Exception Tutorial}} for more details.   
+  Should the <<<Mono>>> fail, OfficeFloor will route the exception to the appropriate exception handler.  See {{{../../../native/native-core/ExceptionHttpServer/index.html}Exception Tutorial}} for more details.   
 
 
 

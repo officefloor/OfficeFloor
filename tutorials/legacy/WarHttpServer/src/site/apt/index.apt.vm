@@ -64,7 +64,7 @@ WAR Tutorial
 
 *Servlet Dependencies
 
-  Dependencies for the servlets are provided by OfficeFloor.  This may either be through OfficeFloor directly.  Or by incorporating a third party dependency injection library, such as {{{../SpringHttpServer/index.html}Spring}}.
+  Dependencies for the servlets are provided by OfficeFloor.  This may either be through OfficeFloor directly.  Or by incorporating a third party dependency injection library, such as {{{../../spring-officefloor/SpringHttpServer/index.html}Spring}}.
 
   In the case of this tutorial, OfficeFloor is directly providing the dependency via <<<officefloor/objects/InjectServletDependency.yml>>>:
 

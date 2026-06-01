@@ -59,4 +59,4 @@ Combined JWT Resource and Authority Tutorial
 
 Next
 
-  The {{{../SwaggerHttpServer/index.html}next tutorial}} covers documenting via OpenAPI / Swagger.
+  The {{{../../native-core/SwaggerHttpServer/index.html}next tutorial}} covers documenting via OpenAPI / Swagger.

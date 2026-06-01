@@ -21,7 +21,7 @@ Spring Actuator with OfficeFloor REST
   This tutorial demonstrates a Spring Boot application that exposes a custom OfficeFloor REST endpoint
   at <<<GET /status>>> while Actuator's <<<GET /actuator/health>>> continues to work unchanged.
 
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/spring/SpringRestActuatorHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestActuatorHttpServer}Tutorial Source}}
 
 
 
@@ -88,6 +88,6 @@ Spring Actuator with OfficeFloor REST
 
 Next
 
-  The {{{../../spring_officefloor/SpringHttpServer/index.html}Spring HTTP Server tutorial}} shows how
+  The {{{../../spring-officefloor/SpringHttpServer/index.html}Spring HTTP Server tutorial}} shows how
   to host your Spring beans inside the OfficeFloor runtime, unlocking further OfficeFloor capabilities
   while keeping all existing Spring configuration.
