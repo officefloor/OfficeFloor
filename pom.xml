@@ -368,6 +368,9 @@
 						<addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
 						<emptyLineAfterHeader>true</emptyLineAfterHeader>
 						<ignoreNoFileToScan>true</ignoreNoFileToScan>
+						<roots>
+							<root>src/main</root>
+						</roots>
 						<failOnMissingHeader>true</failOnMissingHeader>
 						<canUpdateDescription>true</canUpdateDescription>
 						<excludes>

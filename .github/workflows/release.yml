@@ -32,7 +32,7 @@ jobs:
 
     - name: Release to Maven Central
       run: |
-        mvn -V -B -e \
+        mvn -B -ntp \
           -Dofficefloor-deploy=sonatype \
           -Dgpg.passphrase="${GPG_PASSPHRASE}" \
           clean deploy \
