@@ -758,12 +758,11 @@
 					<supportedPackagings>
 						<supportedPackaging>pom</supportedPackaging>
 					</supportedPackagings>
-					<deployMode>FORK</deployMode>
+					<deployMode>EMBED</deployMode>
 					<httpConnector>
 						<port>9999</port>
 					</httpConnector>
-					<webAppSourceDirectory>${basedir}/target/site/
-					</webAppSourceDirectory>
+					<webAppSourceDirectory>${basedir}/target/site</webAppSourceDirectory>
 					<stopKey>OfficeFloor</stopKey>
 					<stopPort>9966</stopPort>
 					<stopWait>10</stopWait>
