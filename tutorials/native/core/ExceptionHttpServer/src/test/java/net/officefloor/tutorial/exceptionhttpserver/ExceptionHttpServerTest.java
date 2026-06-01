@@ -6,7 +6,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,7 +44,7 @@ public class ExceptionHttpServerTest {
 		System.setErr(new PrintStream(error, true));
 
 		// Submit to trigger the exception
-		HttpResponse response = this.client.execute(new HttpGet(this.client.url("/template+submit")));
+		HttpResponse response = this.client.execute(new HttpPost(this.client.url("/submit")));
 		assertEquals(200, response.getStatusLine().getStatusCode(), "Should be successful");
 
 		// Ensure handling by logging the failure

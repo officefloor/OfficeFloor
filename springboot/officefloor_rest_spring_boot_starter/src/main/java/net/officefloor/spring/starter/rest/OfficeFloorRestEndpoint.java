@@ -131,7 +131,8 @@ public class OfficeFloorRestEndpoint {
     /**
      * Instantiate.
      *
-     * @param endpoint {@link RestEndpoint}.
+     * @param endpoint    {@link RestEndpoint}.
+     * @param corsMomento {@link MomentoKey} for CORS configuration.
      */
     public OfficeFloorRestEndpoint(RestEndpoint endpoint, MomentoKey<CorsConfiguration> corsMomento) {
 

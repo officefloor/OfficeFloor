@@ -64,18 +64,22 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * ==================== TestCase =========================
 	 */
 
+	/** Marks a stress test. */
 	@Retention(RetentionPolicy.RUNTIME)
 	protected static @interface StressTest {
 	}
 
+	/** Marks a GUI test. */
 	@Retention(RetentionPolicy.RUNTIME)
 	protected static @interface GuiTest {
 	}
 
+	/** Marks a test that uses Docker. */
 	@Retention(RetentionPolicy.RUNTIME)
 	protected static @interface UsesDockerTest {
 	}
 
+	/** Marks a test that uses Google Cloud. */
 	@Retention(RetentionPolicy.RUNTIME)
 	protected static @interface UsesGCloudTest {
 	}
@@ -182,7 +186,6 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @param ex Failure.
 	 * @return {@link RuntimeException} to allow <code>throw fail(ex);</code> for
 	 *         compilation. Note this is never returned as always throws exception.
-	 * @throws TestFail Handled by {@link #runBare()}.
 	 */
 	public static RuntimeException fail(Throwable ex) {
 		return Assertions.fail(ex);
@@ -687,6 +690,12 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @param <T> Possible {@link Throwable}.
 	 */
 	protected static interface TestLogic<R, T extends Throwable> {
+		/**
+		 * Runs the test logic.
+		 *
+		 * @return Result.
+		 * @throws T If test logic fails.
+		 */
 		R run() throws T;
 	}
 
@@ -709,12 +718,18 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @param <T> Possible {@link Throwable}.
 	 */
 	protected static interface MultithreadedTestLogic<T extends Throwable> {
+		/**
+		 * Runs the multi-threaded test logic.
+		 *
+		 * @throws T If test logic fails.
+		 */
 		void run() throws T;
 	}
 
 	/**
 	 * Undertakes multi-threaded testing of {@link TestLogic}.
 	 * 
+	 * @param <T>            Throwable type.
 	 * @param threadCount    Number of {@link Thread} instances to run in parallel.
 	 * @param iterationCount Number of iterations of {@link TestLogic} per
 	 *                       {@link Thread}.
@@ -729,6 +744,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Undertakes multi-threaded testing of {@link TestLogic}.
 	 * 
+	 * @param <T>            Throwable type.
 	 * @param threadCount    Number of {@link Thread} instances to run in parallel.
 	 * @param iterationCount Number of iterations of {@link TestLogic} per
 	 *                       {@link Thread}.
@@ -747,6 +763,11 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @param <T> Possible {@link Throwable}.
 	 */
 	protected static interface TestCapture<T extends Throwable> {
+		/**
+		 * Runs the test capture logic.
+		 *
+		 * @throws T If test logic fails.
+		 */
 		void run() throws T;
 	}
 

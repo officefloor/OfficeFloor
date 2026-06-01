@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 
+/** {@link AbstractSupplierSource} for Spring beans. */
 public class SpringBeanSupplierSource extends AbstractSupplierSource {
 
     private ConfigurableListableBeanFactory beanFactory;

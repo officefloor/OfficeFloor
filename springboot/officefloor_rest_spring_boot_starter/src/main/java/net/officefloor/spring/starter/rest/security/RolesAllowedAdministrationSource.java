@@ -15,6 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Arrays;
 
+/** {@link AbstractAdministrationSource} to enforce roles-allowed security. */
 public class RolesAllowedAdministrationSource extends AbstractAdministrationSource<ServerHttpConnection, None, None> implements
         AdministrationFactory<ServerHttpConnection, None, None>, Administration<ServerHttpConnection, None, None> {
 

@@ -36,15 +36,17 @@ Start Up Ordering Tutorial
 
   Flyway is configured as per the {{{../FlywayHttpServer/index.html}Flyway Tutorial}}.
   
-  The following demonstrates the object configuration:
-  
-%{snippet|id=tutorial|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
+  The following demonstrates the object configuration in the <<<officefloor/objects/>>> directory:
 
-  The <<<start-after>>> configuration indicates for JPA to start after the Flyway migration has complete.
+%{snippet|file=${basedir}/src/main/resources/officefloor/objects/DataSource.yml|ignoreDownloadError=false}
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/objects/EntityManager.yml|ignoreDownloadError=false}
+
+  The <<<start-after>>> configuration in <<<EntityManager.yml>>> indicates for JPA to start after the Flyway migration has complete.
   
   This ordering is even enforced if the start up is executed by another team, as per the tutorial's configuration:
   
-%{snippet|id=tutorial|file=${basedir}/src/main/resources/application.teams|ignoreDownloadError=false}
+%{snippet|file=${basedir}/src/main/resources/officefloor/teams/DataSource.yml|ignoreDownloadError=false}
 
   There is also <<<start-before>>> for flagging to starting before.
   

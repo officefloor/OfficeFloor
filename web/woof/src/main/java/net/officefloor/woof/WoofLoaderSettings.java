@@ -184,7 +184,6 @@ public class WoofLoaderSettings {
          * Configures the {@link Office}.
          *
          * @param context {@link WoofLoaderConfigurerContext}.
-         * @throws Exception If fails to configure.
          */
         void configure(WoofLoaderConfigurerContext context);
     }

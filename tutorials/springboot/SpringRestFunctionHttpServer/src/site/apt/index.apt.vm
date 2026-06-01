@@ -1,0 +1,159 @@
+~~~
+~~ Spring REST Function HTTP Server Tutorial
+~~~
+
+                                               -----------------------
+                                         Function Injection Tutorial
+                                               -----------------------
+                                                Daniel Sagenschneider
+                                               -----------------------
+
+Function Injection
+
+  OfficeFloor extends Spring's dependency injection with two further kinds of injection.  The previous
+  tutorials covered <<dependency injection>> — Spring beans injected into method parameters.  This
+  tutorial introduces <<function injection>>: composing plain Java methods into a request-handling
+  pipeline declared entirely in a YAML file.
+
+  Each method handles exactly one concern and knows nothing about the others.  The YAML file is the
+  complete specification — it names the classes, their order, and how data flows between them.  This
+  makes the entire pipeline readable without opening any Java file, which is especially valuable when
+  working with AI coding tools.
+
+  The tutorial exposes a <<<POST /order>>> endpoint with three composed steps:
+
+   * <<<validate>>> — checks that <<<productId>>> is present and <<<quantity>>> is positive; short-circuits on invalid input
+
+   * <<<price>>> — calculates the order total using a Spring <<<PricingService>>>; returns a <<<PricedOrder>>>
+
+   * <<<save>>> — persists the order using a Spring <<<OrderService>>> and writes the <<<OrderResponse>>>
+
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/spring/SpringRestFunctionHttpServer}Tutorial Source}}
+
+
+
+*Maven dependency
+
+%{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+
+
+*Application class
+
+  No changes to the standard Spring Boot application class are needed:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestfunction/SpringRestFunctionApplication.java|ignoreDownloadError=false}
+
+
+
+*The YAML pipeline
+
+  The entire pipeline for <<<POST /order>>> lives in one file:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/order.POST.yml|ignoreDownloadError=false}
+
+  Reading the file top-to-bottom is reading the specification.  Each entry is a named step.  The
+  <<<class>>> key names the Java class that implements it.  <<<outputs>>> maps a conditional branch
+  name to its target step.  <<<next>>> names the unconditional continuation.
+
+  None of the three Java classes imports or references the others.  Changing the pipeline — adding a
+  logging step, reordering, bypassing a step in staging — is a YAML edit with no Java changes.
+
+
+
+*Step 1 — validate: conditional routing with <<<@Flow>>>
+
+  The <<<validate>>> step is the entry point.  It receives the request body and decides whether to
+  proceed or short-circuit.  The conditional branch is expressed as a custom functional interface
+  annotated with {{{/apidocs/net/officefloor/plugin/section/clazz/Flow.html}@Flow}}:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestfunction/ValidateOrderLogic.java|ignoreDownloadError=false}
+
+  <<<@Flow("valid")>>> tells OfficeFloor that calling <<<validFlow.flow(order)>>> routes execution
+  to whatever step is mapped to <<<valid>>> in the YAML — here, <<<price>>>.  The <<<OrderRequest>>>
+  passed to <<<flow()>>> is automatically available as a
+  {{{/apidocs/net/officefloor/plugin/section/clazz/Parameter.html}@Parameter}} in the receiving step.
+
+  When the request is invalid, <<<response.send(...)>>> is called directly and the <<<price>>> and
+  <<<save>>> steps are never invoked for that request.
+
+
+
+*Step 2 — price: sequential step with a typed return value
+
+  The <<<price>>> step receives the validated <<<OrderRequest>>> as a <<<@Parameter>>> and uses a
+  Spring <<<PricingService>>> to calculate the total.  The return value becomes the <<<@Parameter>>>
+  for the next step:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestfunction/CalculatePricingLogic.java|ignoreDownloadError=false}
+
+  Returning a value and using <<<next>>> in the YAML is the lightweight alternative to <<<@Flow>>>
+  when there is no branching.  The returned <<<PricedOrder>>> is a plain data carrier — it holds
+  exactly the information the next step needs, nothing more.
+
+
+
+*Step 3 — save: Spring service and response
+
+  The <<<save>>> step receives the <<<PricedOrder>>>, delegates persistence to a Spring
+  <<<OrderService>>>, and writes the final response:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestfunction/SaveOrderLogic.java|ignoreDownloadError=false}
+
+
+
+*Spring services
+
+  Both services are plain Spring beans — annotated with <<<@Service>>> and injected automatically:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestfunction/PricingService.java|ignoreDownloadError=false}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestfunction/OrderService.java|ignoreDownloadError=false}
+
+  The request and response POJOs carry data into and out of the pipeline:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestfunction/OrderRequest.java|ignoreDownloadError=false}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestfunction/PricedOrder.java|ignoreDownloadError=false}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestfunction/OrderResponse.java|ignoreDownloadError=false}
+
+
+
+*Testing
+
+  Each step is a plain Java class — unit-testable without any framework by simply instantiating it
+  and calling the method.  Integration tests use the standard Spring Boot <<<MockMvc>>> approach:
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springrestfunction/SpringRestFunctionHttpServerTest.java|ignoreDownloadError=false}
+
+  <<<validOrderFlowsThroughPipeline>>> confirms the full pipeline ran: the order ID is assigned, the
+  product and quantity are echoed, and the total is the expected price.  <<<invalidOrderStopsAtValidation>>>
+  confirms the short-circuit: <<<orderId>>> is null (no order was created) and <<<total>>> is zero
+  (the pricing step never ran).
+
+
+
+*What you have now
+
+  After completing this tutorial you can:
+
+   * Declare a multi-step request pipeline as a single YAML file
+
+   * Use <<<@Flow>>> with a custom functional interface for conditional branching
+
+   * Use method return values and <<<next>>> for sequential continuation
+
+   * Pass typed data between steps via <<<@Parameter>>>
+
+   * Inject Spring beans into any step without touching the others
+
+  The pipeline is the YAML.  The Java classes are independent units.  Adding, reordering, or removing
+  a step is a YAML change only.
+
+
+
+Next
+
+  The {{{../SpringRestExceptionHttpServer/index.html}Spring REST Exception Handling tutorial}} covers
+  method escalations, composition escalations, and Spring <<<@ControllerAdvice>>> integration.

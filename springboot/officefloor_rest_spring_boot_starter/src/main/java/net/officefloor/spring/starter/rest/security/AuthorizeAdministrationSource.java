@@ -23,6 +23,11 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.function.Function;
 
+/**
+ * Administration source for authorization.
+ *
+ * @param <A> Annotation type.
+ */
 public class AuthorizeAdministrationSource<A extends Annotation> extends AbstractAdministrationSource<ServerHttpConnection, None, None>
         implements  AdministrationFactory<ServerHttpConnection, None, None>, Administration<ServerHttpConnection, None, None>, MethodInvocation {
 
@@ -40,6 +45,12 @@ public class AuthorizeAdministrationSource<A extends Annotation> extends Abstrac
 
     private final Function<A, String> extractExpression;
 
+    /**
+     * Instantiate.
+     *
+     * @param annotationType      Annotation type.
+     * @param extractExpression   Extracts the security expression from the annotation.
+     */
     public AuthorizeAdministrationSource(Class<A> annotationType, Function<A, String> extractExpression) {
         this.annotationType = annotationType;
         this.extractExpression = extractExpression;

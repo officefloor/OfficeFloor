@@ -40,10 +40,6 @@ ZIO Tutorial
   
 %{snippet|id=tutorial|file=${basedir}/src/main/scala/net/officefloor/tutorial/ziohttpserver/MessageService.scala|ignoreDownloadError=false}
 
-  with the following environment:
-  
-%{snippet|id=tutorial|file=${basedir}/src/main/scala/net/officefloor/tutorial/ziohttpserver/InjectMessageRepository.scala|ignoreDownloadError=false}
-  
   The effect is tested with the following code:
   
 %{snippet|id=tutorial|file=${basedir}/src/test/scala/net/officefloor/tutorial/ziohttpserver/MessageServiceTest.scala|ignoreDownloadError=false}
@@ -74,12 +70,10 @@ ZIO Tutorial
    
    [[1]] Provides the success as parameter to next procedure.  Or throws any exception to be handled by configured OfficeFloor exception handlers
    
-  This allows ZIO to be used for writing modular functions of the application.  Then lets OfficeFloor compose these functions graphically together to form the application.
-  
-  As per the WoOF configuration of the application:
-  
-[./images/ZioHttpServer-configuration.png] ZioHttpServer screen shot.
-  
+  This allows ZIO to be used for writing modular functions of the application.  The REST endpoint configuration then composes these functions to service the request:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/index.POST.yml|ignoreDownloadError=false}
+
   The next configured procedure sends the message response:
   
 %{snippet|id=send|file=${basedir}/src/main/scala/net/officefloor/tutorial/ziohttpserver/ServiceLogic.scala|ignoreDownloadError=false}

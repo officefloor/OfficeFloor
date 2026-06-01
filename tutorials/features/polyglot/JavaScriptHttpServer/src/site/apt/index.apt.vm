@@ -30,10 +30,10 @@ JavaScript Polyglot Tutorial
 
   The use of JavaScript in this tutorial will be to validate the request.  This allows JavaScript in a single page application to be re-used on the server.  In other words, validation rules used to confirm correctly entered information can be re-used server side to ensure correct defensive checks regarding the data sent.  This avoids having to recode and maintain two separate sets of validation rules in different languages.
 
-  The configuration of the tutorial is as follows:
+  The REST endpoint configuration shows the JavaScript validation followed by sending the Java response:
 
-[./images/JavaScriptHttpServer-configuration.png] JavaScriptHttpServer screen shot.
-   
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/index.GET.yml|ignoreDownloadError=false}
+
   {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/JavaScriptHttpServer}Tutorial Source}}
 
 

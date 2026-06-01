@@ -36,15 +36,19 @@ JWT Tutorial
 
 
 
-*WoOF configuration
+*Configuration
 
   The resource is configured with access restriction to prevent unauthorized access.  The claims object may also be injected for more specific security logic.
 
 %{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/jwtresourcehttpserver/SecuredResource.java|ignoreDownloadError=false}
-  
-  The JWT security is configured with the {{{/apidocs/net/officefloor/web/jwt/JwtHttpSecuritySource.html}JwtHttpSecuritySource}}.  The below is the configuration of the tutorial.
-  
-[./images/JwtResourceHttpServer-configuration.png] JwtResourceHttpServer screen shot.
+
+  The <<<resource>>> path is also configured to require HTTPS:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/resource.yml|ignoreDownloadError=false}
+
+  The JWT security is configured with the {{{/apidocs/net/officefloor/web/jwt/JwtHttpSecuritySource.html}JwtHttpSecuritySource}} via the security YAML:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/security/JWT.yml|ignoreDownloadError=false}
 
   Many of the handlers for JWT are already available with default implementations:
   

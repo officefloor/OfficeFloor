@@ -1,0 +1,76 @@
+~~~
+~~ #%L
+~~ Static Content Tutorial
+~~ %%
+~~ Copyright (C) 2005 - 2020 Daniel Sagenschneider
+~~ %%
+~~ Licensed under the Apache License, Version 2.0 (the "License");
+~~ you may not use this file except in compliance with the License.
+~~ You may obtain a copy of the License at
+~~
+~~      http://www.apache.org/licenses/LICENSE-2.0
+~~
+~~ Unless required by applicable law or agreed to in writing, software
+~~ distributed under the License is distributed on an "AS IS" BASIS,
+~~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~~ See the License for the specific language governing permissions and
+~~ limitations under the License.
+~~ #L%
+~~~
+
+                                               -----------------------
+                                          Static Content Tutorial
+                                               -----------------------
+                                                Daniel Sagenschneider
+                                               -----------------------
+
+Static Content
+
+  This tutorial demonstrates serving static assets — HTML, CSS, JavaScript, images — for a
+  single-page application alongside OfficeFloor REST endpoints.
+
+  The two halves of a modern web application sit in separate locations on the classpath:
+
+*-------------------------------+-------------------------------------------+
+|| Location                    || Purpose
+*-------------------------------+-------------------------------------------+
+| <<<officefloor/rest/>>>       | REST endpoint YAML files (the API)
+*-------------------------------+-------------------------------------------+
+| <<<PUBLIC/>>>                 | Static assets served directly (the SPA)
+*-------------------------------+-------------------------------------------+
+
+  No routing configuration is needed.  OfficeFloor serves any path under <<<PUBLIC/>>> as a
+  static file, and routes everything else through the REST endpoint declarations.
+
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/StaticContentHttpServer}Tutorial Source}}
+
+
+
+*/PUBLIC
+
+  Place static files anywhere on the classpath under a directory named <<<PUBLIC>>>.  Any file
+  found at <<<PUBLIC/\{path\}>>> is served at <<<GET /\{path\}>>>.  The root path <<</>>> maps to
+  <<<PUBLIC/index.html>>>.
+
+  This gives flexibility in how the SPA build output is packaged:
+
+   * Copy the SPA build artefacts into <<<src/main/resources/PUBLIC/>>> and they are bundled into
+     the application jar.
+
+   * Place them in a separate jar on the runtime classpath — useful when the frontend and backend
+     are built independently.
+
+   * Mount them via any other classpath mechanism.
+
+
+
+*Testing
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/staticcontenthttpserver/StaticContentHttpServerTest.java|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../../../features/reactive/ReactorHttpServer/index.html}Reactor tutorial}} shows how to
+  integrate Project Reactor publishers and subscribers as OfficeFloor procedures.

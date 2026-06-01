@@ -2,22 +2,23 @@ package net.officefloor.spring.starter.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.models.OpenAPI;
+import net.officefloor.activity.team.build.TeamDeployer;
+import net.officefloor.activity.team.build.TeamEmployer;
 import net.officefloor.compile.impl.ApplicationOfficeFloorSource;
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
-import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
 import net.officefloor.compile.spi.officefloor.source.impl.AbstractOfficeFloorSource;
 import net.officefloor.server.http.HttpServer;
 import net.officefloor.web.build.WebArchitect;
-import org.slf4j.Logger;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import java.util.List;
 
+/** {@link AbstractOfficeFloorSource} for Spring Boot. */
 public class SpringBootOfficeFloorSource extends AbstractOfficeFloorSource {
 
     private final ObjectMapper objectMapper;
@@ -28,6 +29,12 @@ public class SpringBootOfficeFloorSource extends AbstractOfficeFloorSource {
 
     private final OpenAPI openApi;
 
+    /**
+     * @param objectMapper       {@link ObjectMapper}.
+     * @param restEndpoints      REST endpoints.
+     * @param applicationContext {@link ConfigurableApplicationContext}.
+     * @param openApi            {@link OpenAPI}.
+     */
     public SpringBootOfficeFloorSource(ObjectMapper objectMapper,
                                        List<OfficeFloorRestEndpoint> restEndpoints,
                                        ConfigurableApplicationContext applicationContext,
@@ -67,6 +74,14 @@ public class SpringBootOfficeFloorSource extends AbstractOfficeFloorSource {
         for (String propertyName : officeFloorSourceContext.getPropertyNames()) {
             deployedOffice.addProperty(propertyName, officeFloorSourceContext.getProperty(propertyName));
         }
+
+        // Load teams from officefloor/teams/ YAML files
+        PropertyList teamProperties = officeFloorSourceContext.createPropertyList();
+        for (String propertyName : officeFloorSourceContext.getPropertyNames()) {
+            teamProperties.addProperty(propertyName).setValue(officeFloorSourceContext.getProperty(propertyName));
+        }
+        TeamDeployer teamDeployer = TeamEmployer.employTeamDeployer(officeFloorDeployer, officeFloorSourceContext, deployedOffice);
+        teamDeployer.addTeams("officefloor/teams", teamProperties);
 
         // Provide default input for routing
         DeployedOfficeInput handlerInput = deployedOffice.getDeployedOfficeInput(WebArchitect.HANDLER_SECTION_NAME, WebArchitect.HANDLER_INPUT_NAME);

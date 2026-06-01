@@ -11,6 +11,7 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 
+/** {@link OfficeExtensionService} for Spring Security. */
 public class SpringSecurityOfficeExtension implements OfficeExtensionService {
 
     private OfficeAdministration preAuthorizeAdministration = null;
@@ -19,6 +20,10 @@ public class SpringSecurityOfficeExtension implements OfficeExtensionService {
 
     private OfficeAdministration rolesAllowedAdministration = null;
 
+    /**
+     * @param architect {@link OfficeArchitect}.
+     * @return {@link OfficeAdministration} for {@link PreAuthorize}.
+     */
     protected OfficeAdministration getPreAuthorizeAdministration(OfficeArchitect architect) {
         if (this.preAuthorizeAdministration == null) {
             this.preAuthorizeAdministration = architect.addOfficeAdministration(PreAuthorize.class.getSimpleName(),
@@ -28,6 +33,10 @@ public class SpringSecurityOfficeExtension implements OfficeExtensionService {
         return this.preAuthorizeAdministration;
     }
 
+    /**
+     * @param architect {@link OfficeArchitect}.
+     * @return {@link OfficeAdministration} for {@link PostAuthorize}.
+     */
     protected OfficeAdministration getPostAuthorizeAdministration(OfficeArchitect architect) {
         if (this.postAuthorizeAdministration == null) {
             this.postAuthorizeAdministration = architect.addOfficeAdministration(PostAuthorize.class.getSimpleName(),
@@ -37,6 +46,10 @@ public class SpringSecurityOfficeExtension implements OfficeExtensionService {
         return this.postAuthorizeAdministration;
     }
 
+    /**
+     * @param architect {@link OfficeArchitect}.
+     * @return {@link OfficeAdministration} for roles allowed.
+     */
     protected OfficeAdministration getRolesAllowedAdministration(OfficeArchitect architect) {
         if (this.rolesAllowedAdministration == null) {
             this.rolesAllowedAdministration = architect.addOfficeAdministration(RolesAllowed.class.getSimpleName(),

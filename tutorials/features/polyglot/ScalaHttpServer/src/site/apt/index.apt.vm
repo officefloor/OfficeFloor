@@ -45,8 +45,16 @@ Scala Polyglot Tutorial
 *Scala
 
   The Scala to service the request is:
-  
+
 %{snippet|file=${basedir}/src/main/scala/net/officefloor/tutorial/scalahttpserver/ScalaService.scala|ignoreDownloadError=false}
+
+
+
+*REST Endpoint
+
+  The REST endpoint routing POST requests to <<<'/scala'>>> to the Scala function is configured as follows:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/scala.POST.yml|ignoreDownloadError=false}
 
 
 

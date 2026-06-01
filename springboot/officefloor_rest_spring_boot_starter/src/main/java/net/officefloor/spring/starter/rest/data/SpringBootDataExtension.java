@@ -6,6 +6,7 @@ import net.officefloor.spring.starter.rest.OfficeFloorSpringBootExtension;
 import net.officefloor.spring.starter.rest.OfficeFloorSpringBootExtensionContext;
 import org.springframework.transaction.TransactionDefinition;
 
+/** {@link OfficeFloorSpringBootExtension} for Spring Boot Data. */
 public class SpringBootDataExtension implements OfficeFloorSpringBootExtension {
 
     /*

@@ -1,0 +1,6 @@
+login:
+  class: net.officefloor.tutorial.authenticationhttpserver.LoginLogic
+  next: render
+render:
+  procedure: Thymeleaf
+  resource: login

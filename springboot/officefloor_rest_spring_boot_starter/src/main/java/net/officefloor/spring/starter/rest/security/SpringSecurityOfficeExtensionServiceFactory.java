@@ -7,12 +7,15 @@ import net.officefloor.compile.spi.office.extension.OfficeExtensionServiceFactor
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.spring.starter.rest.SpringBootExtra;
 
+/** {@link OfficeExtensionServiceFactory} for Spring Security. */
 public class SpringSecurityOfficeExtensionServiceFactory implements OfficeExtensionServiceFactory, OfficeExtensionService {
 
     /**
      * May not be on class path, so must dynamically load.
      */
+    /** Spring Security filter chain class name. */
     public static final String SPRING_SECURITY_FILTER_CLASS_NAME = "org.springframework.security.web.SecurityFilterChain";
+    /** Spring Security office extension class name. */
     public static final String SPRING_SECURITY_OFFICE_EXTENSION_CLASS_NAME = "net.officefloor.spring.starter.rest.security.SpringSecurityOfficeExtension";
 
     /*

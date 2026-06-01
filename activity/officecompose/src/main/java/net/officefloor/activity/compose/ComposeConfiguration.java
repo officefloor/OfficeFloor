@@ -7,6 +7,7 @@ import lombok.Data;
 import java.util.HashMap;
 import java.util.Map;
 
+/** Compose configuration. */
 @Data
 public class ComposeConfiguration {
 
@@ -18,6 +19,12 @@ public class ComposeConfiguration {
     @JsonIgnore
     private Map<String, FunctionConfiguration> functions = new HashMap<>();
 
+    /**
+     * Sets the function configuration.
+     *
+     * @param functionName   Name of the function.
+     * @param functionConfig {@link FunctionConfiguration}.
+     */
     @JsonAnySetter
     public void setFunction(String functionName, FunctionConfiguration functionConfig) {
 

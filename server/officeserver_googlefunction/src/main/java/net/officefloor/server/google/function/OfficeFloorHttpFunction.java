@@ -82,9 +82,9 @@ public class OfficeFloorHttpFunction implements HttpFunction {
 	private static GoogleFunctionInstance instance;
 
 	/**
-	 * Specifies the {@link OfficeFloorFactory}.
-	 * 
-	 * @param factory {@link OfficeFloorFactory}.
+	 * Specifies the {@link HttpFunctionOfficeFloorFactory}.
+	 *
+	 * @param factory {@link HttpFunctionOfficeFloorFactory}.
 	 */
 	public synchronized static void setOfficeFloorFactory(HttpFunctionOfficeFloorFactory factory) {
 

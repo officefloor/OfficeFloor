@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import net.officefloor.activity.compose.build.ComposeArchitect;
 import net.officefloor.activity.compose.build.ComposeEmployer;
+import net.officefloor.activity.team.build.TeamEmployer;
 import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.properties.PropertyList;
@@ -52,6 +53,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+/** {@link AbstractOfficeSource} for Spring Boot. */
 public class SpringBootOfficeSource extends AbstractOfficeSource {
 
     private final ObjectMapper objectMapper;
@@ -64,6 +66,12 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
 
     private final OpenAPI openApi;
 
+    /**
+     * @param objectMapper       {@link ObjectMapper}.
+     * @param restEndpoints      REST endpoints.
+     * @param applicationContext {@link ConfigurableApplicationContext}.
+     * @param openApi            {@link OpenAPI}.
+     */
     public SpringBootOfficeSource(ObjectMapper objectMapper,
                                   List<OfficeFloorRestEndpoint> restEndpoints,
                                   ConfigurableApplicationContext applicationContext,
@@ -113,6 +121,9 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
         WebArchitect webArchitect = WebArchitectEmployer.employWebArchitect(officeArchitect, officeSourceContext);
         ComposeArchitect composeArchitect = ComposeEmployer.employComposeArchitect(officeArchitect, officeSourceContext);
         RestArchitect restArchitect = RestEmployer.employRestArchitect(officeArchitect, webArchitect, composeArchitect, officeSourceContext);
+
+        // Enable auto-wiring of teams to managed functions, but only when teams are configured
+        TeamEmployer.enableOfficeAutoWireTeams("officefloor/teams", officeArchitect);
 
         // Undertake Spring Boot extensions
         for (OfficeFloorSpringBootExtension springBootExtension : officeSourceContext.loadOptionalServices(OfficeFloorSpringBootExtensionServiceFactory.class)) {

@@ -17,6 +17,11 @@ public class SpringBeanManagedObjectSource extends AbstractAsyncManagedObjectSou
 
     private final BeanFactory beanFactory;
 
+    /**
+     * @param beanName    Spring bean name.
+     * @param objectType  Object type.
+     * @param beanFactory {@link BeanFactory}.
+     */
     public SpringBeanManagedObjectSource(String beanName, Class<?> objectType, BeanFactory beanFactory) {
         this.beanName = beanName;
         this.objectType = objectType;

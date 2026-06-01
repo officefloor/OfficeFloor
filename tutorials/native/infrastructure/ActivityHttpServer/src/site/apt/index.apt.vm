@@ -38,7 +38,7 @@ Activity Tutorial
 
   Modularising configuration is necessary when working on bigger projects by bigger teams.
   
-  Trying to configure all logic of a large application into the single WoOF configuration file yields a lot of complexity.  The idea of the graphical configuration is easy understanding of how the application is put together.  When the single graphical configuration file becomes too involved it looses its readability.  Therefore, it is broken into modules to make it easier to understand.
+  Trying to configure all logic of a large application into the single configuration file yields a lot of complexity.  Breaking configuration into smaller files reduces risk of merge conflicts and makes it easier to understand.
   
   Also, scaling teams requires developers to work in isolated parts of the applications.  Having the single configuration file creates a focal point for changes.  This causes developers to <step on each other's toes> and creates problems through increased number of merge conflicts.  Breaking configuration into smaller files reduces risk of merge conflicts.
   
@@ -64,10 +64,10 @@ Activity Tutorial
   
 %{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
   
-  To demonstrate using <<<Activities>>> to modularise configuraiton, the top level WoOF configuration file is as follows:
-  
-[./images/ActivityHttpServer-configuration.png] ActivityHttpServer screen shot.
-  
+  To demonstrate using <<<Activities>>> to modularise configuration, the REST endpoint YAML configures the top-level flow:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/index.GET.yml|ignoreDownloadError=false}
+
   The above configuration has a <<<Procedure>>>:
   
 %{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/activityhttpserver/InitiateDepthLogic.java|ignoreDownloadError=false}
@@ -76,19 +76,13 @@ Activity Tutorial
   
 %{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/activityhttpserver/Depth.java|ignoreDownloadError=false}
   
-  to the following modular <<<Activity>>>:
-  
-[./images/LevelOne-configuration.png] Level One screen shot.
-  
-  Within the above <<<Activity>>>, the <<<Procedure>>> increments the depth:
+  to the following modular <<<Activity>>> (<<<LevelOne.activity>>>).
+
+  Within the <<<Activity>>>, the <<<Procedure>>> increments the depth:
   
 %{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/activityhttpserver/IncreaseDepthLogic.java|ignoreDownloadError=false}
   
-  that is passed onto a further modularised <<<Activity>>>:
-
-[./images/LevelTwo-configuration.png] Level One screen shot.
-
-   that also increases the depth.
+  that is passed onto a further modularised <<<Activity>>> (<<<LevelTwo.activity>>>) that also increases the depth.
    
    The result is then passed out of the modularised <<<Activity>>> configurations to the top level <<<WoOF>>> configuration to send the result via the following <<<Procedure>>>:
    

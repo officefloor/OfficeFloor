@@ -14,6 +14,7 @@ public interface RestArchitect {
     /**
      * Adds a {@link RestMethodDecorator} for the {@link RestMethod} instances.
      *
+     * @param <M>       Momento type.
      * @param decorator {@link RestMethodDecorator}.
      * @return {@link MomentoKey} to retrieve possibly set Momento on the {@link RestMethod}.
      */

@@ -29,7 +29,9 @@ public class SpringMvcArguments implements SpringArguments, SpringArgumentsServi
     /**
      * Only Spring MVC may be available on the class path.
      */
+    /** Spring Security AuthenticationPrincipal class name. */
     public static String AUTHENTICATION_PRINCIPAL_CLASS_NAME = "org.springframework.security.core.annotation.AuthenticationPrincipal";
+    /** Spring Security Authentication class name. */
     public static String AUTHENTICATION_CLASS_NAME = "org.springframework.security.core.Authentication";
 
     /**
@@ -65,6 +67,11 @@ public class SpringMvcArguments implements SpringArguments, SpringArgumentsServi
      */
     @FunctionalInterface
     public static interface SpringArgumentChecker {
+        /**
+         * @param argumentType  Argument type.
+         * @param annotations   Annotations on the argument.
+         * @return Whether the argument is a Spring argument.
+         */
         boolean isSpringArgument(Class<?> argumentType, Object[] annotations);
     }
 

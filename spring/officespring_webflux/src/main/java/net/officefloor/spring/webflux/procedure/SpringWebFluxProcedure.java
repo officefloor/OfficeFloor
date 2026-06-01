@@ -45,7 +45,10 @@ public class SpringWebFluxProcedure extends StaticManagedFunction<SpringWebFluxP
 	 * Dependency keys.
 	 */
 	public static enum DependencyKeys {
-		SERVER_HTTP_CONNECTION, HTTP_REQUEST_STATE
+		/** Server HTTP connection. */
+		SERVER_HTTP_CONNECTION,
+		/** HTTP request state. */
+		HTTP_REQUEST_STATE
 	}
 
 	/**

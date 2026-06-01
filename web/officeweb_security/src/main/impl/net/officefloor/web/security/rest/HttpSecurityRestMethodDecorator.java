@@ -51,6 +51,11 @@ public class HttpSecurityRestMethodDecorator implements RestMethodDecorator<Void
 
     private final Map<String, HttpSecurityBuilder> securities;
 
+    /**
+     * Instantiate.
+     *
+     * @param securities {@link HttpSecurityBuilder} instances by name.
+     */
     public HttpSecurityRestMethodDecorator(Map<String, HttpSecurityBuilder> securities) {
         this.securities = securities;
     }

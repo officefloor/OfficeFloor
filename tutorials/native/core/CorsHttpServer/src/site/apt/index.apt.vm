@@ -38,11 +38,13 @@ CORS Tutorial
 
 *OPTIONS
 
-  CORS will make <<<OPTIONS>>> calls to determine if able to make the request.  This can be configured as follows:
+  CORS will make <<<OPTIONS>>> calls to determine if able to make the request.  This is configured via a REST endpoint YAML file with the generic path parameter <<<\{any\}>>> to match any path:
 
-[./images/CorsHttpServer-configuration.png] CorsHttpServer screen shot.
-  
-  The generic path parameter will match any path.  This allows servicing CORS OPTIONS requests for any path.
+%{snippet|file=${project.build.directory}/site-snippets/any.OPTIONS.yml|ignoreDownloadError=false}
+
+  This allows servicing CORS OPTIONS requests for any path.  The GET endpoint is also configured:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/path.GET.yml|ignoreDownloadError=false}
   
   The handling of the request is the following:
 

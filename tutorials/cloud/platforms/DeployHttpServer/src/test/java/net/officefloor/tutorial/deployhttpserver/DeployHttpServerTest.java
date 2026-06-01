@@ -28,7 +28,7 @@ public class DeployHttpServerTest {
 
 	@Test
 	public void ensureRunning() throws IOException {
-		HttpResponse response = this.client.execute(new HttpGet(this.client.url("/deploy")));
+		HttpResponse response = this.client.execute(new HttpGet(this.client.url("/deploy.html")));
 		assertEquals("Should be succesful", 200, response.getStatusLine().getStatusCode());
 		assertEquals("Incorrect response", "<html><body>Deployed</body></html>",
 				EntityUtils.toString(response.getEntity()));

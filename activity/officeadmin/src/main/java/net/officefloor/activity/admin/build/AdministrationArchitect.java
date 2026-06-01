@@ -6,6 +6,7 @@ import net.officefloor.compile.spi.office.OfficeGovernance;
 
 import java.util.Map;
 
+/** Architect for configuring administration. */
 public interface AdministrationArchitect {
 
     /**

@@ -47,8 +47,10 @@ Flyway Tutorial
 %{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
 
   Ensuring there is a <<<DataSource>>> configured, e.g.:
-  
-%{snippet|id=tutorial|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/objects/DataSource.yml|ignoreDownloadError=false}
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/objects/EntityManager.yml|ignoreDownloadError=false}
   
   That's it.  On startup, OfficeFloor will load Flyway and migrate the <<<DataSource>>>'s database.
 

@@ -52,6 +52,7 @@ public class MockFlowHttpSecuritySource extends
 	 * {@link Flow} keys.
 	 */
 	public static enum Flows {
+		/** Challenge flow. */
 		CHALLENGE
 	}
 

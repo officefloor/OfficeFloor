@@ -75,14 +75,22 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 	 * Dependency keys.
 	 */
 	public static enum Dependencies {
-		SERVER_HTTP_CONNECTION, HTTP_SESSION, HTTP_REQUEST_STATE
+		/** Server HTTP connection dependency. */
+		SERVER_HTTP_CONNECTION,
+		/** HTTP session dependency. */
+		HTTP_SESSION,
+		/** HTTP request state dependency. */
+		HTTP_REQUEST_STATE
 	}
 
 	/**
 	 * Flow keys.
 	 */
 	public static enum Flows {
-		AUTHENTICATE, LOGOUT
+		/** Authenticate flow. */
+		AUTHENTICATE,
+		/** Logout flow. */
+		LOGOUT
 	}
 
 	/**

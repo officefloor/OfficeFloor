@@ -21,8 +21,10 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+/** Employs {@link ManagedObjectArchitect} instances. */
 public class ManagedObjectEmployer {
 
     /**
@@ -55,6 +57,7 @@ public class ManagedObjectEmployer {
         };
     }
 
+    /** {@link ComposeSource} for managed objects. */
     protected static class ManagedObjectComposeSource implements ComposeSource<OfficeManagedObject, ManagedObjectConfiguration> {
 
         @Override
@@ -69,6 +72,7 @@ public class ManagedObjectEmployer {
             OfficeManagedObjectSource managedObjectSource;
             ManagedObjectType<?> managedObjectType;
             ManagedObjectConfiguration moConfiguration = context.getConfiguration();
+
             ManagedObjectSourceConfiguration configuration = moConfiguration.getManagedObject();
 
             // Determine if class
@@ -100,6 +104,14 @@ public class ManagedObjectEmployer {
 
                 // Load the managed object type
                 managedObjectType = officeContext.loadManagedObjectType(managedObjectName, source, propertyList);
+            }
+
+            // Handle start-after ordering
+            List<String> startAfterTypes = configuration.getStartAfter();
+            if (startAfterTypes != null) {
+                for (String type : startAfterTypes) {
+                    officeArchitect.startAfter(managedObjectSource, type);
+                }
             }
 
             // Load the composition handling
@@ -137,8 +149,9 @@ public class ManagedObjectEmployer {
 
             // Provide the type qualifications
             String objectType = managedObjectType.getObjectType().getName();
+            String qualifier = configuration.getQualifier();
             managedObject.addTypeQualification(null, objectType);
-            managedObject.addTypeQualification(managedObjectName, objectType);
+            managedObject.addTypeQualification(qualifier != null ? qualifier : managedObjectName, objectType);
 
             // Return the managed object
             return managedObject;

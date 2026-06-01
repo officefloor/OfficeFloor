@@ -61,7 +61,7 @@
 		<maven.compiler.source>${java-lowest-version}</maven.compiler.source>
 		<maven.compiler.target>${java-lowest-version}</maven.compiler.target>
 		<maven-plugin-version>3.10.2</maven-plugin-version>
-		<maven-project-info-reports-version>3.9.0</maven-project-info-reports-version>
+		<maven-project-info-reports-version>3.6.2</maven-project-info-reports-version>
 		<maven-shade-version>3.5.1</maven-shade-version>
 		<maven-surefire-version>3.2.5</maven-surefire-version>
 		<openjfx-version>${java-lowest-version}-ea+25</openjfx-version>
@@ -711,7 +711,7 @@
 						<configuration>
 							<!-- Ignore generated code that have no control over -->
 							<excludePackageNames>
-								net.officefloor.web.template.parse</excludePackageNames>
+								net.officefloor.web.template.parse,net.officefloor.tutorial*,net.officefloor.activity.model,net.officefloor.model.conform,net.officefloor.model.office,net.officefloor.model.officefloor,net.officefloor.model.section,net.officefloor.woof.model.objects,net.officefloor.woof.model.resources,net.officefloor.woof.model.teams,net.officefloor.woof.model.woof</excludePackageNames>
 							<!-- Ensure good quality JavaDoc -->
 							<failOnError>true</failOnError>
 							<failOnWarnings>true</failOnWarnings>
@@ -758,6 +758,7 @@
 					<supportedPackagings>
 						<supportedPackaging>pom</supportedPackaging>
 					</supportedPackagings>
+					<deployMode>FORK</deployMode>
 					<httpConnector>
 						<port>9999</port>
 					</httpConnector>
@@ -774,9 +775,6 @@
 						<goals>
 							<goal>start</goal>
 						</goals>
-						<configuration>
-							<daemon>true</daemon>
-						</configuration>
 					</execution>
 					<execution>
 						<id>Stop HTTP Server of staged site for linkcheck</id>

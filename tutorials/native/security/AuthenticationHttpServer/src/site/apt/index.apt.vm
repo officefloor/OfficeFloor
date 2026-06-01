@@ -30,11 +30,7 @@ Authentication Tutorial
   
   WoOF provides various authentication schemes along with the ability to customise your own authentication scheme (see {{{/apidocs/net/officefloor/web/spi/security/HttpSecuritySource.html}HttpSecuritySource}} for more details).  This tutorial will focus on form based authentication.
   
-  The below example for this tutorial will demonstrate only allowing a logged in user to view a page.  The simple key pages for this tutorial are as follows:
-    
-[./images/AuthenticationHttpServer-login-screenshot.png] AuthenticationHttpServer login screen shot.
-
-[./images/AuthenticationHttpServer-hello-screenshot.png] AuthenticationHttpServer hello screen shot.
+  The below example for this tutorial will demonstrate only allowing a logged in user to view a page.
 
   {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/AuthenticationHttpServer}Tutorial Source}}
 
@@ -42,12 +38,12 @@ Authentication Tutorial
 
 *Restricted access page
 
-  The page being restricted from access is as follows.
+  The template for the restricted page is as follows.
 
-%{snippet|file=${basedir}/src/main/resources/hello.woof.html|ignoreDownloadError=false}
+%{snippet|file=${basedir}/src/main/resources/templates/hello.html|ignoreDownloadError=false}
 
   With the backing logic class.
-  
+
 %{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/authenticationhttpserver/HelloLogic.java|ignoreDownloadError=false}
 
   The dependency on {{{/apidocs/net/officefloor/web/spi/security/HttpSecurity.html}HttpSecurity}} requires the user to be logged in.  Should the user not be authenticated, creation of this dependency will cause a {{{/apidocs/net/officefloor/web/security/AuthenticationRequiredException.html}AuthenticationRequiredException}} to be thrown.  WoOF automatically handles this exception by:
@@ -68,47 +64,41 @@ Authentication Tutorial
 
 *Configuring access
 
-  The following is the configuration for authentication.
-  
-[./images/AuthenticationHttpServer-configuration.png] Authentication configuration screen shot.
-  
-  While some authentication schemes are straight forward (e.g. {{{/apidocs/net/officefloor/web/security/scheme/BasicHttpSecuritySource.html}Basic}}), others such as {{{/apidocs/net/officefloor/web/security/scheme/FormHttpSecuritySource.html}form based login}} require application specific behaviour (e.g. a form login page).  On selecting the authentication scheme, flows necessary for the chosen authentication will be displayed for configuration.  In the case of this tutorial, the form login flow and authentication flow are required to be configured to/from the login page.  This allows the application to tailor the login page while still being able to re-use the {{{/apidocs/net/officefloor/web/security/scheme/FormHttpSecuritySource.html}FormHttpSecuritySource}}.
-  
-  To enable differing credential stores (e.g. database, LDAP, etc), the WoOF supplied authentication depends on a {{{/apidocs/net/officefloor/web/security/store/CredentialStore.html}CredentialStore}} managed object being configured.  The following is the managed object configuration for this tutorial.   
-  
-%{snippet|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
-  
-  In this case a mock implementation is used that validates the user by ensuring the password matches the username.  This is a simple implementation useful for testing.
-  
+  The following is the security YAML configuration for authentication.
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/security/Security.yml|ignoreDownloadError=false}
+
+  While some authentication schemes are straight forward (e.g. {{{/apidocs/net/officefloor/web/security/scheme/BasicHttpSecuritySource.html}Basic}}), others such as {{{/apidocs/net/officefloor/web/security/scheme/FormHttpSecuritySource.html}form based login}} require application specific behaviour (e.g. a form login page).  The <<<flows>>> section wires the <<<FORM_LOGIN_PAGE>>> flow to a redirect function that sends the user to the login page over HTTPS.
+
+  The login path is configured to always use HTTPS:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/login.yml|ignoreDownloadError=false}
+
+  To enable differing credential stores (e.g. database, LDAP, etc), the WoOF supplied authentication depends on a {{{/apidocs/net/officefloor/web/security/store/CredentialStore.html}CredentialStore}} managed object being configured.  In this case a mock implementation is used that validates the user by ensuring the password matches the username.  This is a simple implementation useful for testing.
+
   For production, another {{{/apidocs/net/officefloor/web/security/store/CredentialStore.html}CredentialStore}} should be used.  WoOF comes with existing implementations for standard credential stores.  Customised implementations may also be used for bespoke environments.
 
   
 
 *Login page
 
-  The login page is as follows.
-  
-%{snippet|file=${basedir}/src/main/resources/login.woof.html|ignoreDownloadError=false}
+  The login page template is as follows.
+
+%{snippet|file=${basedir}/src/main/resources/templates/login.html|ignoreDownloadError=false}
 
   With the backing logic class.
-  
+
 %{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/authenticationhttpserver/LoginLogic.java|ignoreDownloadError=false}
 
-  The {{{/apidocs/net/officefloor/web/security/scheme/FormHttpSecuritySource.html}FormHttpSecuritySource}} requires the credentials to be provided within a {{{/apidocs/net/officefloor/web/security/HttpCredentials.html}HttpCredentials}} as a parameter.
+  The {{{/apidocs/net/officefloor/web/security/scheme/FormHttpSecuritySource.html}FormHttpSecuritySource}} requires the credentials to be provided within a {{{/apidocs/net/officefloor/web/security/HttpCredentials.html}HttpCredentials}} as a parameter.  Using <<<HttpAuthentication>>> directly avoids the need for a <<<@FlowInterface>>> and allows authentication to be triggered programmatically.
 
 
-  
+
 *Remaining code
 
-  The remaining code is included for completeness.
-  
-**Logout page
+  The logout page template is included for completeness.
 
-%{snippet|file=${basedir}/src/main/resources/logout.woof.html|ignoreDownloadError=false}
-
-**Error page
-
-%{snippet|file=${basedir}/src/main/resources/error.woof.html|ignoreDownloadError=false}
+%{snippet|file=${basedir}/src/main/resources/templates/logout.html|ignoreDownloadError=false}
 
 
 

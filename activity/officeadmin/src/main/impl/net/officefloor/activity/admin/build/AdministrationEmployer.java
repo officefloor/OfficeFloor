@@ -63,6 +63,7 @@ public class AdministrationEmployer {
         };
     }
 
+    /** {@link ComposeSource} for {@link OfficeAdministration}. */
     protected static class AdministrationComposeSource implements ComposeSource<OfficeAdministration, AdminConfiguration> {
 
         @Override

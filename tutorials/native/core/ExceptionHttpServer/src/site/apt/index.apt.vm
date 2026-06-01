@@ -36,27 +36,23 @@ Exception Handling Tutorial
 
 
 
-*Template throwing exception
+*Endpoint throwing exception
 
-  The following is the template:
-  
-%{snippet|file=${basedir}/src/main/resources/Template.woof.html|ignoreDownloadError=false}
+  The submit endpoint is configured in REST YAML with the exception handler:
 
-  with the logic throwing the exception:
-  
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/submit.POST.yml|ignoreDownloadError=false}
+
+  The logic throws the exception:
+
 %{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/exceptionhttpserver/TemplateLogic.java|ignoreDownloadError=false}
 
-  Pressing the submit button will trigger the exception to be thrown.  
-  
+  Sending a POST to <<<\/submit>>> will trigger the exception to be thrown.
+
   The tutorial will demonstrate the ease in which this exception can be handled.
-  
+
 
 
 *Exception handling configuration
-  
-  The following shows the configuration for handling the above template exception.
-  
-[./images/ExceptionHttpServer-configuration.png] ExceptionHttpServer screen shot.
 
   The exception is linked to be handled by the following:
   

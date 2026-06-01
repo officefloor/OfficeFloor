@@ -5,6 +5,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.Map;
 
+/** Configuration properties for OfficeFloor REST integration. */
 @Data
 @ConfigurationProperties("officefloor.rest")
 public class OfficeFloorRestProperties {

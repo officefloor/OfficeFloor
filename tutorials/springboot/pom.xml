@@ -15,6 +15,7 @@
 	<description>Tutorials for OfficeFloor Spring Boot integration</description>
 	<modules>
 		<module>SpringRestHttpServer</module>
+		<module>SpringRestFunctionHttpServer</module>
 		<module>SpringRestExceptionHttpServer</module>
 		<module>SpringRestSecurityHttpServer</module>
 		<module>SpringRestValidationHttpServer</module>
@@ -24,5 +25,7 @@
 		<module>SpringRestServletHttpServer</module>
 		<module>SpringRestQualifierHttpServer</module>
 		<module>SpringRestDataJpaHttpServer</module>
+		<module>SpringRestTeamHttpServer</module>
+		<module>SpringRestActuatorHttpServer</module>
 	</modules>
 </project>

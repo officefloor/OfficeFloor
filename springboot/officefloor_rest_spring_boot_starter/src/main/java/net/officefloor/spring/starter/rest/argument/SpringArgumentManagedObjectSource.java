@@ -29,7 +29,9 @@ public class SpringArgumentManagedObjectSource extends AbstractManagedObjectSour
      * Dependency keys.
      */
     public static enum DependencyKeys {
+        /** Server HTTP connection. */
         SERVER_HTTP_CONNECTION,
+        /** HTTP request state. */
         HTTP_REQUEST_STATE
     }
 

@@ -30,8 +30,6 @@ Test Tutorial
     
   To focus on testing, the below simple application to add two numbers will be used.
     
-[./images/TestHttpServer-screenshot.png] TestHttpServer screen shot.
-
   {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/TestHttpServer}Tutorial Source}}
 
   Furthermore, production quality testing would cover a lot more test scenarios than is covered in this tutorial.  The additional scenarios, however, have been excluded for brevity.  They would all follow a similar pattern as described by this tutorial.
@@ -42,7 +40,7 @@ Test Tutorial
 
   The application being tested has one page.
 
-%{snippet|file=${basedir}/src/main/resources/template.woof.html|ignoreDownloadError=false}
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/add.POST.yml|ignoreDownloadError=false}
 
   With the backing logic class.
   

@@ -20,26 +20,31 @@ import reactor.core.publisher.Mono;
 // START SNIPPET: tutorial
 public class CosmosAsyncDbLogic {
 
+	/** Saves a {@link Post}. */
 	public Mono<Post> savePost(Post post, CosmosAsyncEntities entities) {
 		return entities.getContainer(Post.class).createItem(new Post(UUID.randomUUID().toString(), post.getMessage()))
 				.map(response -> response.getItem());
 	}
 
+	/** Retrieves a {@link Post} by identifier. */
 	public Mono<Post> retrievePost(@HttpPathParameter("id") String identifier, CosmosAsyncEntities entities) {
 		PartitionKey partitionKey = entities.createPartitionKey(new Post());
 		return entities.getContainer(Post.class).readItem(identifier, partitionKey, Post.class)
 				.map(response -> response.getItem());
 	}
 
+	/** Sends a {@link Post} response. */
 	public void sendPost(@Parameter Post post, ObjectResponse<Post> response) {
 		response.send(post);
 	}
 
+	/** Retrieves all {@link Post} instances. */
 	public Flux<Post> retrieveAllPosts(CosmosAsyncEntities entities, ObjectResponse<Post[]> response) {
 		PartitionKey partitionKey = entities.createPartitionKey(new Post());
 		return entities.getContainer(Post.class).readAllItems(partitionKey, Post.class);
 	}
 
+	/** Sends the {@link Post} array response. */
 	public void sendPosts(@Parameter Post[] posts, ObjectResponse<Post[]> response) {
 		response.send(posts);
 	}

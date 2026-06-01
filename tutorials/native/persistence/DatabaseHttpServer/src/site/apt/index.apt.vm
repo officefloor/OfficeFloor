@@ -40,13 +40,15 @@ Dependency Injection of Managed Object Tutorial
 
 *Configuring Objects
 
-  Objects for dependency injection are configured in the <<<application.objects>>> file contained at the root of the class path.  
-  
-  Providing this file is optional.  It is anticipated that features such as WoOF annotations and {{{/apidocs/net/officefloor/compile/spi/supplier/source/SupplierSource.html}SupplierSource}} implementations will provide the necessary dependencies for running a web application.  See the {{{../index.html}other tutorials}} for more information.  The file is however supported to extend WoOF web applications with additional custom dependencies.
-  
+  Objects for dependency injection are configured as YAML files in the <<<officefloor/objects/>>> directory on the class path.
+
+  Providing these files is optional.  It is anticipated that features such as WoOF annotations and {{{/apidocs/net/officefloor/compile/spi/supplier/source/SupplierSource.html}SupplierSource}} implementations will provide the necessary dependencies for running a web application.  See the {{{../index.html}other tutorials}} for more information.  The files are however supported to extend WoOF web applications with additional custom dependencies.
+
   The configuration of the dependency injected <<<Connection>>> is as follows.
 
-%{snippet|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
+%{snippet|file=${basedir}/src/main/resources/officefloor/objects/Connection.yml|ignoreDownloadError=false}
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/objects/DataSource.yml|ignoreDownloadError=false}
 
   The <<<Connection>>> is provided by a {{{/apidocs/net/officefloor/frame/api/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} implementation that closes the connection on completion of the request.  This depends on the <<<DataSource>>> to provide a managed <<<Connection>>>.
   
@@ -63,10 +65,14 @@ Dependency Injection of Managed Object Tutorial
 
 
 *Dependency Injection
-  
-  The following is the content of the template. 
 
-%{snippet|file=${basedir}/src/main/resources/Template.woof.html|ignoreDownloadError=false}
+  The REST endpoint chains the service function to Thymeleaf for rendering:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/example.GET.yml|ignoreDownloadError=false}
+
+  The Thymeleaf template renders the rows:
+
+%{snippet|file=${basedir}/src/main/resources/templates/example.html|ignoreDownloadError=false}
 
   The table data is provided by the following method.
 
@@ -76,7 +82,7 @@ Dependency Injection of Managed Object Tutorial
   
   WoOF auto-wires dependency injection based on type.  Auto-wiring dependencies based on type is adequate (and much easier) for the majority of applications.  WoOF's underlying OfficeFloor framework does provide manual dependency configuration, however this is seldom used as OfficeFloor allows qualifying dependencies for auto-wiring.
   
-  The handling of <<< #\{addRow\} >>> submission is via the following method.
+  The handling of <<<POST /addRow>>> submission is via the following method.
 
 %{snippet|id=addRow|file=${basedir}/src/main/java/net/officefloor/tutorial/databasehttpserver/Template.java|ignoreDownloadError=false}
 
@@ -88,7 +94,7 @@ Dependency Injection of Managed Object Tutorial
 
 %{snippet|id=deleteRow|file=${basedir}/src/main/java/net/officefloor/tutorial/databasehttpserver/Template.java|ignoreDownloadError=false}
 
-  After the add or delete method is executed the template is rendered again for the response back to the client.  The rendering of the page executes the <<<getRows(...)>>> method again to display the changes within the table.
+  After the add or delete method is executed the browser is redirected back to <<<GET /example>>> to display the updated table.
 
 
 

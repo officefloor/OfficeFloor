@@ -17,6 +17,7 @@ public class StreamBufferUtil {
 	 * @param headBuffer   Head {@link StreamBuffer}.
 	 * @param outputStream Target {@link OutputStream}.
 	 * @param bufferPool   {@link StreamBufferPool}.
+	 * @throws IOException If fails to write.
 	 */
 	public static void write(StreamBuffer<ByteBuffer> headBuffer, OutputStream outputStream,
 			StreamBufferPool<ByteBuffer> bufferPool) throws IOException {

@@ -68,6 +68,7 @@ public class ObjectResponseManagedObjectSource
      * Dependency keys.
      */
     public static enum ObjectResponseDependencies {
+        /** Server HTTP connection. */
         SERVER_HTTP_CONNECTION
     }
 

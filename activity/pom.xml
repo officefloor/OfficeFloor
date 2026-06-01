@@ -20,6 +20,8 @@
 		<module>officedependency</module>
 		<module>officegovern</module>
 		<module>officemanagedobject</module>
+		<module>officesupplier</module>
+		<module>officeteam</module>
 		<module>officeprocedure</module>
 	</modules>
 	<dependencies>

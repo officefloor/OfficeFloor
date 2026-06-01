@@ -8,6 +8,7 @@ import com.google.cloud.functions.HttpFunction;
 
 import net.officefloor.frame.api.manage.OfficeFloor;
 
+/** JUnit 4 rule for Google HTTP function testing. */
 public class GoogleHttpFunctionRule extends AbstractGoogleHttpFunctionJUnit<GoogleHttpFunctionRule>
 		implements TestRule {
 

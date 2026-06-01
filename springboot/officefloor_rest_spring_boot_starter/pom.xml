@@ -21,6 +21,10 @@
             <artifactId>officeweb_rest</artifactId>
         </dependency>
         <dependency>
+            <groupId>net.officefloor.activity</groupId>
+            <artifactId>officeteam</artifactId>
+        </dependency>
+        <dependency>
             <groupId>net.officefloor.server</groupId>
             <artifactId>officeserver_servlet</artifactId>
         </dependency>

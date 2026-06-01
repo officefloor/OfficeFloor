@@ -45,6 +45,7 @@ public class HttpApplicationObjectManagedObjectSource
 	 * Dependency keys for the {@link HttpApplicationObjectManagedObject}.
 	 */
 	public static enum Dependencies {
+		/** HTTP application state dependency. */
 		HTTP_APPLICATION_STATE
 	}
 

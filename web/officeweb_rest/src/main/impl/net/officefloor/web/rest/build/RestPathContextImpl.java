@@ -26,11 +26,19 @@ public class RestPathContextImpl implements RestPathContext {
 
     private final List<RestMethodContextImpl<?>> methods = new LinkedList<>();
 
+    /**
+     * @param path       Path.
+     * @param parentPath Parent {@link RestPathContext}.
+     */
     public RestPathContextImpl(String path, RestPathContext parentPath) {
         this.path = path;
         this.parentPath = parentPath;
     }
 
+    /**
+     * @param path Path.
+     * @return {@link RestPathContextImpl} for the path.
+     */
     public RestPathContextImpl getRestPathContext(String path) {
 
         // Split into path segments
@@ -63,24 +71,34 @@ public class RestPathContextImpl implements RestPathContext {
         return endpoint;
     }
 
+    /** @param configuration {@link RestConfiguration}. */
     public void addConfiguration(RestConfiguration configuration) {
         this.configuration = configuration;
     }
 
+    /** @param method {@link RestMethodContextImpl}. */
     public void addRestMethod(RestMethodContextImpl<?> method) {
         this.methods.add(method);
     }
 
+    /** @return Whether there are REST methods. */
     public boolean hasRestMethods() {
         return !this.methods.isEmpty();
     }
 
+    /** @param decorators {@link RestMethodDecorator} instances. */
     public void decorateRestMethods(List<RestMethodDecorator<?>> decorators) {
         this.visitEndpoints(this, (path) -> {
             path.methods.forEach((restMethod) -> restMethod.decorateRestMethod(decorators));
         });
     }
 
+    /**
+     * @param endpoints       Endpoints map to populate.
+     * @param webArchitect    {@link WebArchitect}.
+     * @param officeArchitect {@link OfficeArchitect}.
+     * @param sourceContext   {@link OfficeSourceContext}.
+     */
     public void loadRestEndpoints(Map<String, RestEndpoint> endpoints, WebArchitect webArchitect, OfficeArchitect officeArchitect, OfficeSourceContext sourceContext) {
         this.visitEndpoints(this, (path) -> {
 
@@ -100,6 +118,10 @@ public class RestPathContextImpl implements RestPathContext {
         });
     }
 
+    /**
+     * @param path    Root {@link RestPathContextImpl}.
+     * @param visitor {@link Consumer} to visit each endpoint.
+     */
     protected void visitEndpoints(RestPathContextImpl path, Consumer<RestPathContextImpl> visitor) {
 
         // Visit the current path
@@ -109,6 +131,12 @@ public class RestPathContextImpl implements RestPathContext {
         path.childPathSegments.values().forEach((childPath) -> this.visitEndpoints(childPath, visitor));
     }
 
+    /**
+     * @param webArchitect    {@link WebArchitect}.
+     * @param officeArchitect {@link OfficeArchitect}.
+     * @param sourceContext   {@link OfficeSourceContext}.
+     * @return {@link RestEndpoint}.
+     */
     public RestEndpoint buildRestEndpoint(WebArchitect webArchitect, OfficeArchitect officeArchitect, OfficeSourceContext sourceContext) {
 
         // Build the methods

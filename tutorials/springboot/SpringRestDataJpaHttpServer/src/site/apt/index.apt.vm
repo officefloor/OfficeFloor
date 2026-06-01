@@ -152,3 +152,11 @@ Spring REST Data JPA Tutorial
   atomically replaces all existing articles with a single new one:
 
 %{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springrestdatajpa/SpringRestDataJpaTest.java|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../SpringRestTeamHttpServer/index.html}Spring REST Team tutorial}} demonstrates Thread Injection:
+  assigning specific thread pools to steps based on their dependencies so that socket threads
+  are never blocked by database or other slow I/O operations.

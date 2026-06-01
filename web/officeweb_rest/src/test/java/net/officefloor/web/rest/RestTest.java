@@ -106,6 +106,36 @@ public class RestTest {
     }
 
     @Test
+    public void secure() throws Exception {
+        this.doTest(HttpMethod.GET, "/secure", "officefloor/rest/secure.GET.yaml", this.validateSecureGet());
+    }
+
+    public Consumer<MockHttpServer> validateSecureGet() {
+        return (server) -> {
+            server.send(MockHttpServer.mockRequest("/secure")).assertResponse(307, "");
+            server.send(MockHttpServer.mockRequest("/secure").secure(true)).assertResponse(200, "SECURE");
+        };
+    }
+
+    public static class SecureProcedure {
+        public void service(ServerHttpConnection connection) throws Exception {
+            connection.getResponse().getEntityWriter().write(connection.isSecure() ? "SECURE" : "unsecure");
+        }
+    }
+
+    @Test
+    public void secureDirectory() throws Exception {
+        this.doTest(HttpMethod.GET, "/secure/secure", "officefloor/rest/secure.GET.yaml", this.validateSecureDirectoryGet());
+    }
+
+    public Consumer<MockHttpServer> validateSecureDirectoryGet() {
+        return (server) -> {
+            server.send(MockHttpServer.mockRequest("/secure/secure")).assertResponse(307, "");
+            server.send(MockHttpServer.mockRequest("/secure/secure").secure(true)).assertResponse(200, "SECURE");
+        };
+    }
+
+    @Test
     public void additionalEndpointConfiguration() throws Exception {
         this.doTest((restArchitect, properties) -> {
 
@@ -126,6 +156,9 @@ public class RestTest {
                     new RestConfiguration() {
                         @Override
                         public <T> T getConfiguration(String itemName, Class<T> type) {
+                            if ("secure".equals(itemName)) {
+                                return null; // no HTTPS configuration
+                            }
                             assertEquals("test", itemName, "Incorrect configuration item");
                             return (T) configuration;
                         }
@@ -238,7 +271,8 @@ public class RestTest {
     public void loadAll() throws Exception {
         Consumer<MockHttpServer>[] executionValidations = new Consumer[] {
                 this.validateRootGet(), this.validatePathGet(), this.validatePathParameterGet(),
-                this.validateQueryParameterGet(), this.validateAdditionalConfiguration(), this.validateHierarchyOfConfiguration()
+                this.validateQueryParameterGet(), this.validateAdditionalConfiguration(), this.validateHierarchyOfConfiguration(),
+                this.validateSecureGet()
         };
         this.doTest((restArchitect, properties) -> {
 
@@ -399,7 +433,6 @@ public class RestTest {
             assertEquals(1, restMethods.size(), "Should only be one method on end point");
             RestMethod restMethod = restMethods.get(0);
 
-            assertFalse(restMethod.isSecure(), "Should not be secure");
             assertEquals(method, restMethod.getHttpMethod(), "Incorrect HTTP method");
             assertNotNull(restMethod.getHttpInput(), "Must have HTTP Input");
             assertNotNull(restMethod.getServiceInput(), "Must have service input");

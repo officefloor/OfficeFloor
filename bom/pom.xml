@@ -186,6 +186,16 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.activity</groupId>
+				<artifactId>officesupplier</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.activity</groupId>
+				<artifactId>officeteam</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.activity</groupId>
 				<artifactId>officeprocedure</artifactId>
 				<version>${revision}</version>
 			</dependency>
@@ -382,6 +392,11 @@
 			<dependency>
 				<groupId>net.officefloor.web</groupId>
 				<artifactId>officeweb_template</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.web</groupId>
+				<artifactId>officeweb_thymeleaf</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>

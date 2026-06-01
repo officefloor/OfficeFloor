@@ -73,6 +73,20 @@ public class ModelAndViewBridge {
 
     private final ModelFactory modelFactory;
 
+    /**
+     * Instantiate.
+     *
+     * @param method                   {@link Method} being bridged.
+     * @param modelAndViewContainer    {@link ModelAndViewContainer}.
+     * @param handler                  Handler object.
+     * @param handlerAdapter           {@link RequestMappingHandlerAdapter}.
+     * @param servletRequest           {@link HttpServletRequest}.
+     * @param servletResponse          {@link HttpServletResponse}.
+     * @param webRequest               {@link NativeWebRequest}.
+     * @param dispatcherServlet        {@link DispatcherServlet}.
+     * @param applicationContext       {@link ApplicationContext}.
+     * @throws Exception If fails to create the bridge.
+     */
     public ModelAndViewBridge(Method method, ModelAndViewContainer modelAndViewContainer, Object handler,
                               RequestMappingHandlerAdapter handlerAdapter, HttpServletRequest servletRequest,
                               HttpServletResponse servletResponse, NativeWebRequest webRequest,
@@ -124,6 +138,7 @@ public class ModelAndViewBridge {
      * Obtains the {@link WebDataBinderFactory}.
      *
      * @return {@link WebDataBinderFactory}.
+     * @throws Exception If fails to obtain the {@link WebDataBinderFactory}.
      */
     public WebDataBinderFactory getWebDataBinderFactory() throws Exception {
         return this.webDataBinderFactory;
@@ -133,6 +148,7 @@ public class ModelAndViewBridge {
      * Obtains the {@link ModelFactory}.
      *
      * @return {@link ModelFactory}.
+     * @throws Exception If fails to obtain the {@link ModelFactory}.
      */
     public ModelFactory getModelFactory() throws Exception {
         return this.modelFactory;
@@ -212,6 +228,7 @@ public class ModelAndViewBridge {
      *
      * @param view Name of the view.
      * @return {@link ModelAndView} from the current state.
+     * @throws Exception If fails to obtain the {@link ModelAndView}.
      */
     public ModelAndView getModelAndView(String view) throws Exception {
         this.modelAndViewContainer.setViewName(view);
@@ -264,6 +281,7 @@ public class ModelAndViewBridge {
     }
 
 
+    /** {@link HandlerMethod} for OfficeFloor bridging. */
     public class OfficeFloorHandlerMethod extends HandlerMethod {
 
         private OfficeFloorHandlerMethod(Method method) {

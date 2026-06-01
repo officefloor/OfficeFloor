@@ -1,5 +1,6 @@
 package net.officefloor.tutorial.databasehttpserver;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -7,6 +8,9 @@ import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpStatus;
+import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.HttpQueryParameter;
 
 /**
@@ -36,7 +40,7 @@ public class Template {
 	// END SNIPPET: getRows
 
 	// START SNIPPET: addRow
-	public void addRow(Row row, Connection connection) throws SQLException {
+	public void addRow(Row row, Connection connection, ServerHttpConnection http) throws SQLException, IOException {
 
 		// Add the row
 		try (PreparedStatement statement = connection
@@ -44,13 +48,18 @@ public class Template {
 			statement.setString(1, row.getName());
 			statement.setString(2, row.getDescription());
 			statement.executeUpdate();
-
 		}
+
+		// Redirect back to page (POST/Redirect/GET pattern)
+		HttpResponse response = http.getResponse();
+		response.setStatus(HttpStatus.SEE_OTHER);
+		response.getHeaders().addHeader("location", "/example");
 	}
 	// END SNIPPET: addRow
 
 	// START SNIPPET: deleteRow
-	public void deleteRow(@HttpQueryParameter("id") String id, Connection connection) throws SQLException {
+	public void deleteRow(@HttpQueryParameter("id") String id, Connection connection, ServerHttpConnection http)
+			throws SQLException, IOException {
 
 		// Obtain the identifier
 		int rowId = Integer.parseInt(id);
@@ -60,6 +69,11 @@ public class Template {
 			statement.setInt(1, rowId);
 			statement.executeUpdate();
 		}
+
+		// Redirect back to page
+		HttpResponse response = http.getResponse();
+		response.setStatus(HttpStatus.SEE_OTHER);
+		response.getHeaders().addHeader("location", "/example");
 	}
 	// END SNIPPET: deleteRow
 

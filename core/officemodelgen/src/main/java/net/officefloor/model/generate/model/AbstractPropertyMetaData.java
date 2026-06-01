@@ -80,10 +80,20 @@ public abstract class AbstractPropertyMetaData {
 	 */
 	private String name;
 
+	/**
+	 * Obtains the name.
+	 *
+	 * @return Name.
+	 */
 	public String getName() {
 		return this.name;
 	}
 
+	/**
+	 * Sets the name.
+	 *
+	 * @param name Name.
+	 */
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -93,10 +103,20 @@ public abstract class AbstractPropertyMetaData {
 	 */
 	private String type;
 
+	/**
+	 * Obtains the type.
+	 *
+	 * @return Type.
+	 */
 	public String getType() {
 		return this.type;
 	}
 
+	/**
+	 * Sets the type.
+	 *
+	 * @param type Type.
+	 */
 	public void setType(String type) {
 		this.type = type;
 	}
@@ -106,14 +126,29 @@ public abstract class AbstractPropertyMetaData {
 	 */
 	private String cascadeRemove;
 
+	/**
+	 * Obtains the cascade remove flag.
+	 *
+	 * @return Cascade remove flag.
+	 */
 	public String getCascadeRemove() {
 		return this.cascadeRemove;
 	}
 
+	/**
+	 * Sets the cascade remove flag.
+	 *
+	 * @param cascadeRemove Cascade remove flag.
+	 */
 	public void setCascadeRemove(String cascadeRemove) {
 		this.cascadeRemove = cascadeRemove;
 	}
 
+	/**
+	 * Indicates if cascade remove.
+	 *
+	 * @return <code>true</code> if cascade remove.
+	 */
 	public boolean isCascadeRemove() {
 		return Boolean.valueOf(this.cascadeRemove).booleanValue();
 	}
@@ -123,6 +158,11 @@ public abstract class AbstractPropertyMetaData {
 	 */
 	private String description;
 
+	/**
+	 * Obtains the description.
+	 *
+	 * @return Description.
+	 */
 	public String getDescription() {
 		if (this.description == null) {
 			// Construct description from name
@@ -132,6 +172,11 @@ public abstract class AbstractPropertyMetaData {
 		}
 	}
 
+	/**
+	 * Sets the description.
+	 *
+	 * @param description Description.
+	 */
 	public void setDescription(String description) {
 		this.description = description;
 	}

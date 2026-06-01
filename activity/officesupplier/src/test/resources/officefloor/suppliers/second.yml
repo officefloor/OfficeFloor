@@ -1,0 +1,3 @@
+source: ${TestClass}$MockSecondSupplierSource
+properties:
+  configured.property: test-value

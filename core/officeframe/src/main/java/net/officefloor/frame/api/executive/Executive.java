@@ -39,7 +39,10 @@ public interface Executive {
 
 	/**
 	 * Creates a {@link Thread}.
-	 * 
+	 *
+	 * @param threadName  Name of the {@link Thread}.
+	 * @param threadGroup {@link ThreadGroup} for the {@link Thread}.
+	 * @param runnable    {@link Runnable} logic for the {@link Thread}.
 	 * @return New {@link Thread}.
 	 */
 	default Thread createThread(String threadName, ThreadGroup threadGroup, Runnable runnable) {
@@ -115,10 +118,11 @@ public interface Executive {
 
 	/**
 	 * <p>
-	 * Creates an {@link Executor} that <strong>MUST</code> execute the
+	 * Creates an {@link Executor} that {@code MUST} execute the
 	 * {@link Runnable} in a different {@link Thread} to the caller.
 	 * <p>
 	 * This is used in various places within {@link OfficeFloor}:
+	 * </p>
 	 * <ul>
 	 * <li>By {@link ManagedFunction} in executing {@link Runnable} in another
 	 * {@link Thread}</li>

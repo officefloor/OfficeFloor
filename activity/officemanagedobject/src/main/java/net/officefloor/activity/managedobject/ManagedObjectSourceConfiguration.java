@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -31,7 +32,16 @@ public class ManagedObjectSourceConfiguration {
      * ============ Managed Object ================
      */
 
+    private String qualifier;
+
     private ManagedObjectScope scope;
+
+    /*
+     * ========== Ordering ===========
+     */
+
+    @JsonProperty("start-after")
+    private List<String> startAfter;
 
     /*
      * ========== Composition ===========
