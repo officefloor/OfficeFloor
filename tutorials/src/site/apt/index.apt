@@ -65,7 +65,7 @@ OfficeFloor Tutorials
   generate and modify endpoint code accurately.
 
   All tutorials are part of the OfficeFloor continuous builds and their source can be found
-  {{{http://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials}here}}.
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials}here}}.
 
 
 * Phase 1: Spring Boot
@@ -343,7 +343,7 @@ OfficeFloor Tutorials
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./cloud/cloud-platforms/GoogleFunctionHttpServer/index.html}Google Function}} | Deploy as a Google Cloud Function. | {{{https://cloud.google.com/functions}Google Cloud Function}}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./cloud/cloud-platforms/AzureWebAppsHttpServer/index.html}Azure Web Apps}} | Deploy to Azure Web Apps. | {{{https://azure.microsoft.com/services/app-service/web/}Azure Web Apps}}
+| {{{./cloud/cloud-platforms/AzureWebAppsHttpServer/index.html}Azure Web Apps}} | Deploy to Azure Web Apps. | {{{https://azure.microsoft.com/en-us/products/app-service/web}Azure Web Apps}}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 
 

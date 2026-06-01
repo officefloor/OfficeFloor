@@ -30,7 +30,7 @@ Servlet Container Tutorial
   
   The tutorial will demonstrate this with a simple increment service. 
   
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/HttpServletHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/legacy/HttpServletHttpServer}Tutorial Source}}
 
 
 
@@ -44,7 +44,7 @@ Servlet Container Tutorial
   
   Note that WoOF will run as a <<<Filter>>> and only intercept requests it can handle.  This means existing Servlet functionality can work side by side with WoOF.  Very useful for phased migration of existing Servlet applications to WoOF.
   
-  Also, WoOF does not do class path scanning.  Therefore, the start times are very fast.  This makes WoOF ideal for scale to zero PaaS deployments. See the {{{https://officefloor.appspot.com/}OfficeFloor Subscription App}} for an example (code also available {{https://github.com/officefloor/Subscription}}).
+  Also, WoOF does not do class path scanning.  Therefore, the start times are very fast.  This makes WoOF ideal for scale to zero PaaS deployments.
 
 
 

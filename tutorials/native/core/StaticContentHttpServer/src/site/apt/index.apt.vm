@@ -42,7 +42,7 @@ Static Content
   No routing configuration is needed.  OfficeFloor serves any path under <<<PUBLIC/>>> as a
   static file, and routes everything else through the REST endpoint declarations.
 
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/StaticContentHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/native/core/StaticContentHttpServer}Tutorial Source}}
 
 
 

@@ -28,7 +28,7 @@ OpenAPI / Swagger Tutorial
 
   This tutorial demonstrates using {{{https://www.openapis.org/}OpenAPI}} / {{{https://swagger.io/}Swagger}} to document available REST end points.
 
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/SwaggerHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/native/core/SwaggerHttpServer}Tutorial Source}}
   
 
 *Configuring OpenAPI / Swagger

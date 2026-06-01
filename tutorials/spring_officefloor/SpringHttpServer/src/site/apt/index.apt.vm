@@ -48,13 +48,13 @@ Spring HTTP Server Tutorial
 
 [./images/SpringHttpServer-screenshot.png] SpringHttpServer screen shot.
 
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/SpringHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/spring_officefloor/SpringHttpServer}Tutorial Source}}
 
 
 
 *Spring
 
-  In terms of Inversion of Control, Spring focuses heavily on Dependency Injection.  This makes Spring a very useful library of pre-built objects.  In actuality Spring has provided great abstract APIs across various different vendors for various key services (e.g. {{{http://spring.io/projects/spring-data}Spring Data}}).
+  In terms of Inversion of Control, Spring focuses heavily on Dependency Injection.  This makes Spring a very useful library of pre-built objects.  In actuality Spring has provided great abstract APIs across various different vendors for various key services (e.g. {{{https://spring.io/projects/spring-data}Spring Data}}).
 
   However, Spring is still primarily only a Dependency Injection engine.  It does not provide Continuation Injection nor Thread Injection for modeling functionality and execution of your applications.
 
@@ -76,7 +76,7 @@ Spring HTTP Server Tutorial
 
 %{snippet|file=${basedir}/src/main/resources/officefloor/objects/World.yml|ignoreDownloadError=false}
 
-  Similar to {{{http://spring.io/projects/spring-boot}Spring Boot}} applications, a configuration class loads the Spring beans.  The configured class is as follows:
+  Similar to {{{https://spring.io/projects/spring-boot}Spring Boot}} applications, a configuration class loads the Spring beans.  The configured class is as follows:
 
 %{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springhttpserver/SpringBootConfiguration.java|ignoreDownloadError=false}
 

@@ -28,7 +28,7 @@ Migrate JAX-RS Tutorial
 
   This tutorial provides the typical steps in migrating a JAX-RS resource to avoid dependency on JAX-RS.  It also enables simpler code that can take advantage of all the OfficeFloor features.
    
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/JaxRsHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/legacy/JaxRsHttpServer}Tutorial Source}}
 
 
 

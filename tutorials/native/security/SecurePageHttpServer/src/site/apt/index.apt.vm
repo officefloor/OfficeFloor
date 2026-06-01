@@ -30,7 +30,7 @@ Secure Page Tutorial
   
   The below example for this tutorial will implement a simple page to capture card details.
 
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/SecurePageHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/native/security/SecurePageHttpServer}Tutorial Source}}
 
 
 

@@ -36,7 +36,7 @@ CosmosDB Tutorial
    
    * <<<GET /posts>>> to obtain all posts
    
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/CosmosDbHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/cloud/datastores/CosmosDbHttpServer}Tutorial Source}}
 
 
 

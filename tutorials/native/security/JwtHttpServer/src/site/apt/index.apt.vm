@@ -30,7 +30,7 @@ Combined JWT Resource and Authority Tutorial
 
   This tutorial demonstrates combining them.
    
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/JwtHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/native/security/JwtHttpServer}Tutorial Source}}
 
 
 

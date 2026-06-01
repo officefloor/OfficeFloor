@@ -30,7 +30,7 @@ Logger Tutorial
 
   To focus on logging, this tutorial uses a simple application that logs the input string sent by the client. 
 
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/LoggerHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/native/core/LoggerHttpServer}Tutorial Source}}
 
 
 

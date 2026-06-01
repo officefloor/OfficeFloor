@@ -36,7 +36,7 @@ DynamoDB Tutorial
    
    * <<<GET /posts>>> to obtain all posts
    
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/DynamoDbHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/cloud/datastores/DynamoDbHttpServer}Tutorial Source}}
 
 
 
@@ -94,4 +94,4 @@ DynamoDB Tutorial
 
 Next
 
-  The {{{../AwsSamHttpServer/index.html}next tutorial}} covers {{{https://aws.amazon.com/serverless/}AWS Serverless}}.
+  The {{{../../cloud-platforms/AwsSamHttpServer/index.html}next tutorial}} covers {{{https://aws.amazon.com/serverless/}AWS Serverless}}.

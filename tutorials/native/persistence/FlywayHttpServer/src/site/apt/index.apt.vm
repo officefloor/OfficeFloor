@@ -36,7 +36,7 @@ Flyway Tutorial
   
 %{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/flywayhttpserver/FlywayLogic.java|ignoreDownloadError=false}
 
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/FlywayHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/native/persistence/FlywayHttpServer}Tutorial Source}}
 
 
 

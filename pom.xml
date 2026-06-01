@@ -851,6 +851,20 @@
 						<excludedLink>https://dl.acm.org/**</excludedLink>
 						<excludedLink>http://localhost:7878/hi/World</excludedLink>
 						<excludedLink>#</excludedLink>
+						<!-- Absolute path link only valid on deployed server -->
+						<excludedLink>/favicon.ico</excludedLink>
+						<!-- GitHub fork ribbon served via S3 (blocked by CDN but works in browser) -->
+						<excludedLink>https://s3.amazonaws.com/github/ribbons/**</excludedLink>
+						<!-- External sites that block automated link checkers (403/406) -->
+						<excludedLink>https://projectreactor.io/**</excludedLink>
+						<excludedLink>https://r2dbc.io/**</excludedLink>
+						<excludedLink>https://swagger.io/**</excludedLink>
+						<excludedLink>https://www.h2database.com/**</excludedLink>
+						<!-- Permanent redirects (308) that work fine in a browser -->
+						<excludedLink>https://flywaydb.org/**</excludedLink>
+						<excludedLink>https://spring.io/**</excludedLink>
+						<!-- Maven plugin report not generated in aggregated site -->
+						<excludedLink>plugin-info.html</excludedLink>
 					</excludedLinks>
 				</configuration>
 			</plugin>

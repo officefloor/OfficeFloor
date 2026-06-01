@@ -34,7 +34,7 @@ JavaScript Polyglot Tutorial
 
 %{snippet|file=${basedir}/src/main/resources/officefloor/rest/index.GET.yml|ignoreDownloadError=false}
 
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/JavaScriptHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/features/polyglot/JavaScriptHttpServer}Tutorial Source}}
 
 
 

@@ -30,7 +30,7 @@ Secure Link Tutorial
   
   The below example for this tutorial will implement a simple non-secure page to provide login credentials via a secure link.
 
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/SecureLinkHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/native/security/SecureLinkHttpServer}Tutorial Source}}
 
 
 

@@ -32,7 +32,7 @@ Vertx SQL Client Tutorial
 
 %{snippet|file=${project.build.directory}/site-snippets/message/id.GET.yml|ignoreDownloadError=false}
 
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/VertxSqlClientHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/features/reactive/VertxSqlClientHttpServer}Tutorial Source}}
 
 
 
@@ -78,4 +78,4 @@ Vertx SQL Client Tutorial
 
 Next
 
-  The {{{../CatsHttpServer/index.html}next tutorial}} covers using {{{https://typelevel.org/cats-effect/}Cats Effect}}.
+  The {{{../../features-polyglot/CatsHttpServer/index.html}next tutorial}} covers using {{{https://typelevel.org/cats-effect/}Cats Effect}}.

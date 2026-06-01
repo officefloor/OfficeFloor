@@ -65,8 +65,6 @@
 		</breadcrumbs>
 		<menu name="Getting Started">
 			<item name="About" href="./about.html" />
-			<item name="Install" href="./install.html" />
-			<item name="Architecture" href="./architecture.html" />
 			<item name="Tutorials" href="./tutorials/index.html" />
 			<item name="Getting Help" href="./getting-help.html" />
 		</menu>

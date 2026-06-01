@@ -30,7 +30,7 @@ Session HTTP Server Tutorial
   
   The example application for this tutorial will show a simple list of postings.
 
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/SessionHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/native/security/SessionHttpServer}Tutorial Source}}
 
 
 

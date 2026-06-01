@@ -36,7 +36,7 @@ CosmosDB Async Tutorial
    
    * <<<GET /posts>>> to obtain all posts
    
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/CosmosAsyncDbHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/cloud/datastores/CosmosAsyncDbHttpServer}Tutorial Source}}
 
 
 
@@ -97,4 +97,4 @@ CosmosDB Async Tutorial
 
 Next
 
-  The {{{../AzureWebAppsHttpServer/index.html}next tutorial}} {{{https://azure.microsoft.com/services/app-service/web/}Azure Web Apps}}.
+  The {{{../../cloud-platforms/AzureWebAppsHttpServer/index.html}next tutorial}} {{{https://azure.microsoft.com/en-us/products/app-service/web}Azure Web Apps}}.
