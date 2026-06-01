@@ -32,7 +32,7 @@ R2DBC Tutorial
 
 %{snippet|file=${project.build.directory}/site-snippets/message/id.GET.yml|ignoreDownloadError=false}
 
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/features/reactive/R2dbcHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/features/reactive/R2dbcHttpServer}Tutorial Source}}
 
 
 

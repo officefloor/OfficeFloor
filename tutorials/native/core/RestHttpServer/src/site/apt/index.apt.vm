@@ -34,7 +34,7 @@ REST Tutorial
       
    * <<<GET /vehicle/\{id\}>>> to obtain the vehicle entry by the vehicle's identifier
    
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/native/core/RestHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/native/core/RestHttpServer}Tutorial Source}}
 
 
 

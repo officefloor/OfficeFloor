@@ -28,7 +28,7 @@ Migrate Servlet Tutorial
 
   This tutorial provides the typical steps in migrating a Servlet / Filter to avoid dependency on JEE.  It also enables simpler code that can take advantage of all the OfficeFloor features.
    
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/legacy/ServletHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/legacy/ServletHttpServer}Tutorial Source}}
 
 
 

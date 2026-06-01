@@ -36,7 +36,7 @@ DynamoDB Tutorial
    
    * <<<GET /posts>>> to obtain all posts
    
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/cloud/datastores/DynamoDbHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/cloud/datastores/DynamoDbHttpServer}Tutorial Source}}
 
 
 

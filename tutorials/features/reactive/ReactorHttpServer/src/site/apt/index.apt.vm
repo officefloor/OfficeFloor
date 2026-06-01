@@ -36,7 +36,7 @@ Reactive Tutorial
 
 %{snippet|file=${basedir}/src/main/resources/officefloor/rest/reactive.GET.yml|ignoreDownloadError=false}
 
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/features/reactive/ReactorHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/features/reactive/ReactorHttpServer}Tutorial Source}}
 
 
 

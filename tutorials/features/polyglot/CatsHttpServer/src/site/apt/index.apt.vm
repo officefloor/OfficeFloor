@@ -30,7 +30,7 @@ Cats Tutorial
 
   To focus on Cats, this tutorial uses a simple application that retrieves a message from database using {{{https://tpolecat.github.io/doobie/}doobie}} via Cats Effect. 
 
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/features/polyglot/CatsHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/features/polyglot/CatsHttpServer}Tutorial Source}}
 
 
 

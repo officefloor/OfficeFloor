@@ -8,7 +8,7 @@ Google Function Tutorial
 
   This tutorial demonstrates running within {{{https://cloud.google.com/functions}Google Functions}}.
 
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/cloud/platforms/GoogleFunctionHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/cloud/platforms/GoogleFunctionHttpServer}Tutorial Source}}
 
 
 

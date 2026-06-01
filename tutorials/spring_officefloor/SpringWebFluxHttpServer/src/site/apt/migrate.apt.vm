@@ -28,7 +28,7 @@ Migrate Spring Web Flux Tutorial
 
   This tutorial provides the typical steps in migrating a Spring Web Flux Controller to avoid dependency on Spring.  It also enables simpler code that can take advantage of all the OfficeFloor features.
    
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/spring_officefloor/SpringWebFluxHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/spring_officefloor/SpringWebFluxHttpServer}Tutorial Source}}
 
 
 

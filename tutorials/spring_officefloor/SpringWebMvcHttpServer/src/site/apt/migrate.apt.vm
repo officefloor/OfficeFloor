@@ -28,7 +28,7 @@ Migrate Spring Web MVC Tutorial
 
   This tutorial provides the typical steps in migrating a Spring Web MVC Controller to avoid dependency on Spring.  It also enables simpler code that can take advantage of all the OfficeFloor features.
    
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/spring_officefloor/SpringWebMvcHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/spring_officefloor/SpringWebMvcHttpServer}Tutorial Source}}
 
 
 

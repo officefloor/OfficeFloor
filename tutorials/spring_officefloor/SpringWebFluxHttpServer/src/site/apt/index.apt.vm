@@ -28,7 +28,7 @@ Spring Web Flux Tutorial
 
   This tutorial demonstrates configuring Spring Web Flux Controllers within WoOF.  This enables using an existing Spring Application out of the box within WoOF.
    
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/spring_officefloor/SpringWebFluxHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/spring_officefloor/SpringWebFluxHttpServer}Tutorial Source}}
 
 
 

@@ -28,7 +28,7 @@ Azure Web Apps Tutorial
 
   This tutorial demonstrates running within {{{https://azure.microsoft.com/en-us/products/app-service/web}Azure Web Apps}}.
 
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/cloud/platforms/AzureWebAppsHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/cloud/platforms/AzureWebAppsHttpServer}Tutorial Source}}
 
 
 

@@ -32,7 +32,7 @@ Exception Handling Tutorial
   
   This tutorial also introduces the <<<@Parameter>>> annotation to allow passing an object between methods.
 
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/native/core/ExceptionHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/native/core/ExceptionHttpServer}Tutorial Source}}
 
 
 

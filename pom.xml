@@ -859,6 +859,7 @@
 						<excludedLink>https://r2dbc.io/**</excludedLink>
 						<excludedLink>https://swagger.io/**</excludedLink>
 						<excludedLink>https://www.h2database.com/**</excludedLink>
+						<excludedLink>https://www.npmjs.com/**</excludedLink>
 						<!-- Permanent redirects (308) that work fine in a browser -->
 						<excludedLink>https://flywaydb.org/**</excludedLink>
 						<excludedLink>https://spring.io/**</excludedLink>

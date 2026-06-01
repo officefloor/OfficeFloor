@@ -32,7 +32,7 @@ CORS Tutorial
 
   The example used in this tutorial is a simple end point <<<GET /path>>> that will add CORS headers. 
    
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/native/core/CorsHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/native/core/CorsHttpServer}Tutorial Source}}
 
 
 

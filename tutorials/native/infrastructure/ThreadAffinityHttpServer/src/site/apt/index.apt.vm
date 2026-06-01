@@ -31,7 +31,7 @@ Thread Affinity Tutorial
 
   To demonstrate the thread affinity, the following simple application is used.
 
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/native/infrastructure/ThreadAffinityHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/native/infrastructure/ThreadAffinityHttpServer}Tutorial Source}}
 
 
   

@@ -32,7 +32,7 @@ Authentication Tutorial
   
   The below example for this tutorial will demonstrate only allowing a logged in user to view a page.
 
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/native/security/AuthenticationHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/native/security/AuthenticationHttpServer}Tutorial Source}}
 
 
 

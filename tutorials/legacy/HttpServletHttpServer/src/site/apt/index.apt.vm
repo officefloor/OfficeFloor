@@ -30,7 +30,7 @@ Servlet Container Tutorial
   
   The tutorial will demonstrate this with a simple increment service. 
   
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/legacy/HttpServletHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/legacy/HttpServletHttpServer}Tutorial Source}}
 
 
 

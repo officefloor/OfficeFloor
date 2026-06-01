@@ -28,7 +28,7 @@ AWS SAM Tutorial
 
   This tutorial demonstrates running within {{{https://aws.amazon.com/serverless/}AWS Serverless}}.
 
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/cloud/platforms/AwsSamHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/cloud/platforms/AwsSamHttpServer}Tutorial Source}}
 
 
 

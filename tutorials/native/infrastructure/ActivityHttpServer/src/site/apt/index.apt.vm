@@ -30,7 +30,7 @@ Activity Tutorial
 
   To focus on modular configuration, this tutorial uses a simple application that returns the depth of modules within modules. 
 
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/native/infrastructure/ActivityHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/native/infrastructure/ActivityHttpServer}Tutorial Source}}
 
 
 

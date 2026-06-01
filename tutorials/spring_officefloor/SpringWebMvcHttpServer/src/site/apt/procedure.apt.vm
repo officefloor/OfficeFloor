@@ -30,7 +30,7 @@ Spring Web MVC Procedure Tutorial
 
   Adding a Spring Web MVC Controller as a procedure, allows re-use of existing code. Ideally, over time, the Spring Web MVC Controllers are simplified to methods taking advantage of OfficeFloor's {{{https://sagenschneider.blogspot.com/2019/02/inversion-of-coupling-control.html}IoCC}}. However, Spring Web MVC Controllers are supported as procedures to avoid significant rewrites of application code.  This enables taking advantage of OfficeFloor's features with existing Spring code.
    
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/spring_officefloor/SpringWebMvcHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/spring_officefloor/SpringWebMvcHttpServer}Tutorial Source}}
 
 
 

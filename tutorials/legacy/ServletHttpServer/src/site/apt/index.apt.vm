@@ -30,7 +30,7 @@ Servlet Tutorial
 
   Adding Servlets / Filters as a procedure, allows re-use of existing code. Ideally, over time, the Servlets / Filters are simplified to methods taking advantage of OfficeFloor's {{{https://sagenschneider.blogspot.com/2019/02/inversion-of-coupling-control.html}IoCC}}. However, Servlets / Filters are supported as procedures to avoid significant rewrites of your application code.  This enables taking advantage of OfficeFloor's features with existing code.
    
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/legacy/ServletHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/legacy/ServletHttpServer}Tutorial Source}}
 
 
 

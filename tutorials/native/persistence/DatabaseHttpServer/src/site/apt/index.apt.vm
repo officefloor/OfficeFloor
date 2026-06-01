@@ -34,7 +34,7 @@ Dependency Injection of Managed Object Tutorial
   
 [./images/DatabaseHttpServer-screenshot.png] DatabaseHttpServer screen shot.
   
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/native/persistence/DatabaseHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/native/persistence/DatabaseHttpServer}Tutorial Source}}
 
 
 

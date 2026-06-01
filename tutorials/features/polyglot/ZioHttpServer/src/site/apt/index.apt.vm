@@ -30,7 +30,7 @@ ZIO Tutorial
 
   To focus on ZIO, this tutorial uses a simple application that retrieves a message from database via ZIO effect. 
 
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/features/polyglot/ZioHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/features/polyglot/ZioHttpServer}Tutorial Source}}
 
 
 

@@ -30,7 +30,7 @@ Test Tutorial
     
   To focus on testing, the below simple application to add two numbers will be used.
     
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/native/infrastructure/TestHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/native/infrastructure/TestHttpServer}Tutorial Source}}
 
   Furthermore, production quality testing would cover a lot more test scenarios than is covered in this tutorial.  The additional scenarios, however, have been excluded for brevity.  They would all follow a similar pattern as described by this tutorial.
 

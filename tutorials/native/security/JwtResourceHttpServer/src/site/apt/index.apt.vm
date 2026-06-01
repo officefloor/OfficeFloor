@@ -32,7 +32,7 @@ JWT Tutorial
         
    * <<<GET /resource>>> to obtain the secured resource
    
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/native/security/JwtResourceHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/native/security/JwtResourceHttpServer}Tutorial Source}}
 
 
 

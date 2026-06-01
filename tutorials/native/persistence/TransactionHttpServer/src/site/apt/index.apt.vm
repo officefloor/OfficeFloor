@@ -30,7 +30,7 @@ Transaction HTTP Server Tutorial
   
   The example used for this tutorial is adding posts via a REST service.
 
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/native/persistence/TransactionHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/native/persistence/TransactionHttpServer}Tutorial Source}}
 
 
 

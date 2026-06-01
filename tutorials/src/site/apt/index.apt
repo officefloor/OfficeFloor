@@ -65,7 +65,7 @@ OfficeFloor Tutorials
   generate and modify endpoint code accurately.
 
   All tutorials are part of the OfficeFloor continuous builds and their source can be found
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials}here}}.
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials}here}}.
 
 
 * Phase 1: Spring Boot
