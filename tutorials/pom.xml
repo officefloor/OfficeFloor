@@ -22,6 +22,10 @@
 		<module>legacy</module>
 		<module>reference</module>
 	</modules>
+	<properties>
+		<maven.deploy.skip>true</maven.deploy.skip>
+		<skipPublishing>true</skipPublishing>
+	</properties>
 	<build>
 		<plugins>
 			<plugin>

@@ -103,16 +103,29 @@ public class StreamBufferUtil {
 	}
 
 	/**
+	 * Thread-local byte array reused across writes to avoid heap allocation on
+	 * each call. Grows to the largest chunk seen on that thread.
+	 */
+	private static final ThreadLocal<byte[]> WRITE_BUFFER = ThreadLocal.withInitial(() -> new byte[8192]);
+
+	/**
 	 * Writes the {@link ByteBuffer} to the {@link OutputStream}.
-	 * 
+	 *
 	 * @param buffer       {@link ByteBuffer}.
 	 * @param outputStream {@link OutputStream}.
 	 * @throws IOException If fails to write {@link ByteBuffer} content to the
 	 *                     {@link OutputStream}.
 	 */
 	private static final void write(ByteBuffer buffer, OutputStream outputStream) throws IOException {
-		for (int position = BufferJvmFix.position(buffer); position < BufferJvmFix.limit(buffer); position++) {
-			outputStream.write(buffer.get());
+		int length = BufferJvmFix.limit(buffer) - BufferJvmFix.position(buffer);
+		if (length > 0) {
+			byte[] bytes = WRITE_BUFFER.get();
+			if (bytes.length < length) {
+				bytes = new byte[length];
+				WRITE_BUFFER.set(bytes);
+			}
+			buffer.get(bytes, 0, length);
+			outputStream.write(bytes, 0, length);
 		}
 	};
 
