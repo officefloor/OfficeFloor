@@ -29,7 +29,7 @@ jobs:
       run: mvn -V -B -e -DskipTests clean install --file bom/pom.xml
 
     - name: Generate Site
-      run: mvn -V -B -e -Dofficefloor-deploy=site site site:stage
+      run: mvn -V -B -e -Dofficefloor-deploy=site post-site site:stage
 
     - name: Deploy Site
       uses: peaceiris/actions-gh-pages@v4

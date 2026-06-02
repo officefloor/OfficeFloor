@@ -750,43 +750,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-				<!-- Run HTTP server for staged site content for linkcheck
-				report -->
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-maven-plugin</artifactId>
-				<version>${jetty-version}</version>
-				<inherited>false</inherited>
-				<configuration>
-					<supportedPackagings>
-						<supportedPackaging>pom</supportedPackaging>
-					</supportedPackagings>
-					<deployMode>EMBED</deployMode>
-					<httpConnector>
-						<port>9999</port>
-					</httpConnector>
-					<webAppSourceDirectory>${basedir}/target/site</webAppSourceDirectory>
-					<stopKey>OfficeFloor</stopKey>
-					<stopPort>9966</stopPort>
-					<stopWait>10</stopWait>
-				</configuration>
-				<executions>
-					<execution>
-						<id>Start HTTP Server of staged site for linkcheck</id>
-						<phase>pre-site</phase>
-						<goals>
-							<goal>start</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>Stop HTTP Server of staged site for linkcheck</id>
-						<phase>post-site</phase>
-						<goals>
-							<goal>stop</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
 	</build>
 	<reporting>
@@ -817,54 +780,6 @@
 						</reports>
 					</reportSet>
 				</reportSets>
-			</plugin>
-			<plugin>
-				<!-- Report on broken links in site. -->
-				<!-- To obtain link check report for stage site: -->
-				<!-- 1) mvn -DskipTests clean install post-site -->
-				<!-- 2) mvn site:stage -P site-link-check -->
-				<!-- 3) cp -R target/site/apidocs/ target/staging/ -->
-				<!-- 4) rm -rf target/site -->
-				<!-- 5) mv target/staging/ target/site -->
-				<!-- 6) rm -rf target/linkcheck -->
-				<!-- 7) rm -rf target/site/linkcheck.html -->
-				<!-- 8) mvn -N post-site -->
-				<!-- 9) report available at
-				${basedir}/target/site/linkcheck.html -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-linkcheck-plugin</artifactId>
-				<version>1.2</version>
-				<inherited>false</inherited>
-				<configuration>
-					<baseURL>http://localhost:9999</baseURL>
-					<timeout>10000</timeout>
-					<forceSite>false</forceSite>
-					<excludedPages>
-						<excludedPage>apidocs/**</excludedPage>
-					</excludedPages>
-					<excludedLinks>
-						<excludedLink>//dl.acm.org/**</excludedLink>
-						<excludedLink>http://dl.acm.org/**</excludedLink>
-						<excludedLink>https://dl.acm.org/**</excludedLink>
-						<excludedLink>http://localhost:7878/hi/World</excludedLink>
-						<excludedLink>#</excludedLink>
-						<!-- Absolute path link only valid on deployed server -->
-						<excludedLink>/favicon.ico</excludedLink>
-						<!-- GitHub fork ribbon served via S3 (blocked by CDN but works in browser) -->
-						<excludedLink>https://s3.amazonaws.com/github/ribbons/**</excludedLink>
-						<!-- External sites that block automated link checkers (403/406) -->
-						<excludedLink>https://projectreactor.io/**</excludedLink>
-						<excludedLink>https://r2dbc.io/**</excludedLink>
-						<excludedLink>https://swagger.io/**</excludedLink>
-						<excludedLink>https://www.h2database.com/**</excludedLink>
-						<excludedLink>https://www.npmjs.com/**</excludedLink>
-						<!-- Permanent redirects (308) that work fine in a browser -->
-						<excludedLink>https://flywaydb.org/**</excludedLink>
-						<excludedLink>https://spring.io/**</excludedLink>
-						<!-- Maven plugin report not generated in aggregated site -->
-						<excludedLink>plugin-info.html</excludedLink>
-					</excludedLinks>
-				</configuration>
 			</plugin>
 		</plugins>
 	</reporting>
@@ -936,6 +851,91 @@
 					<url>https://officefloor.net</url>
 				</site>
 			</distributionManagement>
+			<build>
+				<plugins>
+					<plugin>
+						<!-- Run HTTP server for staged site content for linkcheck report -->
+						<!-- To obtain link check report for stage site: -->
+						<!-- 1) mvn -DskipTests clean install post-site -->
+						<!-- 2) mvn site:stage -P site-link-check -->
+						<!-- 3) cp -R target/site/apidocs/ target/staging/ -->
+						<!-- 4) rm -rf target/site -->
+						<!-- 5) mv target/staging/ target/site -->
+						<!-- 6) rm -rf target/linkcheck -->
+						<!-- 7) rm -rf target/site/linkcheck.html -->
+						<!-- 8) mvn -N post-site -->
+						<!-- 9) report available at ${basedir}/target/site/linkcheck.html -->
+						<groupId>org.eclipse.jetty</groupId>
+						<artifactId>jetty-maven-plugin</artifactId>
+						<version>${jetty-version}</version>
+						<inherited>false</inherited>
+						<configuration>
+							<supportedPackagings>
+								<supportedPackaging>pom</supportedPackaging>
+							</supportedPackagings>
+							<deployMode>EMBED</deployMode>
+							<httpConnector>
+								<port>9999</port>
+							</httpConnector>
+							<webAppSourceDirectory>${basedir}/target/site</webAppSourceDirectory>
+							<stopKey>OfficeFloor</stopKey>
+							<stopPort>9966</stopPort>
+							<stopWait>10</stopWait>
+						</configuration>
+						<executions>
+							<execution>
+								<id>Start HTTP Server of staged site for linkcheck</id>
+								<phase>pre-site</phase>
+								<goals>
+									<goal>start</goal>
+								</goals>
+							</execution>
+							<execution>
+								<id>Stop HTTP Server of staged site for linkcheck</id>
+								<phase>post-site</phase>
+								<goals>
+									<goal>stop</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+			<reporting>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-linkcheck-plugin</artifactId>
+						<version>1.2</version>
+						<inherited>false</inherited>
+						<configuration>
+							<baseURL>http://localhost:9999</baseURL>
+							<timeout>10000</timeout>
+							<forceSite>false</forceSite>
+							<excludedPages>
+								<excludedPage>apidocs/**</excludedPage>
+							</excludedPages>
+							<excludedLinks>
+								<excludedLink>//dl.acm.org/**</excludedLink>
+								<excludedLink>http://dl.acm.org/**</excludedLink>
+								<excludedLink>https://dl.acm.org/**</excludedLink>
+								<excludedLink>http://localhost:7878/hi/World</excludedLink>
+								<excludedLink>#</excludedLink>
+								<excludedLink>/favicon.ico</excludedLink>
+								<excludedLink>https://s3.amazonaws.com/github/ribbons/**</excludedLink>
+								<excludedLink>https://projectreactor.io/**</excludedLink>
+								<excludedLink>https://r2dbc.io/**</excludedLink>
+								<excludedLink>https://swagger.io/**</excludedLink>
+								<excludedLink>https://www.h2database.com/**</excludedLink>
+								<excludedLink>https://www.npmjs.com/**</excludedLink>
+								<excludedLink>https://flywaydb.org/**</excludedLink>
+								<excludedLink>https://spring.io/**</excludedLink>
+								<excludedLink>plugin-info.html</excludedLink>
+							</excludedLinks>
+						</configuration>
+					</plugin>
+				</plugins>
+			</reporting>
 		</profile>
 		<profile>
 			<id>release-site-to-github</id>
