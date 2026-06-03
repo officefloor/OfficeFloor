@@ -1,0 +1,20 @@
+# Lychee link checker configuration
+# See https://lychee.cli.rs/usage/configuration/
+
+# Only check internal links - external links are maintained by third parties
+# and are best verified by visiting the live site
+offline = true
+
+# Exclude files from being parsed as link sources.
+# Links TO these files from other pages are still checked.
+exclude_path = [
+    # Auto-generated Maven project info report pages - links sourced from
+    # third-party dependency POMs (bad URLs, missing protocols, skin JS references)
+    "**/licenses.html",
+    "**/dependency-management.html",
+    "**/dependencies.html",
+    # Apidocs contain millions of internal javadoc cross-references between generated
+    # class files. Links FROM tutorials/site pages TO apidocs are still checked
+    # because those source pages are not excluded.
+    "**/apidocs/**",
+]

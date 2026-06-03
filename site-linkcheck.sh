@@ -29,7 +29,7 @@ cp -R target/site/apidocs/ target/staging/
 # Run lychee linkcheck against staged site (config in .lychee.toml)
 # --root-dir resolves root-relative paths (e.g. /js/...) relative to the staging root
 STAGING_DIR="$(pwd)/target/staging"
-lychee --root-dir "${STAGING_DIR}" "${STAGING_DIR}/**/*.html"
+lychee --offline --root-dir "${STAGING_DIR}" "${STAGING_DIR}/**/*.html"
 
 # Extract all unique external links from the staged site for visual verification
 EXTERNAL_LINKS_REPORT=target/staging/external-links.txt
