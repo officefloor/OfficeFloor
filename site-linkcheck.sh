@@ -27,7 +27,9 @@ mvn site:stage -P site-link-check
 cp -R target/site/apidocs/ target/staging/
 
 # Run lychee linkcheck against staged site (config in .lychee.toml)
-lychee --base target/staging/ "target/staging/**/*.html"
+# --root-dir resolves root-relative paths (e.g. /js/...) relative to the staging root
+STAGING_DIR="$(pwd)/target/staging"
+lychee --root-dir "${STAGING_DIR}" "${STAGING_DIR}/**/*.html"
 
 # Extract all unique external links from the staged site for visual verification
 EXTERNAL_LINKS_REPORT=target/staging/external-links.txt

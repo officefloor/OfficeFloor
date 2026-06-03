@@ -39,5 +39,5 @@ jobs:
     - name: Run Link Check
       uses: lycheeverse/lychee-action@v2
       with:
-        args: --base target/staging/ "target/staging/**/*.html"
+        args: --root-dir ${{ github.workspace }}/target/staging/ "${{ github.workspace }}/target/staging/**/*.html"
         fail: true
