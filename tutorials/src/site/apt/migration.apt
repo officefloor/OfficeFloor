@@ -1,0 +1,287 @@
+~~~
+~~ #%L
+~~ Tutorials
+~~ %%
+~~ Copyright (C) 2005 - 2020 Daniel Sagenschneider
+~~ %%
+~~ Licensed under the Apache License, Version 2.0 (the "License");
+~~ you may not use this file except in compliance with the License.
+~~ You may obtain a copy of the License at
+~~
+~~      http://www.apache.org/licenses/LICENSE-2.0
+~~
+~~ Unless required by applicable law or agreed to in writing, software
+~~ distributed under the License is distributed on an "AS IS" BASIS,
+~~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~~ See the License for the specific language governing permissions and
+~~ limitations under the License.
+~~ #L%
+~~~
+
+			       ------------------
+			    OfficeFloor Migration Guide
+			       ------------------
+			      Daniel Sagenschneider
+			       ------------------
+
+OfficeFloor Migration Guide
+
+  This guide is for those interested in progressively migrating from a Spring Boot application to
+  running natively on OfficeFloor.  The {{{./index.html}Tutorials}} page covers adding OfficeFloor
+  capabilities to Spring Boot without any migration.  Come back here only if you want to go further.
+
+  The migration is structured as progressive stages.  You can stop at any stage.
+
+  [[1]] <<Spring in OfficeFloor>> hosts your Spring beans inside the OfficeFloor runtime.  All
+        existing Spring configuration continues to work.  Existing Spring Web MVC controllers
+        continue to function while YAML REST procedures are added alongside them.
+
+  [[2]] <<Native OfficeFloor>> removes the Spring dependency entirely.  All REST YAML files,
+        service classes, and team configurations carry over unchanged.
+
+  []
+
+  Additional content covering reactive streams, cloud deployment, and legacy integration is
+  included below for completeness.
+
+
+* Phase 1: Spring in OfficeFloor
+
+  In this phase the OfficeFloor runtime takes ownership of the HTTP server while your existing
+  Spring configuration continues to supply dependency-injected beans.  No Spring code changes are
+  required.  Moving to this phase unlocks further OfficeFloor capabilities such as native thread
+  injection and the full WoOF infrastructure layer, while the familiar Spring programming model
+  remains intact.
+
+
+** Spring Beans
+
+  Host Spring beans directly as OfficeFloor managed objects.  Your Spring <<<@Service>>>,
+  <<<@Repository>>>, and <<<@Component>>> beans are available for injection into any OfficeFloor
+  procedure exactly as they are in a Spring Boot application.
+
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+|| Tutorial                                                    || Description                                               || Covered
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./spring-officefloor/SpringHttpServer/index.html}Spring Beans}} | Host Spring beans inside the OfficeFloor runtime. Spring is used purely as a dependency supplier; all beans remain available for injection. | SpringSupplierSource\
+|                                                              |                                                            | Spring beans as managed objects
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+
+
+** Spring Web MVC in OfficeFloor
+
+  Host an existing Spring Web MVC application inside the OfficeFloor runtime.  Existing
+  <<<@Controller>>> endpoints continue to work while YAML REST procedures can be added alongside
+  them.
+
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+|| Tutorial                                                    || Description                                               || Covered
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./spring-officefloor/SpringWebMvcHttpServer/index.html}Spring Web MVC}} | Run Spring Web MVC @Controller endpoints within OfficeFloor while adding YAML REST procedures. | Spring Web MVC\
+|                                                              |                                                            | @Controller in OfficeFloor
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+
+
+* Phase 2: Native OfficeFloor
+
+  If there is interest in removing Spring as a runtime dependency, OfficeFloor can run without it.
+  All REST YAML files, service classes, and team configurations carry over unchanged.  The following
+  tutorials explore the complete set of native OfficeFloor capabilities organised by concern.
+
+
+** Core REST and Dependency Injection
+
+  The foundation tutorials for native OfficeFloor REST applications.
+
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+|| Tutorial                                                    || Description                                               || Covered
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./native/native-core/RestHttpServer/index.html}REST}}            | Declare REST endpoints as YAML configuration; dependency inject request data and services. | REST\
+|                                                              |                                                            | @PathParameter , HttpException
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./native/native-core/DiPojoHttpServer/index.html}Dependency Injection}} | Dependency inject plain old Java objects (POJOs) into REST procedures. | Dependency Injection
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./native/native-core/EnvironmentHttpServer/index.html}Environment}} | Configure application behaviour across environments using properties and profiles. | @Property , Profile
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./native/native-core/LoggerHttpServer/index.html}Logging}}       | Inject loggers that identify their location within the application. | Logger
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./native/native-core/SwaggerHttpServer/index.html}OpenAPI / Swagger}} | Generate OpenAPI documentation from native OfficeFloor REST YAML endpoint declarations. | {{{https://www.openapis.org/}OpenAPI}}\
+|                                                              |                                                            | {{{https://swagger.io/}Swagger}}
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./native/native-core/ExceptionHttpServer/index.html}Exception Handling}} | Handle and map exceptions within native OfficeFloor REST flows. | @Parameter\
+|                                                              |                                                            | Exception handling
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+
+
+** Persistence
+
+  Connecting native OfficeFloor applications to relational databases.
+
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+|| Tutorial                                                    || Description                                               || Covered
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./native/native-persistence/DatabaseHttpServer/index.html}Database}} | Dependency inject a customised managed object backed by a database connection pool. | ManagedObjectSource
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./native/native-persistence/TransactionHttpServer/index.html}Transaction}} | Govern transactions across multiple procedures within a REST flow. | Governance
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./native/native-persistence/FlywayHttpServer/index.html}Flyway}} | Run Flyway schema migrations on application start up. | {{{https://flywaydb.org/}Flyway}}
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+
+
+** Security
+
+  Authentication and authorisation for native OfficeFloor REST applications.
+
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+|| Tutorial                                                    || Description                                               || Covered
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./native/native-security/AuthenticationHttpServer/index.html}Authentication}} | Configure HTTP authentication across REST endpoints. | Authentication
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./native/native-security/JwtHttpServer/index.html}JWT}}          | Single-server application with combined JWT security and authority. | JWT Security\
+|                                                              |                                                            | JWT Authority
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./native/native-security/JwtAuthorityHttpServer/index.html}JWT Authority}} | Dedicated JWT authority server issuing and renewing tokens. | JWT Authority
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./native/native-security/JwtResourceHttpServer/index.html}JWT Resource}} | JWT-secured resource server validating tokens issued by a separate authority. | JWT Security
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./native/native-security/SessionHttpServer/index.html}Session}}  | Store and retrieve state between requests using the HTTP session. | @HttpSessionStateful
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./native/native-security/SecurePageHttpServer/index.html}Secure Page}} | Require HTTPS for an entire page and its links. | Template Secure
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./native/native-security/SecureLinkHttpServer/index.html}Secure Link}} | Require HTTPS for an individual link within a page. | Link Secure
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+
+
+** Infrastructure and Concurrency
+
+  OfficeFloor's {{{https://sagenschneider.blogspot.com/2019/02/inversion-of-coupling-control.html}IOCC}}
+  model provides fine-grained control over threads, start-up ordering, caching, and modularisation.
+  These tutorials explore that infrastructure layer.
+
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+|| Tutorial                                                    || Description                                               || Covered
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./native/native-infrastructure/TeamHttpServer/index.html}Thread Injection}} | Assign specific thread teams to procedures to performance-tune the application. | Thread Injection
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./native/native-infrastructure/ThreadAffinityHttpServer/index.html}Thread Affinity}} | Bind procedures to CPU cores using the Executive for cache-friendly execution. | Executive
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./native/native-infrastructure/StartBeforeHttpServer/index.html}Start-up Ordering}} | Declare ordered start-up dependencies between ManagedObjectSource instances. | start-before , start-after
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./native/native-infrastructure/ConstantCacheHttpServer/index.html}Cache}} | Cache constant values to avoid repeated computation or lookup. | {{{/apidocs/net/officefloor/cache/Cache.html}Cache}}
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./native/native-infrastructure/ActivityHttpServer/index.html}Activity}} | Modularise REST YAML configuration into reusable Activity units. | Activity (Section)
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./native/native-infrastructure/TestHttpServer/index.html}Testing}} | Unit, system, and integration test OfficeFloor REST applications. | Unit / System / Integration testing
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+
+
+** Static Content
+
+  For modern single-page applications, the REST YAML endpoints provide the API and static assets
+  are served directly from the classpath.
+
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+|| Tutorial                                                    || Description                                               || Covered
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./native/native-core/StaticContentHttpServer/index.html}Static Content}} | Serve SPA assets (HTML, CSS, JavaScript) from the <<<PUBLIC/>>> classpath directory alongside REST endpoints. | /PUBLIC
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+
+
+* Reactive
+
+  OfficeFloor's threading model integrates cleanly with reactive libraries.  These tutorials
+  demonstrate how to wire reactive streams and reactive database clients as procedures in REST YAML
+  composition.
+
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+|| Tutorial                                                    || Description                                               || Covered
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./features/features-reactive/ReactorHttpServer/index.html}Reactor}} | Integrate Project Reactor publishers and subscribers as OfficeFloor procedures. | {{{https://projectreactor.io/}Project Reactor}}\
+|                                                              |                                                            | Reactive streams
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./features/features-reactive/R2dbcHttpServer/index.html}R2DBC}}    | Reactive relational database access using R2DBC within OfficeFloor REST composition. | {{{https://r2dbc.io}R2DBC}}\
+|                                                              |                                                            | Reactive database
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./features/features-reactive/VertxSqlClientHttpServer/index.html}Vertx SQL Client}} | High-performance database interaction using the Vert.x SQL Client. | {{{https://github.com/eclipse-vertx/vertx-sql-client}Vertx SQL Client}}
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+
+
+* Cloud and Deployment
+
+
+** Cloud Platforms
+
+  Deploy native OfficeFloor applications to major cloud and serverless platforms.
+
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+|| Tutorial                                                    || Description                                               || Covered
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./cloud/cloud-platforms/DeployHttpServer/index.html}Deploy}}    | Package and deploy an OfficeFloor application including Docker containerisation. | Deploy , Docker
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./cloud/cloud-platforms/AwsSamHttpServer/index.html}AWS SAM}}   | Deploy as an AWS Serverless Application Model (SAM) function. | {{{https://aws.amazon.com/serverless/}AWS Serverless}}
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./cloud/cloud-platforms/GoogleFunctionHttpServer/index.html}Google Function}} | Deploy as a Google Cloud Function. | {{{https://cloud.google.com/functions}Google Cloud Function}}
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./cloud/cloud-platforms/AzureWebAppsHttpServer/index.html}Azure Web Apps}} | Deploy to Azure Web Apps. | {{{https://azure.microsoft.com/en-us/products/app-service/web}Azure Web Apps}}
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+
+
+** Cloud Datastores
+
+  Integrate cloud-native datastores into OfficeFloor REST applications as managed objects.
+
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+|| Tutorial                                                    || Description                                               || Covered
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./cloud/cloud-datastores/DynamoDbHttpServer/index.html}DynamoDB}} | Integrate Amazon DynamoDB as an OfficeFloor managed object. | {{{https://aws.amazon.com/dynamodb/}DynamoDB}}
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./cloud/cloud-datastores/CosmosDbHttpServer/index.html}Cosmos DB}} | Integrate Azure Cosmos DB (synchronous client) as an OfficeFloor managed object. | {{{https://docs.microsoft.com/azure/cosmos-db}Cosmos DB}}
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./cloud/cloud-datastores/CosmosAsyncDbHttpServer/index.html}Async Cosmos DB}} | Integrate Azure Cosmos DB (asynchronous client) as an OfficeFloor managed object. | {{{https://docs.microsoft.com/azure/cosmos-db}Async Cosmos DB}}
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./cloud/cloud-datastores/FirestoreHttpServer/index.html}Firestore}} | Integrate Google Cloud Firestore as an OfficeFloor managed object. | {{{https://cloud.google.com/firestore}Firestore}}
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./cloud/cloud-datastores/ObjectifyHttpServer/index.html}Objectify}} | Integrate Google Cloud Datastore via Objectify as an OfficeFloor managed object. | {{{https://github.com/objectify/objectify/wiki}Objectify}}
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+
+
+* Legacy Integration
+
+  For applications that must co-exist with a Servlet container, WAR deployment, or JAX-RS
+  framework.  The step-by-step guides below show how to embed each legacy format and then
+  progressively migrate to native OfficeFloor.
+
+
+** JEE Web Archive (WAR / Servlets)
+
+*-------+------------------------------------------------------+------------------------------------------------------------+------------------------------+
+|| Step || Tutorial                                            || Description                                               || Covered
+*-------+------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| 1     | {{{./legacy/WarHttpServer/index.html}Embed WAR}}     | Run a JEE WAR within OfficeFloor. | WAR
+*-------+------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| 2     | {{{./legacy/ServletHttpServer/index.html}Servlet Procedures}} | Integrate Servlets and Filters as OfficeFloor Procedures. | Servlet / Filter Procedure
+*-------+------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| 3     | {{{./legacy/ServletHttpServer/migrate.html}Migrate Servlet}} | Remove the JEE Servlet dependency and run natively on OfficeFloor. | Migrate Servlet / Filter
+*-------+------------------------------------------------------+------------------------------------------------------------+------------------------------+
+
+
+** JAX-RS
+
+*-------+------------------------------------------------------+------------------------------------------------------------+------------------------------+
+|| Step || Tutorial                                            || Description                                               || Covered
+*-------+------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| 1     | {{{./legacy/JaxRsWarHttpServer/index.html}Embed JAX-RS}} | Run JAX-RS resources within OfficeFloor as a WAR. | JAX-RS WAR
+*-------+------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| 2     | {{{./legacy/JaxRsHttpServer/index.html}JAX-RS Procedures}} | Integrate JAX-RS resource methods as OfficeFloor Procedures. | JAX-RS Procedure
+*-------+------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| 3     | {{{./legacy/JaxRsHttpServer/migrate.html}Migrate JAX-RS}} | Remove the JAX-RS dependency and run natively on OfficeFloor. | Migrate JAX-RS
+*-------+------------------------------------------------------+------------------------------------------------------------+------------------------------+
+
+
+** HttpServlet Container Embedding
+
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+|| Tutorial                                                    || Description                                               || Covered
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./legacy/HttpServletHttpServer/index.html}Embed in HttpServlet Container}} | Embed WoOF inside an existing HttpServlet container such as Tomcat or Jetty. | Servlet , PaaS / Cloud
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+

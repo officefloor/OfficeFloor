@@ -51,4 +51,4 @@ OpenAPI / Swagger Tutorial
 
 Next
 
-  The {{{../CorsHttpServer/index.html}next tutorial}} covers CORS.
+  The {{{../ExceptionHttpServer/index.html}next tutorial}} covers exception handling.

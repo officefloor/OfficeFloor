@@ -1,3 +1,0 @@
-cors:
-  class: net.officefloor.tutorial.corshttpserver.Cors
-  method: cors

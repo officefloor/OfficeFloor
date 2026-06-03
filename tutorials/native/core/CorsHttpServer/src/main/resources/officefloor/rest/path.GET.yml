@@ -1,3 +1,0 @@
-service:
-  class: net.officefloor.tutorial.corshttpserver.Logic
-  method: service

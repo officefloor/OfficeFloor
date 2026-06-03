@@ -19,8 +19,7 @@
 		<module>LoggerHttpServer</module>
 		<module>VariableHttpServer</module>
 		<module>SwaggerHttpServer</module>
-		<module>CorsHttpServer</module>
-		<module>ExceptionHttpServer</module>
+<module>ExceptionHttpServer</module>
 		<module>StaticContentHttpServer</module>
 	</modules>
 </project>
