@@ -5,6 +5,12 @@
 # and are best verified by visiting the live site
 offline = true
 
+# Exclude protocol-relative URLs (//domain/path) that lychee resolves as local
+# file paths under --offline/--root-dir mode rather than as external URLs
+exclude = [
+    "dl\\.acm\\.org",
+]
+
 # Exclude files from being parsed as link sources.
 # Links TO these files from other pages are still checked.
 exclude_path = [
