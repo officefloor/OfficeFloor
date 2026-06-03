@@ -10,11 +10,11 @@ offline = true
 exclude_path = [
     # Auto-generated Maven project info report pages - links sourced from
     # third-party dependency POMs (bad URLs, missing protocols, skin JS references)
-    "**/licenses.html",
-    "**/dependency-management.html",
-    "**/dependencies.html",
+    ".*/licenses\\.html",
+    ".*/dependency-management\\.html",
+    ".*/dependencies\\.html",
     # Apidocs contain millions of internal javadoc cross-references between generated
     # class files. Links FROM tutorials/site pages TO apidocs are still checked
     # because those source pages are not excluded.
-    "**/apidocs/**",
+    ".*/apidocs/.*",
 ]
