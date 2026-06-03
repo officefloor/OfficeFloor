@@ -19,19 +19,19 @@
   #L%
   -->
 
-<project>
+<project xmlns="http://maven.apache.org/DECORATION/1.7.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/DECORATION/1.7.0 https://maven.apache.org/xsd/decoration-1.7.0.xsd">
 	<bannerLeft>
-		<name>OfficeFloor</name>
 		<src>https://officefloor.net/images/OfficeFloorBannerImage.png</src>
 		<href>https://officefloor.net/</href>
 	</bannerLeft>
-	<googleAnalyticsAccountId>UA-23477455-1</googleAnalyticsAccountId>
-<publishDate position="right" />
+	<publishDate position="right" />
 	<version position="right" />
 	<skin>
 		<groupId>org.apache.maven.skins</groupId>
 		<artifactId>maven-fluido-skin</artifactId>
-		<version>1.5</version>
+		<version>2.1.0</version>
 	</skin>
 	<custom>
 		<fluidoSkin>
@@ -70,6 +70,5 @@
 			<item name="Tutorials" href="./tutorials/index.html" />
 			<item name="Getting Help" href="./getting-help.html" />
 		</menu>
-		<menu ref="modules" />
 	</body>
 </project>

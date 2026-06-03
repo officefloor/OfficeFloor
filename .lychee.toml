@@ -1,0 +1,15 @@
+# Lychee link checker configuration
+# See https://lychee.cli.rs/usage/configuration/
+
+# Only check internal links - external links are maintained by third parties
+# and are best verified by visiting the live site
+offline = true
+
+# Exclude auto-generated Maven project info report pages.
+# These contain links sourced from third-party dependency POMs (bad URLs,
+# missing protocols, skin JS references) that we have no control over.
+exclude_path = [
+    "**/licenses.html",
+    "**/dependency-management.html",
+    "**/dependencies.html",
+]
