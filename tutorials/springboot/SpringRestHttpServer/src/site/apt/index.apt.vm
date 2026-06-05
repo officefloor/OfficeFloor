@@ -153,13 +153,10 @@ multiple public methods (casual, formal)
 
   Both Spring annotations (<<<@PathVariable>>>, <<<@RequestParam>>>, <<<@RequestHeader>>>, <<<@CookieValue>>>, <<<@RequestBody>>>, <<<@ModelAttribute>>>, <<<@RequestPart>>>) and OfficeFloor's own annotations ({{{/apidocs/net/officefloor/web/HttpPathParameter.html}@HttpPathParameter}}, {{{/apidocs/net/officefloor/web/HttpQueryParameter.html}@HttpQueryParameter}}, {{{/apidocs/net/officefloor/web/HttpHeaderParameter.html}@HttpHeaderParameter}}, {{{/apidocs/net/officefloor/web/HttpObject.html}@HttpObject}}) are available on any service method parameter.
 
-  <<Note:>> when using Spring's <<<@PathVariable>>> or <<<@RequestParam>>>, always specify the
-  parameter name explicitly in the annotation attribute — for example
-  <<<@PathVariable(name = "name")>>> or <<<@RequestParam(name = "name")>>>.  Omitting the name
+  <<Note:>> always specify the parameter name explicitly in the annotation — for example
+  <<<@PathVariable("name")>>> or <<<@RequestParam(name = "name")>>>.  Omitting the name
   relies on compile-time parameter name discovery, which is not guaranteed across all build
-  configurations and may silently fail to bind the value.  OfficeFloor's own
-  <<<@HttpPathParameter("name")>>> and <<<@HttpQueryParameter("name")>>> always require the name,
-  so this issue cannot arise with them.
+  configurations and may silently fail to bind the value.
 
 
 

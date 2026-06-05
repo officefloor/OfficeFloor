@@ -80,9 +80,9 @@ Spring REST Qualifier Tutorial
 
 %{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestqualifier/CasualGreetingService.java|ignoreDownloadError=false}
 
-  <<Note:>> always supply the name string explicitly in <<<@RequestParam(name = "...")>>>.
-  Omitting it relies on compile-time parameter name discovery, which is not guaranteed to be
-  available in all build configurations and may silently fail to bind the query parameter.
+  <<Note:>> always specify the name explicitly — <<<@RequestParam(name = "name")>>>.
+  Omitting it relies on compile-time parameter name discovery, which is not guaranteed across
+  all build configurations and may silently fail to bind the query parameter.
 
 
 

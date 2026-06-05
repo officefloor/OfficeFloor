@@ -115,6 +115,9 @@ OfficeFloor Tutorials
 | {{{./springboot/SpringRestActuatorHttpServer/index.html}Actuator}} | Spring Boot Actuator health, info, and metrics endpoints continue to work alongside OfficeFloor REST YAML endpoints with no additional configuration. | spring-boot-starter-actuator\
 |                                                              |                                                            | /actuator/health
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./springboot/SpringRestConversionReference/index.html}Conversion Reference}} | Side-by-side reference for converting a Spring MVC REST application to OfficeFloor REST YAML configuration. Covers all common substitutions from endpoint declaration to transaction governance. | Spring → OfficeFloor mapping\
+|                                                              |                                                            | Conversion checklist
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 
 
 * Spring WebFlux

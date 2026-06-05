@@ -27,5 +27,6 @@
 		<module>SpringRestDataJpaHttpServer</module>
 		<module>SpringRestTeamHttpServer</module>
 		<module>SpringRestActuatorHttpServer</module>
+		<module>SpringRestConversionReference</module>
 	</modules>
 </project>
