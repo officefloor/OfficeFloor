@@ -232,6 +232,33 @@ validate:
 
 
 
+*Running against a real server
+
+  Because the application is standard Spring Boot, it can be run directly without any test harness:
+
++--
+mvn spring-boot:run
++--
+
+  With the server running, the endpoints respond to plain HTTP:
+
++--
+curl http://localhost:8080/greeting
+{"message":"Hello, World!"}
+
+curl -s -X POST \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Daniel"}' \
+  http://localhost:8080/greeting
+{"message":"Hello, Daniel!"}
++--
+
+  The integration test does the same thing programmatically.  <<<@SpringBootTest(webEnvironment = RANDOM_PORT)>>> starts an embedded server on a random port and <<<TestRestTemplate>>> makes real HTTP calls — no MockMvc involved:
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springresthttpserver/SpringRestHttpServerRealServerTest.java|ignoreDownloadError=false}
+
+
+
 Next
 
   The {{{../SpringRestFunctionHttpServer/index.html}Function Injection tutorial}} explores function injection more deeply: a three-step pipeline with conditional branching, typed data passing between steps, and independent Spring service injection at each step.
