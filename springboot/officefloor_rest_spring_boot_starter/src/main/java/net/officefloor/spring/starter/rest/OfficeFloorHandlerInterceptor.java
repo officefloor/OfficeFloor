@@ -136,10 +136,13 @@ public class OfficeFloorHandlerInterceptor implements HandlerInterceptor {
             writer = new HttpServletHttpResponseWriter(response, bufferPool);
         }
 
+        // Strip the servlet context path from request URI
+        String contextPath = request.getContextPath();
+        String requestUri = request.getRequestURI().substring(contextPath != null ? contextPath.length() : 0)
+                + (request.getQueryString() != null ? "?" + request.getQueryString() : "");
+
         // Create the server HTTP connection
         net.officefloor.server.http.HttpMethod httpMethod = net.officefloor.server.http.HttpMethod.getHttpMethod(request.getMethod());
-        String requestUri = request.getRequestURI()
-                + (request.getQueryString() != null ? "?" + request.getQueryString() : "");
         SpringServerHttpConnection connection = new SpringServerHttpConnection(
                 this.bridge.getHttpServerLocation(), request.isSecure(), () -> httpMethod, () -> requestUri,
                 HttpVersion.getHttpVersion(request.getProtocol()), httpHeaders, entity, null, null,
