@@ -1,0 +1,330 @@
+~~~
+~~ #%L
+~~ Spring REST to OfficeFloor Conversion Reference
+~~ %%
+~~ Copyright (C) 2005 - 2026 Daniel Sagenschneider
+~~ %%
+~~ Licensed under the Apache License, Version 2.0 (the "License");
+~~ you may not use this file except in compliance with the License.
+~~ You may obtain a copy of the License at
+~~
+~~      http://www.apache.org/licenses/LICENSE-2.0
+~~
+~~ Unless required by applicable law or agreed to in writing, software
+~~ distributed under the License is distributed on an "AS IS" BASIS,
+~~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~~ See the License for the specific language governing permissions and
+~~ limitations under the License.
+~~ #L%
+~~~
+
+~~~
+~~ Spring REST to OfficeFloor Conversion Reference
+~~~
+
+                                       -----------------------
+                              Spring → OfficeFloor Conversion Reference
+                                       -----------------------
+                                        Daniel Sagenschneider
+                                       -----------------------
+
+Spring REST to OfficeFloor Conversion Reference
+
+  This page summarises the mechanical substitutions required to convert a Spring MVC REST
+  application to OfficeFloor REST YAML configuration.  Each section shows the Spring pattern
+  on the left and the OfficeFloor equivalent on the right.
+
+
+
+*Entry point — no change
+
+  The Spring Boot application class is unchanged.
+
++--
+// Spring — unchanged in OfficeFloor
+@SpringBootApplication
+public class MyApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(MyApplication.class, args);
+    }
+}
++--
+
+
+
+*Endpoint declaration — controller class → YAML file + plain class
+
+*----+----+
+| Spring | OfficeFloor |
+*----+----+
+| <<<@RestController>>> + <<<@GetMapping("/owners")>>> on a class | <<<owners.GET.yml>>> file under <<<officefloor/rest/>>> |
+*----+----+
+| <<<@PostMapping("/owners")>>> | <<<owners.POST.yml>>> |
+*----+----+
+| <<<@PutMapping("/owners/{id}")>>> | <<<owners/{id}.PUT.yml>>> |
+*----+----+
+| <<<@DeleteMapping("/owners/{id}")>>> | <<<owners/{id}.DELETE.yml>>> |
+*----+----+
+
+  The service class itself is a plain Java class — no Spring stereotype annotations:
+
++--
+// Spring
+@RestController
+@RequestMapping("/api")
+public class OwnerRestController {
+    @GetMapping("/owners/{id}")
+    public ResponseEntity<OwnerDto> getOwner(@PathVariable Integer ownerId) { ... }
+}
++--
+
++--
+// OfficeFloor — owners/{ownerId}.GET.yml
+service:
+  class: com.example.rest.GetOwnerService
++--
+
++--
+// OfficeFloor — GetOwnerService.java (plain class, no Spring annotations on the class)
+public class GetOwnerService {
+    public void service(...) { ... }
+}
++--
+
+
+
+*Spring bean injection — no annotation needed on bean parameters
+
+  Spring beans (<<<@Service>>>, <<<@Repository>>>, <<<@Component>>>, etc.) are injected
+  directly as method parameters by type.  No annotation is needed on the parameter itself.
+
++--
+// Spring
+@Autowired
+private ClinicService clinicService;
++--
+
++--
+// OfficeFloor — ClinicService injected by matching its type
+public void service(ClinicService clinicService, ObjectResponse<OwnerDto> response) { ... }
++--
+
+
+
+*HTTP response — <<<ObjectResponse>>> with or without <<<ResponseEntity>>>
+
+  The simplest migration keeps <<<ResponseEntity>>> building code intact by wrapping it in
+  <<<ObjectResponse\<ResponseEntity\<T\>\>>>>.  A deeper conversion replaces it with the
+  OfficeFloor-idiomatic form.
+
+*----+----+
+| Spring | OfficeFloor |
+*----+----+
+| <<<ResponseEntity<T>>>> return type | <<<ObjectResponse<T>>>> method parameter |
+*----+----+
+| <<<return ResponseEntity.ok(dto)>>> | <<<response.send(dto)>>> (default 200) |
+*----+----+
+| <<<return ResponseEntity.status(201).body(dto)>>> | <<<ObjectResponse<ResponseEntity<T>>>>> then <<<response.send(ResponseEntity.status(201).body(dto))>>> — keeps Spring <<<ResponseEntity>>> building; <<or>> use <<<@HttpResponse(status = 201) ObjectResponse<T> response>>> for the OfficeFloor-idiomatic form |
+*----+----+
+| custom response headers | <<<ObjectResponse<ResponseEntity<T>>>>> then <<<response.send(ResponseEntity.ok().header("X-Header", value).body(dto))>>> |
+*----+----+
+| <<<return ResponseEntity.noContent().build()>>> | omit <<<ObjectResponse>>> parameter entirely — OfficeFloor returns 204 automatically when no response is sent |
+*----+----+
+
+
+
+*Path parameters — use <<<@PathVariable>>> with an explicit name
+
+  Spring's <<<@PathVariable>>> works directly in OfficeFloor service methods.  Always supply
+  the name explicitly to avoid relying on compile-time parameter name discovery, which is not
+  guaranteed across all build configurations and may silently fail to bind the value.
+
++--
+// Spring controller
+public ResponseEntity<OwnerDto> getOwner(@PathVariable Integer ownerId, ...) { ... }
++--
+
++--
+// OfficeFloor service class — explicit name in the annotation
+public void service(@PathVariable("ownerId") Integer ownerId,
+        ClinicService clinicService,
+        ObjectResponse<OwnerDto> response) { ... }
++--
+
+
+
+*Query parameters — use <<<@RequestParam>>> with an explicit name
+
+  Spring's <<<@RequestParam>>> works directly in OfficeFloor service methods.  Always supply
+  <<<name = "...">>> explicitly for the same reason.
+
++--
+// Spring controller
+public ResponseEntity<List<OwnerDto>> listOwners(
+        @RequestParam(required = false) String lastName, ...) { ... }
++--
+
++--
+// OfficeFloor service class — explicit name required
+public void service(@RequestParam(name = "lastName", required = false) String lastName,
+        ClinicService clinicService,
+        ObjectResponse<List<OwnerDto>> response) { ... }
++--
+
+
+
+*Request body — no change
+
+  <<<@RequestBody>>> works identically in OfficeFloor service methods.
+
++--
+// Spring and OfficeFloor — identical
+public void service(@RequestBody OwnerDto ownerDto, ...) { ... }
++--
+
+
+
+*404 / not-found responses — exception + YAML escalation
+
+  Spring controllers typically branch on a null check and return <<<ResponseEntity.notFound()>>>.
+  In OfficeFloor the idiomatic approach is to throw a checked exception and handle it in a
+  separate method, wired through YAML <<<escalations:>>>.
+
++--
+// Spring
+if (owner == null) return ResponseEntity.notFound().build();
++--
+
++--
+// OfficeFloor service class — two methods, both reachable as separate YAML steps
+public void service(@HttpPathParameter("id") String idStr,
+        ClinicService clinicService,
+        ObjectResponse<OwnerDto> response) throws NotFoundException {
+    Owner owner = clinicService.findById(Integer.parseInt(idStr));
+    if (owner == null) throw new NotFoundException(idStr);
+    response.send(toDto(owner));
+}
+
+public void notFound(@Parameter NotFoundException ex,
+        @HttpResponse(status = 404) ObjectResponse<String> response) {
+    response.send(ex.getMessage());
+}
++--
+
++--
+// OfficeFloor YAML — method: required because the class has two public methods
+service:
+  class: com.example.rest.GetOwnerService
+  method: service
+  escalations:
+    com.example.exception.NotFoundException: notFound
+
+notFound:
+  class: com.example.rest.GetOwnerService
+  method: notFound
++--
+
+  See the {{{../SpringRestExceptionHttpServer/index.html}Exception Handling tutorial}} for
+  the full picture, including composition-level escalations and <<<@RestControllerAdvice>>>.
+
+
+
+*Multi-method rule — <<<method:>>> is required
+
+  When the service class has more than one public method, OfficeFloor cannot determine which to
+  invoke and the application fails to start:
+
++--
+Require configuring method for service (GetOwnerService) as it contains
+multiple public methods (notFound, service)
++--
+
+  Every YAML entry that references such a class <<must>> include <<<method:>>>.  This applies
+  whether the methods are in the same YAML file or in different files.
+
+  See the {{{../SpringRestHttpServer/index.html}Spring REST HTTP Server tutorial}} for a
+  worked example using two independent service methods in one class.
+
+
+
+*Transaction governance — YAML <<<govern:>>> replaces <<<@Transactional>>>
+
++--
+// Spring
+@Transactional(readOnly = true)
+public Owner findById(int id) { ... }
++--
+
++--
+// OfficeFloor YAML — governs the entire step, not the service bean method
+service:
+  class: com.example.rest.GetOwnerService
+  method: service
+  govern: [ readonly-transaction ]
++--
+
+  Two built-in governance names are provided by the starter:
+
+*----+----+
+| <<<readonly-transaction>>> | Read-only transaction; database driver may skip write-path overhead. |
+*----+----+
+| <<<transaction>>> | Read/write transaction; rolls back on any exception. |
+*----+----+
+
+  Multiple steps that all carry <<<govern: [ transaction ]>>> share the <<same>> transaction.
+  See the {{{../SpringRestDataJpaHttpServer/index.html}Data JPA tutorial}} for details.
+
+
+
+*<<<server.servlet.context-path>>> — supported
+
+  Setting <<<server.servlet.context-path>>> in <<<application.properties>>> works as expected.
+  OfficeFloor strips the context path from the request URI before routing, so endpoint YAML
+  files are always named relative to the context root regardless of the configured path.
+
++--
+# application.properties
+server.servlet.context-path=/petclinic
++--
+
++--
+# YAML file name — relative to context root, not to the full server path
+officefloor/rest/owners.GET.yml    →  GET  /petclinic/owners
+officefloor/rest/vets.GET.yml      →  GET  /petclinic/vets
++--
+
+
+
+*<<<@RestControllerAdvice>>> — works without change
+
+  Spring <<<@RestControllerAdvice>>> / <<<@ExceptionHandler>>> classes handle exceptions that
+  escape the OfficeFloor composition without any extra configuration.  They are the right
+  choice for application-wide error handling that should apply to both OfficeFloor and native
+  Spring <<<@RestController>>> endpoints.
+
+  See the {{{../SpringRestExceptionHttpServer/index.html}Exception Handling tutorial}} for a
+  worked example.
+
+
+
+*Conversion checklist
+
+  [[1]] Replace <<<@RestController>>> + <<<@*Mapping>>> with YAML files under <<<officefloor/rest/>>>.
+
+  [[2]] Convert the controller class to a plain Java class — remove all Spring stereotype annotations.
+
+  [[3]] Ensure every <<<@PathVariable>>> includes an explicit name — <<<@PathVariable("ownerId")>>>.
+
+  [[4]] Ensure every <<<@RequestParam>>> includes an explicit name — <<<@RequestParam(name = "lastName")>>>.
+
+  [[5]] Replace <<<ResponseEntity<T>>>> return type with an <<<ObjectResponse<T>>>> parameter and <<<response.send(dto)>>> for the simple case.  When custom headers or a non-200 status are needed, use <<<ObjectResponse<ResponseEntity<T>>>> and pass the <<<ResponseEntity>>> directly to <<<response.send(...)>>> — this is also the easiest incremental migration path as it preserves existing <<<ResponseEntity>>> building code.
+
+  [[6]] Alternatively, replace <<<ResponseEntity.status(N)>>> with <<<@HttpResponse(status = N)>>> on the <<<ObjectResponse>>> parameter for the OfficeFloor-idiomatic form.
+
+  [[7]] Replace null-check 404 returns with a thrown exception and a YAML <<<escalations:>>> entry.
+
+  [[8]] Whenever a service class has more than one public method, add <<<method:>>> to every YAML entry that references it.
+
+  [[9]] Remove <<<@Transactional>>> from service classes; declare <<<govern:>>> in the YAML instead.
+
+  [[10]] Verify <<<@RequestBody>>> parameters — they work as-is, no changes required.

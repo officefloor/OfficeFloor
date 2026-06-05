@@ -56,6 +56,11 @@ public class WebRestController {
         return "ID=" + id;
     }
 
+    @GetMapping("/path/int/{id}")
+    public String pathVariableInteger(@PathVariable("id") Integer id, MockComponent component) {
+        return "ID=" + id + ":" + component.getValue();
+    }
+
     @GetMapping("/query")
     public String requestParam(@RequestParam("name") String name) {
         return name;

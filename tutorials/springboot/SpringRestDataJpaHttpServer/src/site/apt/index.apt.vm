@@ -118,6 +118,11 @@ Spring REST Data JPA Tutorial
 
 %{snippet|file=${project.build.directory}/site-snippets/article/id.DELETE.yml|ignoreDownloadError=false}
 
+  <<<DeleteArticleService>>> has two public methods (<<<service>>> and <<<notFound>>>), so
+  every YAML entry that references it must include <<<method:>>>.  See the
+  {{{../SpringRestHttpServer/index.html}Spring REST HTTP Server tutorial}} for a full
+  explanation of this rule.
+
 
 
 *Transaction spanning multiple service methods

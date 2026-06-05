@@ -42,6 +42,27 @@
 	<build>
 		<plugins>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-path-param-snippets</id>
+						<phase>pre-site</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<copy file="${basedir}/src/main/resources/officefloor/rest/greeting/formal/{name}.GET.yml"
+									  tofile="${project.build.directory}/site-snippets/greeting/formal/name.GET.yml"/>
+								<copy file="${basedir}/src/main/resources/officefloor/rest/greeting/casual/{name}.GET.yml"
+									  tofile="${project.build.directory}/site-snippets/greeting/casual/name.GET.yml"/>
+							</target>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>

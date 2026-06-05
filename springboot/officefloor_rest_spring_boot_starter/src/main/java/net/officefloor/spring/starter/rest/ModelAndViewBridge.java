@@ -289,8 +289,9 @@ public class ModelAndViewBridge {
         DispatcherServlet servlet = this.getDispatcherServlet();
 
         // If within test, use TestDispatcherServlet (reflection to avoid imports)
-        Object mockMvc = this.getApplicationContext().getBean("mockMvc");
-        if (mockMvc != null) {
+        final String mockMvcBeanName = "mockMvc";
+        if (this.getApplicationContext().containsBean(mockMvcBeanName)) {
+            Object mockMvc = this.getApplicationContext().getBean(mockMvcBeanName);
             Method getDispatchServletMethod = mockMvc.getClass().getDeclaredMethod("getDispatcherServlet");
             servlet = (DispatcherServlet) getDispatchServletMethod.invoke(mockMvc);
         }
