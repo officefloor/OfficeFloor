@@ -96,6 +96,20 @@ public class OfficeFloorNativeTest extends AbstractMockMvcVerification {
     }
 
     @Test
+    public void serverHttpConnection() throws Exception {
+        this.mvc.perform(get(this.getPath("/serverHttpConnection")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("GET")));
+    }
+
+    @Test
+    public void httpRequestState() throws Exception {
+        this.mvc.perform(get(this.getPath("/httpRequestState/42")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("ID=42")));
+    }
+
+    @Test
     public void team() throws Exception {
         this.mvc.perform(get(this.getPath("/team")))
                 .andExpect(status().isOk())

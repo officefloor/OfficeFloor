@@ -112,12 +112,12 @@ OfficeFloor Tutorials
 |                                                              |                                                            | Thread injection\
 |                                                              |                                                            | officefloor/teams/
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./native/native-core/VariableHttpServer/index.html}Variables}} | Pass state downstream through a procedure flow without coupling callers to callees. | Out\<T\>\
+| {{{./springboot/VariableHttpServer/index.html}Variables}} | Pass state downstream through a procedure flow without coupling callers to callees. | Out\<T\>\
 |                                                              |                                                            | @Val
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./features/features-polyglot/KotlinHttpServer/index.html}Kotlin}}  | Implement REST procedure logic in Kotlin alongside Java procedures. | Polyglot Kotlin
+| {{{./springboot/KotlinHttpServer/index.html}Kotlin}}  | Implement REST procedure logic in Kotlin alongside Java procedures. | Polyglot Kotlin
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./features/features-polyglot/ScalaHttpServer/index.html}Scala}}    | Implement REST procedure logic in Scala alongside Java procedures. | Polyglot Scala
+| {{{./springboot/ScalaHttpServer/index.html}Scala}}    | Implement REST procedure logic in Scala alongside Java procedures. | Polyglot Scala
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./features/features-polyglot/JavaScriptHttpServer/index.html}JavaScript}} | Implement REST procedure logic in JavaScript via GraalVM. | Polyglot JavaScript\
 |                                                              |                                                            | GraalVM

@@ -1,0 +1,91 @@
+~~~
+~~ #%L
+~~ Scala Tutorial
+~~ %%
+~~ Copyright (C) 2005 - 2020 Daniel Sagenschneider
+~~ %%
+~~ Licensed under the Apache License, Version 2.0 (the "License");
+~~ you may not use this file except in compliance with the License.
+~~ You may obtain a copy of the License at
+~~
+~~      http://www.apache.org/licenses/LICENSE-2.0
+~~
+~~ Unless required by applicable law or agreed to in writing, software
+~~ distributed under the License is distributed on an "AS IS" BASIS,
+~~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~~ See the License for the specific language governing permissions and
+~~ limitations under the License.
+~~ #L%
+~~~
+
+                                               -----------------------
+                                               Scala Tutorial
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+Scala Tutorial
+
+  This tutorial demonstrates writing OfficeFloor REST endpoint logic in Scala within a Spring
+  Boot application.  Because Scala objects compile to JVM singletons, Scala object methods work
+  directly as OfficeFloor service procedures alongside Java code.
+
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/ScalaHttpServer}Tutorial Source}}
+
+
+
+*Maven dependency
+
+  Add the OfficeFloor Scala support alongside the Spring Boot starter:
+
+%{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+
+
+*Application class
+
+  Register <<<DefaultScalaModule>>> as a Spring bean so that Jackson can serialise and
+  deserialise Scala classes in <<<@RequestBody>>> and <<<ObjectResponse>>>:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/scala/net/officefloor/tutorial/scalahttpserver/Application.scala|ignoreDownloadError=false}
+
+
+
+*Scala service method
+
+  The Scala object method that handles the request uses <<<@RequestBody>>> to receive the
+  JSON request body and <<<ObjectResponse>>> to send the response:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/scala/net/officefloor/tutorial/scalahttpserver/ScalaService.scala|ignoreDownloadError=false}
+
+
+
+*REST endpoint
+
+  The YAML file routes <<<POST '/scala'>>> to the Scala method via the <<<Scala>>> procedure
+  source.  The compiled class name for a Scala object is <<<\<ObjectName\>\$>>>:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/scala.POST.yml|ignoreDownloadError=false}
+
+
+
+*Scala data classes
+
+  Scala classes work directly as JSON request and response objects once <<<DefaultScalaModule>>>
+  is registered:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/scala/net/officefloor/tutorial/scalahttpserver/ScalaRequest.scala|ignoreDownloadError=false}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/scala/net/officefloor/tutorial/scalahttpserver/ScalaResponse.scala|ignoreDownloadError=false}
+
+
+
+*Testing
+
+%{snippet|id=tutorial|file=${basedir}/src/test/scala/net/officefloor/tutorial/scalahttpserver/ScalaHttpServerTest.scala|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../../features/features-polyglot/JavaScriptHttpServer/index.html}next tutorial}} covers polyglot JavaScript.

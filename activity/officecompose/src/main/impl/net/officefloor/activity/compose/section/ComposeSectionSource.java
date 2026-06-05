@@ -574,7 +574,7 @@ public class ComposeSectionSource extends AbstractSectionSource {
                 }
                 return object;
             });
-            sectionDesigner.link(procedure.getSubSectionObject(objectName), externalObject);
+            sectionDesigner.link(procedure.getSubSectionObject(procedureObjectType.getObjectName()), externalObject);
         }
 
         return new ProcedureComposedFunction(functionConfiguration, procedureType, procedure);

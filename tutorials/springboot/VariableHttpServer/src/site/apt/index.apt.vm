@@ -1,0 +1,121 @@
+~~~
+~~ #%L
+~~ Variable Tutorial
+~~ %%
+~~ Copyright (C) 2005 - 2020 Daniel Sagenschneider
+~~ %%
+~~ Licensed under the Apache License, Version 2.0 (the "License");
+~~ you may not use this file except in compliance with the License.
+~~ You may obtain a copy of the License at
+~~
+~~      http://www.apache.org/licenses/LICENSE-2.0
+~~
+~~ Unless required by applicable law or agreed to in writing, software
+~~ distributed under the License is distributed on an "AS IS" BASIS,
+~~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~~ See the License for the specific language governing permissions and
+~~ limitations under the License.
+~~ #L%
+~~~
+
+                                               -----------------------
+                                                 Variable Tutorial
+                                               -----------------------
+				                            Daniel Sagenschneider
+                                               -----------------------
+
+Variable Tutorial
+
+  This tutorial demonstrates passing values downstream between functions using variables within a
+  Spring Boot application.
+
+  Unlike direct method parameters, variables do not need to be passed explicitly by the caller.
+  A variable set in one function is available for injection into any downstream function, allowing
+  pipelines to be composed from independent classes that know nothing of each other.
+
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/VariableHttpServer}Tutorial Source}}
+
+
+
+*Maven dependency
+
+%{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+
+
+*Application class
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/variablehttpserver/Application.java|ignoreDownloadError=false}
+
+
+
+*Out\<T\> / Var\<T\>
+
+  The following method demonstrates setting values for variables.
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/variablehttpserver/OutLogic.java|ignoreDownloadError=false}
+
+  Variables are created by reflectively interrogating the method parameters.  Because many variables
+  may share the same type, qualifiers distinguish them — much like naming a variable.
+
+  The {{{/apidocs/net/officefloor/plugin/clazz/Qualifier.html}@Qualifier}} meta-annotation is the
+  recommended approach.  The qualifier used in this tutorial is:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/variablehttpserver/Description.java|ignoreDownloadError=false}
+
+  Prefer {{{/apidocs/net/officefloor/plugin/variable/Out.html}Out\<T\>}} to set a variable.
+  This allows the compiler to reason about out/in combinations and catch uninitialised variables.
+
+  When a function must both read and write the same variable, use
+  {{{/apidocs/net/officefloor/plugin/variable/Var.html}Var\<T\>}}.  Use this sparingly as it
+  reduces the ability to statically reason about flow composition.
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/variablehttpserver/VarLogic.java|ignoreDownloadError=false}
+
+
+
+*@Val / In\<T\>
+
+  The following method demonstrates reading variable values downstream.
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/variablehttpserver/ValLogic.java|ignoreDownloadError=false}
+
+  {{{/apidocs/net/officefloor/plugin/variable/Val.html}@Val}} annotates a parameter to receive
+  the current value of a variable.  It distinguishes the variable from other injected objects such
+  as <<<ObjectResponse>>>.
+
+  The preferred combination is <<<Out\<T\>>>> upstream with <<<@Val>>> downstream — readable and
+  avoids importing extra framework types at the read site.
+
+  For symmetry there is also {{{/apidocs/net/officefloor/plugin/variable/In.html}In\<T\>}}:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/variablehttpserver/InLogic.java|ignoreDownloadError=false}
+
+
+
+*Composing flows — YAML endpoint files
+
+  The YAML files wire together the upstream setter and downstream reader as a two-step pipeline.
+  Each step is independent — neither class references the other.
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/outIn.GET.yml|ignoreDownloadError=false}
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/varVal.GET.yml|ignoreDownloadError=false}
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/outVal.GET.yml|ignoreDownloadError=false}
+
+
+
+*Testing
+
+  Tests use <<<MockMvc>>> to exercise the full composed pipeline through Spring MVC:
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/variablehttpserver/VariableHttpServerTest.java|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../SpringRestTeamHttpServer/index.html}Thread Injection tutorial}} shows how to assign
+  dedicated thread pools to pipeline steps so that socket threads are never blocked by slow
+  downstream work.
