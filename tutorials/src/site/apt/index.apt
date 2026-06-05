@@ -108,10 +108,6 @@ OfficeFloor Tutorials
 | {{{./springboot/SpringRestDataJpaHttpServer/index.html}Spring Data JPA}} | Integrate Spring Data JPA repositories with transaction governance in REST YAML composition. | Spring Data JPA\
 |                                                              |                                                            | @Transactional governance
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./springboot/SpringRestTeamHttpServer/index.html}Thread Injection}} | Assign dedicated thread pools to steps based on their dependencies. Socket threads are freed immediately; blocking database calls run on a separate team. | Teams\
-|                                                              |                                                            | Thread injection\
-|                                                              |                                                            | officefloor/teams/
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./springboot/SpringRestActuatorHttpServer/index.html}Actuator}} | Spring Boot Actuator health, info, and metrics endpoints continue to work alongside OfficeFloor REST YAML endpoints with no additional configuration. | spring-boot-starter-actuator\
 |                                                              |                                                            | /actuator/health
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
@@ -120,42 +116,27 @@ OfficeFloor Tutorials
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 
 
-* Spring WebFlux
+* Beyond Spring MVC — Additional OfficeFloor Capabilities
 
-  Virtual Threads in modern JVMs remove the scalability advantage that Spring WebFlux was built to
-  address.  Rather than discarding existing reactive components, this tutorial shows how to host them
-  inside a Spring MVC application so you retain the investment while gaining the simplicity of
-  synchronous programming with Virtual Threads.
+  The following tutorials cover capabilities that OfficeFloor provides over and above what Spring MVC
+  offers.  Thread injection assigns dedicated thread pools to pipeline steps so that socket threads
+  are never blocked waiting on databases or external services.  The remaining tutorials extend that
+  further with reactive interop, implicit state passing via variables, and polyglot procedure logic
+  written in Kotlin, Scala, JavaScript, or other JVM languages.
 
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 || Tutorial                                                    || Description                                               || Covered
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./springboot/SpringRestTeamHttpServer/index.html}Thread Injection}} | Assign dedicated thread pools to steps based on their dependencies. Socket threads are freed immediately; blocking database calls run on a separate team. | Teams\
+|                                                              |                                                            | Thread injection\
+|                                                              |                                                            | officefloor/teams/
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./spring-officefloor/SpringWebFluxHttpServer/index.html}Spring WebFlux in Spring MVC}} | Reuse existing Spring WebFlux @Controller components within a Spring MVC application. Virtual Threads deliver the same non-blocking throughput without a reactive programming model. | Spring WebFlux\
 |                                                              |                                                            | Virtual Threads\
 |                                                              |                                                            | Spring MVC interop
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-
-
-* Variables
-
-  Variables allow state to be passed downstream through a procedure flow without coupling callers
-  to callees.  This is useful for threading contextual data through a multi-step pipeline declared
-  in YAML.
-
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-|| Tutorial                                                    || Description                                               || Covered
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./native/native-core/VariableHttpServer/index.html}Variables}} | Pass state downstream through a procedure flow without coupling callers to callees. | Out\<T\> , @Val
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-
-
-* Polyglot
-
-  OfficeFloor procedures can be written in any JVM language.  Mix Kotlin, Scala, or JavaScript
-  logic into the same REST YAML endpoint graph as Java procedures.
-
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-|| Tutorial                                                    || Description                                               || Covered
+| {{{./native/native-core/VariableHttpServer/index.html}Variables}} | Pass state downstream through a procedure flow without coupling callers to callees. | Out\<T\>\
+|                                                              |                                                            | @Val
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./features/features-polyglot/KotlinHttpServer/index.html}Kotlin}}  | Implement REST procedure logic in Kotlin alongside Java procedures. | Polyglot Kotlin
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
