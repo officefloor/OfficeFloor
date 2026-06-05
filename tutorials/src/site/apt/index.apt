@@ -26,11 +26,6 @@
 
 OfficeFloor Tutorials
 
-  The tutorials show how to add OfficeFloor capabilities to an existing
-  {{{https://spring.io/projects/spring-boot}Spring Boot}} application.  Spring's dependency
-  injection, security, persistence, and all other Spring configuration remain intact at every
-  stage.  OfficeFloor enriches, not replaces.
-
   OfficeFloor extends dependency injection with two further kinds of injection:
 
    * <<Function injection>> composes plain Java methods into a request-handling pipeline declared
@@ -40,23 +35,9 @@ OfficeFloor Tutorials
    * <<Thread injection>> assigns dedicated thread pools to steps based solely on their
      dependencies.  Socket threads never block on database calls.
 
-  The tutorials are structured as follows:
-
-  [[1]] <<Spring Boot>> adds OfficeFloor REST YAML composition to your existing Spring Boot
-        application.  No migration required.
-
-  [[2]] <<Spring WebFlux>> shows how to reuse existing Spring WebFlux components within a Spring MVC
-        application, taking advantage of Virtual Threads as they render Spring WebFlux
-        increasingly unnecessary.
-
-  [[3]] <<Polyglot>> covers writing procedure logic in Kotlin, Scala, JavaScript, or other JVM
-        languages alongside Java procedures.
-
-  []
-
-  REST endpoints are declared as YAML configuration files throughout these tutorials.  This allows
-  teams to work concurrently on separate endpoint files and gives AI tooling the context it needs to
-  generate and modify endpoint code accurately.
+  The first section covers existing Spring MVC functionality delivered through OfficeFloor function
+  injection.  The second shows where OfficeFloor goes beyond Spring MVC, adding capabilities through
+  its function and thread injection.
 
   All tutorials are part of the OfficeFloor continuous builds and their source can be found
   {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials}here}}.
@@ -130,10 +111,6 @@ OfficeFloor Tutorials
 | {{{./springboot/SpringRestTeamHttpServer/index.html}Thread Injection}} | Assign dedicated thread pools to steps based on their dependencies. Socket threads are freed immediately; blocking database calls run on a separate team. | Teams\
 |                                                              |                                                            | Thread injection\
 |                                                              |                                                            | officefloor/teams/
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./spring-officefloor/SpringWebFluxHttpServer/index.html}Spring WebFlux in Spring MVC}} | Reuse existing Spring WebFlux @Controller components within a Spring MVC application. Virtual Threads deliver the same non-blocking throughput without a reactive programming model. | Spring WebFlux\
-|                                                              |                                                            | Virtual Threads\
-|                                                              |                                                            | Spring MVC interop
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./native/native-core/VariableHttpServer/index.html}Variables}} | Pass state downstream through a procedure flow without coupling callers to callees. | Out\<T\>\
 |                                                              |                                                            | @Val
