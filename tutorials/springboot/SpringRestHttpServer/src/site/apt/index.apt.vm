@@ -70,6 +70,8 @@ officefloor/rest/
 ├── greeting.POST.yml            →  POST /greeting
 └── greeting/
     ├── {name}.GET.yml           →  GET  /greeting/{name}
+    ├── entity/
+    │   └── {name}.GET.yml       →  GET  /greeting/entity/{name}
     ├── formal/
     │   └── {name}.GET.yml       →  GET  /greeting/formal/{name}
     └── casual/
@@ -142,6 +144,16 @@ multiple public methods (casual, formal)
 %{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springresthttpserver/GetGreetingLogic.java|ignoreDownloadError=false}
 
   {{{/apidocs/net/officefloor/web/ObjectResponse.html}ObjectResponse\<T\>}} serialises the object to JSON and writes it to the HTTP response.
+
+
+
+**ObjectResponse with ResponseEntity — Spring-compatible headers and status
+
+  For full Spring compatibility, <<<ObjectResponse>>> also accepts a <<<ResponseEntity\<T\>>>> as its type parameter.  This lets you set custom response headers or a non-200 status code while keeping the same dependency-injected style:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springresthttpserver/GetGreetingEntityLogic.java|ignoreDownloadError=false}
+
+  Using <<<ObjectResponse\<ResponseEntity\<GreetingResponse\>\>>>> gives full control over the HTTP response while staying consistent with the rest of the OfficeFloor programming model.  When you only need the body and a 200 status, <<<ObjectResponse\<T\>>>> is simpler; reach for the <<<ResponseEntity>>> form when you need headers or a specific status code.
 
 
 

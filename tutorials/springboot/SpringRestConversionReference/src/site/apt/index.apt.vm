@@ -111,16 +111,22 @@ public void service(ClinicService clinicService, ObjectResponse<OwnerDto> respon
 
 
 
-*HTTP response — <<<ObjectResponse>>> replaces <<<ResponseEntity>>>
+*HTTP response — <<<ObjectResponse>>> with or without <<<ResponseEntity>>>
+
+  The simplest migration keeps <<<ResponseEntity>>> building code intact by wrapping it in
+  <<<ObjectResponse\<ResponseEntity\<T\>\>>>>.  A deeper conversion replaces it with the
+  OfficeFloor-idiomatic form.
 
 *----+----+
 | Spring | OfficeFloor |
 *----+----+
-| <<<ResponseEntity<T>>>> parameter / return | <<<ObjectResponse<T>>>> method parameter |
+| <<<ResponseEntity<T>>>> return type | <<<ObjectResponse<T>>>> method parameter |
 *----+----+
 | <<<return ResponseEntity.ok(dto)>>> | <<<response.send(dto)>>> (default 200) |
 *----+----+
-| <<<return ResponseEntity.status(201).body(dto)>>> | <<<@HttpResponse(status = 201) ObjectResponse<T> response>>> then <<<response.send(dto)>>> |
+| <<<return ResponseEntity.status(201).body(dto)>>> | <<<ObjectResponse<ResponseEntity<T>>>>> then <<<response.send(ResponseEntity.status(201).body(dto))>>> — keeps Spring <<<ResponseEntity>>> building; <<or>> use <<<@HttpResponse(status = 201) ObjectResponse<T> response>>> for the OfficeFloor-idiomatic form |
+*----+----+
+| custom response headers | <<<ObjectResponse<ResponseEntity<T>>>>> then <<<response.send(ResponseEntity.ok().header("X-Header", value).body(dto))>>> |
 *----+----+
 | <<<return ResponseEntity.noContent().build()>>> | omit <<<ObjectResponse>>> parameter entirely — OfficeFloor returns 204 automatically when no response is sent |
 *----+----+
@@ -311,9 +317,9 @@ officefloor/rest/vets.GET.yml      →  GET  /petclinic/vets
 
   [[4]] Ensure every <<<@RequestParam>>> includes an explicit name — <<<@RequestParam(name = "lastName")>>>.
 
-  [[5]] Replace <<<ResponseEntity<T>>>> return with <<<ObjectResponse<T>>>> parameter and <<<response.send(...)>>>.
+  [[5]] Replace <<<ResponseEntity<T>>>> return type with an <<<ObjectResponse<T>>>> parameter and <<<response.send(dto)>>> for the simple case.  When custom headers or a non-200 status are needed, use <<<ObjectResponse<ResponseEntity<T>>>> and pass the <<<ResponseEntity>>> directly to <<<response.send(...)>>> — this is also the easiest incremental migration path as it preserves existing <<<ResponseEntity>>> building code.
 
-  [[6]] Replace <<<ResponseEntity.status(N)>>> with <<<@HttpResponse(status = N)>>> on the <<<ObjectResponse>>> parameter.
+  [[6]] Alternatively, replace <<<ResponseEntity.status(N)>>> with <<<@HttpResponse(status = N)>>> on the <<<ObjectResponse>>> parameter for the OfficeFloor-idiomatic form.
 
   [[7]] Replace null-check 404 returns with a thrown exception and a YAML <<<escalations:>>> entry.
 

@@ -12,6 +12,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 // START SNIPPET: tutorial
@@ -81,6 +82,15 @@ public class SpringRestHttpServerTest {
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(content().json(mapper.writeValueAsString(new GreetingResponse("Hey, Alice!"))));
+	}
+
+	@Test
+	public void getGreetingEntity() throws Exception {
+		mvc.perform(MockMvcRequestBuilders.get("/greeting/entity/OfficeFloor")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(header().string("X-Greeting-Name", "OfficeFloor"))
+				.andExpect(content().json(mapper.writeValueAsString(new GreetingResponse("Hello, OfficeFloor!"))));
 	}
 
 }
