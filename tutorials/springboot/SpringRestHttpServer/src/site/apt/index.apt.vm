@@ -66,10 +66,14 @@ Spring REST HTTP Server Tutorial
 
 +--
 officefloor/rest/
-├── greeting.GET.yml          →  GET  /greeting
-├── greeting.POST.yml         →  POST /greeting
+├── greeting.GET.yml             →  GET  /greeting
+├── greeting.POST.yml            →  POST /greeting
 └── greeting/
-    └── {name}.GET.yml        →  GET  /greeting/{name}
+    ├── {name}.GET.yml           →  GET  /greeting/{name}
+    ├── formal/
+    │   └── {name}.GET.yml       →  GET  /greeting/formal/{name}
+    └── casual/
+        └── {name}.GET.yml       →  GET  /greeting/casual/{name}
 +--
 
   The naming convention is <<<\{path\}.\{METHOD\}.yml>>>.  Directory structure below <<<officefloor/rest/>>> becomes the URL path, so deeper URLs are produced simply by nesting files in sub-directories.  Curly-brace segments such as <<<\{name\}>>> become URL path parameters.  The special filename <<<index.\{METHOD\}.yml>>> maps to the root path <<</>>>.
@@ -78,7 +82,9 @@ officefloor/rest/
 
 *YAML endpoint files — entries are named steps
 
-  Inside each YAML file, entries are named steps.  The label on each entry is a developer-chosen name used to wire steps together — it is not a keyword.  A step entry identifies the Java class that implements it:
+  Inside each YAML file, entries are named steps.  The label on each entry is a developer-chosen
+  name used to wire steps together — it is not a keyword.  A step entry identifies the Java class
+  that implements it:
 
 +--
 myLabel:
@@ -87,13 +93,39 @@ myLabel:
 
   The <<first entry>> in the file is always called when the HTTP request arrives.
 
-  When a class has only one public method that method is used automatically.  When there are multiple public methods the <<<method>>> key selects the right one:
+  When a class has only one public method that method is used automatically.
+
+
+
+**Multi-method classes — <<<method:>>> is required
+
+  When a class has more than one public method, OfficeFloor cannot determine which to call and
+  the application fails to start:
 
 +--
-enrich:
-  class: com.example.MyLogic
-  method: enrich
+Require configuring method for service (GreetingStyleLogic) as it contains
+multiple public methods (casual, formal)
 +--
+
+  Every YAML entry that references such a class <<must>> include <<<method:>>> to name which
+  method to invoke.
+
+  <<<GreetingStyleLogic>>> is a single class with two independent greeting styles, each serving
+  its own endpoint:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springresthttpserver/GreetingStyleLogic.java|ignoreDownloadError=false}
+
+  The <<<formal>>> endpoint YAML specifies <<<method: formal>>>:
+
+%{snippet|file=${project.build.directory}/site-snippets/greeting/formal/name.GET.yml|ignoreDownloadError=false}
+
+  The <<<casual>>> endpoint specifies <<<method: casual>>>:
+
+%{snippet|file=${project.build.directory}/site-snippets/greeting/casual/name.GET.yml|ignoreDownloadError=false}
+
+  Both entries reference the same class but each picks a different method.  The rule holds
+  regardless of how many entries reference the class or whether those entries appear in one YAML
+  file or several.
 
 
 

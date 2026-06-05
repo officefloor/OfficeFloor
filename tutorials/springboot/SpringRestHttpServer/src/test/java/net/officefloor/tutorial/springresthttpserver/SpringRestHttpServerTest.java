@@ -60,11 +60,28 @@ public class SpringRestHttpServerTest {
 	@Test
 	public void postGreetingWithBlankName() throws Exception {
 		mvc.perform(post("/greeting")
-				.accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(mapper.writeValueAsString(new GreetingRequest(""))))
+						.accept(MediaType.APPLICATION_JSON)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(mapper.writeValueAsString(new GreetingRequest(""))))
 				.andExpect(status().isOk())
 				.andExpect(content().json(mapper.writeValueAsString(new GreetingResponse("Hello, World!"))));
 	}
+
+	@Test
+	public void getFormalGreeting() throws Exception {
+		mvc.perform(MockMvcRequestBuilders.get("/greeting/formal/Alice")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(content().json(mapper.writeValueAsString(new GreetingResponse("Good day, Alice."))));
+	}
+
+	@Test
+	public void getCasualGreeting() throws Exception {
+		mvc.perform(MockMvcRequestBuilders.get("/greeting/casual/Alice")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(content().json(mapper.writeValueAsString(new GreetingResponse("Hey, Alice!"))));
+	}
+
 }
 // END SNIPPET: tutorial
