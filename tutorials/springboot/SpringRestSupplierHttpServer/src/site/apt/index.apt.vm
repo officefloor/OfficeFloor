@@ -224,6 +224,6 @@ SupplierSource in OfficeFloor
 
 Next
 
-  The {{{../SpringRestActuatorHttpServer/index.html}Spring Actuator tutorial}} demonstrates
-  that Spring Boot Actuator health, info, and metrics endpoints continue to work unchanged
-  alongside OfficeFloor REST YAML endpoints.
+  The {{{../SpringRestGovernanceHttpServer/index.html}Spring REST Governance tutorial}} demonstrates
+  how OfficeFloor Governance wraps function execution with framework-managed pre/post lifecycle
+  via YAML configuration — without annotations on the service class.
