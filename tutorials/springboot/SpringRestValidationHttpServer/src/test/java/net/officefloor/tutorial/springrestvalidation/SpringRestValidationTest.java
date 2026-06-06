@@ -75,5 +75,30 @@ public class SpringRestValidationTest {
 			.andExpect(status().isBadRequest())
 			.andExpect(jsonPath("$.message").isNotEmpty());
 	}
+
+	@Test
+	public void custom_constraint_even_quantity_accepted() throws Exception {
+		BulkOrderRequest request = new BulkOrderRequest();
+		request.setProduct("Gloves");
+		request.setQuantity(4);
+
+		mvc.perform(post("/order/bulk")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(mapper.writeValueAsString(request)))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.message").value("Bulk order: 4 x Gloves"));
+	}
+
+	@Test
+	public void custom_constraint_odd_quantity_rejected() throws Exception {
+		BulkOrderRequest request = new BulkOrderRequest();
+		request.setProduct("Gloves");
+		request.setQuantity(3);   // odd — violates @EvenQuantity
+
+		mvc.perform(post("/order/bulk")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(mapper.writeValueAsString(request)))
+			.andExpect(status().isBadRequest());
+	}
 }
 // END SNIPPET: tutorial

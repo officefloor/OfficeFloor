@@ -132,6 +132,8 @@ public void service(ClinicService clinicService, ObjectResponse<OwnerDto> respon
 *----+----+
 | <<<return ResponseEntity.noContent().build()>>> | omit <<<ObjectResponse>>> parameter entirely — OfficeFloor returns 204 automatically when no response is sent |
 *----+----+
+| HTTP redirect (302) | <<<ObjectResponse<ResponseEntity<Void>>>>> then <<<response.send(ResponseEntity.status(302).location(URI.create("/target")).build())>>>; or inject <<<HttpServletResponse>>> and call <<<sendRedirect("/target")>>> — see the {{{../SpringRestServletHttpServer/index.html}Servlet Interop tutorial}} |
+*----+----+
 
 
 
@@ -332,6 +334,8 @@ officefloor/rest/vets.GET.yml      →  GET  /petclinic/vets
 | Pagination (<<<Page\<T\>>>>, <<<PageRequest>>>) | {{{../SpringRestDataJpaHttpServer/index.html}Data JPA tutorial}}
 *--------------------------------------------+--------------------------------------------------------------+
 | <<<ResponseEntity.created(uri)>>> (201 + <<<Location>>> header) | {{{../SpringRestDataJpaHttpServer/index.html}Data JPA tutorial}}
+*--------------------------------------------+--------------------------------------------------------------+
+| <<<@Aspect>>> / <<<@Around>>> on Spring beans | No change required — Spring AOP proxies wrap the bean before OfficeFloor injects it, so aspects fire normally
 *--------------------------------------------+--------------------------------------------------------------+
 
 
