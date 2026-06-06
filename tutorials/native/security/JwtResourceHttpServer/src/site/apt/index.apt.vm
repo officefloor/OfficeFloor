@@ -92,4 +92,4 @@ JWT Tutorial
 
 Next
 
-  The {{{../JwtAuthorityHttpServer/index.html}next tutorial}} covers providing a JWT authority server.
+  The {{{../SessionHttpServer/index.html}next tutorial}} covers storing and retrieving state between requests using the HTTP session.

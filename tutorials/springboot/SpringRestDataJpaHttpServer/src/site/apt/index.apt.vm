@@ -182,6 +182,6 @@ Spring REST Data JPA Tutorial
 
 Next
 
-  The {{{../SpringRestTeamHttpServer/index.html}Spring REST Team tutorial}} demonstrates Thread Injection:
-  assigning specific thread pools to steps based on their dependencies so that socket threads
-  are never blocked by database or other slow I/O operations.
+  The {{{../SpringRestActuatorHttpServer/index.html}Spring Actuator tutorial}} demonstrates that
+  Spring Boot Actuator health, info, and metrics endpoints continue to work unchanged alongside
+  OfficeFloor REST YAML endpoints with no additional configuration.

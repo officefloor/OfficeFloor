@@ -328,3 +328,9 @@ officefloor/rest/vets.GET.yml      →  GET  /petclinic/vets
   [[9]] Remove <<<@Transactional>>> from service classes; declare <<<govern:>>> in the YAML instead.
 
   [[10]] Verify <<<@RequestBody>>> parameters — they work as-is, no changes required.
+
+
+
+Next
+
+  Return to the {{{../../index.html}tutorials}} index to explore the full range of OfficeFloor capabilities.

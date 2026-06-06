@@ -253,6 +253,6 @@ Managed Objects in OfficeFloor
 
 Next
 
-  The {{{../SpringRestActuatorHttpServer/index.html}Spring Actuator tutorial}} demonstrates
-  that Spring Boot Actuator health, info, and metrics endpoints continue to work unchanged
-  alongside OfficeFloor REST YAML endpoints.
+  The {{{../SpringRestSupplierHttpServer/index.html}Supplier tutorial}} demonstrates
+  registering a library of related managed objects from a single YAML declaration using a
+  <<<SupplierSource>>> — ideal for third-party library integration.

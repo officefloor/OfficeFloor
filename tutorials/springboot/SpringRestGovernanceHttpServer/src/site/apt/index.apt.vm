@@ -236,6 +236,6 @@ governance:
 
 Next
 
-  The {{{../SpringRestActuatorHttpServer/index.html}Spring Actuator tutorial}} demonstrates
-  that Spring Boot Actuator health, info, and metrics endpoints continue to work unchanged
-  alongside OfficeFloor REST YAML endpoints.
+  The {{{../SpringRestVariableHttpServer/index.html}Variables tutorial}} demonstrates
+  passing state downstream through a procedure flow without coupling callers to callees
+  using <<<Out\<T\>>>> and <<<@Val>>>.

@@ -112,4 +112,4 @@ Thread Injection Tutorial
 
 Next
 
-  The {{{../TestHttpServer/index.html}next tutorial}} covers testing a WoOF web application.
+  The {{{../ThreadAffinityHttpServer/index.html}next tutorial}} covers binding procedures to CPU cores using the Executive for cache-friendly execution.

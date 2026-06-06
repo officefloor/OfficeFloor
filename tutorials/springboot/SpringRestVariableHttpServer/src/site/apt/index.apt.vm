@@ -116,6 +116,5 @@ Variable Tutorial
 
 Next
 
-  The {{{../SpringRestTeamHttpServer/index.html}Thread Injection tutorial}} shows how to assign
-  dedicated thread pools to pipeline steps so that socket threads are never blocked by slow
-  downstream work.
+  The {{{../SpringRestKotlinHttpServer/index.html}Kotlin tutorial}} demonstrates implementing
+  REST procedure logic in Kotlin alongside Java procedures.

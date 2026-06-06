@@ -80,4 +80,4 @@ Logger Tutorial
 
 Next
 
-  The {{{../../native-security/JwtResourceHttpServer/index.html}next tutorial}} covers JWT security.
+  The {{{../SwaggerHttpServer/index.html}next tutorial}} covers documenting via OpenAPI / Swagger.

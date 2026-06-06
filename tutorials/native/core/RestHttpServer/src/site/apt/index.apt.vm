@@ -99,4 +99,4 @@ REST Tutorial
 
 Next
 
-  The {{{../StaticContentHttpServer/index.html}next tutorial}} covers serving static (files) content for single page applications.
+  The {{{../DiPojoHttpServer/index.html}next tutorial}} covers dependency injection of plain old Java objects into REST procedures.

@@ -111,5 +111,4 @@ Bean Validation in OfficeFloor REST YAML Composition
 
 Next
 
-  The {{{../SpringRestCorsHttpServer/index.html}Spring REST CORS tutorial}} demonstrates
-  the five ways to configure Cross-Origin Resource Sharing for OfficeFloor REST endpoints.
+  The {{{../SpringRestSecurityHttpServer/index.html}Spring REST Security tutorial}} demonstrates Spring Security integration with OfficeFloor REST YAML composition.

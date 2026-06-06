@@ -112,4 +112,4 @@ Authentication Tutorial
 
 Next
 
-  Return to the {{{../index.html}tutorials}}.
+  The {{{../JwtHttpServer/index.html}next tutorial}} covers JWT security — a single-server application with combined JWT security and authority.

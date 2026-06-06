@@ -120,6 +120,10 @@ OfficeFloor Tutorials
 |                                                              |                                                            | SupplierSource\
 |                                                              |                                                            | Library integration
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./springboot/SpringRestGovernanceHttpServer/index.html}Governance}} | Wrap function execution with framework-managed pre/post lifecycle declared in YAML — no annotations on the service class required. Governed objects implement a typed extension interface; OfficeFloor enrolls them automatically. | officefloor/govern/\
+|                                                              |                                                            | @Govern, @Enforce, @Disregard\
+|                                                              |                                                            | Auto-wire extensions
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./springboot/SpringRestVariableHttpServer/index.html}Variables}} | Pass state downstream through a procedure flow without coupling callers to callees. | Out\<T\>\
 |                                                              |                                                            | @Val
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+

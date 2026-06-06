@@ -97,4 +97,4 @@ CosmosDB Async Tutorial
 
 Next
 
-  The {{{../../cloud-platforms/AzureWebAppsHttpServer/index.html}next tutorial}} {{{https://azure.microsoft.com/en-us/products/app-service/web}Azure Web Apps}}.
+  The {{{../FirestoreHttpServer/index.html}next tutorial}} covers integrating Google Cloud Firestore as an OfficeFloor managed object.
