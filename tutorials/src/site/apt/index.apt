@@ -122,9 +122,9 @@ OfficeFloor Tutorials
 | {{{./springboot/JavaScriptHttpServer/index.html}JavaScript}} | Implement REST procedure logic in JavaScript via GraalVM. | Polyglot JavaScript\
 |                                                              |                                                            | GraalVM
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./features/features-polyglot/CatsHttpServer/index.html}Cats Effect}} | Integrate Cats Effect functional IO into OfficeFloor REST composition. | {{{https://typelevel.org/cats-effect/}Cats Effect}}
+| {{{./springboot/CatsHttpServer/index.html}Cats Effect}} | Integrate Cats Effect functional IO into OfficeFloor REST composition. | {{{https://typelevel.org/cats-effect/}Cats Effect}}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./features/features-polyglot/ZioHttpServer/index.html}ZIO}}        | Integrate ZIO functional effects into OfficeFloor REST composition. | {{{https://zio.dev}ZIO}}
+| {{{./springboot/ZioHttpServer/index.html}ZIO}}        | Integrate ZIO functional effects into OfficeFloor REST composition. | {{{https://zio.dev}ZIO}}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 
 
