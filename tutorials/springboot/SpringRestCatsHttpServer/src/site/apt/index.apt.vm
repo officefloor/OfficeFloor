@@ -1,0 +1,112 @@
+~~~
+~~ #%L
+~~ Cats Tutorial
+~~ %%
+~~ Copyright (C) 2005 - 2020 Daniel Sagenschneider
+~~ %%
+~~ Licensed under the Apache License, Version 2.0 (the "License");
+~~ you may not use this file except in compliance with the License.
+~~ You may obtain a copy of the License at
+~~
+~~      http://www.apache.org/licenses/LICENSE-2.0
+~~
+~~ Unless required by applicable law or agreed to in writing, software
+~~ distributed under the License is distributed on an "AS IS" BASIS,
+~~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~~ See the License for the specific language governing permissions and
+~~ limitations under the License.
+~~ #L%
+~~~
+
+                                               -----------------------
+                                               Cats Tutorial
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+Cats Tutorial
+
+  This tutorial demonstrates using {{{https://typelevel.org/cats-effect/}Cats Effect}} within a
+  Spring Boot application.
+
+  The application retrieves a message from an H2 database using
+  {{{https://tpolecat.github.io/doobie/}doobie}} and returns it in an HTTP response.
+
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestCatsHttpServer}Tutorial Source}}
+
+
+
+*Maven dependency
+
+  Add Cats Effect and doobie support alongside the Spring Boot starter:
+
+%{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+
+
+*Application class
+
+  The application registers <<<DefaultScalaModule>>> for Jackson serialisation and creates
+  a doobie <<<Transactor>>> as a Spring bean using the auto-configured H2 <<<DataSource>>>:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/scala/net/officefloor/tutorial/catshttpserver/Application.scala|ignoreDownloadError=false}
+
+
+
+*Cats with doobie
+
+  The <<<MessageRepository>>> issues a SQL query via doobie and returns it as a Cats <<<IO>>>:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/scala/net/officefloor/tutorial/catshttpserver/MessageRepository.scala|ignoreDownloadError=false}
+
+
+
+*Service logic
+
+  The <<<service>>> method receives the <<<@RequestBody>>> and the injected <<<Transactor>>>
+  (from the Spring bean), runs the doobie query, and returns <<<IO[CatsResponse]>>>.  OfficeFloor
+  (via <<<officescala_cats>>>) detects the <<<IO>>> return type, runs it, and passes the result
+  as the <<<@Parameter>>> to the <<<send>>> method:
+
+%{snippet|id=service|file=${basedir}/src/main/scala/net/officefloor/tutorial/catshttpserver/ServiceLogic.scala|ignoreDownloadError=false}
+
+%{snippet|id=send|file=${basedir}/src/main/scala/net/officefloor/tutorial/catshttpserver/ServiceLogic.scala|ignoreDownloadError=false}
+
+
+
+*REST endpoint
+
+  The YAML chains the two methods:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/index.POST.yml|ignoreDownloadError=false}
+
+
+
+*Request and Response
+
+%{snippet|id=tutorial|file=${basedir}/src/main/scala/net/officefloor/tutorial/catshttpserver/CatsRequest.scala|ignoreDownloadError=false}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/scala/net/officefloor/tutorial/catshttpserver/CatsResponse.scala|ignoreDownloadError=false}
+
+
+
+*Database
+
+  Spring Boot auto-initialises the embedded H2 database from <<<schema.sql>>> and <<<data.sql>>>
+  on the classpath:
+
+%{snippet|file=${basedir}/src/main/resources/schema.sql|ignoreDownloadError=false}
+
+%{snippet|file=${basedir}/src/main/resources/data.sql|ignoreDownloadError=false}
+
+
+
+*Testing
+
+%{snippet|id=tutorial|file=${basedir}/src/test/scala/net/officefloor/tutorial/catshttpserver/CatsHttpServerTest.scala|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../SpringRestZioHttpServer/index.html}next tutorial}} covers {{{https://zio.dev}ZIO}}.

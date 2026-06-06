@@ -28,11 +28,11 @@
 		<module>SpringRestTeamHttpServer</module>
 		<module>SpringRestActuatorHttpServer</module>
 		<module>SpringRestConversionReference</module>
-		<module>VariableHttpServer</module>
-		<module>KotlinHttpServer</module>
-		<module>ScalaHttpServer</module>
-		<module>JavaScriptHttpServer</module>
-		<module>CatsHttpServer</module>
-		<module>ZioHttpServer</module>
+		<module>SpringRestVariableHttpServer</module>
+		<module>SpringRestKotlinHttpServer</module>
+		<module>SpringRestScalaHttpServer</module>
+		<module>SpringRestJavaScriptHttpServer</module>
+		<module>SpringRestCatsHttpServer</module>
+		<module>SpringRestZioHttpServer</module>
 	</modules>
 </project>

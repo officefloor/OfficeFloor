@@ -112,19 +112,19 @@ OfficeFloor Tutorials
 |                                                              |                                                            | Thread injection\
 |                                                              |                                                            | officefloor/teams/
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./springboot/VariableHttpServer/index.html}Variables}} | Pass state downstream through a procedure flow without coupling callers to callees. | Out\<T\>\
+| {{{./springboot/SpringRestVariableHttpServer/index.html}Variables}} | Pass state downstream through a procedure flow without coupling callers to callees. | Out\<T\>\
 |                                                              |                                                            | @Val
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./springboot/KotlinHttpServer/index.html}Kotlin}}  | Implement REST procedure logic in Kotlin alongside Java procedures. | Polyglot Kotlin
+| {{{./springboot/SpringRestKotlinHttpServer/index.html}Kotlin}}  | Implement REST procedure logic in Kotlin alongside Java procedures. | Polyglot Kotlin
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./springboot/ScalaHttpServer/index.html}Scala}}    | Implement REST procedure logic in Scala alongside Java procedures. | Polyglot Scala
+| {{{./springboot/SpringRestScalaHttpServer/index.html}Scala}}    | Implement REST procedure logic in Scala alongside Java procedures. | Polyglot Scala
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./springboot/JavaScriptHttpServer/index.html}JavaScript}} | Implement REST procedure logic in JavaScript via GraalVM. | Polyglot JavaScript\
+| {{{./springboot/SpringRestJavaScriptHttpServer/index.html}JavaScript}} | Implement REST procedure logic in JavaScript via GraalVM. | Polyglot JavaScript\
 |                                                              |                                                            | GraalVM
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./springboot/CatsHttpServer/index.html}Cats Effect}} | Integrate Cats Effect functional IO into OfficeFloor REST composition. | {{{https://typelevel.org/cats-effect/}Cats Effect}}
+| {{{./springboot/SpringRestCatsHttpServer/index.html}Cats Effect}} | Integrate Cats Effect functional IO into OfficeFloor REST composition. | {{{https://typelevel.org/cats-effect/}Cats Effect}}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./springboot/ZioHttpServer/index.html}ZIO}}        | Integrate ZIO functional effects into OfficeFloor REST composition. | {{{https://zio.dev}ZIO}}
+| {{{./springboot/SpringRestZioHttpServer/index.html}ZIO}}        | Integrate ZIO functional effects into OfficeFloor REST composition. | {{{https://zio.dev}ZIO}}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 
 
