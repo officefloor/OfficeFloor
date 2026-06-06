@@ -112,6 +112,10 @@ OfficeFloor Tutorials
 |                                                              |                                                            | Thread injection\
 |                                                              |                                                            | officefloor/teams/
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./springboot/SpringRestManagedObjectHttpServer/index.html}Managed Objects}} | Declare managed objects via YAML with PROCESS, THREAD, or FUNCTION scope. Implement ManagedObjectSource for flows and asynchronous completion managed by the OfficeFloor framework. | officefloor/managedobjects/\
+|                                                              |                                                            | ManagedObjectSource flows\
+|                                                              |                                                            | PROCESS / THREAD / FUNCTION scope
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./springboot/SpringRestVariableHttpServer/index.html}Variables}} | Pass state downstream through a procedure flow without coupling callers to callees. | Out\<T\>\
 |                                                              |                                                            | @Val
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
