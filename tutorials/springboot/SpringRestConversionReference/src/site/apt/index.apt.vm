@@ -65,6 +65,41 @@ public class MyApplication {
 *----+----+
 | <<<@DeleteMapping("/owners/{id}")>>> | <<<owners/{id}.DELETE.yml>>> |
 *----+----+
+| <<<@GetMapping("/owners/{ownerId}/pets/{petId}")>>> | <<<owners/{ownerId}/pets/{petId}.GET.yml>>> |
+*----+----+
+
+  Nested resource paths follow the same directory convention — the YAML file path mirrors the
+  URL structure.  Both variables are available to the service method.  Use
+  <<<@PathVariable(name = "…")>>> — not the shorthand <<<@PathVariable("…")>>> — for the reason
+  explained in the path parameters section below:
+
++--
+// Spring — nested resource with two path variables
+@GetMapping("/owners/{ownerId}/pets/{petId}")
+public ResponseEntity<PetDto> getPet(
+        @PathVariable Integer ownerId,
+        @PathVariable Integer petId) { ... }
++--
+
++--
+// OfficeFloor — owners/{ownerId}/pets/{petId}.GET.yml
+service:
+  class: com.example.rest.GetPetService
++--
+
++--
+// OfficeFloor — GetPetService.java — note name= attribute, not value shorthand
+public class GetPetService {
+    public void service(
+            @PathVariable(name = "ownerId") Integer ownerId,
+            @PathVariable(name = "petId") Integer petId,
+            ClinicService clinicService,
+            ObjectResponse<PetDto> response) { ... }
+}
++--
+
+  A working two-variable example with routing-priority tests is in the
+  {{{../SpringRestHttpServer/index.html}Spring REST HTTP Server tutorial}}.
 
   The service class itself is a plain Java class — no Spring stereotype annotations:
 
@@ -137,11 +172,13 @@ public void service(ClinicService clinicService, ObjectResponse<OwnerDto> respon
 
 
 
-*Path parameters — use <<<@PathVariable>>> with an explicit name
+*Path parameters — use <<<@PathVariable(name = "…")>>> with an explicit name attribute
 
-  Spring's <<<@PathVariable>>> works directly in OfficeFloor service methods.  Always supply
-  the name explicitly to avoid relying on compile-time parameter name discovery, which is not
-  guaranteed across all build configurations and may silently fail to bind the value.
+  Spring's <<<@PathVariable>>> works directly in OfficeFloor service methods.  Always use the
+  <<<name =>>> attribute form.  The shorthand <<<@PathVariable("ownerId")>>> sets the <<<value>>>
+  attribute, which requires <<<@AliasFor>>> synthesis to alias to <<<name>>>; OfficeFloor resolves
+  arguments from raw Java reflection where that synthesis is not applied, so the shorthand
+  produces an empty name and the binding fails at runtime.
 
 +--
 // Spring controller
@@ -149,8 +186,9 @@ public ResponseEntity<OwnerDto> getOwner(@PathVariable Integer ownerId, ...) { .
 +--
 
 +--
-// OfficeFloor service class — explicit name in the annotation
-public void service(@PathVariable("ownerId") Integer ownerId,
+// OfficeFloor service class — use name= attribute directly; value= shorthand requires
+// @AliasFor synthesis which is not applied in OfficeFloor's argument resolution
+public void service(@PathVariable(name = "ownerId") Integer ownerId,
         ClinicService clinicService,
         ObjectResponse<OwnerDto> response) { ... }
 +--
@@ -346,7 +384,7 @@ officefloor/rest/vets.GET.yml      →  GET  /petclinic/vets
 
   [[2]] Convert the controller class to a plain Java class — remove all Spring stereotype annotations.
 
-  [[3]] Ensure every <<<@PathVariable>>> includes an explicit name — <<<@PathVariable("ownerId")>>>.
+  [[3]] Ensure every <<<@PathVariable>>> uses the <<<name =>>> attribute form — <<<@PathVariable(name = "ownerId")>>>, not the shorthand <<<@PathVariable("ownerId")>>>.  The shorthand sets the <<<value>>> attribute which requires <<<@AliasFor>>> synthesis; OfficeFloor uses raw reflection where synthesis is not applied and the binding silently fails.
 
   [[4]] Ensure every <<<@RequestParam>>> includes an explicit name — <<<@RequestParam(name = "lastName")>>>.
 

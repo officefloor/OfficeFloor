@@ -77,6 +77,21 @@ public class SpringRestValidationTest {
 	}
 
 	@Test
+	public void validation_errors_return_structured_field_error_map() throws Exception {
+		OrderRequest request = new OrderRequest();
+		request.setProduct("");   // blank — violates @NotBlank
+		request.setQuantity(0);   // zero — violates @Min(1)
+
+		mvc.perform(post("/order")
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON)
+				.content(mapper.writeValueAsString(request)))
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.errors.product[0]").value("Product name is required"))
+			.andExpect(jsonPath("$.errors.quantity[0]").value("Quantity must be at least 1"));
+	}
+
+	@Test
 	public void custom_constraint_even_quantity_accepted() throws Exception {
 		BulkOrderRequest request = new BulkOrderRequest();
 		request.setProduct("Gloves");

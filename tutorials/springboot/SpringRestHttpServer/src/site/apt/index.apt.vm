@@ -165,10 +165,46 @@ multiple public methods (casual, formal)
 
   Both Spring annotations (<<<@PathVariable>>>, <<<@RequestParam>>>, <<<@RequestHeader>>>, <<<@CookieValue>>>, <<<@RequestBody>>>, <<<@ModelAttribute>>>, <<<@RequestPart>>>) and OfficeFloor's own annotations ({{{/apidocs/net/officefloor/web/HttpPathParameter.html}@HttpPathParameter}}, {{{/apidocs/net/officefloor/web/HttpQueryParameter.html}@HttpQueryParameter}}, {{{/apidocs/net/officefloor/web/HttpHeaderParameter.html}@HttpHeaderParameter}}, {{{/apidocs/net/officefloor/web/HttpObject.html}@HttpObject}}) are available on any service method parameter.
 
-  <<Note:>> always specify the parameter name explicitly in the annotation — for example
-  <<<@PathVariable("name")>>> or <<<@RequestParam(name = "name")>>>.  Omitting the name
-  relies on compile-time parameter name discovery, which is not guaranteed across all build
-  configurations and may silently fail to bind the value.
+  <<Note:>> always use the <<<name =>>> attribute form — <<<@PathVariable(name = "name")>>>
+  and <<<@RequestParam(name = "name")>>>.  The shorthand <<<@PathVariable("name")>>> sets
+  the <<<value>>> attribute, which requires <<<@AliasFor>>> annotation synthesis to alias to
+  <<<name>>>; OfficeFloor resolves arguments from raw Java reflection where that synthesis is
+  not applied, so the shorthand silently produces an empty name and the binding fails.
+
+
+
+*Multiple path variables — nested resource URLs
+
+  A URL path with two variable segments — such as <<<GET /greeting/\{style\}/\{name\}>>> —
+  is declared by nesting the YAML file inside a variable-named directory:
+
++--
+officefloor/rest/
+└── greeting/
+    └── {style}/
+        └── {name}.GET.yml     →  GET  /greeting/{style}/{name}
++--
+
+  Both variables are available in the service method.  Use the <<<name =>>> attribute form on
+  <<<@PathVariable>>> — the shorthand <<<@PathVariable("style")>>> silently fails in OfficeFloor
+  because raw Java reflection does not apply the <<<@AliasFor>>> alias:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/greeting/{style}/{name}.GET.yml|ignoreDownloadError=false}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springresthttpserver/GetStyledGreetingLogic.java|ignoreDownloadError=false}
+
+  Literal path segments always take priority over variable segments during routing.  The test
+  below confirms that <<<GET /greeting/royal/Alice>>> resolves the two-variable endpoint
+  while <<<GET /greeting/formal/Alice>>> still routes to the dedicated
+  <<<greeting/formal/\{name\}.GET.yml>>> endpoint:
+
++--
+// routes to greeting/{style}/{name}.GET.yml  → "royal: Hello, Alice!"
+GET /greeting/royal/Alice
+
+// routes to greeting/formal/{name}.GET.yml   → "Good day, Alice."  (literal wins)
+GET /greeting/formal/Alice
++--
 
 
 
