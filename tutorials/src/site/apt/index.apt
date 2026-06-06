@@ -116,6 +116,10 @@ OfficeFloor Tutorials
 |                                                              |                                                            | ManagedObjectSource flows\
 |                                                              |                                                            | PROCESS / THREAD / FUNCTION scope
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./springboot/SpringRestSupplierHttpServer/index.html}Supplier}} | Register a library of related managed objects from a single YAML declaration. A SupplierSource holds shared state (connections, queues, DI containers) and vends it through multiple typed wrappers — ideal for third-party library integration. | officefloor/suppliers/\
+|                                                              |                                                            | SupplierSource\
+|                                                              |                                                            | Library integration
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./springboot/SpringRestVariableHttpServer/index.html}Variables}} | Pass state downstream through a procedure flow without coupling callers to callees. | Out\<T\>\
 |                                                              |                                                            | @Val
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
