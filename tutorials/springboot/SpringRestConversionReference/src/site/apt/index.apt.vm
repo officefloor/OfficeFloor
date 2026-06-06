@@ -126,6 +126,8 @@ public void service(ClinicService clinicService, ObjectResponse<OwnerDto> respon
 *----+----+
 | <<<return ResponseEntity.status(201).body(dto)>>> | <<<ObjectResponse<ResponseEntity<T>>>>> then <<<response.send(ResponseEntity.status(201).body(dto))>>> — keeps Spring <<<ResponseEntity>>> building; <<or>> use <<<@HttpResponse(status = 201) ObjectResponse<T> response>>> for the OfficeFloor-idiomatic form |
 *----+----+
+| <<<ResponseEntity.created(uri).body(dto)>>> (201 + <<<Location>>> header) | <<<ObjectResponse<ResponseEntity<T>>>>> then <<<response.send(ResponseEntity.created(URI.create("/resource/" + id)).body(dto))>>> — see the {{{../SpringRestDataJpaHttpServer/index.html}Data JPA tutorial}} for a worked example |
+*----+----+
 | custom response headers | <<<ObjectResponse<ResponseEntity<T>>>>> then <<<response.send(ResponseEntity.ok().header("X-Header", value).body(dto))>>> |
 *----+----+
 | <<<return ResponseEntity.noContent().build()>>> | omit <<<ObjectResponse>>> parameter entirely — OfficeFloor returns 204 automatically when no response is sent |
@@ -304,6 +306,33 @@ officefloor/rest/vets.GET.yml      →  GET  /petclinic/vets
 
   See the {{{../SpringRestExceptionHttpServer/index.html}Exception Handling tutorial}} for a
   worked example.
+
+
+
+*Pattern quick-reference — where to look
+
+  The mechanical substitutions above cover the core conversion.  Several Spring annotations
+  have direct OfficeFloor equivalents documented in dedicated tutorials:
+
+*--------------------------------------------+--------------------------------------------------------------+
+|| Spring annotation / feature               || Tutorial
+*--------------------------------------------+--------------------------------------------------------------+
+| <<<@PreAuthorize>>>, <<<@Secured>>>, <<<@RolesAllowed>>> | {{{../SpringRestSecurityHttpServer/index.html}Security tutorial}}
+*--------------------------------------------+--------------------------------------------------------------+
+| <<<@CrossOrigin>>>                         | {{{../SpringRestCorsHttpServer/index.html}CORS tutorial}}
+*--------------------------------------------+--------------------------------------------------------------+
+| <<<@Valid>>>, <<<@Validated>>>, custom <<<@Constraint>>> | {{{../SpringRestValidationHttpServer/index.html}Validation tutorial}}
+*--------------------------------------------+--------------------------------------------------------------+
+| <<<@ExceptionHandler>>>, <<<@ControllerAdvice>>> | {{{../SpringRestExceptionHttpServer/index.html}Exception Handling tutorial}}
+*--------------------------------------------+--------------------------------------------------------------+
+| <<<springdoc-openapi>>>, Swagger UI        | {{{../SpringRestOpenApiHttpServer/index.html}OpenAPI tutorial}}
+*--------------------------------------------+--------------------------------------------------------------+
+| <<<@Transactional>>>, Spring Data JPA      | {{{../SpringRestDataJpaHttpServer/index.html}Data JPA tutorial}}
+*--------------------------------------------+--------------------------------------------------------------+
+| Pagination (<<<Page\<T\>>>>, <<<PageRequest>>>) | {{{../SpringRestDataJpaHttpServer/index.html}Data JPA tutorial}}
+*--------------------------------------------+--------------------------------------------------------------+
+| <<<ResponseEntity.created(uri)>>> (201 + <<<Location>>> header) | {{{../SpringRestDataJpaHttpServer/index.html}Data JPA tutorial}}
+*--------------------------------------------+--------------------------------------------------------------+
 
 
 

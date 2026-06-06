@@ -95,8 +95,15 @@ Spring REST Data JPA Tutorial
 
 %{snippet|file=${basedir}/src/main/resources/officefloor/rest/article.POST.yml|ignoreDownloadError=false}
 
-  The <<<@HttpResponse(status = 201)>>> annotation on <<<ObjectResponse>>> changes the default
-  HTTP status from <<<200>>> to <<<201 Created>>>.
+  <<<ResponseEntity.created(uri)>>> sets both the <<<201 Created>>> status and the <<<Location>>>
+  header in one call.  Accepting <<<ObjectResponse\<ResponseEntity\<T\>\>>>> rather than
+  <<<ObjectResponse\<T\>>>> is the way to pass a full <<<ResponseEntity>>> — including custom
+  status codes and headers — through to the HTTP layer while keeping the response body
+  serialisation unchanged.
+
+  This is also the easiest incremental migration path from a Spring MVC controller: the
+  <<<ResponseEntity>>> building code moves into the service method with minimal change and
+  the <<<return>>> is replaced by <<<response.send(...)>>>.
 
 
 
@@ -157,6 +164,26 @@ Spring REST Data JPA Tutorial
 
 
 
+*Pagination — <<<@RequestParam>>> page and size
+
+  Spring Data's <<<Page\<T\>>>> and <<<PageRequest>>> work without modification in OfficeFloor
+  service methods.  Declare <<<page>>> and <<<size>>> as <<<@RequestParam>>> parameters with
+  a <<<defaultValue>>>; Spring Data handles the query and metadata:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestdatajpa/ListArticlesPageService.java|ignoreDownloadError=false}
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/article/page.GET.yml|ignoreDownloadError=false}
+
+  The <<<ArticlePage>>> response DTO wraps the page metadata alongside the content list so the
+  caller receives everything needed to render a paginated view or navigate to the next page:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestdatajpa/ArticlePage.java|ignoreDownloadError=false}
+
+  Pagination sits naturally under <<<readonly-transaction>>> governance because it is a pure
+  read and it inherits the lazy-loading protection of a started-but-not-written transaction.
+
+
+
 *Database configuration
 
   Add H2 (or any JDBC driver) as a runtime dependency.  The <<<application.properties>>> file
@@ -171,10 +198,13 @@ Spring REST Data JPA Tutorial
   Tests use standard Spring Boot <<<MockMvc>>>.  The <<<ArticleRepository>>> is injected for
   setup and teardown — OfficeFloor tests do not require any special utilities.
 
-  <<<deleteArticleNotFound>>> verifies that the <<<notFound>>> exception-handler step
-  (which also carries <<<govern: [ transaction ]>>>) returns a proper 404 within the same
-  transaction.  <<<replaceAllArticles>>> verifies that the two-step <<<replace-all>>> endpoint
-  atomically replaces all existing articles with a single new one:
+  <<<createArticle>>> asserts the <<<201 Created>>> status and that the <<<Location>>> header
+  points to the new resource.  <<<deleteArticleNotFound>>> verifies that the <<<notFound>>>
+  exception-handler step (which also carries <<<govern: [ transaction ]>>>) returns a proper
+  404 within the same transaction.  <<<replaceAllArticles>>> verifies that the two-step
+  <<<replace-all>>> endpoint atomically replaces all existing articles with a single new one.
+  <<<listArticlesPage>>> asserts that the <<<page>>> and <<<size>>> query parameters correctly
+  slice the result set and that the response metadata reflects the total count:
 
 %{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springrestdatajpa/SpringRestDataJpaTest.java|ignoreDownloadError=false}
 
