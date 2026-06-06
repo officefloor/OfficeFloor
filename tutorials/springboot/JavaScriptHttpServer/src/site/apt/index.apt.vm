@@ -1,0 +1,115 @@
+~~~
+~~ #%L
+~~ JavaScript Tutorial
+~~ %%
+~~ Copyright (C) 2005 - 2020 Daniel Sagenschneider
+~~ %%
+~~ Licensed under the Apache License, Version 2.0 (the "License");
+~~ you may not use this file except in compliance with the License.
+~~ You may obtain a copy of the License at
+~~
+~~      http://www.apache.org/licenses/LICENSE-2.0
+~~
+~~ Unless required by applicable law or agreed to in writing, software
+~~ distributed under the License is distributed on an "AS IS" BASIS,
+~~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~~ See the License for the specific language governing permissions and
+~~ limitations under the License.
+~~ #L%
+~~~
+
+                                               -----------------------
+                                               JavaScript Tutorial
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+JavaScript Tutorial
+
+  This tutorial demonstrates using JavaScript within a Spring Boot application via GraalVM.
+
+  A practical use of JavaScript in a server-side pipeline is to re-use client-side validation
+  logic on the server.  The same rules that guard form inputs in the browser can run again at
+  the HTTP boundary — written once, applied in both places.
+
+  The REST endpoint chains three steps: a Java step parses the request body, a JavaScript step
+  validates it, then a Java step sends the response:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/index.GET.yml|ignoreDownloadError=false}
+
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/JavaScriptHttpServer}Tutorial Source}}
+
+
+
+*Maven dependency
+
+  Add GraalVM JavaScript support alongside the Spring Boot starter:
+
+%{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+
+
+*Application class
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/javascripthttpserver/Application.java|ignoreDownloadError=false}
+
+
+
+*Receive step
+
+  The first step is a Java class that reads the <<<@RequestBody>>> and returns the parsed object
+  as the parameter for the next step in the pipeline:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/javascripthttpserver/ReceiveLogic.java|ignoreDownloadError=false}
+
+
+
+*JavaScript validate step
+
+  The JavaScript function receives the <<<Request>>> as a pipeline parameter (<<<param>>>) from
+  the previous step.  It throws <<<HttpException>>> to abort the pipeline with the appropriate
+  HTTP error status:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/resources/net/officefloor/tutorial/javascripthttpserver/Validate.js|ignoreDownloadError=false}
+
+  The <<<officefloor>>> meta-data array tells OfficeFloor the type of each function parameter.
+  <<<param>>> means the value is passed from the previous step's return value rather than from
+  a managed object source.  For further parameter options see the JavaScript
+  {{{https://github.com/officefloor/OfficeFloor/blob/master/officefloor/polyglot/script/officejavascript/src/test/resources/javascript/Functions.js}polyglot tests}}.
+
+
+
+*Send step
+
+  After JavaScript validation passes, the send step returns a successful response:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/javascripthttpserver/ResponseLogic.java|ignoreDownloadError=false}
+
+
+
+*Request and Response
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/javascripthttpserver/Request.java|ignoreDownloadError=false}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/javascripthttpserver/Response.java|ignoreDownloadError=false}
+
+
+
+*Note on scripting and threading
+
+  GraalVM script engines are created per-thread rather than shared.  This avoids concurrency
+  problems — all state is injected into the function — but it does mean memory scales with the
+  number of threads.  For validation at the socket boundary, that is bounded by the number of
+  CPU cores, so the overhead is modest.
+
+
+
+*Testing
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/javascripthttpserver/JavaScriptHttpServerTest.java|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../../features/features-polyglot/CatsHttpServer/index.html}next tutorial}} covers Cats Effect.

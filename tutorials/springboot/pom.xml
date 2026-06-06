@@ -31,5 +31,6 @@
 		<module>VariableHttpServer</module>
 		<module>KotlinHttpServer</module>
 		<module>ScalaHttpServer</module>
+		<module>JavaScriptHttpServer</module>
 	</modules>
 </project>
