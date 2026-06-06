@@ -26,6 +26,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import net.officefloor.activity.compose.build.ComposeArchitect;
 import net.officefloor.activity.compose.build.ComposeEmployer;
+import net.officefloor.activity.govern.build.GovernanceEmployer;
+import net.officefloor.activity.managedobject.build.ManagedObjectEmployer;
+import net.officefloor.activity.supplier.build.SupplierEmployer;
 import net.officefloor.activity.team.build.TeamEmployer;
 import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
@@ -145,6 +148,26 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
         // Enable auto-wiring of teams to managed functions, but only when teams are configured
         TeamEmployer.enableOfficeAutoWireTeams("officefloor/teams", officeArchitect);
 
+        // Build the shared property list used for all YAML-based classpath loading
+        PropertyList propertyList = officeSourceContext.createPropertyList();
+        for (String propertyName : officeSourceContext.getPropertyNames()) {
+            propertyList.addProperty(propertyName).setValue(officeSourceContext.getProperty(propertyName));
+        }
+
+        // Load managed objects from officefloor/managedobjects/
+        ManagedObjectEmployer.employManagedObjectArchitect(officeArchitect, composeArchitect, officeSourceContext)
+                .addManagedObjects("officefloor/managedobjects", propertyList);
+
+        // Load suppliers from officefloor/suppliers/
+        SupplierEmployer.employSupplierArchitect(officeArchitect, officeSourceContext)
+                .addSuppliers("officefloor/suppliers", propertyList);
+
+        // Load governance from officefloor/govern/ and register each by name in ComposeArchitect
+        // so REST YAML files can reference them via govern: [ name ]
+        GovernanceEmployer.employGovernanceArchitect(officeArchitect, composeArchitect, officeSourceContext)
+                .addGovernances("officefloor/govern", propertyList)
+                .forEach(composeArchitect::addGovernance);
+
         // Undertake Spring Boot extensions
         for (OfficeFloorSpringBootExtension springBootExtension : officeSourceContext.loadOptionalServices(OfficeFloorSpringBootExtensionServiceFactory.class)) {
             springBootExtension.extendSpringBootSupport(new OfficeFloorSpringBootExtensionContext() {
@@ -199,10 +222,6 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
 
         // Add the rest servicing
         officeSourceContext.getLogger().info("Loading REST endpoints:");
-        PropertyList propertyList = officeSourceContext.createPropertyList();
-        for (String propertyName : officeSourceContext.getPropertyNames()) {
-            propertyList.addProperty(propertyName).setValue(officeSourceContext.getProperty(propertyName));
-        }
         Map<String, RestEndpoint> restEndpoints = restArchitect.addRestServices(false, "officefloor/rest", propertyList);
 
         // Include the REST endpoints (sorted for deterministic loading and logging)

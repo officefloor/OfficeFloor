@@ -20,24 +20,14 @@
 
 package net.officefloor.spring.starter.rest.govern;
 
-import net.officefloor.plugin.governance.clazz.Enforce;
-import net.officefloor.plugin.governance.clazz.Govern;
-
 /**
- * Second class-based governance loaded from {@code officefloor/govern/audit.yml}.
+ * Governance extension interface for {@link AuditGovernance}.
  *
- * Uses {@link AuditExtension} (not {@link TrackingExtension}) so each governance governs
- * its own dedicated managed object.  This avoids the OfficeFloor frame constraint where
- * a managed object governed by multiple governances requires a locally-sequential governance
- * index, which fails when preceding governances (e.g. transaction) shift global indices.
+ * Kept distinct from {@link TrackingExtension} so each governance governs its own
+ * dedicated managed object, avoiding the OfficeFloor limitation where a managed object
+ * governed by multiple governances requires locally-sequential governance indices.
  */
-public class AuditGovernance {
+public interface AuditExtension {
 
-    @Govern
-    public void govern(AuditExtension extension) {
-        extension.notifyAudited();
-    }
-
-    @Enforce
-    public void enforce() {}
+    void notifyAudited();
 }

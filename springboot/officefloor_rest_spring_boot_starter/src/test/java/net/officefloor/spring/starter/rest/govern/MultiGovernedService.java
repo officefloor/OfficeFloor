@@ -25,13 +25,14 @@ import net.officefloor.web.ObjectResponse;
 /**
  * REST service decorated with two governances ({@code govern: [ tracking, audit ]}).
  *
- * Both {@link TrackingGovernance#govern} and {@link AuditGovernance#govern} are called
- * before this method executes, so {@link TrackingComponent#notificationCount} is already
- * 2 by the time the response is sent.
+ * {@link TrackingGovernance#govern} fires on {@link TrackingComponent} and
+ * {@link AuditGovernance#govern} fires on {@link AuditComponent} before this method
+ * executes, so both counts are already 1 by the time the response is sent.
+ * The response {@code "1:1"} confirms that both governances loaded from the directory ran.
  */
 public class MultiGovernedService {
 
-    public void service(TrackingComponent tracking, ObjectResponse<String> response) {
-        response.send(String.valueOf(tracking.notificationCount));
+    public void service(TrackingComponent tracking, AuditComponent audit, ObjectResponse<String> response) {
+        response.send(tracking.notificationCount + ":" + audit.auditCount);
     }
 }

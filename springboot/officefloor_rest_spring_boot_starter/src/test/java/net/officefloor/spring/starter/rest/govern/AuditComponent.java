@@ -20,24 +20,20 @@
 
 package net.officefloor.spring.starter.rest.govern;
 
-import net.officefloor.plugin.governance.clazz.Enforce;
-import net.officefloor.plugin.governance.clazz.Govern;
+import org.springframework.stereotype.Component;
 
 /**
- * Second class-based governance loaded from {@code officefloor/govern/audit.yml}.
+ * Spring-managed bean governed by {@link AuditGovernance}.
  *
- * Uses {@link AuditExtension} (not {@link TrackingExtension}) so each governance governs
- * its own dedicated managed object.  This avoids the OfficeFloor frame constraint where
- * a managed object governed by multiple governances requires a locally-sequential governance
- * index, which fails when preceding governances (e.g. transaction) shift global indices.
+ * {@code auditCount} is package-private so the test can reset it before each assertion.
  */
-public class AuditGovernance {
+@Component
+public class AuditComponent implements AuditExtension {
 
-    @Govern
-    public void govern(AuditExtension extension) {
-        extension.notifyAudited();
+    int auditCount = 0;
+
+    @Override
+    public void notifyAudited() {
+        auditCount++;
     }
-
-    @Enforce
-    public void enforce() {}
 }

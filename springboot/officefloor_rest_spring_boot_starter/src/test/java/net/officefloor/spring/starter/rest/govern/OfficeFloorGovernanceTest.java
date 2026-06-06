@@ -34,14 +34,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * Confirms governances declared in {@code officefloor/govern/} YAML files are loaded
- * automatically, registered by name, and applied to REST service functions via
- * {@code govern:} in their REST YAML configuration.
+ * automatically, registered by name in ComposeArchitect, and applied to REST service
+ * functions via {@code govern:} in their REST YAML configuration.
  *
- * <p>The governance extension type is {@link TrackingExtension}.  {@link TrackingComponent}
- * is a Spring bean implementing that interface, making it a governed managed object in any
- * function decorated with a governance that uses {@link TrackingExtension}.  The test reads
- * {@link TrackingComponent#notificationCount} from the response body to confirm that the
- * correct number of {@code @Govern} callbacks fired before the service method executed.
+ * <p>Each governance uses a distinct extension interface so that each governs only its own
+ * dedicated Spring bean.  This avoids the OfficeFloor frame limitation where multiple
+ * governances sharing an extension interface on the same managed object require globally
+ * sequential indices that are not guaranteed when other governances (e.g. transaction)
+ * are registered first.
+ *
+ * <p>The {@code @Govern} callback fires before the service method, so the governance
+ * counts are already incremented when the service reads them.  The response body carries
+ * the evidence that the correct number of governance callbacks fired.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -50,9 +54,13 @@ public class OfficeFloorGovernanceTest extends AbstractMockMvcVerification {
     @Autowired
     TrackingComponent trackingComponent;
 
+    @Autowired
+    AuditComponent auditComponent;
+
     @BeforeEach
-    void resetTrackingState() {
+    void resetGovernanceState() {
         trackingComponent.notificationCount = 0;
+        auditComponent.auditCount = 0;
     }
 
     @Test
@@ -66,6 +74,6 @@ public class OfficeFloorGovernanceTest extends AbstractMockMvcVerification {
     public void multipleGovernancesFromDirectoryAreAllApplied() throws Exception {
         this.mvc.perform(get(this.getPath("/multi-governed")))
                 .andExpect(status().isOk())
-                .andExpect(content().string(equalTo("2")));
+                .andExpect(content().string(equalTo("1:1")));
     }
 }
