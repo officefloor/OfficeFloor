@@ -1,4 +1,4 @@
-package net.officefloor.spring.starter.rest.exception;
+package net.officefloor.tutorial.springrestexceptionhttpserver;
 
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.web.ObjectResponse;

@@ -1,4 +1,4 @@
-package net.officefloor.spring.starter.rest.exception;
+package net.officefloor.tutorial.springrestexceptionhttpserver;
 
 // START SNIPPET: tutorial
 public class MockException extends Exception {

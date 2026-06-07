@@ -1,7 +1,7 @@
-package net.officefloor.spring.starter.rest.exception;
+package net.officefloor.tutorial.springrestexceptionhttpserver;
 
 // START SNIPPET: tutorial
-public class SpringAdviceService {
+public class MethodService {
     public void service() throws MockException {
         throw new MockException("thrown");
     }

@@ -51,7 +51,7 @@ Exception Handling in OfficeFloor REST YAML Composition
   (<<<extends Exception>>>) ensures the throws clause appears in the method signature, which is
   required for OfficeFloor to discover and route the escalation through the YAML configuration.
 
-%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/spring/starter/rest/exception/MockException.java|ignoreDownloadError=false}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestexceptionhttpserver/MockException.java|ignoreDownloadError=false}
 
 
 
@@ -74,7 +74,7 @@ Exception Handling in OfficeFloor REST YAML Composition
 
   The service method simply declares and throws the exception:
 
-%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/spring/starter/rest/exception/MethodService.java|ignoreDownloadError=false}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestexceptionhttpserver/MethodService.java|ignoreDownloadError=false}
 
 **Handler method
 
@@ -82,7 +82,7 @@ Exception Handling in OfficeFloor REST YAML Composition
   escalation object as a method parameter.  From there it can inspect the exception and write
   a response using <<<ObjectResponse>>>:
 
-%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/spring/starter/rest/exception/MethodExceptionHandler.java|ignoreDownloadError=false}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestexceptionhttpserver/MethodExceptionHandler.java|ignoreDownloadError=false}
 
   The <<<@Parameter>>> annotation is provided by OfficeFloor and signals that the parameter value
   is passed from the previous step's output — in the escalation case this is the thrown exception.
@@ -108,12 +108,12 @@ Exception Handling in OfficeFloor REST YAML Composition
 
   The service class is identical in structure to the method-escalation example:
 
-%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/spring/starter/rest/exception/CompositionService.java|ignoreDownloadError=false}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestexceptionhttpserver/CompositionService.java|ignoreDownloadError=false}
 
   The handler class is also the same pattern, just producing a different response to illustrate
   which level caught the exception:
 
-%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/spring/starter/rest/exception/CompositionExceptionHandler.java|ignoreDownloadError=false}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestexceptionhttpserver/CompositionExceptionHandler.java|ignoreDownloadError=false}
 
   The key difference from method escalation is entirely in the YAML — the Java classes are written
   the same way regardless of which level handles the escalation.
@@ -137,14 +137,14 @@ Exception Handling in OfficeFloor REST YAML Composition
 
   The service method throws the exception in the same way as before:
 
-%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/spring/starter/rest/exception/SpringAdviceService.java|ignoreDownloadError=false}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestexceptionhttpserver/SpringAdviceService.java|ignoreDownloadError=false}
 
 **ExceptionControllerAdvice
 
   The <<<@RestControllerAdvice>>> class provides the <<<@ExceptionHandler>>> method.  Spring
   resolves the HTTP response status via <<<@ResponseStatus>>>:
 
-%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/spring/starter/rest/exception/ExceptionControllerAdvice.java|ignoreDownloadError=false}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestexceptionhttpserver/ExceptionControllerAdvice.java|ignoreDownloadError=false}
 
   Because this is a standard Spring mechanism, all the usual Spring features apply — returning
   <<<ResponseEntity>>>, reading the <<<HttpServletRequest>>>, accessing Spring beans, and so on.
@@ -172,12 +172,12 @@ Exception Handling in OfficeFloor REST YAML Composition
 
   The MockMvc tests call each endpoint and assert the response:
 
-%{snippet|file=${basedir}/src/test/java/net/officefloor/spring/starter/rest/exception/ExceptionHandlingTutorialTest.java|ignoreDownloadError=false}
+%{snippet|file=${basedir}/src/test/java/net/officefloor/tutorial/springrestexceptionhttpserver/ExceptionHandlingTutorialTest.java|ignoreDownloadError=false}
 
   The same three approaches are also verified against a real embedded server (no MockMvc) to
   confirm they work in production deployments:
 
-%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/spring/starter/rest/exception/ExceptionHandlingIntegrationTest.java|ignoreDownloadError=false}
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springrestexceptionhttpserver/ExceptionHandlingIntegrationTest.java|ignoreDownloadError=false}
 
 
 

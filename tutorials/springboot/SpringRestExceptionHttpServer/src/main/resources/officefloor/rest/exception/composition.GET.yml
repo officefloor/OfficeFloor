@@ -1,9 +1,9 @@
 composition:
   escalations:
-    net.officefloor.spring.starter.rest.exception.MockException: handler
+    net.officefloor.tutorial.springrestexceptionhttpserver.MockException: handler
 
 service:
-  class: net.officefloor.spring.starter.rest.exception.CompositionService
+  class: net.officefloor.tutorial.springrestexceptionhttpserver.CompositionService
 
 handler:
-  class: net.officefloor.spring.starter.rest.exception.CompositionExceptionHandler
+  class: net.officefloor.tutorial.springrestexceptionhttpserver.CompositionExceptionHandler

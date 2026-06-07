@@ -1,4 +1,4 @@
-package net.officefloor.spring.starter.rest.exception;
+package net.officefloor.tutorial.springrestexceptionhttpserver;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
