@@ -189,7 +189,7 @@ officefloor/rest/
   <<<@PathVariable>>> — the shorthand <<<@PathVariable("style")>>> silently fails in OfficeFloor
   because raw Java reflection does not apply the <<<@AliasFor>>> alias:
 
-%{snippet|file=${basedir}/src/main/resources/officefloor/rest/greeting/{style}/{name}.GET.yml|ignoreDownloadError=false}
+%{snippet|file=${project.build.directory}/site-snippets/greeting/style/name.GET.yml|ignoreDownloadError=false}
 
 %{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springresthttpserver/GetStyledGreetingLogic.java|ignoreDownloadError=false}
 

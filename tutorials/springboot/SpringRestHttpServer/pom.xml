@@ -57,6 +57,8 @@
 									  tofile="${project.build.directory}/site-snippets/greeting/formal/name.GET.yml"/>
 								<copy file="${basedir}/src/main/resources/officefloor/rest/greeting/casual/{name}.GET.yml"
 									  tofile="${project.build.directory}/site-snippets/greeting/casual/name.GET.yml"/>
+								<copy file="${basedir}/src/main/resources/officefloor/rest/greeting/{style}/{name}.GET.yml"
+									  tofile="${project.build.directory}/site-snippets/greeting/style/name.GET.yml"/>
 							</target>
 						</configuration>
 					</execution>
