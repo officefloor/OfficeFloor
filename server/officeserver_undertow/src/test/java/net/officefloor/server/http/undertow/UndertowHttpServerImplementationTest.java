@@ -76,6 +76,8 @@ public class UndertowHttpServerImplementationTest extends AbstractHttpServerImpl
 		private static final HttpString CONTENT_TYPE = new HttpString("Content-Type");
 		private static final String TYPE_PLAIN = "text/plain";
 
+		private static final java.util.concurrent.Executor SAME_THREAD = Runnable::run;
+
 		private static ByteBuffer createHelloWorldBuffer() {
 			ByteBuffer buffer = ByteBuffer.allocateDirect(HELLO_WORLD.length);
 			buffer.put(HELLO_WORLD);
@@ -87,7 +89,10 @@ public class UndertowHttpServerImplementationTest extends AbstractHttpServerImpl
 		protected ProcessManager service(HttpServerExchange exchange) throws Exception {
 			exchange.getResponseHeaders().put(CONTENT_LENGTH, HELLO_WORLD.length);
 			exchange.getResponseHeaders().put(CONTENT_TYPE, TYPE_PLAIN);
-			exchange.getResponseSender().send(HELLO_WORLD_BUFFER.duplicate());
+			// Must dispatch so Undertow waits for endExchange() before processing next pipelined request
+			exchange.dispatch(SAME_THREAD, () -> {
+				exchange.getResponseSender().send(HELLO_WORLD_BUFFER.duplicate());
+			});
 			return () -> {
 				// no cancel handling
 			};
