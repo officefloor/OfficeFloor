@@ -90,4 +90,4 @@ Thread Affinity Tutorial
 
 Next
 
-  The {{{../../../features/features-polyglot/KotlinHttpServer/index.html}next tutorial}} covers Kotlin.
+  The {{{../StartBeforeHttpServer/index.html}next tutorial}} covers declaring ordered start-up dependencies between ManagedObjectSource instances.

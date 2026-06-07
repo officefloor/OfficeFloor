@@ -13,7 +13,6 @@
 	<packaging>pom</packaging>
 	<name>OfficeFloor Polyglot Feature Tutorials</name>
 	<modules>
-		<module>KotlinHttpServer</module>
 		<module>ScalaHttpServer</module>
 		<module>JavaScriptHttpServer</module>
 		<module>CatsHttpServer</module>

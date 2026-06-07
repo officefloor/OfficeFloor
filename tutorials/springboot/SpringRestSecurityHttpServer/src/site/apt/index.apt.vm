@@ -170,6 +170,24 @@ Spring Security Integration Tutorial
 
 
 
+*Method-level security — <<<@PreAuthorize>>> with SpEL bean references
+
+  Spring Security SpEL supports referencing any Spring bean by name using the <<<@beanName>>>
+  syntax.  A common pattern centralises role constants in a <<<@Component>>> so that role
+  names are never duplicated as string literals across service classes:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestsecurity/Roles.java|ignoreDownloadError=false}
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/security/rolebean.GET.yml|ignoreDownloadError=false}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestsecurity/RolesBeanService.java|ignoreDownloadError=false}
+
+  The expression <<<@roles.ADMIN>>> resolves the <<<roles>>> bean and reads its <<<ADMIN>>>
+  field at evaluation time.  This is standard Spring Security SpEL — OfficeFloor does not
+  require any additional configuration to support it.
+
+
+
 *Method-level security — <<<@Secured>>>
 
   <<<@Secured>>> accepts one or more role names (including the <<<ROLE_>>> prefix).  Enable it in
@@ -214,4 +232,5 @@ Spring Security Integration Tutorial
 
 Next
 
-  The {{{../SpringRestValidationHttpServer/index.html}Spring REST Validation tutorial}} demonstrates Bean Validation integration with OfficeFloor REST YAML composition.
+  The {{{../SpringRestCorsHttpServer/index.html}Spring REST CORS tutorial}} demonstrates
+  the five ways to configure Cross-Origin Resource Sharing for OfficeFloor REST endpoints.

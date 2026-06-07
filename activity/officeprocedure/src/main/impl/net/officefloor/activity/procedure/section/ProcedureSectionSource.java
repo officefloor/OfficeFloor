@@ -80,8 +80,9 @@ public class ProcedureSectionSource extends AbstractSectionSource {
 		properties.addProperty(ProcedureManagedFunctionSource.SOURCE_NAME_PROPERTY_NAME).setValue(serviceName);
 		properties.addProperty(ProcedureManagedFunctionSource.PROCEDURE_PROPERTY_NAME).setValue(procedureName);
 
-		// Create the class section loader
+		// Create the class section loader in single-method mode so that custom
 		ClassSectionLoader sectionLoader = new ClassSectionLoader(designer, context);
+		sectionLoader.setSingleMethod(FUNCTION_NAME);
 
 		// Load the procedure
 		sectionLoader.addManagedFunctions(FUNCTION_NAME, ProcedureManagedFunctionSource.class.getName(), properties,

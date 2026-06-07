@@ -108,6 +108,6 @@ Spring Actuator with OfficeFloor REST
 
 Next
 
-  The {{{../../spring-officefloor/SpringHttpServer/index.html}Spring HTTP Server tutorial}} shows how
-  to host your Spring beans inside the OfficeFloor runtime, unlocking further OfficeFloor capabilities
-  while keeping all existing Spring configuration.
+  The {{{../SpringRestConversionReference/index.html}Conversion Reference}} provides a side-by-side
+  reference for converting a Spring MVC REST application to OfficeFloor REST YAML configuration,
+  covering all common substitutions from endpoint declaration to transaction governance.

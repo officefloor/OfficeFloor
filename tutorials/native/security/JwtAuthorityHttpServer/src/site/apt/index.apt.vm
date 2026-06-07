@@ -100,4 +100,4 @@ JWT Authority Tutorial
 
 Next
 
-  The {{{../JwtHttpServer/index.html}next tutorial}} covers combining JWT security and JWT authority server together for smaller applications.
+  The {{{../JwtResourceHttpServer/index.html}next tutorial}} covers a JWT-secured resource server validating tokens issued by a separate authority.

@@ -65,6 +65,41 @@ public class MyApplication {
 *----+----+
 | <<<@DeleteMapping("/owners/{id}")>>> | <<<owners/{id}.DELETE.yml>>> |
 *----+----+
+| <<<@GetMapping("/owners/{ownerId}/pets/{petId}")>>> | <<<owners/{ownerId}/pets/{petId}.GET.yml>>> |
+*----+----+
+
+  Nested resource paths follow the same directory convention — the YAML file path mirrors the
+  URL structure.  Both variables are available to the service method.  Use
+  <<<@PathVariable(name = "…")>>> — not the shorthand <<<@PathVariable("…")>>> — for the reason
+  explained in the path parameters section below:
+
++--
+// Spring — nested resource with two path variables
+@GetMapping("/owners/{ownerId}/pets/{petId}")
+public ResponseEntity<PetDto> getPet(
+        @PathVariable Integer ownerId,
+        @PathVariable Integer petId) { ... }
++--
+
++--
+// OfficeFloor — owners/{ownerId}/pets/{petId}.GET.yml
+service:
+  class: com.example.rest.GetPetService
++--
+
++--
+// OfficeFloor — GetPetService.java — note name= attribute, not value shorthand
+public class GetPetService {
+    public void service(
+            @PathVariable(name = "ownerId") Integer ownerId,
+            @PathVariable(name = "petId") Integer petId,
+            ClinicService clinicService,
+            ObjectResponse<PetDto> response) { ... }
+}
++--
+
+  A working two-variable example with routing-priority tests is in the
+  {{{../SpringRestHttpServer/index.html}Spring REST HTTP Server tutorial}}.
 
   The service class itself is a plain Java class — no Spring stereotype annotations:
 
@@ -126,18 +161,24 @@ public void service(ClinicService clinicService, ObjectResponse<OwnerDto> respon
 *----+----+
 | <<<return ResponseEntity.status(201).body(dto)>>> | <<<ObjectResponse<ResponseEntity<T>>>>> then <<<response.send(ResponseEntity.status(201).body(dto))>>> — keeps Spring <<<ResponseEntity>>> building; <<or>> use <<<@HttpResponse(status = 201) ObjectResponse<T> response>>> for the OfficeFloor-idiomatic form |
 *----+----+
+| <<<ResponseEntity.created(uri).body(dto)>>> (201 + <<<Location>>> header) | <<<ObjectResponse<ResponseEntity<T>>>>> then <<<response.send(ResponseEntity.created(URI.create("/resource/" + id)).body(dto))>>> — see the {{{../SpringRestDataJpaHttpServer/index.html}Data JPA tutorial}} for a worked example |
+*----+----+
 | custom response headers | <<<ObjectResponse<ResponseEntity<T>>>>> then <<<response.send(ResponseEntity.ok().header("X-Header", value).body(dto))>>> |
 *----+----+
 | <<<return ResponseEntity.noContent().build()>>> | omit <<<ObjectResponse>>> parameter entirely — OfficeFloor returns 204 automatically when no response is sent |
 *----+----+
+| HTTP redirect (302) | <<<ObjectResponse<ResponseEntity<Void>>>>> then <<<response.send(ResponseEntity.status(302).location(URI.create("/target")).build())>>>; or inject <<<HttpServletResponse>>> and call <<<sendRedirect("/target")>>> — see the {{{../SpringRestServletHttpServer/index.html}Servlet Interop tutorial}} |
+*----+----+
 
 
 
-*Path parameters — use <<<@PathVariable>>> with an explicit name
+*Path parameters — use <<<@PathVariable(name = "…")>>> with an explicit name attribute
 
-  Spring's <<<@PathVariable>>> works directly in OfficeFloor service methods.  Always supply
-  the name explicitly to avoid relying on compile-time parameter name discovery, which is not
-  guaranteed across all build configurations and may silently fail to bind the value.
+  Spring's <<<@PathVariable>>> works directly in OfficeFloor service methods.  Always use the
+  <<<name =>>> attribute form.  The shorthand <<<@PathVariable("ownerId")>>> sets the <<<value>>>
+  attribute, which requires <<<@AliasFor>>> synthesis to alias to <<<name>>>; OfficeFloor resolves
+  arguments from raw Java reflection where that synthesis is not applied, so the shorthand
+  produces an empty name and the binding fails at runtime.
 
 +--
 // Spring controller
@@ -145,8 +186,9 @@ public ResponseEntity<OwnerDto> getOwner(@PathVariable Integer ownerId, ...) { .
 +--
 
 +--
-// OfficeFloor service class — explicit name in the annotation
-public void service(@PathVariable("ownerId") Integer ownerId,
+// OfficeFloor service class — use name= attribute directly; value= shorthand requires
+// @AliasFor synthesis which is not applied in OfficeFloor's argument resolution
+public void service(@PathVariable(name = "ownerId") Integer ownerId,
         ClinicService clinicService,
         ObjectResponse<OwnerDto> response) { ... }
 +--
@@ -307,13 +349,42 @@ officefloor/rest/vets.GET.yml      →  GET  /petclinic/vets
 
 
 
+*Pattern quick-reference — where to look
+
+  The mechanical substitutions above cover the core conversion.  Several Spring annotations
+  have direct OfficeFloor equivalents documented in dedicated tutorials:
+
+*--------------------------------------------+--------------------------------------------------------------+
+|| Spring annotation / feature               || Tutorial
+*--------------------------------------------+--------------------------------------------------------------+
+| <<<@PreAuthorize>>>, <<<@Secured>>>, <<<@RolesAllowed>>> | {{{../SpringRestSecurityHttpServer/index.html}Security tutorial}}
+*--------------------------------------------+--------------------------------------------------------------+
+| <<<@CrossOrigin>>>                         | {{{../SpringRestCorsHttpServer/index.html}CORS tutorial}}
+*--------------------------------------------+--------------------------------------------------------------+
+| <<<@Valid>>>, <<<@Validated>>>, custom <<<@Constraint>>> | {{{../SpringRestValidationHttpServer/index.html}Validation tutorial}}
+*--------------------------------------------+--------------------------------------------------------------+
+| <<<@ExceptionHandler>>>, <<<@ControllerAdvice>>> | {{{../SpringRestExceptionHttpServer/index.html}Exception Handling tutorial}}
+*--------------------------------------------+--------------------------------------------------------------+
+| <<<springdoc-openapi>>>, Swagger UI        | {{{../SpringRestOpenApiHttpServer/index.html}OpenAPI tutorial}}
+*--------------------------------------------+--------------------------------------------------------------+
+| <<<@Transactional>>>, Spring Data JPA      | {{{../SpringRestDataJpaHttpServer/index.html}Data JPA tutorial}}
+*--------------------------------------------+--------------------------------------------------------------+
+| Pagination (<<<Page\<T\>>>>, <<<PageRequest>>>) | {{{../SpringRestDataJpaHttpServer/index.html}Data JPA tutorial}}
+*--------------------------------------------+--------------------------------------------------------------+
+| <<<ResponseEntity.created(uri)>>> (201 + <<<Location>>> header) | {{{../SpringRestDataJpaHttpServer/index.html}Data JPA tutorial}}
+*--------------------------------------------+--------------------------------------------------------------+
+| <<<@Aspect>>> / <<<@Around>>> on Spring beans | No change required — Spring AOP proxies wrap the bean before OfficeFloor injects it, so aspects fire normally
+*--------------------------------------------+--------------------------------------------------------------+
+
+
+
 *Conversion checklist
 
   [[1]] Replace <<<@RestController>>> + <<<@*Mapping>>> with YAML files under <<<officefloor/rest/>>>.
 
   [[2]] Convert the controller class to a plain Java class — remove all Spring stereotype annotations.
 
-  [[3]] Ensure every <<<@PathVariable>>> includes an explicit name — <<<@PathVariable("ownerId")>>>.
+  [[3]] Ensure every <<<@PathVariable>>> uses the <<<name =>>> attribute form — <<<@PathVariable(name = "ownerId")>>>, not the shorthand <<<@PathVariable("ownerId")>>>.  The shorthand sets the <<<value>>> attribute which requires <<<@AliasFor>>> synthesis; OfficeFloor uses raw reflection where synthesis is not applied and the binding silently fails.
 
   [[4]] Ensure every <<<@RequestParam>>> includes an explicit name — <<<@RequestParam(name = "lastName")>>>.
 
@@ -328,3 +399,9 @@ officefloor/rest/vets.GET.yml      →  GET  /petclinic/vets
   [[9]] Remove <<<@Transactional>>> from service classes; declare <<<govern:>>> in the YAML instead.
 
   [[10]] Verify <<<@RequestBody>>> parameters — they work as-is, no changes required.
+
+
+
+Next
+
+  Return to the {{{../../index.html}tutorials}} index to explore the full range of OfficeFloor capabilities.

@@ -183,4 +183,4 @@ Exception Handling in OfficeFloor REST YAML Composition
 
 Next
 
-  The {{{../SpringRestSecurityHttpServer/index.html}Spring REST Security tutorial}} demonstrates Spring Security integration with OfficeFloor REST YAML composition.
+  The {{{../SpringRestValidationHttpServer/index.html}Spring REST Validation tutorial}} demonstrates Bean Validation integration with OfficeFloor REST YAML composition.

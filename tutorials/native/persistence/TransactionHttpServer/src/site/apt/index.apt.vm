@@ -109,5 +109,5 @@ Transaction HTTP Server Tutorial
 
 Next
 
-  The {{{../../native-core/VariableHttpServer/index.html}next tutorial}} covers variables.
+  The {{{../FlywayHttpServer/index.html}next tutorial}} covers running Flyway schema migrations on application start up.
 

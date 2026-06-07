@@ -101,6 +101,60 @@ Bean Validation in OfficeFloor REST YAML Composition
 
 
 
+*Structured error response — <<<@RestControllerAdvice>>> for <<<MethodArgumentNotValidException>>>
+
+  When the service method does not declare a <<<BindingResult>>> parameter, Spring throws
+  <<<MethodArgumentNotValidException>>> on validation failure.  A <<<@RestControllerAdvice>>>
+  catches this and returns a structured body — typically a map of field names to error messages —
+  that clients can display field-by-field:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestvalidation/ValidationErrorResponse.java|ignoreDownloadError=false}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestvalidation/ValidationControllerAdvice.java|ignoreDownloadError=false}
+
+  The advice works identically for OfficeFloor service methods and Spring <<<@RestController>>>
+  methods — no additional configuration is needed.  The test verifies both the 400 status and
+  the per-field error structure:
+
++--
+// response body for { "product": "", "quantity": 0 }
+{
+  "errors": {
+    "product":  ["Product name is required"],
+    "quantity": ["Quantity must be at least 1"]
+  }
+}
++--
+
+
+
+*Custom constraint validators
+
+  Custom <<<@Constraint>>> annotations backed by a <<<ConstraintValidator>>> implementation work
+  without any change.  They are invoked by the Jakarta Bean Validation machinery during
+  <<<@Valid>>> processing — OfficeFloor does not intercept or replace that machinery.
+
+  The example below validates that an order quantity is even (items sold in pairs).  The
+  validator uses <<<disableDefaultConstraintViolation()>>> and <<<buildConstraintViolationWithTemplate()>>>
+  to produce a specific message, exactly as in a plain Spring MVC application:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestvalidation/EvenQuantity.java|ignoreDownloadError=false}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestvalidation/EvenQuantityValidator.java|ignoreDownloadError=false}
+
+  The annotation is applied to the request DTO alongside standard Jakarta constraints:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestvalidation/BulkOrderRequest.java|ignoreDownloadError=false}
+
+  The service method and YAML are identical to the standard <<<@Valid>>> pattern — no special
+  configuration is needed for custom constraints:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/order/bulk.POST.yml|ignoreDownloadError=false}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestvalidation/PlaceBulkOrderService.java|ignoreDownloadError=false}
+
+
+
 *Testing
 
   Tests use Spring Boot's <<<MockMvc>>> — no OfficeFloor-specific test utilities are required:
@@ -111,5 +165,4 @@ Bean Validation in OfficeFloor REST YAML Composition
 
 Next
 
-  The {{{../SpringRestCorsHttpServer/index.html}Spring REST CORS tutorial}} demonstrates
-  the five ways to configure Cross-Origin Resource Sharing for OfficeFloor REST endpoints.
+  The {{{../SpringRestSecurityHttpServer/index.html}Spring REST Security tutorial}} demonstrates Spring Security integration with OfficeFloor REST YAML composition.

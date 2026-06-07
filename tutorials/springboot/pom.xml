@@ -26,7 +26,16 @@
 		<module>SpringRestQualifierHttpServer</module>
 		<module>SpringRestDataJpaHttpServer</module>
 		<module>SpringRestTeamHttpServer</module>
+		<module>SpringRestManagedObjectHttpServer</module>
+		<module>SpringRestSupplierHttpServer</module>
+		<module>SpringRestGovernanceHttpServer</module>
 		<module>SpringRestActuatorHttpServer</module>
 		<module>SpringRestConversionReference</module>
+		<module>SpringRestVariableHttpServer</module>
+		<module>SpringRestKotlinHttpServer</module>
+		<module>SpringRestScalaHttpServer</module>
+		<module>SpringRestJavaScriptHttpServer</module>
+		<module>SpringRestCatsHttpServer</module>
+		<module>SpringRestZioHttpServer</module>
 	</modules>
 </project>

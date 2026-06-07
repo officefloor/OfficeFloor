@@ -175,6 +175,6 @@ Thread Injection in OfficeFloor
 
 Next
 
-  The {{{../SpringRestActuatorHttpServer/index.html}Spring Actuator tutorial}} demonstrates that
-  Spring Boot Actuator health, info, and metrics endpoints continue to work unchanged alongside
-  OfficeFloor REST YAML endpoints.
+  The {{{../SpringRestManagedObjectHttpServer/index.html}Managed Objects tutorial}} demonstrates
+  declaring managed objects via YAML with PROCESS, THREAD, or FUNCTION scope — and implementing
+  <<<ManagedObjectSource>>> for flows and asynchronous completion managed by the OfficeFloor framework.

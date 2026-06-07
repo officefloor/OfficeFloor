@@ -93,5 +93,25 @@ public class SpringRestHttpServerTest {
 				.andExpect(content().json(mapper.writeValueAsString(new GreetingResponse("Hello, OfficeFloor!"))));
 	}
 
+	@Test
+	public void getStyledGreeting_bothVariablesExtracted() throws Exception {
+		mvc.perform(MockMvcRequestBuilders.get("/greeting/royal/Alice")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(content().json(mapper.writeValueAsString(
+						new GreetingResponse("royal: Hello, Alice!"))));
+	}
+
+	@Test
+	public void getStyledGreeting_literalSegmentWinsOverVariable() throws Exception {
+		// /greeting/formal/Alice matches greeting/formal/{name}.GET.yml (literal "formal"),
+		// NOT greeting/{style}/{name}.GET.yml — literal segments take priority over variables
+		mvc.perform(MockMvcRequestBuilders.get("/greeting/formal/Alice")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(content().json(mapper.writeValueAsString(
+						new GreetingResponse("Good day, Alice."))));
+	}
+
 }
 // END SNIPPET: tutorial

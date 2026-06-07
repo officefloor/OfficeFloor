@@ -112,19 +112,31 @@ OfficeFloor Tutorials
 |                                                              |                                                            | Thread injection\
 |                                                              |                                                            | officefloor/teams/
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./native/native-core/VariableHttpServer/index.html}Variables}} | Pass state downstream through a procedure flow without coupling callers to callees. | Out\<T\>\
+| {{{./springboot/SpringRestManagedObjectHttpServer/index.html}Managed Objects}} | Declare managed objects via YAML with PROCESS, THREAD, or FUNCTION scope. Implement ManagedObjectSource for flows and asynchronous completion managed by the OfficeFloor framework. | officefloor/managedobjects/\
+|                                                              |                                                            | ManagedObjectSource flows\
+|                                                              |                                                            | PROCESS / THREAD / FUNCTION scope
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./springboot/SpringRestSupplierHttpServer/index.html}Supplier}} | Register a library of related managed objects from a single YAML declaration. A SupplierSource holds shared state (connections, queues, DI containers) and vends it through multiple typed wrappers — ideal for third-party library integration. | officefloor/suppliers/\
+|                                                              |                                                            | SupplierSource\
+|                                                              |                                                            | Library integration
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./springboot/SpringRestGovernanceHttpServer/index.html}Governance}} | Wrap function execution with framework-managed pre/post lifecycle declared in YAML — no annotations on the service class required. Governed objects implement a typed extension interface; OfficeFloor enrolls them automatically. | officefloor/govern/\
+|                                                              |                                                            | @Govern, @Enforce, @Disregard\
+|                                                              |                                                            | Auto-wire extensions
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./springboot/SpringRestVariableHttpServer/index.html}Variables}} | Pass state downstream through a procedure flow without coupling callers to callees. | Out\<T\>\
 |                                                              |                                                            | @Val
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./features/features-polyglot/KotlinHttpServer/index.html}Kotlin}}  | Implement REST procedure logic in Kotlin alongside Java procedures. | Polyglot Kotlin
+| {{{./springboot/SpringRestKotlinHttpServer/index.html}Kotlin}}  | Implement REST procedure logic in Kotlin alongside Java procedures. | Polyglot Kotlin
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./features/features-polyglot/ScalaHttpServer/index.html}Scala}}    | Implement REST procedure logic in Scala alongside Java procedures. | Polyglot Scala
+| {{{./springboot/SpringRestScalaHttpServer/index.html}Scala}}    | Implement REST procedure logic in Scala alongside Java procedures. | Polyglot Scala
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./features/features-polyglot/JavaScriptHttpServer/index.html}JavaScript}} | Implement REST procedure logic in JavaScript via GraalVM. | Polyglot JavaScript\
+| {{{./springboot/SpringRestJavaScriptHttpServer/index.html}JavaScript}} | Implement REST procedure logic in JavaScript via GraalVM. | Polyglot JavaScript\
 |                                                              |                                                            | GraalVM
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./features/features-polyglot/CatsHttpServer/index.html}Cats Effect}} | Integrate Cats Effect functional IO into OfficeFloor REST composition. | {{{https://typelevel.org/cats-effect/}Cats Effect}}
+| {{{./springboot/SpringRestCatsHttpServer/index.html}Cats Effect}} | Integrate Cats Effect functional IO into OfficeFloor REST composition. | {{{https://typelevel.org/cats-effect/}Cats Effect}}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./features/features-polyglot/ZioHttpServer/index.html}ZIO}}        | Integrate ZIO functional effects into OfficeFloor REST composition. | {{{https://zio.dev}ZIO}}
+| {{{./springboot/SpringRestZioHttpServer/index.html}ZIO}}        | Integrate ZIO functional effects into OfficeFloor REST composition. | {{{https://zio.dev}ZIO}}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 
 

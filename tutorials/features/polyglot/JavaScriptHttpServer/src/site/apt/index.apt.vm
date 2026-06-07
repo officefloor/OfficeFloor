@@ -90,5 +90,5 @@ JavaScript Polyglot Tutorial
 
 Next
 
-  The {{{../../../spring-officefloor/SpringHttpServer/index.html}next tutorial}} covers integrating Spring beans into OfficeFloor.
-  
+  The {{{../CatsHttpServer/index.html}next tutorial}} covers using {{{https://typelevel.org/cats-effect/}Cats Effect}}.
+

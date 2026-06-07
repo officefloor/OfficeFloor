@@ -94,4 +94,4 @@ DynamoDB Tutorial
 
 Next
 
-  The {{{../../cloud-platforms/AwsSamHttpServer/index.html}next tutorial}} covers {{{https://aws.amazon.com/serverless/}AWS Serverless}}.
+  The {{{../CosmosDbHttpServer/index.html}next tutorial}} covers the {{{https://docs.microsoft.com/azure/cosmos-db/}CosmosDB}} client.

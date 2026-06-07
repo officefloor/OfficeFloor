@@ -17,7 +17,7 @@
 		<module>DiPojoHttpServer</module>
 		<module>EnvironmentHttpServer</module>
 		<module>LoggerHttpServer</module>
-		<module>VariableHttpServer</module>
+
 		<module>SwaggerHttpServer</module>
 <module>ExceptionHttpServer</module>
 		<module>StaticContentHttpServer</module>

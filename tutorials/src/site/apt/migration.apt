@@ -203,6 +203,27 @@ OfficeFloor Migration Guide
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 
 
+* Polyglot
+
+  Write individual procedures in any JVM language.  Each procedure in a REST YAML flow can be
+  implemented in a different language; OfficeFloor injects dependencies and executes them together
+  in one pipeline.
+
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+|| Tutorial                                                    || Description                                               || Covered
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./features/features-polyglot/ScalaHttpServer/index.html}Scala}}    | Implement native OfficeFloor procedure logic in Scala. | Polyglot Scala\
+|                                                              |                                                            | Scala Procedure
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./features/features-polyglot/JavaScriptHttpServer/index.html}JavaScript}} | Implement native OfficeFloor procedure logic in JavaScript via GraalVM. | Polyglot JavaScript\
+|                                                              |                                                            | GraalVM
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./features/features-polyglot/CatsHttpServer/index.html}Cats Effect}} | Integrate Cats Effect functional IO into native OfficeFloor REST composition. | {{{https://typelevel.org/cats-effect/}Cats Effect}}
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./features/features-polyglot/ZioHttpServer/index.html}ZIO}}        | Integrate ZIO functional effects into native OfficeFloor REST composition. | {{{https://zio.dev}ZIO}}
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+
+
 * Reactive
 
   OfficeFloor's threading model integrates cleanly with reactive libraries.  These tutorials
