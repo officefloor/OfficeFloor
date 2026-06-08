@@ -87,11 +87,12 @@ public class UndertowHttpServerImplementationTest extends AbstractHttpServerImpl
 
 		@Override
 		protected ProcessManager service(HttpServerExchange exchange) throws Exception {
-			exchange.getResponseHeaders().put(CONTENT_LENGTH, HELLO_WORLD.length);
-			exchange.getResponseHeaders().put(CONTENT_TYPE, TYPE_PLAIN);
-			// Must dispatch so Undertow waits for endExchange() before processing next pipelined request
-			exchange.dispatch(SAME_THREAD, () -> {
-				exchange.getResponseSender().send(HELLO_WORLD_BUFFER.duplicate());
+			exchange.getRequestReceiver().receiveFullBytes((ex, bytes) -> {
+				ex.dispatch(SAME_THREAD, () -> {
+					ex.getResponseHeaders().put(CONTENT_LENGTH, HELLO_WORLD.length);
+					ex.getResponseHeaders().put(CONTENT_TYPE, TYPE_PLAIN);
+					ex.getResponseSender().send(HELLO_WORLD_BUFFER.duplicate());
+				});
 			});
 			return () -> {
 				// no cancel handling
