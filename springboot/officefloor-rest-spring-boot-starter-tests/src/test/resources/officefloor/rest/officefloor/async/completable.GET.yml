@@ -1,0 +1,2 @@
+service:
+  class: ${async.package}.CompletableService

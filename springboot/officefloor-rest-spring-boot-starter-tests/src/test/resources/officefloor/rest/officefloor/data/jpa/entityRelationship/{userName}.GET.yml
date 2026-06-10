@@ -1,0 +1,3 @@
+service:
+  class: ${data.jpa.package}.EntityRelationshipService
+  method: get
