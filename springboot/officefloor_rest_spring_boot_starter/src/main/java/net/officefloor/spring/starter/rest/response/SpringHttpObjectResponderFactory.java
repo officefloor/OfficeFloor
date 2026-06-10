@@ -165,6 +165,9 @@ public class SpringHttpObjectResponderFactory implements HttpObjectResponderFact
                         mavBridge.processDispatchResult(mav, null);
                     }
 
+                    // Flag that externally handled (by Spring), so OfficeFloor does not overwrite
+                    HttpExternalResponse.of(connection.getResponse()).externalSend();
+
                     // Handled
                     return;
                 }

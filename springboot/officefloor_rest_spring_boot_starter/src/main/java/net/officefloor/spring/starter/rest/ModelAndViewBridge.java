@@ -23,8 +23,10 @@ package net.officefloor.spring.starter.rest;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.HandlerMethod;
@@ -32,12 +34,15 @@ import org.springframework.web.method.annotation.ModelFactory;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.DispatcherServlet;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Bridge to Spring for the {@link ModelAndView}.
@@ -282,10 +287,26 @@ public class ModelAndViewBridge {
             exception = null;
         }
 
-        // Create the handler chain
-        HandlerExecutionChain chain = new HandlerExecutionChain(this.handler);
+        if (exception != null) {
+            // Directly invoke HandlerExceptionResolver beans from the ApplicationContext.
+            Map<String, HandlerExceptionResolver> resolverBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
+                    this.applicationContext, HandlerExceptionResolver.class, true, false);
+            List<HandlerExceptionResolver> resolvers = new ArrayList<>(resolverBeans.values());
+            AnnotationAwareOrderComparator.sort(resolvers);
 
-        // Obtain the dispatcher servlet
+            for (HandlerExceptionResolver resolver : resolvers) {
+                ModelAndView resolved = resolver.resolveException(
+                        this.servletRequest, this.servletResponse, null, exception);
+                if (resolved != null) {
+                    return;
+                }
+            }
+
+            // No resolver handled the exception
+            throw exception;
+        }
+
+        // Normal path: delegate to DispatcherServlet to render ModelAndView
         DispatcherServlet servlet = this.getDispatcherServlet();
 
         // If within test, use TestDispatcherServlet (reflection to avoid imports)
@@ -296,9 +317,9 @@ public class ModelAndViewBridge {
             servlet = (DispatcherServlet) getDispatchServletMethod.invoke(mockMvc);
         }
 
-        // Delegate to Dispatcher Servlet
+        HandlerExecutionChain chain = new HandlerExecutionChain(this.handler);
         processDispatchResultMethod.invoke(servlet, this.getHttpServletRequest(),
-                this.getHttpServletResponse(), chain, modelAndView, exception);
+                this.getHttpServletResponse(), chain, modelAndView, null);
     }
 
 

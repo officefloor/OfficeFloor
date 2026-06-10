@@ -24,6 +24,7 @@ import net.officefloor.activity.compose.build.ComposeArchitect;
 import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.spring.starter.rest.OfficeFloorSpringBootExtension;
 import net.officefloor.spring.starter.rest.OfficeFloorSpringBootExtensionContext;
+import org.springframework.data.repository.Repository;
 import org.springframework.transaction.TransactionDefinition;
 
 /** {@link OfficeFloorSpringBootExtension} for Spring Boot Data. */
@@ -43,12 +44,16 @@ public class SpringBootDataExtension implements OfficeFloorSpringBootExtension {
         // Configure the transaction governance
         OfficeGovernance transaction = context.getOfficeArchitect()
                 .addOfficeGovernance(transactionName, new SpringDataTransactionGovernanceSource(new ReadWriteTransactionDefinition(), context.getApplicationContext()));
-        transaction.enableAutoWireExtensions();
 
         // Configure the read only transaction governance
         OfficeGovernance readOnlyTransaction = context.getOfficeArchitect()
                 .addOfficeGovernance(readOnlyName, new SpringDataTransactionGovernanceSource(new ReadOnlyTransactionDefinition(), context.getApplicationContext()));
-        readOnlyTransaction.enableAutoWireExtensions();
+
+        // Only auto-wire governance extensions when Spring Data Repository beans are present.
+        if (!context.getApplicationContext().getBeansOfType(Repository.class).isEmpty()) {
+            transaction.enableAutoWireExtensions();
+            readOnlyTransaction.enableAutoWireExtensions();
+        }
 
         // Make available for governance
         ComposeArchitect compose = context.getComposeArchitect();
