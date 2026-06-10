@@ -32,6 +32,7 @@
 		<module>SpringRestActuatorHttpServer</module>
 		<module>SpringRestConversionReference</module>
 		<module>SpringRestVariableHttpServer</module>
+		<module>SpringRestSpringBoot3HttpServer</module>
 		<module>SpringRestKotlinHttpServer</module>
 		<module>SpringRestScalaHttpServer</module>
 		<module>SpringRestJavaScriptHttpServer</module>

@@ -1,0 +1,149 @@
+~~~
+~~ #%L
+~~ Spring Boot 3 REST HTTP Server Tutorial
+~~ %%
+~~ Copyright (C) 2005 - 2026 Daniel Sagenschneider
+~~ %%
+~~ Licensed under the Apache License, Version 2.0 (the "License");
+~~ you may not use this file except in compliance with the License.
+~~ You may obtain a copy of the License at
+~~
+~~      http://www.apache.org/licenses/LICENSE-2.0
+~~
+~~ Unless required by applicable law or agreed to in writing, software
+~~ distributed under the License is distributed on an "AS IS" BASIS,
+~~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~~ See the License for the specific language governing permissions and
+~~ limitations under the License.
+~~ #L%
+~~~
+
+                                               -----------------------
+                                         Spring Boot 3 REST HTTP Server Tutorial
+                                               -----------------------
+                                                Daniel Sagenschneider
+                                               -----------------------
+
+Spring Boot 3 REST HTTP Server Tutorial
+
+  OfficeFloor provides version-specific REST starters so that each Spring Boot generation receives
+  a JAR compiled and validated against that exact runtime.  This tutorial demonstrates how to add
+  OfficeFloor REST to an <<existing Spring Boot 3 application>> by declaring the correct starter.
+
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestSpringBoot3HttpServer}Tutorial Source}}
+
+
+
+*Choosing the right starter
+
+  Two artifacts are published — one per supported Spring Boot generation:
+
+*--+--+
+| <<Spring Boot version>> | <<Starter artifact>> |
+*--+--+
+| Spring Boot 3.x | <<<officefloor-rest-spring-boot-3-starter>>> |
+*--+--+
+| Spring Boot 4.x | <<<officefloor-rest-spring-boot-4-starter>>> |
+*--+--+
+
+  Each starter is compiled against its target Spring Boot version, so its classes are binary
+  compatible with the runtime you already have.  Mixing versions — e.g., pulling the 4-starter
+  into a Spring Boot 3 project — can cause <<<NoSuchMethodError>>> or other binary incompatibilities
+  at runtime.
+
+  To check which Spring Boot version your project uses, look at the <<<parent>>> block or the
+  <<<spring-boot-dependencies>>> import in your <<<pom.xml>>>.
+
+
+
+*Maven dependency for Spring Boot 3
+
+  Add only the one starter that matches your Spring Boot generation.  Everything else —
+  <<<spring-boot-starter-web>>> and the rest of your existing dependencies — is unchanged:
+
+%{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+  The <<<officefloor-rest-spring-boot-3-starter>>> auto-configures OfficeFloor into the Spring MVC
+  pipeline exactly as the Spring Boot 4 starter does.  On start-up it scans the classpath for YAML
+  files under <<<officefloor/rest/>>> and registers each as a handler for the corresponding HTTP
+  method and URL path.  No additional Java or XML configuration is needed.
+
+
+
+*Application class
+
+  The application entry point is an ordinary <<<@SpringBootApplication>>> class — no OfficeFloor
+  annotation is required:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestspringboot3server/Application.java|ignoreDownloadError=false}
+
+
+
+*YAML endpoint file
+
+  Endpoints are declared as YAML files under <<<src/main/resources/officefloor/rest/>>>.  The file
+  path mirrors the URL and the file name suffix is the HTTP method:
+
++--
+officefloor/rest/
+└── greeting.GET.yml     →  GET  /greeting
++--
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/greeting.GET.yml|ignoreDownloadError=false}
+
+  The <<<service>>> label is the developer-chosen step name.  The <<<class>>> value names the Java
+  class that handles the request.  OfficeFloor calls the single public method on that class.
+
+
+
+*Service logic with Spring injection
+
+  The handler receives Spring beans as plain method parameters — no <<<@Autowired>>> annotation is
+  needed.  <<<ObjectResponse\<T\>>>> serialises the return value as JSON:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestspringboot3server/GreetingLogic.java|ignoreDownloadError=false}
+
+  The injected <<<GreetingService>>> is a standard Spring <<<@Service>>>:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestspringboot3server/GreetingService.java|ignoreDownloadError=false}
+
+  The response DTO is a plain Java class:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestspringboot3server/GreetingResponse.java|ignoreDownloadError=false}
+
+
+
+*Testing
+
+  Tests use the standard Spring Boot 3 test stack.  <<<@AutoConfigureMockMvc>>> is at its
+  Spring Boot 3 package (<<<org.springframework.boot.test.autoconfigure.web.servlet>>>):
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springrestspringboot3server/SpringBoot3HttpServerTest.java|ignoreDownloadError=false}
+
+
+
+*Migrating from Spring Boot 3 to Spring Boot 4
+
+  When you are ready to upgrade your application to Spring Boot 4, the only OfficeFloor change is
+  swapping the starter artifact ID:
+
++--
+<!-- Before (Spring Boot 3) -->
+<artifactId>officefloor-rest-spring-boot-3-starter</artifactId>
+
+<!-- After (Spring Boot 4) -->
+<artifactId>officefloor-rest-spring-boot-4-starter</artifactId>
++--
+
+  All YAML endpoint files, service logic classes, and test code remain identical.  The two starters
+  expose the same auto-configuration API so the rest of your codebase does not need to change.
+
+  The {{{../SpringRestHttpServer/index.html}Spring REST HTTP Server tutorial}} shows the full
+  feature set (path variables, composed steps, conditional routing) using the Spring Boot 4 starter.
+  Everything demonstrated there applies equally to the Spring Boot 3 starter.
+
+
+
+Next
+
+  The {{{../SpringRestFunctionHttpServer/index.html}Function Injection tutorial}} explores function injection more deeply: a three-step pipeline with conditional branching, typed data passing between steps, and independent Spring service injection at each step.
