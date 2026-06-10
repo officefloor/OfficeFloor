@@ -20,6 +20,7 @@
 
 package net.officefloor.spring.starter.rest;
 
+import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -30,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -50,13 +52,33 @@ public class OfficeFloorRestAutoConfiguration {
      * Fallback {@link ObjectMapper} bean for Spring Boot 4+, where Jackson 2.x is no longer
      * auto-configured (SB4 auto-configures tools.jackson.databind.ObjectMapper instead).
      * In SB3 this bean is never created because JacksonAutoConfiguration already provides one.
+     * Uses {@code findAndRegisterModules()} so ServiceLoader-registered modules (e.g. KotlinModule)
+     * are picked up automatically.
      *
      * @return {@link ObjectMapper}.
      */
     @Bean
     @ConditionalOnMissingBean(ObjectMapper.class)
     public ObjectMapper jackson2ObjectMapper() {
-        return new ObjectMapper();
+        return new ObjectMapper().findAndRegisterModules();
+    }
+
+    /**
+     * Registers a {@code KotlinModule} bean when {@code jackson-module-kotlin} is on the
+     * classpath. In Spring Boot 3, {@code JacksonAutoConfiguration} picks up all {@link Module}
+     * beans and installs them on the shared {@link ObjectMapper}, which is required for Jackson to
+     * deserialize Kotlin data classes (which have no no-arg constructor).
+     *
+     * @return {@link Module} wrapping {@code KotlinModule}.
+     * @throws Exception if reflection fails.
+     */
+    @Bean
+    @ConditionalOnMissingBean(name = "kotlinJacksonModule")
+    @ConditionalOnClass(name = "com.fasterxml.jackson.module.kotlin.KotlinModule")
+    public Module kotlinJacksonModule() throws Exception {
+        Object builder = Class.forName("com.fasterxml.jackson.module.kotlin.KotlinModule$Builder")
+                .getDeclaredConstructor().newInstance();
+        return (Module) builder.getClass().getMethod("build").invoke(builder);
     }
 
     /**
