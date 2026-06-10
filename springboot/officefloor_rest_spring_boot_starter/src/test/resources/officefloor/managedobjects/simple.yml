@@ -1,3 +1,0 @@
-managed-object:
-  class: ${managedobject.package}.SimpleManagedObject
-  scope: PROCESS

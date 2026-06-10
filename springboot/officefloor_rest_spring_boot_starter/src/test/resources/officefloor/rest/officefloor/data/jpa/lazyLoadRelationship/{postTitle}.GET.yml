@@ -1,3 +1,0 @@
-service:
-  class: ${data.jpa.package}.LazyLoadRelationshipService
-  govern: [ transaction ]

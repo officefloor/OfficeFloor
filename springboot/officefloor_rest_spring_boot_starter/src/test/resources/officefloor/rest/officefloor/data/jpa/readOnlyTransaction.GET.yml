@@ -1,3 +1,0 @@
-service:
-  class: ${data.jpa.package}.ReadOnlyTransactionService
-  govern: [ readonly-transaction ]

@@ -1,3 +1,0 @@
-service:
-  class: ${govern.package}.MultiGovernedService
-  govern: [ tracking, audit ]

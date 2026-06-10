@@ -1,2 +1,0 @@
-service:
-  class: ${cache.package}.ComputeService

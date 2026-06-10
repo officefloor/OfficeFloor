@@ -1,3 +1,0 @@
-service:
-  class: ${govern.package}.GovernedService
-  govern: [ tracking ]

@@ -651,6 +651,17 @@
 				<groupId>net.officefloor.springboot</groupId>
 				<artifactId>officefloor-rest-spring-boot-starter</artifactId>
 				<version>${revision}</version>
+				<type>pom</type>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.springboot</groupId>
+				<artifactId>officefloor-rest-spring-boot-3-starter</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.springboot</groupId>
+				<artifactId>officefloor-rest-spring-boot-4-starter</artifactId>
+				<version>${revision}</version>
 			</dependency>
 			<!-- ================================================ -->
 			<!-- Additional Dependencies -->

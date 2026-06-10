@@ -1,2 +1,0 @@
-service:
-  class: ${security.package}.PreAuthorizeService

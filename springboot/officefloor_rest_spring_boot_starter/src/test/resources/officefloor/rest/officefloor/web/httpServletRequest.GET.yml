@@ -1,2 +1,0 @@
-service:
-  class: ${web.package}.HttpServletRequestService

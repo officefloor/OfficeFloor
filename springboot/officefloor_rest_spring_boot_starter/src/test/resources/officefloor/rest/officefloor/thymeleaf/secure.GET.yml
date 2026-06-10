@@ -1,2 +1,0 @@
-service:
-  class: ${thymeleaf.package}.SecureService
