@@ -67,6 +67,22 @@ public class SpringRestSecurityTest {
 			.andExpect(status().isForbidden());
 	}
 
+	@Test
+	@WithMockUser(username = "user", roles = "USER")
+	public void disable_inherited_authorize_grants_non_admin() throws Exception {
+		mvc.perform(get("/security/admin/open"))
+			.andExpect(status().isOk())
+			.andExpect(content().string("Open under Admin"));
+	}
+
+	@Test
+	@WithMockUser(username = "admin", roles = "ADMIN")
+	public void disable_inherited_authorize_grants_admin() throws Exception {
+		mvc.perform(get("/security/admin/open"))
+			.andExpect(status().isOk())
+			.andExpect(content().string("Open under Admin"));
+	}
+
 	// --- Spring Security integration ---
 
 	@Test

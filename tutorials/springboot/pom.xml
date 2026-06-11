@@ -13,6 +13,29 @@
 	<packaging>pom</packaging>
 	<name>Spring Boot Tutorials</name>
 	<description>Tutorials for OfficeFloor Spring Boot integration</description>
+	<dependencyManagement>
+		<dependencies>
+			<!-- All springboot tutorials use Spring Boot 4 (except SpringRestSpringBoot3HttpServer) -->
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-dependencies</artifactId>
+				<version>${spring4-version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-maven-plugin</artifactId>
+					<version>${spring4-version}</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
 	<modules>
 		<module>SpringRestHttpServer</module>
 		<module>SpringRestFunctionHttpServer</module>

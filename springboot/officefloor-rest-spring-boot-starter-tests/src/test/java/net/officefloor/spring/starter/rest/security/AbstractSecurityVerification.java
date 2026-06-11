@@ -221,6 +221,38 @@ public abstract class AbstractSecurityVerification extends AbstractMockMvcVerifi
     }
 
     @Test
+    @WithMockUser(username = "User", roles = "NO_ACCESS")
+    public void authorizeInheritedDisabledForChildren_NoAccess() throws Exception {
+        this.mvc.perform(get(this.getPath("/authorized/open/child")).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("Accessed")));
+    }
+
+    @Test
+    @WithMockUser(username = "User", roles = "ACCESS")
+    public void authorizeInheritedDisabledForChildren_Access() throws Exception {
+        this.mvc.perform(get(this.getPath("/authorized/open/child")).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("Accessed")));
+    }
+
+    @Test
+    @WithMockUser(username = "User", roles = "NO_ACCESS")
+    public void authorizeInheritedDisabled_NoAccess() throws Exception {
+        this.mvc.perform(get(this.getPath("/authorized/open")).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("Accessed")));
+    }
+
+    @Test
+    @WithMockUser(username = "User", roles = "ACCESS")
+    public void authorizeInheritedDisabled_Access() throws Exception {
+        this.mvc.perform(get(this.getPath("/authorized/open")).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("Accessed")));
+    }
+
+    @Test
     public void logout() throws Exception {
         this.mvc.perform(post(this.getPath("/logout", true)).with(csrf()))
                 .andExpect(status().is3xxRedirection())

@@ -17,6 +17,18 @@
 		<basedir>${basedir}</basedir>
 		<projectVersion>${project.version}</projectVersion>
 	</properties>
+	<dependencyManagement>
+		<dependencies>
+			<!-- Override back to Spring Boot 3 for this compatibility tutorial -->
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-dependencies</artifactId>
+				<version>${spring-version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 	<dependencies>
 		<!-- START SNIPPET: tutorial -->
 		<dependency>
@@ -40,6 +52,15 @@
 		</dependency>
 	</dependencies>
 	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-maven-plugin</artifactId>
+					<version>${spring-version}</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

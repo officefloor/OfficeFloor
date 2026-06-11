@@ -112,4 +112,16 @@ public class SecurityController {
         return "Accessed";
     }
 
+    @GetMapping("/authorized/open")
+    @ResponseBody
+    public String authorizedOpen() {
+        return "Accessed";
+    }
+
+    @GetMapping("/authorized/open/child")
+    @ResponseBody
+    public String authorizedOpenChild() {
+        return "Accessed";
+    }
+
 }

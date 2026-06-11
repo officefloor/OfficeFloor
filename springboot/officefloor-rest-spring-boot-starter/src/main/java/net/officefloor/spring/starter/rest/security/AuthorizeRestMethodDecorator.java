@@ -84,7 +84,7 @@ public class AuthorizeRestMethodDecorator implements RestMethodDecorator<Void> {
             }
         }
 
-        if (expressionText == null) {
+        if (expressionText == null || expressionText.isBlank()) {
             return; // no authorization configured
         }
 

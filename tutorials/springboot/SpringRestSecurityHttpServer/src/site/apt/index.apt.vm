@@ -220,7 +220,6 @@ Spring Security Integration Tutorial
 
 
 
-{Spring_Boot_annotation_compatibility}
 *Spring Boot annotation compatibility
 
   OfficeFloor fully supports <<<@PreAuthorize>>>, <<<@Secured>>>, and <<<@RolesAllowed>>> on
