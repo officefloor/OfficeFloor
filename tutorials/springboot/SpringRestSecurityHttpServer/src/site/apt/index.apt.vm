@@ -234,7 +234,7 @@ Spring Security Integration Tutorial
 
 
 
-**<<<@PreAuthorize>>>
+*<<<@PreAuthorize>>>
 
   <<<@PreAuthorize>>> on a service method is evaluated by OfficeFloor before the method is invoked.
   The full Spring Security SpEL expression language is available — <<<hasRole()>>>,
@@ -247,7 +247,7 @@ Spring Security Integration Tutorial
 
 
 
-**<<<@PreAuthorize>>> with SpEL bean references
+*<<<@PreAuthorize>>> with SpEL bean references
 
   Spring Security SpEL supports referencing any Spring bean by name using the <<<@beanName>>>
   syntax.  A common pattern centralises role constants in a <<<@Component>>> so that role
@@ -265,7 +265,7 @@ Spring Security Integration Tutorial
 
 
 
-**<<<@Secured>>>
+*<<<@Secured>>>
 
   <<<@Secured>>> accepts one or more role names (including the <<<ROLE_>>> prefix).  Enable it in
   the security configuration with <<<securedEnabled = true>>>:
@@ -276,7 +276,7 @@ Spring Security Integration Tutorial
 
 
 
-**<<<@RolesAllowed>>>
+*<<<@RolesAllowed>>>
 
   The JSR-250 <<<@RolesAllowed>>> annotation works the same way.  Enable it with
   <<<jsr250Enabled = true>>>:
