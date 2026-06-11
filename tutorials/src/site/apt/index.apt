@@ -58,6 +58,9 @@ OfficeFloor Tutorials
 |                                                              |                                                            | REST YAML composition\
 |                                                              |                                                            | Function injection basics
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./springboot/SpringRestSpringBoot3HttpServer/index.html}Spring Boot 3}} | Add OfficeFloor REST to an existing Spring Boot 3 application using the version-specific starter. Explains which starter to choose for SB3 vs SB4 and how to migrate between them. | officefloor-rest-spring-boot-3-starter\
+|                                                              |                                                            | Starter version selection
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./springboot/SpringRestFunctionHttpServer/index.html}Function Injection}} | Compose a multi-step request pipeline via YAML. Conditional branching with @Flow, sequential continuation with return values, and typed data passing between steps. | @Flow\
 |                                                              |                                                            | @Parameter\
 |                                                              |                                                            | Pipeline composition

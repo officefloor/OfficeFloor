@@ -21,7 +21,7 @@
 		<!-- START SNIPPET: tutorial -->
 		<dependency>
 			<groupId>net.officefloor.springboot</groupId>
-			<artifactId>officefloor-rest-spring-boot-starter</artifactId>
+			<artifactId>officefloor-rest-spring-boot-4-starter</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

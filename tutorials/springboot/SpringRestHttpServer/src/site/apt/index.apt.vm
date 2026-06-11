@@ -297,4 +297,4 @@ curl -s -X POST \
 
 Next
 
-  The {{{../SpringRestFunctionHttpServer/index.html}Function Injection tutorial}} explores function injection more deeply: a three-step pipeline with conditional branching, typed data passing between steps, and independent Spring service injection at each step.
+  The {{{../SpringRestSpringBoot3HttpServer/index.html}Spring Boot 3 tutorial}} shows how to add OfficeFloor REST to an existing Spring Boot 3 application and explains which version-specific starter to choose.
