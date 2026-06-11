@@ -26,15 +26,15 @@
 
 Azure Web Apps Tutorial
 
-  This tutorial demonstrates running within {{{https://azure.microsoft.com/services/app-service/web/}Azure Web Apps}}.
+  This tutorial demonstrates running within {{{https://azure.microsoft.com/en-us/products/app-service/web}Azure Web Apps}}.
 
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/AzureWebAppsHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/cloud/platforms/AzureWebAppsHttpServer}Tutorial Source}}
 
 
 
 *Azure
 
-  {{{https://azure.microsoft.com/services/app-service/web/}Azure Web Apps}} is able to run Servlet applications.  Therefore, OfficeFloor is configured as a Servlet application as follows:
+  {{{https://azure.microsoft.com/en-us/products/app-service/web}Azure Web Apps}} is able to run Servlet applications.  Therefore, OfficeFloor is configured as a Servlet application as follows:
   
 %{snippet|id=azure|file=${basedir}/pom.xml|ignoreDownloadError=false}
 
@@ -60,4 +60,4 @@ Azure Web Apps Tutorial
 
 Next
 
-  The {{{../PayPalHttpServer/index.html}next tutorial}} covers integrating PayPal into OfficeFloor.
+  Return to the {{{../../../migration.html}migration guide}}.

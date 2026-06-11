@@ -944,8 +944,17 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 				// Easy access to the container
 				ManagedObjectContainerImpl container = ManagedObjectContainerImpl.this;
 
-				// Unregister the governance
-				container.registeredGovernances[governanceIndex] = null;
+				// Translate the global governanceIndex to the local index for this managed object.
+				// registeredGovernances is sized/indexed locally (0..n-1 for the governances that
+				// govern this object), while governanceIndex is a global offset across the entire
+				// Office.  Scan the metadata to find the matching local slot.
+				ManagedObjectGovernanceMetaData<?>[] governanceMetaDatas = container.metaData.getGovernanceMetaData();
+				for (int i = 0; i < governanceMetaDatas.length; i++) {
+					if (governanceMetaDatas[i].getGovernanceIndex() == governanceIndex) {
+						container.registeredGovernances[i] = null;
+						break;
+					}
+				}
 
 				// Determine if waiting on unloading governance
 				if (container.containerState != ManagedObjectContainerState.UNLOAD_WAITING_GOVERNANCE) {

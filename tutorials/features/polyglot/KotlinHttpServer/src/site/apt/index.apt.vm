@@ -32,7 +32,7 @@ Kotlin Polyglot Tutorial
   
   As Kotlin compiles to classes, much of the existing features of WoOF can be used as is.  Furthermore, as this tutorial also demonstrates, Kotlin functions can be used.
 
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/KotlinHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/features/polyglot/KotlinHttpServer}Tutorial Source}}
 
 
 
@@ -47,8 +47,16 @@ Kotlin Polyglot Tutorial
 *Kotlin
 
   The Kotlin to service the request is:
-  
+
 %{snippet|file=${basedir}/src/main/kotlin/net/officefloor/tutorial/kotlinhttpserver/KotlinLogic.kt|ignoreDownloadError=false}
+
+
+
+*REST Endpoint
+
+  The REST endpoint routing POST requests to <<<'/'>>> to the Kotlin function is configured as follows:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/index.POST.yml|ignoreDownloadError=false}
 
 
 

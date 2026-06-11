@@ -1,3 +1,23 @@
+/*-
+ * #%L
+ * Web REST
+ * %%
+ * Copyright (C) 2005 - 2026 Daniel Sagenschneider
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 package net.officefloor.web.rest.build;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -19,6 +39,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+/** Employs the REST architecture. */
 public class RestEmployer {
 
     /**
@@ -45,11 +66,16 @@ public class RestEmployer {
         return ComposeEmployer.isCompositionsAvailable(resourceDirectory, RestEmployer::isRestCompositionFile);
     }
 
+    /**
+     * @param itemName Item name.
+     * @return Whether the item is a REST composition file.
+     */
     protected static boolean isRestCompositionFile(String itemName) {
         int lastDot = itemName.lastIndexOf('.');
         return lastDot > 0;
     }
 
+    /** {@link RestArchitect} implementation. */
     protected static class RestArchitectImpl implements RestArchitect {
 
         private final OfficeArchitect officeArchitect;
@@ -59,11 +85,20 @@ public class RestEmployer {
 
         private final List<RestMethodDecorator<?>> decorators = new LinkedList<>();
 
+        /**
+         * @param officeArchitect     {@link OfficeArchitect}.
+         * @param webArchitect        {@link WebArchitect}.
+         * @param composeArchitect    {@link ComposeArchitect}.
+         * @param officeSourceContext {@link OfficeSourceContext}.
+         */
         protected RestArchitectImpl(OfficeArchitect officeArchitect, WebArchitect webArchitect, ComposeArchitect composeArchitect, OfficeSourceContext officeSourceContext) {
             this.officeArchitect = officeArchitect;
             this.webArchitect = webArchitect;
             this.composeArchitect = composeArchitect;
             this.officeSourceContext = officeSourceContext;
+
+            // Add secure decorator
+            this.decorators.add(new SecureRestMethodDecorator());
         }
 
         /*
@@ -206,16 +241,25 @@ public class RestEmployer {
         }
     }
 
+    /** Composed REST endpoint. */
     protected static class ComposedEndpoint {
         private final OfficeSectionInput input;
         private final RestConfiguration configuration;
 
+        /**
+         * @param input         {@link OfficeSectionInput}.
+         * @param configuration {@link RestConfiguration}.
+         */
         public ComposedEndpoint(OfficeSectionInput input, RestConfiguration configuration) {
             this.input = input;
             this.configuration = configuration;
         }
     }
 
+    /**
+     * @param context {@link ComposeContext}.
+     * @return {@link ComposedEndpoint}.
+     */
     protected static ComposedEndpoint createComposedEndpoint(ComposeContext<?> context) {
         return new ComposedEndpoint(context.getStartFunction(), new RestConfiguration() {
 

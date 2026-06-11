@@ -54,6 +54,7 @@ public class WoofTemplateExtensionLoaderImpl implements WoofTemplateExtensionLoa
 	 * =============== WoofTemplateExtensionLoader =================
 	 */
 
+	/** Loads the specification. */
 	public static class LoadSpecification implements OfficeFloorCompilerRunnable<PropertyList> {
 		@Override
 		public PropertyList run(OfficeFloorCompiler compiler, Object[] parameters) throws Exception {

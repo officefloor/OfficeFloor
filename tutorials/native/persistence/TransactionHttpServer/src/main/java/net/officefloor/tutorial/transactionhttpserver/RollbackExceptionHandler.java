@@ -12,7 +12,7 @@ import net.officefloor.server.http.ServerHttpConnection;
  */
 public class RollbackExceptionHandler {
 
-	public void handle(@Parameter IllegalArgumentException exception, ServerHttpConnection connection)
+	public void handle(@Parameter Exception exception, ServerHttpConnection connection)
 			throws Exception {
 		HttpResponse response = connection.getResponse();
 		response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);

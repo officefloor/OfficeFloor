@@ -1,0 +1,7 @@
+savePost:
+  class: net.officefloor.tutorial.cosmosasyncdbhttpserver.CosmosAsyncDbLogic
+  method: savePost
+  next: sendPost
+sendPost:
+  class: net.officefloor.tutorial.cosmosasyncdbhttpserver.CosmosAsyncDbLogic
+  method: sendPost

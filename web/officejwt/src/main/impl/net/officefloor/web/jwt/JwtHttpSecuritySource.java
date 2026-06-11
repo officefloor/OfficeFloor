@@ -108,7 +108,6 @@ public class JwtHttpSecuritySource<C> extends
 	 * 
 	 * @param validateKeysFactory {@link JwtValidateKeysFactory}. May be
 	 *                            <code>null</code> to not override.
-	 * @throws T If failure in {@link ContextRunnable}.
 	 */
 	public static void setOverrideKeys(JwtValidateKeysFactory validateKeysFactory) {
 		if (validateKeysFactory != null) {
@@ -184,7 +183,16 @@ public class JwtHttpSecuritySource<C> extends
 	 * Flow keys.
 	 */
 	public static enum Flows {
-		RETRIEVE_KEYS, RETRIEVE_ROLES, NO_JWT, INVALID_JWT, EXPIRED_JWT
+		/** Retrieve keys flow. */
+		RETRIEVE_KEYS,
+		/** Retrieve roles flow. */
+		RETRIEVE_ROLES,
+		/** No JWT flow. */
+		NO_JWT,
+		/** Invalid JWT flow. */
+		INVALID_JWT,
+		/** Expired JWT flow. */
+		EXPIRED_JWT
 	}
 
 	/**

@@ -1,3 +1,23 @@
+/*-
+ * #%L
+ * Composition
+ * %%
+ * Copyright (C) 2005 - 2026 Daniel Sagenschneider
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 package net.officefloor.activity.compose.build;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -32,10 +52,13 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+/** Employs compose architecture. */
 public class ComposeEmployer {
 
+    /** Prefix for added inputs. */
     public static String ADDED_INPUT_PREFIX = "#";
 
+    /** {@link ObjectMapper} for YAML. */
     public static final ObjectMapper MAPPER = new ObjectMapper(new YAMLFactory());
 
     /**
@@ -104,6 +127,7 @@ public class ComposeEmployer {
         return new ComposeArchitectImpl(architect, sourceContext);
     }
 
+    /** Implementation of {@link ComposeArchitect}. */
     protected static class ComposeArchitectImpl implements ComposeArchitect {
 
         private final OfficeArchitect architect;
@@ -114,6 +138,12 @@ public class ComposeEmployer {
 
         private final Map<String, OfficeGovernance> governances = new HashMap<>();
 
+        /**
+         * Instantiate.
+         *
+         * @param architect     {@link OfficeArchitect}.
+         * @param sourceContext {@link OfficeSourceContext}.
+         */
         protected ComposeArchitectImpl(OfficeArchitect architect, OfficeSourceContext sourceContext) {
             this.architect = architect;
             this.sourceContext = sourceContext;
@@ -195,6 +225,20 @@ public class ComposeEmployer {
             }
         }
 
+        /**
+         * Adds a composition.
+         *
+         * @param <C>             Configuration type.
+         * @param <T>             Composition result type.
+         * @param namespace       Namespace for the composition.
+         * @param itemName        Name of the item.
+         * @param source          {@link ComposeSource}.
+         * @param resourceName    Name of the resource.
+         * @param properties      {@link PropertyList}.
+         * @param configurationClass {@link Class} of the configuration.
+         * @return Composition result.
+         * @throws Exception If fails to add composition.
+         */
         protected <C extends ComposeConfiguration, T> T addComposition(
                 String namespace, String itemName, ComposeSource<T, C> source,
                 String resourceName, PropertyList properties,
@@ -209,6 +253,7 @@ public class ComposeEmployer {
             // Add the composition
             ComposeSectionSource composeSectionSource = new ComposeSectionSource(composeConfiguration);
             OfficeSection composition = architect.addOfficeSection(sectionName, composeSectionSource, resourceName);
+            properties.configureProperties(composition);
 
             // Build the item
             T item;

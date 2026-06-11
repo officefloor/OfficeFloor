@@ -28,11 +28,7 @@ OpenAPI / Swagger Tutorial
 
   This tutorial demonstrates using {{{https://www.openapis.org/}OpenAPI}} / {{{https://swagger.io/}Swagger}} to document available REST end points.
 
-  The example application for this tutorial has the following configuration:
-  
-[./images/SwaggerHttpServer-configuration.png] SwaggerHttpServer configuration.
-    
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/SwaggerHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/native/core/SwaggerHttpServer}Tutorial Source}}
   
 
 *Configuring OpenAPI / Swagger
@@ -55,4 +51,4 @@ OpenAPI / Swagger Tutorial
 
 Next
 
-  The {{{../CorsHttpServer/index.html}next tutorial}} covers CORS.
+  The {{{../ExceptionHttpServer/index.html}next tutorial}} covers exception handling.

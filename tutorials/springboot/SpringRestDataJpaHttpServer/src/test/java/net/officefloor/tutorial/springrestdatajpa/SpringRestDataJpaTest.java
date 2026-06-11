@@ -16,6 +16,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -45,6 +46,7 @@ public class SpringRestDataJpaTest {
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(mapper.writeValueAsString(new ArticleRequest("My Title", "My content"))))
 				.andExpect(status().isCreated())
+				.andExpect(header().string("Location", containsString("/article/")))
 				.andExpect(jsonPath("$.title").value("My Title"))
 				.andExpect(jsonPath("$.content").value("My content"))
 				.andExpect(jsonPath("$.id").isNumber());
@@ -107,6 +109,28 @@ public class SpringRestDataJpaTest {
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$", hasSize(1)))
 				.andExpect(jsonPath("$[0].title").value("New Article"));
+	}
+
+	// Pagination: page and size query params drive Spring Data's PageRequest
+	@Test
+	public void listArticlesPage() throws Exception {
+		for (int i = 1; i <= 5; i++) {
+			repository.save(new Article(null, "Article " + i, "content " + i));
+		}
+
+		mvc.perform(get("/article/page?page=0&size=3").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content", hasSize(3)))
+				.andExpect(jsonPath("$.totalElements").value(5))
+				.andExpect(jsonPath("$.totalPages").value(2))
+				.andExpect(jsonPath("$.page").value(0))
+				.andExpect(jsonPath("$.size").value(3));
+
+		mvc.perform(get("/article/page?page=1&size=3").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content", hasSize(2)))
+				.andExpect(jsonPath("$.totalElements").value(5))
+				.andExpect(jsonPath("$.page").value(1));
 	}
 }
 // END SNIPPET: tutorial

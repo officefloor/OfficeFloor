@@ -12,6 +12,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 // START SNIPPET: tutorial
@@ -60,11 +61,57 @@ public class SpringRestHttpServerTest {
 	@Test
 	public void postGreetingWithBlankName() throws Exception {
 		mvc.perform(post("/greeting")
-				.accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(mapper.writeValueAsString(new GreetingRequest(""))))
+						.accept(MediaType.APPLICATION_JSON)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(mapper.writeValueAsString(new GreetingRequest(""))))
 				.andExpect(status().isOk())
 				.andExpect(content().json(mapper.writeValueAsString(new GreetingResponse("Hello, World!"))));
 	}
+
+	@Test
+	public void getFormalGreeting() throws Exception {
+		mvc.perform(MockMvcRequestBuilders.get("/greeting/formal/Alice")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(content().json(mapper.writeValueAsString(new GreetingResponse("Good day, Alice."))));
+	}
+
+	@Test
+	public void getCasualGreeting() throws Exception {
+		mvc.perform(MockMvcRequestBuilders.get("/greeting/casual/Alice")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(content().json(mapper.writeValueAsString(new GreetingResponse("Hey, Alice!"))));
+	}
+
+	@Test
+	public void getGreetingEntity() throws Exception {
+		mvc.perform(MockMvcRequestBuilders.get("/greeting/entity/OfficeFloor")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(header().string("X-Greeting-Name", "OfficeFloor"))
+				.andExpect(content().json(mapper.writeValueAsString(new GreetingResponse("Hello, OfficeFloor!"))));
+	}
+
+	@Test
+	public void getStyledGreeting_bothVariablesExtracted() throws Exception {
+		mvc.perform(MockMvcRequestBuilders.get("/greeting/royal/Alice")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(content().json(mapper.writeValueAsString(
+						new GreetingResponse("royal: Hello, Alice!"))));
+	}
+
+	@Test
+	public void getStyledGreeting_literalSegmentWinsOverVariable() throws Exception {
+		// /greeting/formal/Alice matches greeting/formal/{name}.GET.yml (literal "formal"),
+		// NOT greeting/{style}/{name}.GET.yml — literal segments take priority over variables
+		mvc.perform(MockMvcRequestBuilders.get("/greeting/formal/Alice")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(content().json(mapper.writeValueAsString(
+						new GreetingResponse("Good day, Alice."))));
+	}
+
 }
 // END SNIPPET: tutorial

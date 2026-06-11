@@ -38,5 +38,11 @@
 			<contains><![CDATA[<revision>${project.version}</revision>]]></contains>
 		</file>
 
+		<!-- Ensure README references current version -->
+		<file>
+			<location>README.md</location>
+			<contains><![CDATA[<version>${project.version}</version>]]></contains>
+		</file>
+
 	</files>
 </verifications>

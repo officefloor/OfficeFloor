@@ -44,6 +44,7 @@ public class FlywayMigrateManagedObjectSource extends AbstractManagedObjectSourc
 	 * Migrate dependency keys.
 	 */
 	public static enum MigrateDependencyKeys {
+		/** Flyway dependency. */
 		FLYWAY
 	}
 
@@ -51,6 +52,7 @@ public class FlywayMigrateManagedObjectSource extends AbstractManagedObjectSourc
 	 * Flow keys.
 	 */
 	public static enum FlowKeys {
+		/** Migrate flow key. */
 		MIGRATE
 	}
 

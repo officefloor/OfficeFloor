@@ -330,6 +330,11 @@
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-project-info-reports-plugin</artifactId>
+					<version>${maven-project-info-reports-version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-source-plugin</artifactId>
 					<version>${maven-source-version}</version>
 				</plugin>
@@ -368,6 +373,9 @@
 						<addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
 						<emptyLineAfterHeader>true</emptyLineAfterHeader>
 						<ignoreNoFileToScan>true</ignoreNoFileToScan>
+						<roots>
+							<root>src/main</root>
+						</roots>
 						<failOnMissingHeader>true</failOnMissingHeader>
 						<canUpdateDescription>true</canUpdateDescription>
 						<excludes>
@@ -403,141 +411,6 @@
 					<groupId>net.alchim31.maven</groupId>
 					<artifactId>scala-maven-plugin</artifactId>
 					<version>${scala-maven-version}</version>
-				</plugin>
-				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself. -->
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>org.apache.maven.plugins</groupId>
-										<artifactId>maven-verifier-plugin</artifactId>
-										<versionRange>[1.0,)</versionRange>
-										<goals>
-											<goal>verify</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>org.apache.maven.plugins</groupId>
-										<artifactId>maven-antrun-plugin</artifactId>
-										<versionRange>[1.6,)</versionRange>
-										<goals>
-											<goal>run</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											org.codehaus.mojo
-										</groupId>
-										<artifactId>
-											javacc-maven-plugin
-										</artifactId>
-										<versionRange>
-											[2.6,)
-										</versionRange>
-										<goals>
-											<goal>javacc</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											org.apache.maven.plugins
-										</groupId>
-										<artifactId>
-											maven-plugin-plugin
-										</artifactId>
-										<versionRange>
-											[2.6,)
-										</versionRange>
-										<goals>
-											<goal>descriptor</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											org.codehaus.mojo
-										</groupId>
-										<artifactId>
-											flatten-maven-plugin
-										</artifactId>
-										<versionRange>
-											[1.0.0,)
-										</versionRange>
-										<goals>
-											<goal>flatten</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											net.alchim31.maven
-										</groupId>
-										<artifactId>
-											scala-maven-plugin
-										</artifactId>
-										<versionRange>
-											[4.0.1,)
-										</versionRange>
-										<goals>
-											<goal>compile</goal>
-											<goal>testCompile</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											org.jetbrains.kotlin
-										</groupId>
-										<artifactId>
-											kotlin-maven-plugin
-										</artifactId>
-										<versionRange>
-											[1.3.41,)
-										</versionRange>
-										<goals>
-											<goal>test-compile</goal>
-											<goal>compile</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
-					</configuration>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -711,7 +584,7 @@
 						<configuration>
 							<!-- Ignore generated code that have no control over -->
 							<excludePackageNames>
-								net.officefloor.web.template.parse</excludePackageNames>
+								net.officefloor.web.template.parse,net.officefloor.tutorial*,net.officefloor.activity.model,net.officefloor.model.conform,net.officefloor.model.office,net.officefloor.model.officefloor,net.officefloor.model.section,net.officefloor.woof.model.objects,net.officefloor.woof.model.resources,net.officefloor.woof.model.teams,net.officefloor.woof.model.woof</excludePackageNames>
 							<!-- Ensure good quality JavaDoc -->
 							<failOnError>true</failOnError>
 							<failOnWarnings>true</failOnWarnings>
@@ -747,46 +620,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-				<!-- Run HTTP server for staged site content for linkcheck
-				report -->
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-maven-plugin</artifactId>
-				<version>${jetty-version}</version>
-				<inherited>false</inherited>
-				<configuration>
-					<supportedPackagings>
-						<supportedPackaging>pom</supportedPackaging>
-					</supportedPackagings>
-					<httpConnector>
-						<port>9999</port>
-					</httpConnector>
-					<webAppSourceDirectory>${basedir}/target/site/
-					</webAppSourceDirectory>
-					<stopKey>OfficeFloor</stopKey>
-					<stopPort>9966</stopPort>
-					<stopWait>10</stopWait>
-				</configuration>
-				<executions>
-					<execution>
-						<id>Start HTTP Server of staged site for linkcheck</id>
-						<phase>pre-site</phase>
-						<goals>
-							<goal>start</goal>
-						</goals>
-						<configuration>
-							<daemon>true</daemon>
-						</configuration>
-					</execution>
-					<execution>
-						<id>Stop HTTP Server of staged site for linkcheck</id>
-						<phase>post-site</phase>
-						<goals>
-							<goal>stop</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
 	</build>
 	<reporting>
@@ -795,15 +628,10 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-project-info-reports-plugin</artifactId>
 				<version>${maven-project-info-reports-version}</version>
-				<inherited>true</inherited>
+				<inherited>false</inherited>
 				<reportSets>
 					<reportSet>
-						<reports>
-							<report>index</report>
-						</reports>
-						<configuration>
-							<skipEmptyReport>false</skipEmptyReport>
-						</configuration>
+						<reports />
 					</reportSet>
 				</reportSets>
 			</plugin>
@@ -822,39 +650,6 @@
 						</reports>
 					</reportSet>
 				</reportSets>
-			</plugin>
-			<plugin>
-				<!-- Report on broken links in site. -->
-				<!-- To obtain link check report for stage site: -->
-				<!-- 1) mvn -DskipTests clean install post-site -->
-				<!-- 2) mvn site:stage -P site-link-check -->
-				<!-- 3) cp -R target/site/apidocs/ target/staging/ -->
-				<!-- 4) rm -rf target/site -->
-				<!-- 5) mv target/staging/ target/site -->
-				<!-- 6) rm -rf target/linkcheck -->
-				<!-- 7) rm -rf target/site/linkcheck.html -->
-				<!-- 8) mvn -N post-site -->
-				<!-- 9) report available at
-				${basedir}/target/site/linkcheck.html -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-linkcheck-plugin</artifactId>
-				<version>1.2</version>
-				<inherited>false</inherited>
-				<configuration>
-					<baseURL>http://localhost:9999</baseURL>
-					<timeout>10000</timeout>
-					<forceSite>false</forceSite>
-					<excludedPages>
-						<excludedPage>apidocs/**</excludedPage>
-					</excludedPages>
-					<excludedLinks>
-						<excludedLink>//dl.acm.org/**</excludedLink>
-						<excludedLink>http://dl.acm.org/**</excludedLink>
-						<excludedLink>https://dl.acm.org/**</excludedLink>
-						<excludedLink>http://localhost:7878/hi/World</excludedLink>
-						<excludedLink>#</excludedLink>
-					</excludedLinks>
-				</configuration>
 			</plugin>
 		</plugins>
 	</reporting>
@@ -938,37 +733,10 @@
 			<distributionManagement>
 				<site>
 					<id>github-pages-site</id>
-					<name>GitHub pages - deployed by GitHub site plugin</name>
-					<url>docs</url>
+					<name>GitHub pages - deployed by GitHub Action</name>
+					<url>https://officefloor.net</url>
 				</site>
 			</distributionManagement>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>com.github.github</groupId>
-						<artifactId>site-maven-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>release-site-to-github</id>
-								<goals>
-									<goal>site</goal>
-								</goals>
-								<phase>site-deploy</phase>
-								<configuration>
-									<repositoryOwner>officefloor</repositoryOwner>
-									<repositoryName>officefloor.github.io</repositoryName>
-									<server>github</server>
-									<path>
-										${project.distributionManagement.site.url}</path>
-									<merge>true</merge>
-									<message>Site version ${project.version}</message>
-									<noJekyll>true</noJekyll>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
 		</profile>
 		<profile>
 			<id>continuous-integration</id>

@@ -1,0 +1,2 @@
+service:
+  class: net.officefloor.tutorial.springrestspringboot3server.GreetingLogic

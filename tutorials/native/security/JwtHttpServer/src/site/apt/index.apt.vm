@@ -30,15 +30,21 @@ Combined JWT Resource and Authority Tutorial
 
   This tutorial demonstrates combining them.
    
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/JwtHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/native/security/JwtHttpServer}Tutorial Source}}
 
 
 
-*WoOF configuration
+*Configuration
 
   The configuration contains both the {{{../JwtResourceHttpServer/index.html}JWT Resource}} and {{{../JwtAuthorityHttpServer/index.html}JWT Authority}}.  It is joined by the {{{/apidocs/net/officefloor/web/jwt/authority/combined/CombinedServerRetrieveValidateKeysSectionSource.html}CombinedServerRetrieveValidateKeysSectionSource}} that handles the JWT keys being loaded from the {{{/apidocs/net/officefloor/web/jwt/authority/JwtAuthority.html}JwtAuthority}}.
 
-[./images/JwtHttpServer-configuration.png] JwtHttpServer screen shot.
+  The security YAML configuration is:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/security/JWT.yml|ignoreDownloadError=false}
+
+  All endpoints are configured to require HTTPS:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/resource.yml|ignoreDownloadError=false}
 
   As the JWT Authority can be clustered, it allows the application to also be clustered.
     
@@ -53,4 +59,4 @@ Combined JWT Resource and Authority Tutorial
 
 Next
 
-  The {{{../SwaggerHttpServer/index.html}next tutorial}} covers documenting via OpenAPI / Swagger.
+  The {{{../JwtAuthorityHttpServer/index.html}next tutorial}} covers a dedicated JWT authority server issuing and renewing tokens.

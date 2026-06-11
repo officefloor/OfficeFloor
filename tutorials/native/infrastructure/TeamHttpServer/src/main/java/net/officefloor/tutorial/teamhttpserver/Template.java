@@ -48,6 +48,18 @@ public class Template implements Serializable {
 	public Template getThreadNames() {
 		return this;
 	}
+
+	public void setCacheThreadName(String cacheThreadName) {
+		this.cacheThreadName = cacheThreadName;
+	}
+
+	public void setDatabaseThreadName(String databaseThreadName) {
+		this.databaseThreadName = databaseThreadName;
+	}
+
+	public Map<Character, LetterEncryption> getCache() {
+		return this.cache;
+	}
 	// END SNIPPET: values
 
 	private static final long serialVersionUID = 1L;

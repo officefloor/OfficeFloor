@@ -46,6 +46,7 @@ public class AuthenticationManagedObjectSource<A, AC extends Serializable, C>
 	 * Dependency keys.
 	 */
 	public static enum Dependencies {
+		/** Authentication context dependency. */
 		AUTHENTICATION_CONTEXT
 	}
 

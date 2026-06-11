@@ -1,0 +1,3 @@
+service:
+  class: net.officefloor.tutorial.springresthttpserver.GreetingStyleLogic
+  method: casual

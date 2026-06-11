@@ -1,0 +1,8 @@
+security:
+  source: net.officefloor.web.security.scheme.FormHttpSecuritySource
+  properties:
+    realm: Test
+  flows:
+    form: loginRedirect
+loginRedirect:
+  class: net.officefloor.tutorial.authenticationhttpserver.LoginRedirect

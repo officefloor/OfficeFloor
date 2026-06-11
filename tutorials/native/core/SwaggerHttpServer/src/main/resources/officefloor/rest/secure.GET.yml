@@ -1,0 +1,3 @@
+secure:
+  class: net.officefloor.tutorial.swaggerhttpserver.Servicer
+  method: secure

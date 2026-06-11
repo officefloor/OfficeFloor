@@ -47,6 +47,7 @@ public class FileTestSupport implements TestSupport {
 	 * ===================== TestSupport ===========================
 	 */
 
+	/** Default constructor. */
 	public FileTestSupport() {
 		// Nothing to initialise
 	}

@@ -40,9 +40,10 @@ public class AvailableTypeImpl implements AvailableType {
 
 	/**
 	 * Extracts the {@link AvailableType} instances.
-	 * 
-	 * @param managedObjects {@link ManagedObjectNode} instances by name.
-	 * @param compileContext {@link CompileContext}.
+	 *
+	 * @param managedObjects  {@link ManagedObjectNode} instances by name.
+	 * @param compileContext  {@link CompileContext}.
+	 * @param sourceContext   {@link SourceContext}.
 	 * @return Extracted {@link AvailableType} instances.
 	 */
 	public static AvailableType[] extractAvailableTypes(Map<String, ManagedObjectNode> managedObjects,

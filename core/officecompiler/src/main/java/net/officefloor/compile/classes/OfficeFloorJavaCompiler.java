@@ -65,12 +65,18 @@ public abstract class OfficeFloorJavaCompiler {
 	 */
 	@FunctionalInterface
 	public static interface ImplementationRunnable<T extends Throwable> {
+		/**
+		 * Runs with the implementation.
+		 *
+		 * @throws T Possible failure.
+		 */
 		void run() throws T;
 	}
 
 	/**
 	 * Runs with a particular {@link OfficeFloorJavaCompiler} implementation.
 	 * 
+	 * @param <T>                                            Throwable type.
 	 * @param officeFloorJavaCompilerImplementationClassName {@link Class} name of
 	 *                                                       the
 	 *                                                       {@link OfficeFloorJavaCompiler}

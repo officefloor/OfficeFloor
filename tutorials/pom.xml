@@ -15,13 +15,17 @@
 	<description>Tutorials for OfficeFloor</description>
 	<modules>
 		<module>springboot</module>
-		<module>features</module>
-		<module>spring_migration</module>
+		<module>spring_officefloor</module>
 		<module>native</module>
+		<module>features</module>
 		<module>cloud</module>
 		<module>legacy</module>
 		<module>reference</module>
 	</modules>
+	<properties>
+		<maven.deploy.skip>true</maven.deploy.skip>
+		<skipPublishing>true</skipPublishing>
+	</properties>
 	<build>
 		<plugins>
 			<plugin>
@@ -45,10 +49,10 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>org.sonatype.plugins</groupId>
-				<artifactId>nexus-staging-maven-plugin</artifactId>
+				<groupId>org.sonatype.central</groupId>
+				<artifactId>central-publishing-maven-plugin</artifactId>
 				<configuration>
-					<skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
+					<skipPublishing>true</skipPublishing>
 				</configuration>
 			</plugin>
 			<plugin>

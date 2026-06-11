@@ -1,3 +1,23 @@
+/*-
+ * #%L
+ * Composition
+ * %%
+ * Copyright (C) 2005 - 2026 Daniel Sagenschneider
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 package net.officefloor.activity.compose.section;
 
 import net.officefloor.activity.compose.ComposeConfiguration;
@@ -184,10 +204,19 @@ public class ComposeSectionSource extends AbstractSectionSource {
             // Obtain details of function
             ComposedFunction composedFunction;
             String className = functionConfiguration.getClassName();
+            String procedureSource = functionConfiguration.getProcedure();
             if (className != null) {
 
                 // Capture the composed function
                 composedFunction = ComposeSectionSource.loadProcedure(functionName, className,
+                        functionConfiguration, sectionDesigner, sectionSourceContext,
+                        procedureLoader, procedureArchitect, externalObjects);
+                functions.put(functionName, composedFunction);
+
+            } else if (procedureSource != null) {
+
+                // Capture the composed function (custom procedure source)
+                composedFunction = ComposeSectionSource.loadCustomProcedure(functionName, procedureSource,
                         functionConfiguration, sectionDesigner, sectionSourceContext,
                         procedureLoader, procedureArchitect, externalObjects);
                 functions.put(functionName, composedFunction);
@@ -203,6 +232,9 @@ public class ComposeSectionSource extends AbstractSectionSource {
 
         // SectionOutputs created for #-prefixed external input references (deduplicated by name)
         Map<String, SectionOutput> externalSectionOutputs = new HashMap<>();
+
+        // SectionOutputs created for unhandled escalations (deduplicated by type name)
+        Map<String, SectionOutput> sectionEscalations = new HashMap<>();
 
         // Map composition (following deterministic order)
         for (String composedFunctionName : new ArrayList<>(functions.keySet()).stream().sorted().toList()) {
@@ -258,7 +290,6 @@ public class ComposeSectionSource extends AbstractSectionSource {
                     });
 
             // Map escalations
-            Map<String, SectionOutput> sectionEscalations = new HashMap<>();
             link(composedFunction.getConfiguration().getEscalations(), composeConfiguration.getComposition(),
                     composedFunction.getEscalations(), ComposedFunctionOutput::getOutputName,
                     (handlerName) -> {
@@ -365,7 +396,26 @@ public class ComposeSectionSource extends AbstractSectionSource {
         }
 
         // Load the configuration
-        PropertyList properties = new PropertyListImpl();
+        PropertyList properties = sectionSourceContext.createPropertyList();
+
+        // Load procedure properties from context (convention: "{functionName}.procedure.{propertyName}")
+        String procedurePropertyPrefix = functionName + ".procedure.";
+        for (String propName : sectionSourceContext.getPropertyNames()) {
+            if (propName.startsWith(procedurePropertyPrefix)) {
+                String propKey = propName.substring(procedurePropertyPrefix.length());
+                properties.addProperty(propKey).setValue(sectionSourceContext.getProperty(propName));
+            }
+        }
+
+        // Load inline properties from YAML (as fallback if not already set from context)
+        Map<String, String> configProperties = functionConfiguration.getProperties();
+        if (configProperties != null) {
+            for (Map.Entry<String, String> entry : configProperties.entrySet()) {
+                if (properties.getProperty(entry.getKey()) == null) {
+                    properties.addProperty(entry.getKey()).setValue(entry.getValue());
+                }
+            }
+        }
 
         // Determine if next
         String next = functionConfiguration.getNext();
@@ -474,6 +524,60 @@ public class ComposeSectionSource extends AbstractSectionSource {
         public SubSectionOutput getOutput(String outputName) {
             return this.procedure.getSubSectionOutput(outputName);
         }
+    }
+
+    private static ComposedFunction loadCustomProcedure(String functionName, String procedureSourceName,
+                               FunctionConfiguration functionConfiguration,
+                               SectionDesigner sectionDesigner, SectionSourceContext sectionSourceContext,
+                               ProcedureLoader procedureLoader, ProcedureArchitect<SubSection> procedureArchitect,
+                               Map<String, SectionObject> externalObjects) {
+
+        // Resource is optional for custom procedure sources
+        String resource = functionConfiguration.getResource();
+
+        // Determine the method name
+        String methodName = functionConfiguration.getMethod();
+        if (methodName == null) {
+            Procedure[] allProcedures = procedureLoader.listProcedures(resource);
+            Procedure[] sourceProcedures = Arrays.stream(allProcedures)
+                    .filter(p -> procedureSourceName.equals(p.getServiceName()))
+                    .toArray(Procedure[]::new);
+            if (sourceProcedures.length == 1) {
+                methodName = sourceProcedures[0].getProcedureName();
+            } else {
+                throw sectionDesigner.addIssue("Require configuring method for " + functionName
+                        + " (procedure source: " + procedureSourceName + ") as it contains multiple procedures ("
+                        + Arrays.stream(sourceProcedures).map(Procedure::getProcedureName).collect(Collectors.joining(", ")) + ")");
+            }
+        }
+
+        // Determine if next
+        String next = functionConfiguration.getNext();
+        boolean isNext = ((next != null) && (!next.isEmpty()));
+
+        // Load the procedure
+        PropertyList properties = new PropertyListImpl();
+        SubSection procedure = procedureArchitect.addProcedure(functionName, resource, procedureSourceName, methodName, isNext, properties);
+
+        // Load the procedure type
+        ProcedureType procedureType = procedureLoader.loadProcedureType(resource, procedureSourceName, methodName, properties);
+
+        // Load the object dependencies
+        for (ProcedureObjectType procedureObjectType : procedureType.getObjectTypes()) {
+            String objectType = procedureObjectType.getObjectType().getName();
+            String objectTypeQualifier = procedureObjectType.getTypeQualifier();
+            String objectName = ((objectTypeQualifier != null) ? objectTypeQualifier + "_" : "") + objectType;
+            SectionObject externalObject = externalObjects.computeIfAbsent(objectName, (key) -> {
+                SectionObject object = sectionDesigner.addSectionObject(objectName, objectType);
+                if (objectTypeQualifier != null) {
+                    object.setTypeQualifier(objectTypeQualifier);
+                }
+                return object;
+            });
+            sectionDesigner.link(procedure.getSubSectionObject(procedureObjectType.getObjectName()), externalObject);
+        }
+
+        return new ProcedureComposedFunction(functionConfiguration, procedureType, procedure);
     }
 
     private static ComposedFunction loadSectionSource(String functionName, FunctionConfiguration functionConfiguration,

@@ -36,7 +36,9 @@ public class TutorialArchiveLocatorUtil {
 
 	/**
 	 * Obtains the location of the archive file.
-	 * 
+	 *
+	 * @param artifactId Maven artifact ID.
+	 * @param suffix     Archive file suffix.
 	 * @return Location of the archive file.
 	 */
 	public static File getArchiveFile(String artifactId, String suffix) {

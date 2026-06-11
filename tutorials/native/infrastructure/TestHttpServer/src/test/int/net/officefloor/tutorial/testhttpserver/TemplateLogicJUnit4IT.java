@@ -25,7 +25,7 @@ public class TemplateLogicJUnit4IT {
 	public void integrationTest() throws Exception {
 
 		// Send request to add
-		HttpPost request = new HttpPost("http://localhost:7878/template+add?a=1&b=2");
+		HttpPost request = new HttpPost("http://localhost:7878/add?a=1&b=2");
 		HttpResponse response = this.client.execute(request);
 
 		// Ensure added the values

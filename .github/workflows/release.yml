@@ -24,15 +24,15 @@ jobs:
       with:
         distribution: temurin
         java-version: 17
-        server-id: sonatype-nexus-staging
+        server-id: central
         server-username: SONATYPE_USERNAME
         server-password: SONATYPE_PASSWORD
         gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
         gpg-passphrase: GPG_PASSPHRASE
 
-    - name: Deploy to Maven Central
+    - name: Release to Maven Central
       run: |
-        mvn -V -B -e \
+        mvn -B -ntp \
           -Dofficefloor-deploy=sonatype \
           -Dgpg.passphrase="${GPG_PASSPHRASE}" \
           clean deploy \
@@ -41,3 +41,4 @@ jobs:
         SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
         SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
         GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        OFFICEFLOOR_SKIP_STRESS_TESTS: true
