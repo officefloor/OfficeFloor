@@ -1,0 +1,3 @@
+service:
+  class: net.officefloor.tutorial.springrestgovernance.GovernedService
+  govern: [ audit ]

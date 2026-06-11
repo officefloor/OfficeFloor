@@ -37,6 +37,7 @@ public interface StateManager extends AutoCloseable {
 	 * Loads the object from the {@link ManagedObject} asynchronously.
 	 * 
 	 * @param boundObjectName Bound name of the {@link ManagedObject}.
+	 * @param <O>             Object type.
 	 * @param user            {@link ObjectUser} to receive the loaded object (or
 	 *                        possible failure).
 	 * @throws UnknownObjectException If unknown bound object name.
@@ -46,6 +47,7 @@ public interface StateManager extends AutoCloseable {
 	/**
 	 * Obtains the object for the {@link ManagedObject} synchronously.
 	 * 
+	 * @param <O>                   Object type.
 	 * @param boundObjectName       Bound name of the {@link ManagedObject}.
 	 * @param timeoutInMilliseconds Time out in milliseconds to wait for the
 	 *                              {@link ManagedObject} creation.

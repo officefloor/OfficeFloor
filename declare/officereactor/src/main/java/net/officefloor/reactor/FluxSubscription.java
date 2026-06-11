@@ -59,8 +59,9 @@ public class FluxSubscription<T> extends AbstractSubscription<T> {
 
 	/**
 	 * Instantiate.
-	 * 
-	 * @param context {@link ManagedFunctionContext}.
+	 *
+	 * @param comonentType Component type.
+	 * @param context      {@link ManagedFunctionContext}.
 	 */
 	public FluxSubscription(Class<?> comonentType, ManagedFunctionContext<?, ?> context) {
 		super(context);

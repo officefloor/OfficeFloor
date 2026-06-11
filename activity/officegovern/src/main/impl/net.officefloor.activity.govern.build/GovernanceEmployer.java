@@ -1,3 +1,23 @@
+/*-
+ * #%L
+ * Governance
+ * %%
+ * Copyright (C) 2005 - 2026 Daniel Sagenschneider
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 package net.officefloor.activity.govern.build;
 
 import net.officefloor.activity.compose.build.ComposeArchitect;
@@ -46,7 +66,7 @@ public class GovernanceEmployer {
             @Override
             public Map<String, OfficeGovernance> addGovernances(String governanceDirectory, PropertyList properties) throws Exception {
                 Map<String, OfficeGovernance> governances = new HashMap<>();
-                composeArchitect.addCompositions((composeContext, listener) -> {
+                composeArchitect.addCompositions(Governance.class.getSimpleName(), (composeContext, listener) -> {
                     listener.composition(composeContext.getItemName(),
                             composeContext.addComposition(composeContext.getItemName(), new GovernanceComposeSource(), GovernConfiguration.class));
                 }, governanceDirectory, properties, governances::put);
@@ -89,7 +109,7 @@ public class GovernanceEmployer {
                 // Load the source based governance
                 String source = configuration.getSource();
                 governance = officeArchitect.addOfficeGovernance(governanceName, source);
-                Map<String, String> properties = configuration.getConfig();
+                Map<String, String> properties = configuration.getProperties();
                 PropertyList propertyList = officeContext.createPropertyList();
                 if (properties != null) {
                     properties.forEach((name, value) -> {

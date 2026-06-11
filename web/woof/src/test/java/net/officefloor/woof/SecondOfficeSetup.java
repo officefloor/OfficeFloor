@@ -44,6 +44,8 @@ import net.officefloor.frame.api.source.TestSource;
 public class SecondOfficeSetup extends AbstractOfficeFloorSource
 		implements OfficeFloorCompilerConfigurer, OfficeFloorCompilerConfigurerServiceFactory {
 
+	public static final String SECOND_OFFICE_NAME = "second";
+
 	/**
 	 * Indicates whether to configure second {@link Office}.
 	 */
@@ -86,7 +88,7 @@ public class SecondOfficeSetup extends AbstractOfficeFloorSource
 
 	@Override
 	public void sourceOfficeFloor(OfficeFloorDeployer deployer, OfficeFloorSourceContext context) throws Exception {
-		deployer.addDeployedOffice("second", new SecondOfficeSource(), null);
+		deployer.addDeployedOffice(SECOND_OFFICE_NAME, new SecondOfficeSource(), null);
 	}
 
 	/**

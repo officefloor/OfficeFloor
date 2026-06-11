@@ -1,0 +1,8 @@
+service:
+  class: net.officefloor.tutorial.catshttpserver.ServiceLogic
+  method: service
+  next: send
+
+send:
+  class: net.officefloor.tutorial.catshttpserver.ServiceLogic
+  method: send

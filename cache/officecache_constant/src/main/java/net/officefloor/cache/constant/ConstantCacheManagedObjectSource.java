@@ -63,6 +63,7 @@ public class ConstantCacheManagedObjectSource<K, V>
 	 * Flow keys.
 	 */
 	public static enum Flows {
+		/** Refreshes the cache. */
 		REFRESH
 	}
 

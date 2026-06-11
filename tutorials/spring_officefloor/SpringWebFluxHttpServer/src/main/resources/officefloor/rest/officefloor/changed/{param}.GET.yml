@@ -1,0 +1,4 @@
+path:
+  resource: net.officefloor.tutorial.springwebfluxhttpserver.SpringRestController
+  procedure: SpringWebFluxController
+  method: path

@@ -113,10 +113,12 @@ public class ModelMetaData {
 	 */
 	private String name;
 
+	/** @return Name. */
 	public String getName() {
 		return this.name;
 	}
 
+	/** @param name Name. */
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -126,10 +128,12 @@ public class ModelMetaData {
 	 */
 	private String packageName;
 
+	/** @return Package name. */
 	public String getPackageName() {
 		return this.packageName;
 	}
 
+	/** @param packageName Package name. */
 	public void setPackageName(String packageName) {
 		this.packageName = packageName;
 	}
@@ -139,10 +143,12 @@ public class ModelMetaData {
 	 */
 	private List<String> imports = new LinkedList<String>();
 
+	/** @return Import classes. */
 	public List<String> getImportClasses() {
 		return this.imports;
 	}
 
+	/** @param importClass Import class to add. */
 	public void addImportClass(String importClass) {
 		this.imports.add(importClass);
 	}
@@ -152,10 +158,12 @@ public class ModelMetaData {
 	 */
 	private String classSuffix;
 
+	/** @return Class suffix. */
 	public String getClassSuffix() {
 		return (this.classSuffix == null ? "" : this.classSuffix);
 	}
 
+	/** @param classSuffix Class suffix. */
 	public void setClassSuffix(String classSuffix) {
 		this.classSuffix = classSuffix;
 	}
@@ -166,10 +174,12 @@ public class ModelMetaData {
 	 */
 	private List<String> interfaces = new LinkedList<String>();
 
+	/** @return Interfaces. */
 	public List<String> getInterfaces() {
 		return this.interfaces;
 	}
 
+	/** @param interfaceName Interface name to add. */
 	public void addInterface(String interfaceName) {
 		this.interfaces.add(interfaceName);
 	}
@@ -179,10 +189,12 @@ public class ModelMetaData {
 	 */
 	private List<FieldMetaData> fields = new LinkedList<FieldMetaData>();
 
+	/** @return Fields. */
 	public List<FieldMetaData> getFields() {
 		return this.fields;
 	}
 
+	/** @param field {@link FieldMetaData} to add. */
 	public void addField(FieldMetaData field) {
 		this.fields.add(field);
 	}
@@ -192,10 +204,12 @@ public class ModelMetaData {
 	 */
 	private List<ListMetaData> lists = new LinkedList<ListMetaData>();
 
+	/** @return Lists. */
 	public List<ListMetaData> getLists() {
 		return this.lists;
 	}
 
+	/** @param list {@link ListMetaData} to add. */
 	public void addList(ListMetaData list) {
 		this.lists.add(list);
 	}

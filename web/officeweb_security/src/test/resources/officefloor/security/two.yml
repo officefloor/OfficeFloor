@@ -1,0 +1,4 @@
+security:
+  source: net.officefloor.web.security.scheme.MockChallengeHttpSecuritySource
+  properties:
+    realm: TWO

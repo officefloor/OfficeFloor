@@ -42,7 +42,10 @@ public class StartApplicationHttpAuthenticateFunction<AC extends Serializable, C
 	 * Dependency keys.
 	 */
 	public static enum Dependencies {
-		AUTHENTICATION_CONTEXT, CREDENTIALS
+		/** Authentication context. */
+		AUTHENTICATION_CONTEXT,
+		/** Credentials. */
+		CREDENTIALS
 	}
 
 	/*

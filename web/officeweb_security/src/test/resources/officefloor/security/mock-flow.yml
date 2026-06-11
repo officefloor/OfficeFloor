@@ -1,0 +1,9 @@
+security:
+  source: net.officefloor.web.security.scheme.MockFlowHttpSecuritySource
+  properties:
+    realm: TEST
+  flows:
+    CHALLENGE: challenge
+
+challenge:
+  class: ${TestClass}$MockChallengeHandler

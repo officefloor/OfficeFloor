@@ -273,6 +273,7 @@ public class TomcatServletManager implements ServletManager, ServletServicer {
 		}
 	}
 
+	/** {@link ServletContextListener} for application setup. */
 	public static class SetupApplicationListener implements ServletContextListener {
 		@Override
 		public void contextInitialized(ServletContextEvent sce) {

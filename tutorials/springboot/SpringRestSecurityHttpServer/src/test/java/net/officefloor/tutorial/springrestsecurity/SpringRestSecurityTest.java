@@ -117,5 +117,20 @@ public class SpringRestSecurityTest {
 		mvc.perform(get("/security/rolesallowed"))
 			.andExpect(status().isForbidden());
 	}
+
+	@Test
+	@WithMockUser(username = "admin", roles = "ADMIN")
+	public void spel_bean_reference_grants_admin() throws Exception {
+		mvc.perform(get("/security/rolebean"))
+			.andExpect(status().isOk())
+			.andExpect(content().string("Admin access via @PreAuthorize SpEL bean reference"));
+	}
+
+	@Test
+	@WithMockUser(username = "user", roles = "USER")
+	public void spel_bean_reference_denies_non_admin() throws Exception {
+		mvc.perform(get("/security/rolebean"))
+			.andExpect(status().isForbidden());
+	}
 }
 // END SNIPPET: tutorial

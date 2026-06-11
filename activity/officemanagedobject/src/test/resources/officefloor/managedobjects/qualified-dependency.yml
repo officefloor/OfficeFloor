@@ -1,0 +1,5 @@
+managed-object:
+  class: ${TestClass}$MockQualifiedDependency
+#  dependencies:
+#    ${TestClass}$MockQualifiedManagedObject:
+#      qualifier: qualifier-two

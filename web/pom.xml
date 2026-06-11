@@ -25,6 +25,7 @@
         <module>officeweb_rest</module>
 		<module>officeweb_security</module>
 		<module>officeweb_template</module>
+		<module>officeweb_thymeleaf</module>
 		<module>woof</module>
 		<module>woof_test</module>
 	</modules>

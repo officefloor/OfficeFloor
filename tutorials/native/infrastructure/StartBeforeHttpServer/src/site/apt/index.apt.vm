@@ -1,0 +1,65 @@
+~~~
+~~ #%L
+~~ Start Before Tutorial
+~~ %%
+~~ Copyright (C) 2005 - 2020 Daniel Sagenschneider
+~~ %%
+~~ Licensed under the Apache License, Version 2.0 (the "License");
+~~ you may not use this file except in compliance with the License.
+~~ You may obtain a copy of the License at
+~~ 
+~~      http://www.apache.org/licenses/LICENSE-2.0
+~~ 
+~~ Unless required by applicable law or agreed to in writing, software
+~~ distributed under the License is distributed on an "AS IS" BASIS,
+~~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~~ See the License for the specific language governing permissions and
+~~ limitations under the License.
+~~ #L%
+~~~
+
+                                               -----------------------
+                                             Start Up Ordering Tutorial 
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+Start Up Ordering Tutorial
+
+  This tutorial demonstrates ability to order the start up of various {{{/apidocs/net/officefloor/frame/api/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} instances.  It will do so by ordering the {{{https://flywaydb.org/}Flyway}} migration to always occur before JPA validation of the schema.
+
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/native/infrastructure/StartBeforeHttpServer}Tutorial Source}}
+
+
+
+*Start Order Configuration
+
+  Flyway is configured as per the {{{../../native-persistence/FlywayHttpServer/index.html}Flyway Tutorial}}.
+  
+  The following demonstrates the object configuration in the <<<officefloor/objects/>>> directory:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/objects/DataSource.yml|ignoreDownloadError=false}
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/objects/EntityManager.yml|ignoreDownloadError=false}
+
+  The <<<start-after>>> configuration in <<<EntityManager.yml>>> indicates for JPA to start after the Flyway migration has complete.
+  
+  This ordering is even enforced if the start up is executed by another team, as per the tutorial's configuration:
+  
+%{snippet|file=${basedir}/src/main/resources/officefloor/teams/DataSource.yml|ignoreDownloadError=false}
+
+  There is also <<<start-before>>> for flagging to starting before.
+  
+  Note that without this configuration, the {{{/apidocs/net/officefloor/frame/api/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} instances are likely to start in parallel for improved start up performance.  However, in the case of this tutorial, the JPA validation could then occur before the Flyway migration completed causing the JPA validation to fail.  Hence, the start ordering is provided to avoid these issues.
+
+
+*Testing
+
+  The following test starts the application and retrieves the migrated data:
+  
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/startbeforehttpserver/StartBeforeHttpServerTest.java|ignoreDownloadError=false}
+
+
+Next
+
+  The {{{../ConstantCacheHttpServer/index.html}next tutorial}} covers caching constant values to avoid repeated computation or lookup.

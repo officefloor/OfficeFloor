@@ -89,8 +89,8 @@ public class ArchiveAwareClassLoaderFactory {
 
 	/**
 	 * Instantiate with specific parent {@link ClassLoader}.
-	 * 
-	 * @param parentClassLoader
+	 *
+	 * @param parentClassLoader Parent {@link ClassLoader} to use for loading.
 	 */
 	public ArchiveAwareClassLoaderFactory(ClassLoader parentClassLoader) {
 		this.instantiator = (urls) -> new URLClassLoader(urls, parentClassLoader);

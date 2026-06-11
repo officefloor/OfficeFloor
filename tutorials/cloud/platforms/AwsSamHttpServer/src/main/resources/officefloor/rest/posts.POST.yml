@@ -1,0 +1,3 @@
+createPost:
+  class: net.officefloor.tutorial.awssamhttpserver.SamLogic
+  method: createPost

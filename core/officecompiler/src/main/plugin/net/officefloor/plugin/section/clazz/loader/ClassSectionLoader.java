@@ -109,6 +109,13 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 	private final ClassSectionFlowManufacturerContextImpl flowContext;
 
 	/**
+	 * Name of the single method to load. When set, only that function's object
+	 * dependencies are named by their function object label rather than by type.
+	 * When <code>null</code>, all methods are loaded with type-based naming.
+	 */
+	private String singleMethod = null;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param designer       {@link SectionDesigner}.
@@ -121,6 +128,20 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 		// Create the dependency/flow contexts
 		this.objectContext = new ClassSectionObjectManufacturerContextImpl(designer, sectionContext);
 		this.flowContext = new ClassSectionFlowManufacturerContextImpl(designer, sectionContext);
+	}
+
+	/**
+	 * Configures single method mode. When the named method is loaded, its object
+	 * dependencies are named by the function object label rather than the type,
+	 * allowing custom {@link net.officefloor.activity.procedure.spi.ProcedureSource} labels to flow through as
+	 * {@link SectionObject} names.
+	 *
+	 * @param methodName Name of the single method.
+	 * @return <code>this</code> for chaining.
+	 */
+	public ClassSectionLoader setSingleMethod(String methodName) {
+		this.singleMethod = methodName;
+		return this;
 	}
 
 	/**
@@ -323,13 +344,19 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 			}
 
 			// Link functions
-			NEXT_FUNCTION: for (SectionClassFunction sectionFunction : new ArrayList<>(
-					this.flowContext.sectionFunctions.values())) {
+			NEXT_FUNCTION: for (Map.Entry<String, SectionClassFunction> sectionFunctionEntry : new ArrayList<>(
+					this.flowContext.sectionFunctions.entrySet())) {
+
+				SectionClassFunction sectionFunction = sectionFunctionEntry.getValue();
 
 				// Determine if already configured
 				if (sectionFunction.isAlreadyConfigured()) {
 					continue NEXT_FUNCTION;
 				}
+
+				// Single-method mode: this function's objects use label-based naming
+				boolean isSingleMethodTarget = singleMethod != null
+						&& singleMethod.equals(sectionFunctionEntry.getKey());
 
 				// Obtain the function details
 				SectionFunction function = sectionFunction.managedFunction;
@@ -436,8 +463,10 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 					// Obtain the dependency
 					String objectQualifier = functionObjectType.getTypeQualifier();
 					String objectTypeName = functionObjectType.getObjectType().getName();
-					SectionDependencyObjectNode objectDependency = this.objectContext.getDependency(objectQualifier,
-							objectTypeName, functionObjectType);
+					SectionDependencyObjectNode objectDependency = isSingleMethodTarget
+							? this.objectContext.getDependencyByLabel(functionObjectType.getObjectName(),
+									objectQualifier, objectTypeName, functionObjectType)
+							: this.objectContext.getDependency(objectQualifier, objectTypeName, functionObjectType);
 
 					// Link dependency (if available)
 					if (objectDependency != null) {
@@ -941,6 +970,12 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 
 				// Obtain the function name
 				String functionName = functionDecoration.getFunctionName(functionType, ClassSectionLoader.this);
+
+				// In single-method mode only the named function is loaded
+				if (ClassSectionLoader.this.singleMethod != null
+						&& !ClassSectionLoader.this.singleMethod.equals(functionName)) {
+					continue NEXT_FUNCTION;
+				}
 
 				// Add function
 				String functionTypeName = functionType.getFunctionName();
@@ -1539,6 +1574,46 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 			this.sectionObjects.put(objectName, sectionObject);
 
 			// Return the section object
+			return sectionObject;
+		}
+
+		/**
+		 * Obtains the dependency using the function object label as the section object
+		 * name (single-method mode). The label flows straight through rather than being
+		 * replaced by the type-derived name, while the type is still set correctly for
+		 * auto-wiring.
+		 */
+		private SectionDependencyObjectNode getDependencyByLabel(String label, String qualifier, String typeName,
+				AnnotatedType annotatedType) throws Exception {
+
+			// Use label as key — no type-based deduplication
+			SectionDependencyObjectNode existing = this.sectionObjects.get(label);
+			if (existing != null) {
+				return existing;
+			}
+
+			// Attempt to load via plugin
+			if (annotatedType != null) {
+				this.annotatedType = annotatedType;
+				this.isAugmented = false;
+				for (ClassSectionObjectManufacturer manufacturer : this.context
+						.loadOptionalServices(ClassSectionObjectManufacturerServiceFactory.class)) {
+					SectionDependencyObjectNode dependency = manufacturer.createObject(this);
+					if (this.isAugmented) {
+						return null;
+					}
+					if (dependency != null) {
+						return dependency;
+					}
+				}
+			}
+
+			// Create section object named by label, typed correctly for auto-wiring
+			SectionObject sectionObject = this.designer.addSectionObject(label, typeName);
+			if (ClassSectionLoader.this.isQualifier(qualifier)) {
+				sectionObject.setTypeQualifier(qualifier);
+			}
+			this.sectionObjects.put(label, sectionObject);
 			return sectionObject;
 		}
 

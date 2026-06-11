@@ -1,0 +1,7 @@
+retrieveAllPosts:
+  class: net.officefloor.tutorial.cosmosasyncdbhttpserver.CosmosAsyncDbLogic
+  method: retrieveAllPosts
+  next: sendPosts
+sendPosts:
+  class: net.officefloor.tutorial.cosmosasyncdbhttpserver.CosmosAsyncDbLogic
+  method: sendPosts
