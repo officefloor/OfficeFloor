@@ -1,0 +1,3 @@
+service:
+  class: ${TestClass}$GovernanceService
+  govern: [ mock ]

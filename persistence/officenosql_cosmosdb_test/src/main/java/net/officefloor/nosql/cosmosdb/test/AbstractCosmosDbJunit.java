@@ -149,8 +149,8 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 	 * Instantiate.
 	 * 
 	 * @param emulatorInstance {@link CosmosEmulatorInstance}. May be
-	 *                         <code>null</code> for
-	 *                         {@link CosmosEmulatorInstance#DEFAULT}.
+	 *                         <code>null</code> for default
+	 *                         {@link CosmosEmulatorInstance}.
 	 * @param testDatabse      {@link CosmosTestDatabase}. May be <code>null</code>
 	 *                         for new {@link CosmosTestDatabase}.
 	 */
@@ -233,7 +233,8 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 
 	/**
 	 * Start CosmosDb locally.
-	 * 
+	 *
+	 * @param skip Handles test skip.
 	 * @throws Exception If fails to start.
 	 */
 	protected void startCosmosDb(BiFunction<String, Throwable, Exception> skip) throws Exception {
@@ -310,7 +311,8 @@ public abstract class AbstractCosmosDbJunit<T extends AbstractCosmosDbJunit<T>> 
 
 	/**
 	 * Stops locally running CosmosDb.
-	 * 
+	 *
+	 * @param skip Handles test skip.
 	 * @throws Throwable If fails to stop.
 	 */
 	protected void stopCosmosDb(BiFunction<String, Throwable, Exception> skip) throws Throwable {

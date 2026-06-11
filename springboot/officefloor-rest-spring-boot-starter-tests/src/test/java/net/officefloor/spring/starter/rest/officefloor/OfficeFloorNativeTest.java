@@ -1,0 +1,132 @@
+/*-
+ * #%L
+ * OfficeFloor REST Spring Boot Starter
+ * %%
+ * Copyright (C) 2005 - 2026 Daniel Sagenschneider
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
+package net.officefloor.spring.starter.rest.officefloor;
+
+import net.officefloor.spring.starter.rest.AbstractMockMvcVerification;
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+/**
+ * Confirms native {@link net.officefloor.frame.api.manage.OfficeFloor} functionality can sit beside Spring.
+ */
+@SpringBootTest
+@AutoConfigureMockMvc
+public class OfficeFloorNativeTest extends AbstractMockMvcVerification {
+
+    @Test
+    public void httpPathParameter() throws Exception {
+        this.mvc.perform(get(this.getPath("/path/1")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("ID=1")));
+    }
+
+    @Test
+    public void httpQueryParameter() throws Exception {
+        this.mvc.perform(get(this.getPath("/query?name=value")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("value")));
+    }
+
+    @Test
+    public void httpHeaderParameter() throws Exception {
+        this.mvc.perform(get(this.getPath("/header")).header("header", "VALUE"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("VALUE")));
+    }
+
+    @Test
+    public void httpObject() throws Exception {
+        this.mvc.perform(post(this.getPath("/httpObject")).with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(new RequestEntity("ENTITY"))))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("ENTITY")));
+    }
+
+    @Test
+    public void httpResponse() throws Exception {
+        this.mvc.perform(get(this.getPath("/httpResponse")))
+                .andExpect(status().isCreated())
+                .andExpect(content().string(equalTo("created")));
+    }
+
+    @Test
+    public void httpServletRequest() throws Exception {
+        this.mvc.perform(get(this.getPath("/httpServletRequest?name=Servlet")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("Servlet")));
+    }
+
+    @Test
+    public void httpServletResponse() throws Exception {
+        this.mvc.perform(get(this.getPath("/httpServletResponse")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("Servlet")));
+    }
+
+    @Test
+    public void serverHttpConnection() throws Exception {
+        this.mvc.perform(get(this.getPath("/serverHttpConnection")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("GET")));
+    }
+
+    @Test
+    public void httpRequestState() throws Exception {
+        this.mvc.perform(get(this.getPath("/httpRequestState/42")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("ID=42")));
+    }
+
+    @Test
+    public void team() throws Exception {
+        this.mvc.perform(get(this.getPath("/team")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(new BaseMatcher<String>() {
+                    @Override
+                    public boolean matches(Object actual) {
+                        String[] threadNames = ((String) actual).split("---");
+                        assertEquals(2, threadNames.length, "Should be only two thread names");
+                        assertNotEquals(threadNames[0], threadNames[1], "Should be different threads");
+                        return true;
+                    }
+
+                    @Override
+                    public void describeTo(Description description) {
+                        description.appendText("Should be different threads");
+                    }
+                }));
+    }
+
+}

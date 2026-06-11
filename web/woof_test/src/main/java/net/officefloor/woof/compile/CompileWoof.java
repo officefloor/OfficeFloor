@@ -119,7 +119,8 @@ public class CompileWoof {
 
 	/**
 	 * Opens the {@link MockWoofServer}.
-	 * 
+	 *
+	 * @param propertyNameValuePairs Property name/value pairs.
 	 * @return {@link MockWoofServer}.
 	 * @throws Exception If fails to open {@link MockWoofServer}.
 	 */
@@ -128,7 +129,17 @@ public class CompileWoof {
 
 			// Determine if load
 			if (!this.isLoad) {
-				context.notLoad();
+
+				// Still require architects to load (just no functionality)
+				context.notLoadOverrideProperties();
+				context.notLoadAdditionalProfiles();
+				context.notLoadHttpServer();
+				context.notLoadWoof();
+				context.notLoadObjects();
+				context.notLoadExternal();
+				context.notLoadResources();
+				context.notLoadTeams();
+				context.notLoadWoofExtensions();
 			}
 
 			// Do not load external configuration

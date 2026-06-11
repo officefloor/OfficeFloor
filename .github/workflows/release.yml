@@ -1,0 +1,44 @@
+name: Release to Maven Central
+
+on:
+  workflow_dispatch:
+
+env:
+  BUILD_MAVEN_VERSION: 3.9.2
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Set up Maven
+      uses: stCarolas/setup-maven@v4.5
+      with:
+        maven-version: ${{ env.BUILD_MAVEN_VERSION }}
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: 17
+        server-id: central
+        server-username: SONATYPE_USERNAME
+        server-password: SONATYPE_PASSWORD
+        gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+        gpg-passphrase: GPG_PASSPHRASE
+
+    - name: Release to Maven Central
+      run: |
+        mvn -B -ntp \
+          -Dofficefloor-deploy=sonatype \
+          -Dgpg.passphrase="${GPG_PASSPHRASE}" \
+          clean deploy \
+          --file bom/pom.xml
+      env:
+        SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+        SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+        GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        OFFICEFLOOR_SKIP_STRESS_TESTS: true

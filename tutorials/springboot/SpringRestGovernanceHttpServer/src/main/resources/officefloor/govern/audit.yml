@@ -1,0 +1,2 @@
+governance:
+  class: net.officefloor.tutorial.springrestgovernance.AuditGovernance

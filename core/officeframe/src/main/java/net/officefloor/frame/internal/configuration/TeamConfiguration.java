@@ -49,7 +49,7 @@ public interface TeamConfiguration<TS extends TeamSource> {
 	/**
 	 * Indicates if requested no {@link TeamOversight}.
 	 * 
-	 * @return <cod>true</code> to request no {@link TeamOversight}.
+	 * @return {@code true} to request no {@link TeamOversight}.
 	 */
 	boolean isRequestNoTeamOversight();
 

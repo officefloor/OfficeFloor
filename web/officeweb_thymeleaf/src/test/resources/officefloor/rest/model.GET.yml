@@ -1,0 +1,7 @@
+service:
+  class: ${TestClass}$ModelService
+  next: render
+
+render:
+  procedure: Thymeleaf
+  resource: model

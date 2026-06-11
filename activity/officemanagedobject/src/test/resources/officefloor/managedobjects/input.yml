@@ -1,0 +1,10 @@
+managed-object:
+  source: ${TestClass}$MockInputManagedObjectSource
+  scope: FUNCTION
+  properties:
+    required.property: configured
+  outputs:
+    HANDLE_FLOW: handle
+
+handle:
+  class: ${TestClass}$FlowService

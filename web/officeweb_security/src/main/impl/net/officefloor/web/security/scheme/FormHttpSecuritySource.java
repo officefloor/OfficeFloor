@@ -51,6 +51,7 @@ public class FormHttpSecuritySource extends
 	 * Dependency keys.
 	 */
 	public static enum Dependencies {
+		/** Credential store dependency. */
 		CREDENTIAL_STORE
 	}
 
@@ -58,6 +59,7 @@ public class FormHttpSecuritySource extends
 	 * Flow keys.
 	 */
 	public static enum Flows {
+		/** Form login page flow. */
 		FORM_LOGIN_PAGE
 	}
 

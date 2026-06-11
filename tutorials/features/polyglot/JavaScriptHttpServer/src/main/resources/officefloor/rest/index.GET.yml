@@ -1,0 +1,8 @@
+validate:
+  resource: net/officefloor/tutorial/javascripthttpserver/Validate.js
+  procedure: JavaScript
+  method: validate
+  next: send
+
+send:
+  class: net.officefloor.tutorial.javascripthttpserver.ResponseLogic

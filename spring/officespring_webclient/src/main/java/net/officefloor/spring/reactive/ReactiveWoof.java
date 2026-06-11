@@ -87,6 +87,7 @@ public class ReactiveWoof {
 	/**
 	 * Sends the response.
 	 * 
+	 * @param <T>      Response type.
 	 * @param flow     {@link AsynchronousFlow}.
 	 * @param response {@link ObjectResponse}.
 	 * @return {@link Consumer} for sending the response.

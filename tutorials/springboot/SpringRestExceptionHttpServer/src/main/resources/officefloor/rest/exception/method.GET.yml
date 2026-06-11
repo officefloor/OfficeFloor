@@ -1,0 +1,7 @@
+service:
+  class: net.officefloor.tutorial.springrestexceptionhttpserver.MethodService
+  escalations:
+    net.officefloor.tutorial.springrestexceptionhttpserver.MockException: handler
+
+handler:
+  class: net.officefloor.tutorial.springrestexceptionhttpserver.MethodExceptionHandler

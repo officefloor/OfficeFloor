@@ -22,6 +22,8 @@ package net.officefloor.woof;
 
 import java.io.IOException;
 
+import net.officefloor.frame.test.FileTestSupport;
+import net.officefloor.frame.test.TestSupportExtension;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -38,18 +40,25 @@ import net.officefloor.server.http.HttpClientTestUtil;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.build.HttpInput;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests the WoOF server.
  * 
  * @author Daniel Sagenschneider
  */
-public class WoofServerTest extends AbstractTestCase {
+@ExtendWith(TestSupportExtension.class)
+public class WoofServerTest extends AbstractModelTestCase {
 
 	/**
 	 * {@link System} property for user home.
 	 */
 	private static final String USER_HOME = "user.home";
+
+	private final FileTestSupport files = new FileTestSupport();
 
 	/**
 	 * Obtains the user home path.
@@ -57,44 +66,48 @@ public class WoofServerTest extends AbstractTestCase {
 	 * @return User home path.
 	 */
 	private String userHomePath() throws IOException {
-		return this.findFile(".config/officefloor/application-test.properties").getParentFile().getParentFile()
+		return this.files.findFile(".config/officefloor/application-test.properties").getParentFile().getParentFile()
 				.getParentFile().getAbsolutePath();
 	}
 
 	/**
 	 * Ensure can invoke {@link HttpRequest} on the WoOF server.
 	 */
-	public void testWoofServerDefaultPorts() throws IOException {
+	@Test
+	public void woofServerDefaultPorts() throws IOException {
 		this.doRequestTest("/template", "TEMPLATE");
 	}
 
 	/**
 	 * Ensure can invoke {@link HttpRequest} on the WoOF server.
 	 */
-	public void testWoofServerNonDefaultPorts() throws IOException {
+	@Test
+	public void woofServerNonDefaultPorts() throws IOException {
 
 		// Open the OfficeFloor (on non-default ports)
-		this.officeFloor = WoOF.open(8787, 9797);
+		this.officeFloor = WoOF.open(8787, 9797, NO_COMPOSITION_PROPERTY_NAME, NO_COMPOSITION_PROPERTY_VALUE);
 
 		// Create the client
 		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
 
 			// Ensure can obtain template
 			HttpResponse response = client.execute(new HttpGet("http://localhost:8787/template"));
-			assertEquals("Incorrect template", "TEMPLATE", HttpClientTestUtil.entityToString(response));
+			assertEquals("TEMPLATE", HttpClientTestUtil.entityToString(response), "Incorrect template");
 		}
 	}
 
 	/**
 	 * Ensure can override context.
 	 */
-	public void testContextualOverload() throws IOException {
+	@Test
+	public void contextualOverload() throws IOException {
 
 		// Run within context (without WoOF loads)
 		this.officeFloor = WoofLoaderSettings.contextualLoad((context) -> {
 
 			// Don't load WoOF
 			context.notLoadWoof();
+			context.notLoadObjects();
 
 			// Register handling
 			context.extend((woofContext) -> {
@@ -118,12 +131,12 @@ public class WoofServerTest extends AbstractTestCase {
 
 			// Ensure WoOF template not loaded
 			HttpResponse response = client.execute(new HttpGet("http://localhost:7878/template"));
-			assertEquals("Should not be found", 404, response.getStatusLine().getStatusCode());
+			assertEquals(404, response.getStatusLine().getStatusCode(), "Should not be found");
 
 			// Ensure can obtain configured in service
 			response = client.execute(new HttpGet("http://localhost:7878/extended"));
-			assertEquals("Should obtain value", 200, response.getStatusLine().getStatusCode());
-			assertEquals("Incorrect entity", "OVERRIDE", HttpClientTestUtil.entityToString(response));
+			assertEquals(200, response.getStatusLine().getStatusCode(), "Should obtain value");
+			assertEquals("OVERRIDE", HttpClientTestUtil.entityToString(response), "Incorrect entity");
 		}
 	}
 
@@ -136,10 +149,11 @@ public class WoofServerTest extends AbstractTestCase {
 	/**
 	 * Ensure default JSON configured.
 	 */
-	public void testDefaultJsonObject() throws IOException {
+	@Test
+	public void defaultJsonObject() throws IOException {
 
 		// Open the OfficeFloor (on default ports)
-		this.officeFloor = WoOF.open();
+		this.officeFloor = WoOF.open(NO_COMPOSITION_PROPERTY_NAME, NO_COMPOSITION_PROPERTY_VALUE);
 
 		// Create the client
 		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
@@ -149,8 +163,8 @@ public class WoofServerTest extends AbstractTestCase {
 			post.addHeader("Content-Type", "application/json");
 			post.setEntity(new StringEntity("{\"message\":\"TEST\"}"));
 			HttpResponse response = client.execute(post);
-			assertEquals("Incorrect template", "{\"message\":\"TEST-mock\"}",
-					HttpClientTestUtil.entityToString(response));
+			assertEquals("{\"message\":\"TEST-mock\"}",
+					HttpClientTestUtil.entityToString(response), "Incorrect template");
 		}
 	}
 
@@ -159,35 +173,40 @@ public class WoofServerTest extends AbstractTestCase {
 	 * 
 	 * @throws IOException
 	 */
-	public void testTeams() throws IOException {
+	@Test
+	public void teams() throws IOException {
 		this.doRequestTest("/teams", "\"DIFFERENT THREAD\"");
 	}
 
 	/**
 	 * Ensure can invoke a {@link Procedure}.
 	 */
-	public void testProcedure() throws IOException {
+	@Test
+	public void procedure() throws IOException {
 		this.doRequestTest("/procedure", "\"PROCEDURE\"");
 	}
 
 	/**
 	 * Ensure can override {@link Property} value via default properties file.
 	 */
-	public void testApplicationProperties() throws IOException {
+	@Test
+	public void applicationProperties() throws IOException {
 		this.doRequestTest("/property", "DEFAULT_OVERRIDE");
 	}
 
 	/**
 	 * Ensure can override {@link Property} value via profile properties file.
 	 */
-	public void testApplicationProfileProperties() throws IOException {
+	@Test
+	public void applicationProfileProperties() throws IOException {
 		this.doRequestTest("/property", "TEST_OVERRIDE", WoOF.DEFAULT_OFFICE_PROFILES, "test");
 	}
 
 	/**
 	 * Ensure can specify contextual profile.
 	 */
-	public void testContextOverrideProperty() throws IOException {
+	@Test
+	public void contextOverrideProperty() throws IOException {
 		WoofLoaderSettings.contextualLoad((context) -> {
 			context.addOverrideProperty("Property.function.override", "CONTEXT_OVERRIDE");
 			this.doRequestTest("/property", "CONTEXT_OVERRIDE");
@@ -198,7 +217,8 @@ public class WoofServerTest extends AbstractTestCase {
 	/**
 	 * Ensure can override {@link Property} via environment.
 	 */
-	public void testEnvironmentProperty() throws Exception {
+	@Test
+	public void environmentProperty() throws Exception {
 		this.doEnvironmentTest("/property", "ENV_OVERRIDE", "OFFICEFLOOR.application.Property.function.override",
 				"ENV_OVERRIDE");
 	}
@@ -206,14 +226,16 @@ public class WoofServerTest extends AbstractTestCase {
 	/**
 	 * Ensure can override {@link Property} via user properties.
 	 */
-	public void testUserProperties() throws IOException {
+	@Test
+	public void userProperties() throws IOException {
 		this.doSystemPropertiesTest("/property", "USER_OVERRIDE", USER_HOME, this.userHomePath());
 	}
 
 	/**
 	 * Ensure can override {@link Property} via user profile properties.
 	 */
-	public void testUserProfileProperties() throws IOException {
+	@Test
+	public void userProfileProperties() throws IOException {
 		this.doSystemPropertiesTest("/property", "USER_TEST_OVERRIDE", USER_HOME, this.userHomePath(),
 				WoOF.DEFAULT_OFFICE_PROFILES, "test");
 	}
@@ -221,7 +243,8 @@ public class WoofServerTest extends AbstractTestCase {
 	/**
 	 * Ensure can override {@link Property} value via {@link System}.
 	 */
-	public void testSystemProperty() throws IOException {
+	@Test
+	public void systemProperty() throws IOException {
 		this.doSystemPropertiesTest("/property", "SYSTEM_OVERRIDE", "OFFICE.Property.function.override",
 				"SYSTEM_OVERRIDE");
 	}
@@ -229,14 +252,16 @@ public class WoofServerTest extends AbstractTestCase {
 	/**
 	 * Ensure can override {@link Property} value via command line parameters.
 	 */
-	public void testCommandLineProperty() throws IOException {
+	@Test
+	public void commandLineProperty() throws IOException {
 		this.doRequestTest("/property", "COMMAND_LINE", "OFFICE.Property.function.override", "COMMAND_LINE");
 	}
 
 	/**
 	 * Ensure no external properties configured.
 	 */
-	public void testNoExternalProperties() throws IOException {
+	@Test
+	public void noExternalProperties() throws IOException {
 		WoofLoaderSettings.contextualLoad((context) -> {
 			context.notLoadExternal();
 			this.doSystemPropertiesTest("/property", "DEFAULT_OVERRIDE", "OFFICE.Property.function.override",
@@ -248,14 +273,16 @@ public class WoofServerTest extends AbstractTestCase {
 	/**
 	 * Ensure can specify single profile.
 	 */
-	public void testSingleProfile() throws IOException {
+	@Test
+	public void singleProfile() throws IOException {
 		this.doSystemPropertiesTest("/profile", "test", WoOF.DEFAULT_OFFICE_PROFILES, "test");
 	}
 
 	/**
 	 * Ensure handle multiple profiles.
 	 */
-	public void testMultipleProfiles() throws IOException {
+	@Test
+	public void multipleProfiles() throws IOException {
 		this.doSystemPropertiesTest("/profile", "test,unknown,override", "OFFICE.profiles",
 				"test ,  unknown, override ");
 	}
@@ -263,28 +290,32 @@ public class WoofServerTest extends AbstractTestCase {
 	/**
 	 * Ensure can specify profile via environment.
 	 */
-	public void testEnvironmentProfile() throws Exception {
+	@Test
+	public void environmentProfile() throws Exception {
 		this.doEnvironmentTest("/profile", "environment", "OFFICEFLOOR." + WoOF.DEFAULT_OFFICE_PROFILES, "environment");
 	}
 
 	/**
 	 * Ensure can specify profile via {@link System}.
 	 */
-	public void testSystemProfile() throws IOException {
+	@Test
+	public void systemProfile() throws IOException {
 		this.doSystemPropertiesTest("/profile", "system", WoOF.DEFAULT_OFFICE_PROFILES, "system");
 	}
 
 	/**
 	 * Ensure can load profile via command line.
 	 */
-	public void testCommandLineProfile() throws IOException {
+	@Test
+	public void commandLineProfile() throws IOException {
 		this.doRequestTest("/profile", "commandline", WoOF.DEFAULT_OFFICE_PROFILES, "commandline");
 	}
 
 	/**
 	 * Ensure can specify contextual profile.
 	 */
-	public void testContextProfile() throws IOException {
+	@Test
+	public void contextProfile() throws IOException {
 		WoofLoaderSettings.contextualLoad((context) -> {
 			context.notLoadExternal();
 			context.addProfile("test");

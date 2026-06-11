@@ -71,17 +71,29 @@ public class UndertowHttpServerImplementationTest extends AbstractHttpServerImpl
 	public static class RawUndertowHttpServer extends AbstractUndertowHttpServer {
 
 		private static final byte[] HELLO_WORLD = "hello world".getBytes(Charset.forName("UTF-8"));
-		private static final ByteBuffer HELLO_WORLD_BUFFER = ByteBuffer.wrap(HELLO_WORLD);
+		private static final ByteBuffer HELLO_WORLD_BUFFER = createHelloWorldBuffer();
 		private static final HttpString CONTENT_LENGTH = new HttpString("Content-Length");
 		private static final HttpString CONTENT_TYPE = new HttpString("Content-Type");
 		private static final String TYPE_PLAIN = "text/plain";
 
+		private static final java.util.concurrent.Executor SAME_THREAD = Runnable::run;
+
+		private static ByteBuffer createHelloWorldBuffer() {
+			ByteBuffer buffer = ByteBuffer.allocateDirect(HELLO_WORLD.length);
+			buffer.put(HELLO_WORLD);
+			buffer.flip();
+			return buffer;
+		}
+
 		@Override
 		protected ProcessManager service(HttpServerExchange exchange) throws Exception {
-			exchange.getResponseHeaders().put(CONTENT_LENGTH, HELLO_WORLD.length);
-			exchange.getResponseHeaders().put(CONTENT_TYPE, TYPE_PLAIN);
-			exchange.getResponseChannel().write(HELLO_WORLD_BUFFER.duplicate());
-			exchange.endExchange();
+			exchange.getRequestReceiver().receiveFullBytes((ex, bytes) -> {
+				ex.dispatch(SAME_THREAD, () -> {
+					ex.getResponseHeaders().put(CONTENT_LENGTH, HELLO_WORLD.length);
+					ex.getResponseHeaders().put(CONTENT_TYPE, TYPE_PLAIN);
+					ex.getResponseSender().send(HELLO_WORLD_BUFFER.duplicate());
+				});
+			});
 			return () -> {
 				// no cancel handling
 			};

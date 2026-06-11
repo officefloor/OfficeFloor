@@ -42,7 +42,7 @@ import net.officefloor.web.jwt.validate.JwtValidateKey;
  * <li>The instance retrieves all {@link JwtAccessKey} instances from a central
  * store, and identifies a new {@link JwtAccessKey} is required.</li>
  * <li>The instance creates the {@link JwtAccessKey} and stores it in the
- * central store.</li>
+ * central store.
  * <ul>
  * <li>Note: the active window for the {@link JwtAccessKey} should be in the
  * future. It should only be active after a time that all instances in the

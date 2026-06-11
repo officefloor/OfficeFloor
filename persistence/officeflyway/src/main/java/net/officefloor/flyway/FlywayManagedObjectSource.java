@@ -49,6 +49,7 @@ public class FlywayManagedObjectSource
 	 * Dependency keys.
 	 */
 	public static enum DependencyKeys {
+		/** Data source dependency. */
 		DATA_SOURCE
 	}
 

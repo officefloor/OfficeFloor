@@ -1,4 +1,24 @@
 ~~~
+~~ #%L
+~~ Spring REST Validation HTTP Server Tutorial
+~~ %%
+~~ Copyright (C) 2005 - 2026 Daniel Sagenschneider
+~~ %%
+~~ Licensed under the Apache License, Version 2.0 (the "License");
+~~ you may not use this file except in compliance with the License.
+~~ You may obtain a copy of the License at
+~~ 
+~~      http://www.apache.org/licenses/LICENSE-2.0
+~~ 
+~~ Unless required by applicable law or agreed to in writing, software
+~~ distributed under the License is distributed on an "AS IS" BASIS,
+~~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~~ See the License for the specific language governing permissions and
+~~ limitations under the License.
+~~ #L%
+~~~
+
+~~~
 ~~ Spring REST Validation HTTP Server Tutorial
 ~~~
 
@@ -22,7 +42,7 @@ Bean Validation in OfficeFloor REST YAML Composition
    * <<<POST /order/binding>>> — uses <<<BindingResult>>> to receive validation errors inside the
      service method and build a structured error response.
 
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/spring/SpringRestValidationHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestValidationHttpServer}Tutorial Source}}
 
 
 
@@ -81,6 +101,60 @@ Bean Validation in OfficeFloor REST YAML Composition
 
 
 
+*Structured error response — <<<@RestControllerAdvice>>> for <<<MethodArgumentNotValidException>>>
+
+  When the service method does not declare a <<<BindingResult>>> parameter, Spring throws
+  <<<MethodArgumentNotValidException>>> on validation failure.  A <<<@RestControllerAdvice>>>
+  catches this and returns a structured body — typically a map of field names to error messages —
+  that clients can display field-by-field:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestvalidation/ValidationErrorResponse.java|ignoreDownloadError=false}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestvalidation/ValidationControllerAdvice.java|ignoreDownloadError=false}
+
+  The advice works identically for OfficeFloor service methods and Spring <<<@RestController>>>
+  methods — no additional configuration is needed.  The test verifies both the 400 status and
+  the per-field error structure:
+
++--
+// response body for { "product": "", "quantity": 0 }
+{
+  "errors": {
+    "product":  ["Product name is required"],
+    "quantity": ["Quantity must be at least 1"]
+  }
+}
++--
+
+
+
+*Custom constraint validators
+
+  Custom <<<@Constraint>>> annotations backed by a <<<ConstraintValidator>>> implementation work
+  without any change.  They are invoked by the Jakarta Bean Validation machinery during
+  <<<@Valid>>> processing — OfficeFloor does not intercept or replace that machinery.
+
+  The example below validates that an order quantity is even (items sold in pairs).  The
+  validator uses <<<disableDefaultConstraintViolation()>>> and <<<buildConstraintViolationWithTemplate()>>>
+  to produce a specific message, exactly as in a plain Spring MVC application:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestvalidation/EvenQuantity.java|ignoreDownloadError=false}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestvalidation/EvenQuantityValidator.java|ignoreDownloadError=false}
+
+  The annotation is applied to the request DTO alongside standard Jakarta constraints:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestvalidation/BulkOrderRequest.java|ignoreDownloadError=false}
+
+  The service method and YAML are identical to the standard <<<@Valid>>> pattern — no special
+  configuration is needed for custom constraints:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/order/bulk.POST.yml|ignoreDownloadError=false}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestvalidation/PlaceBulkOrderService.java|ignoreDownloadError=false}
+
+
+
 *Testing
 
   Tests use Spring Boot's <<<MockMvc>>> — no OfficeFloor-specific test utilities are required:
@@ -91,5 +165,4 @@ Bean Validation in OfficeFloor REST YAML Composition
 
 Next
 
-  The {{{../SpringRestSecurityHttpServer/index.html}Spring REST Security tutorial}} demonstrates
-  Spring Security integration with OfficeFloor REST YAML composition.
+  The {{{../SpringRestSecurityHttpServer/index.html}Spring REST Security tutorial}} demonstrates Spring Security integration with OfficeFloor REST YAML composition.

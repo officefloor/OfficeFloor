@@ -42,6 +42,7 @@ public class HttpSessionObjectManagedObject
 	 * Dependency keys for the {@link HttpSessionObjectManagedObject}.
 	 */
 	public static enum Dependencies {
+		/** HTTP session dependency. */
 		HTTP_SESSION
 	}
 

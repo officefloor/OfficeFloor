@@ -54,7 +54,6 @@ public class ProcedureLoaderUtil {
 	 * 
 	 * @param clazz {@link Class}.
 	 * @return {@link Procedure} instances for {@link Class}.
-	 * @throws Exception If fails to load {@link Procedure} instances.
 	 */
 	public static Procedure[] listProcedures(Class<?> clazz) {
 		return listProcedures(clazz.getName());
@@ -65,7 +64,6 @@ public class ProcedureLoaderUtil {
 	 * 
 	 * @param resource Resource.
 	 * @return {@link Procedure} instances for {@link Class}.
-	 * @throws Exception If fails to load {@link Procedure} instances.
 	 */
 	public static Procedure[] listProcedures(String resource) {
 		return newProcedureLoader().listProcedures(resource);
@@ -154,7 +152,6 @@ public class ProcedureLoaderUtil {
 	 * 
 	 * @param clazz              {@link Class}.
 	 * @param expectedProcedures Expected {@link Procedure} instances.
-	 * @throws Exception If fails to validate.
 	 */
 	public static void validateProcedures(Class<?> clazz, Procedure... expectedProcedures) {
 		validateProcedures(clazz.getName(), expectedProcedures);
@@ -165,7 +162,6 @@ public class ProcedureLoaderUtil {
 	 * 
 	 * @param resource           Resource.
 	 * @param expectedProcedures Expected {@link Procedure} instances.
-	 * @throws Exception If fails to validate.
 	 */
 	public static void validateProcedures(String resource, Procedure... expectedProcedures) {
 

@@ -90,7 +90,6 @@ import net.officefloor.web.security.impl.HttpAccessAdministrationSource;
 import net.officefloor.web.security.impl.HttpAccessControlManagedObjectSource;
 import net.officefloor.web.security.impl.HttpAuthenticationManagedObjectSource;
 import net.officefloor.web.security.impl.HttpChallengeContextManagedObjectSource;
-import net.officefloor.web.security.impl.HttpSecurityConfiguration;
 import net.officefloor.web.security.impl.HttpSecurityExecuteManagedObjectSource;
 import net.officefloor.web.security.impl.HttpSecuritySectionSource;
 import net.officefloor.web.security.scheme.AnonymousHttpSecuritySource;
@@ -104,6 +103,10 @@ import net.officefloor.web.security.type.HttpSecuritySupportingManagedObjectDepe
 import net.officefloor.web.security.type.HttpSecuritySupportingManagedObjectType;
 import net.officefloor.web.security.type.HttpSecurityType;
 import net.officefloor.web.spi.security.AuthenticationContext;
+import net.officefloor.activity.compose.build.ComposeArchitect;
+import net.officefloor.activity.compose.build.ComposeContext;
+import net.officefloor.activity.compose.build.ComposeLinkHandler;
+import net.officefloor.activity.compose.build.ComposeSource;
 import net.officefloor.web.spi.security.HttpChallengeContext;
 import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.spi.security.HttpSecurityContext;
@@ -119,15 +122,17 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 
 	/**
 	 * Employs the {@link HttpSecurityArchitect}.
-	 * 
+	 *
 	 * @param webArchitect        {@link WebArchitect}.
+	 * @param composeArchitect    {@link ComposeArchitect}.
 	 * @param officeArchitect     {@link OfficeArchitect}.
 	 * @param officeSourceContext {@link OfficeSourceContext}.
 	 * @return {@link HttpSecurityArchitect}.
 	 */
 	public static HttpSecurityArchitect employHttpSecurityArchitect(WebArchitect webArchitect,
-			OfficeArchitect officeArchitect, OfficeSourceContext officeSourceContext) {
-		return new HttpSecurityArchitectEmployer(webArchitect, officeArchitect, officeSourceContext);
+	                                                                ComposeArchitect composeArchitect, OfficeArchitect officeArchitect,
+																	OfficeSourceContext officeSourceContext) {
+		return new HttpSecurityArchitectEmployer(webArchitect, composeArchitect, officeArchitect, officeSourceContext);
 	}
 
 	/**
@@ -147,6 +152,11 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 	private final WebArchitect webArchitect;
 
 	/**
+	 * {@link ComposeArchitect}.
+	 */
+	private final ComposeArchitect composeArchitect;
+
+	/**
 	 * {@link OfficeArchitect}.
 	 */
 	private final OfficeArchitect officeArchitect;
@@ -157,7 +167,7 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 	private final OfficeSourceContext officeSourceContext;
 
 	/**
-	 * Added {@link HttpSecurityArchitectImpl} instances.
+	 * Added {@link HttpSecurityBuilder} instances.
 	 */
 	private List<HttpSecurityBuilderImpl<?, ?, ?, ?, ?>> securities = new ArrayList<>();
 
@@ -178,14 +188,16 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 
 	/**
 	 * Instantiate.
-	 * 
+	 *
 	 * @param webArchitect        {@link WebArchitect}.
+	 * @param composeArchitect    {@link ComposeArchitect}.
 	 * @param officeArchitect     {@link OfficeArchitect}.
 	 * @param officeSourceContext {@link OfficeSourceContext}.
 	 */
-	private HttpSecurityArchitectEmployer(WebArchitect webArchitect, OfficeArchitect officeArchitect,
-			OfficeSourceContext officeSourceContext) {
+	private HttpSecurityArchitectEmployer(WebArchitect webArchitect, ComposeArchitect composeArchitect,
+										  OfficeArchitect officeArchitect, OfficeSourceContext officeSourceContext) {
 		this.webArchitect = webArchitect;
+		this.composeArchitect = composeArchitect;
 		this.officeArchitect = officeArchitect;
 		this.officeSourceContext = officeSourceContext;
 	}
@@ -241,6 +253,25 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 
 		// Return the HTTP security builder
 		return security;
+	}
+
+	@Override
+	public HttpSecurityBuilder addHttpSecurity(String securityName, String securityLocation,
+			PropertyList properties) throws Exception {
+		return this.composeArchitect.addComposition(securityName, new HttpSecurityComposeSource(),
+				securityLocation, properties, HttpSecurityConfiguration.class);
+	}
+
+	@Override
+	public Map<String, HttpSecurityBuilder> addHttpSecurities(String securityDirectory,
+			PropertyList properties) throws Exception {
+		Map<String, HttpSecurityBuilder> result = new HashMap<>();
+		this.composeArchitect.addCompositions(HttpSecurity.class.getSimpleName(), (composeContext, listener) ->
+				listener.composition(composeContext.getItemName(),
+						composeContext.addComposition(composeContext.getItemName(),
+								new HttpSecurityComposeSource(), HttpSecurityConfiguration.class)),
+				securityDirectory, properties, result::put);
+		return result;
 	}
 
 	@Override
@@ -671,7 +702,7 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 	 * {@link HttpSecurityBuilder} implementation.
 	 */
 	private class HttpSecurityBuilderImpl<A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>>
-			implements HttpSecurityBuilder, HttpSecurityContext, HttpSecurityConfiguration<A, AC, C, O, F> {
+			implements HttpSecurityBuilder, HttpSecurityContext, net.officefloor.web.security.impl.HttpSecurityConfiguration<A, AC, C, O, F> {
 
 		/**
 		 * Name of the {@link HttpSecurity}.
@@ -1054,6 +1085,11 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 			return builder;
 		}
 
+		@Override
+		public OfficeManagedObject getHttpAccessControl() {
+			return this.httpAccessControl;
+		}
+
 		/*
 		 * =============== HttpSecurityConfiguration ====================
 		 */
@@ -1178,7 +1214,7 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param annotation {@link HttpFlowSecurerAnnotation}.
+		 * @param httpSecurerBuilder {@link HttpSecurerBuilderImpl}.
 		 */
 		private HttpFlowSecurerImpl(HttpSecurerBuilderImpl httpSecurerBuilder) {
 			this.httpSecurerBuilder = httpSecurerBuilder;
@@ -1275,7 +1311,7 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 	 * {@link HttpFlowSecurer} {@link ManagedFunctionSource}.
 	 */
 	@PrivateSource
-	private class HttpFlowSecurerManagedFunctionSource extends AbstractManagedFunctionSource {
+	private static class HttpFlowSecurerManagedFunctionSource extends AbstractManagedFunctionSource {
 
 		/**
 		 * Name of the secure {@link ManagedFunction}.
@@ -1325,6 +1361,69 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 				function.addObject(this.annotation.argumentType);
 			}
 			function.addAnnotation(this.annotation);
+		}
+	}
+
+	/**
+	 * {@link ComposeSource} for loading {@link HttpSecurityBuilder} from yml.
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private class HttpSecurityComposeSource implements ComposeSource<HttpSecurityBuilder, HttpSecurityConfiguration> {
+
+		@Override
+		public HttpSecurityBuilder source(ComposeContext<HttpSecurityConfiguration> context) throws Exception {
+			OfficeArchitect officeArchitect = context.getOfficeArchitect();
+			OfficeSourceContext officeSourceContext = context.getOfficeSourceContext();
+			String securityName = context.getItemName();
+			HttpSecuritySourceConfiguration secConfig = context.getConfiguration().getSecurity();
+
+			// Instantiate source
+			HttpSecuritySource source = (HttpSecuritySource) officeSourceContext
+					.loadClass(secConfig.getSource()).getDeclaredConstructor().newInstance();
+
+			// Build property list for type loading
+			PropertyList propertyList = officeSourceContext.createPropertyList();
+			Map<String, String> props = secConfig.getProperties();
+			if (props != null) {
+				props.forEach((name, value) -> propertyList.addProperty(name).setValue(value));
+			}
+
+			// Load security type to obtain flow types
+			HttpSecurityLoader loader = new HttpSecurityLoaderImpl(officeArchitect, officeSourceContext, securityName);
+			HttpSecurityType<?, ?, ?, ?, ?> type = loader.loadHttpSecurityType(source, propertyList);
+
+			// Create builder (registers the source instance)
+			HttpSecurityBuilder builder = HttpSecurityArchitectEmployer.this.addHttpSecurity(securityName, source);
+
+			// Apply properties to builder
+			if (props != null) {
+				props.forEach(builder::addProperty);
+			}
+
+			// Link security flows to composition functions
+			context.linkFlows(secConfig.getFlows(), type.getFlowTypes(), new ComposeLinkHandler<HttpSecurityFlowType<?>>() {
+				@Override
+				public String getFlowName(HttpSecurityFlowType<?> flowType) {
+					return flowType.getFlowName();
+				}
+
+				@Override
+				public void link(HttpSecurityFlowType<?> flowType, OfficeSectionInput handler) {
+					officeArchitect.link(builder.getOutput(flowType.getFlowName()), handler);
+				}
+
+				@Override
+				public void handleNonConfiguredFlow(HttpSecurityFlowType<?> flowType) {
+					officeArchitect.addIssue("Must configure handler for " + HttpSecurity.class.getSimpleName() + " output " + flowType.getFlowName());
+				}
+
+				@Override
+				public void handleExtraConfiguredFlow(String flowName, String handlerName) {
+					officeArchitect.addIssue(HttpSecurity.class.getSimpleName() + " does not define flow " + flowName);
+				}
+			});
+
+			return builder;
 		}
 	}
 

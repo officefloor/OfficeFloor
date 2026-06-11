@@ -57,10 +57,17 @@ public abstract class AbstractPolyglotObjectTest extends OfficeFrameTestCase {
 		assertNull("Should not dependency inject", object.getDependency());
 	}
 
+	/**
+	 * Creates the {@link ObjectInterface}.
+	 *
+	 * @return {@link ObjectInterface}.
+	 */
 	protected abstract ObjectInterface create();
 
 	/**
 	 * Invoke object.
+	 *
+	 * @throws Throwable On test failure.
 	 */
 	public void testInvokeObject() throws Throwable {
 		CompileOfficeFloor compiler = new CompileOfficeFloor();
@@ -88,12 +95,24 @@ public abstract class AbstractPolyglotObjectTest extends OfficeFrameTestCase {
 		assertSame("Incorrect dependency", dependency, object.getDependency());
 	}
 
+	/** Logic for testing objects. */
 	public static class ObjectLogic {
+		/**
+		 * Services the object.
+		 *
+		 * @param object {@link ObjectInterface}.
+		 * @param out    Output for the object.
+		 */
 		public void service(ObjectInterface object, Out<ObjectInterface> out) {
 			out.set(object);
 		}
 	}
 
+	/**
+	 * Configures the object into the {@link CompileOfficeContext}.
+	 *
+	 * @param context {@link CompileOfficeContext}.
+	 */
 	protected abstract void object(CompileOfficeContext context);
 
 	/**

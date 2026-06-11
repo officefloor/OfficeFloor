@@ -1,0 +1,4 @@
+html:
+  resource: net.officefloor.tutorial.springwebmvchttpserver.SpringController
+  procedure: SpringWebMvcController
+  method: html

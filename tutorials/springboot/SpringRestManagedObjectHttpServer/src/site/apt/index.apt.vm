@@ -1,0 +1,258 @@
+~~~
+~~ #%L
+~~ Spring REST Managed Object HTTP Server Tutorial
+~~ %%
+~~ Copyright (C) 2005 - 2026 Daniel Sagenschneider
+~~ %%
+~~ Licensed under the Apache License, Version 2.0 (the "License");
+~~ you may not use this file except in compliance with the License.
+~~ You may obtain a copy of the License at
+~~
+~~      http://www.apache.org/licenses/LICENSE-2.0
+~~
+~~ Unless required by applicable law or agreed to in writing, software
+~~ distributed under the License is distributed on an "AS IS" BASIS,
+~~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~~ See the License for the specific language governing permissions and
+~~ limitations under the License.
+~~ #L%
+~~~
+
+~~~
+~~ Spring REST Managed Object HTTP Server Tutorial
+~~~
+
+                                               -----------------------
+                                     Spring REST Managed Object Tutorial
+                                               -----------------------
+                                                Daniel Sagenschneider
+                                               -----------------------
+
+Managed Objects in OfficeFloor
+
+  This tutorial introduces OfficeFloor Managed Objects: the native unit of state
+  management inside the OfficeFloor runtime.
+
+  The primary value of managed objects is the ability to implement
+  {{{/apidocs/net/officefloor/frame/api/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}},
+  which makes the object an <<active participant>> in OfficeFloor's execution model.
+  While a Spring bean is always a passive, ready-made value, a
+  {{{/apidocs/net/officefloor/frame/api/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}}
+  can:
+
+   * <<Declare flows>> — named outputs that OfficeFloor wires to downstream functions in
+     the YAML pipeline.  The source triggers them via
+     {{{/apidocs/net/officefloor/frame/api/managedobject/source/ManagedObjectExecuteContext.html}ManagedObjectExecuteContext}},
+     passing a typed argument and an optional completion callback.
+
+   * <<Signal asynchronous completion>> — use
+     {{{/apidocs/net/officefloor/frame/api/managedobject/source/ManagedObjectUser.html}ManagedObjectUser.setManagedObject()}}
+     to hand the constructed object back to OfficeFloor asynchronously.  The function
+     pipeline pauses without blocking any thread and resumes the moment the object is ready.
+
+   * <<Declare dependencies>> on other managed objects or Spring beans, composing managed
+     objects into typed graphs.
+
+   * <<Run startup logic>> via <<<start(ManagedObjectExecuteContext)>>> to open connections
+     or register listeners when the application starts.
+
+  The tutorial shows two endpoints: one using the
+  {{{/apidocs/net/officefloor/plugin/managedobject/clazz/ClassManagedObjectSource.html}ClassManagedObjectSource}}
+  shorthand (via <<<class:>>> in YAML) for a plain POJO, and one using a custom
+  {{{/apidocs/net/officefloor/frame/api/managedobject/source/impl/AbstractManagedObjectSource.html}AbstractManagedObjectSource}}
+  (via <<<source:>>> in YAML) that declares a flow output.
+
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestManagedObjectHttpServer}Tutorial Source}}
+
+
+
+*Maven dependency
+
+%{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+
+
+*Application class
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestmanagedobject/SpringRestManagedObjectApplication.java|ignoreDownloadError=false}
+
+
+
+*Scopes
+
+  The <<<scope>>> field in the YAML controls how long one instance lives and which parts
+  of the request pipeline share it:
+
+*--------------------+------------------------------------------------------------------------+------------------------------------------------------+
+|| Scope             || One instance lives for …                                              || Typical use
+*--------------------+------------------------------------------------------------------------+------------------------------------------------------+
+| <<<PROCESS>>>      | The duration of one request.  All functions (pipeline steps) servicing that request share the same instance. | Correlation IDs, per-request audit logs, request-scoped caches — anything that must be consistent across all steps of a single request.
+*--------------------+------------------------------------------------------------------------+------------------------------------------------------+
+| <<<THREAD>>>       | The lifetime of one thread participating in the request.  When a request is handed off across Teams, each thread gets its own instance. | Per-thread resources that must not cross thread boundaries during a single request's execution.
+*--------------------+------------------------------------------------------------------------+------------------------------------------------------+
+| <<<FUNCTION>>>     | The duration of one function (step) invocation.  Even within the same request, each pipeline step gets a fresh instance. | Step-local scratch state that must not persist beyond a single function call.
+*--------------------+------------------------------------------------------------------------+------------------------------------------------------+
+
+  Both examples in this tutorial use <<<PROCESS>>> scope: a new instance is created when
+  each request arrives and shared across every step that handles that request.
+
+
+
+*Example 1 — <<<class:>>> (ClassManagedObjectSource)
+
+  The <<<class:>>> YAML shorthand delegates to
+  {{{/apidocs/net/officefloor/plugin/managedobject/clazz/ClassManagedObjectSource.html}ClassManagedObjectSource}},
+  which instantiates the named class with its default constructor.  This is the right choice
+  for a plain POJO that needs no flows or asynchronous behaviour.
+
+
+**The managed object
+
+  <<<RequestContext>>> generates its own correlation ID and start timestamp at construction.
+  No Spring annotations, no framework imports:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestmanagedobject/RequestContext.java|ignoreDownloadError=false}
+
+
+**YAML configuration
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/managedobjects/RequestContext.yml|ignoreDownloadError=false}
+
+  Drop any number of YAML files into <<<officefloor/managedobjects/>>>; the starter picks
+  them up automatically at startup.
+
+
+**Service method
+
+  OfficeFloor resolves <<<RequestContext>>> by type, the same way it resolves Spring beans:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestmanagedobject/RequestContextService.java|ignoreDownloadError=false}
+
+
+**REST endpoint
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/request.GET.yml|ignoreDownloadError=false}
+
+
+**Response
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestmanagedobject/RequestContextResponse.java|ignoreDownloadError=false}
+
+  A typical response:
+
++--
+{
+  "correlationId" : "a3f9c2d1-7b4e-4f0a-9c6d-e1b2f3a4d5e6",
+  "startTimeMs"   : 1749200000000
+}
++--
+
+
+
+*Example 2 — <<<source:>>> (custom AbstractManagedObjectSource)
+
+  When a managed object needs to declare flows or perform asynchronous setup, implement
+  {{{/apidocs/net/officefloor/frame/api/managedobject/source/impl/AbstractManagedObjectSource.html}AbstractManagedObjectSource}}
+  directly and reference the class via <<<source:>>> in the YAML.
+  {{{/apidocs/net/officefloor/frame/api/build/None.html}None}} is used as the type
+  parameter for the dependency keys when the source has no dependencies.
+
+
+**The managed object value class
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestmanagedobject/SessionId.java|ignoreDownloadError=false}
+
+
+**The ManagedObjectSource
+
+  <<<SessionIdSource>>> extends
+  {{{/apidocs/net/officefloor/frame/api/managedobject/source/impl/AbstractManagedObjectSource.html}AbstractManagedObjectSource}}
+  with {{{/apidocs/net/officefloor/frame/api/build/None.html}None}} for dependencies (no
+  other objects required) and <<<Flows>>> for the one declared output:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestmanagedobject/SessionIdSource.java|ignoreDownloadError=false}
+
+  OfficeFloor requires every flow declared via <<<context.addFlow()>>> to be wired to a
+  handler in the YAML.  A source triggers the flow at runtime via
+  {{{/apidocs/net/officefloor/frame/api/managedobject/source/ManagedObjectExecuteContext.html}ManagedObjectExecuteContext.invokeStartupProcess()}}
+  (on application start) or via
+  {{{/apidocs/net/officefloor/frame/api/managedobject/source/ManagedObjectUser.html}ManagedObjectUser.setManagedObject()}}
+  for per-request asynchronous completion.
+
+
+**The flow handler
+
+  <<<SessionLogService>>> is wired to the <<<LOG>>> flow.  The
+  {{{/apidocs/net/officefloor/plugin/section/clazz/Parameter.html}@Parameter}} annotation
+  receives the typed argument the source passes when it triggers the flow:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestmanagedobject/SessionLogService.java|ignoreDownloadError=false}
+
+
+**YAML configuration
+
+  The <<<outputs:>>> map wires each declared flow name to a handler function defined in
+  the same YAML file:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/managedobjects/SessionId.yml|ignoreDownloadError=false}
+
+
+**Service method
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestmanagedobject/SessionIdService.java|ignoreDownloadError=false}
+
+
+**REST endpoint
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/session.GET.yml|ignoreDownloadError=false}
+
+
+
+*Testing
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springrestmanagedobject/SpringRestManagedObjectHttpServerTest.java|ignoreDownloadError=false}
+
+  The <<<class:>>> tests confirm that <<<PROCESS>>> scope delivers a freshly-constructed
+  <<<RequestContext>>> per request — two successive calls produce different correlation IDs
+  — and that the start timestamp falls within the wall-clock window of the request.
+
+  The <<<source:>>> tests confirm that <<<SessionIdSource>>> is wired correctly — the
+  endpoint responds successfully — and that <<<PROCESS>>> scope gives each request a
+  distinct <<<SessionId>>> instance.
+
+
+
+*What you have now
+
+  After completing this tutorial you can:
+
+   * Understand that the primary value of
+     {{{/apidocs/net/officefloor/frame/api/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}}
+     is enabling flows and asynchronous completion managed by the OfficeFloor framework
+
+   * Use the <<<class:>>> shorthand (backed by
+     {{{/apidocs/net/officefloor/plugin/managedobject/clazz/ClassManagedObjectSource.html}ClassManagedObjectSource}})
+     for plain POJOs that need no flows
+
+   * Extend
+     {{{/apidocs/net/officefloor/frame/api/managedobject/source/impl/AbstractManagedObjectSource.html}AbstractManagedObjectSource}}
+     with {{{/apidocs/net/officefloor/frame/api/build/None.html}None}} for unused key
+     parameters, and declare flow outputs via <<<context.addFlow()>>>
+
+   * Wire flows to handler functions in the YAML via <<<outputs:>>> and receive typed
+     arguments via
+     {{{/apidocs/net/officefloor/plugin/section/clazz/Parameter.html}@Parameter}}
+
+   * Choose <<<PROCESS>>>, <<<THREAD>>>, or <<<FUNCTION>>> scope to match the intended
+     lifetime: per-request, per-thread-within-request, or per-function-step
+
+   * Inject any managed object into service methods by type, alongside Spring beans,
+     with no annotation required on either the class or the method
+
+
+
+Next
+
+  The {{{../SpringRestSupplierHttpServer/index.html}Supplier tutorial}} demonstrates
+  registering a library of related managed objects from a single YAML declaration using a
+  <<<SupplierSource>>> — ideal for third-party library integration.

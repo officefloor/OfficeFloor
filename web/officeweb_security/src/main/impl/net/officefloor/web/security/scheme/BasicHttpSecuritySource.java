@@ -158,6 +158,7 @@ public class BasicHttpSecuritySource extends
 	 * Dependency keys.
 	 */
 	public static enum Dependencies {
+		/** Credential store dependency. */
 		CREDENTIAL_STORE
 	}
 
