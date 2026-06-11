@@ -34,8 +34,28 @@ public interface OfficeFloorIssues {
 	 * issues in construction.
 	 */
 	public static enum AssetType {
-	OFFICE_FLOOR, OFFICE, TEAM, EXECUTIVE, MANAGED_OBJECT, MANAGED_OBJECT_POOL, GOVERNANCE, ADMINISTRATOR, PROCESS,
-	THREAD, FUNCTION
+		/** OfficeFloor asset. */
+		OFFICE_FLOOR,
+		/** Office asset. */
+		OFFICE,
+		/** Team asset. */
+		TEAM,
+		/** Executive asset. */
+		EXECUTIVE,
+		/** Managed object asset. */
+		MANAGED_OBJECT,
+		/** Managed object pool asset. */
+		MANAGED_OBJECT_POOL,
+		/** Governance asset. */
+		GOVERNANCE,
+		/** Administrator asset. */
+		ADMINISTRATOR,
+		/** Process asset. */
+		PROCESS,
+		/** Thread asset. */
+		THREAD,
+		/** Function asset. */
+		FUNCTION
 	}
 
 	/**

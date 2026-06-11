@@ -1,0 +1,23 @@
+# Enforce LF line endings in the repository and on checkout across all platforms.
+# This prevents Windows git (core.autocrlf=true) from converting templates and
+# other text files to CRLF, which would cause Thymeleaf and similar renderers
+# to emit CRLF in HTTP response bodies, breaking cross-platform tests.
+* text=auto eol=lf
+
+# Explicitly mark binary formats so git never mangles them.
+*.jar binary
+*.class binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.zip binary
+*.gz binary
+*.tar binary
+*.war binary
+*.ear binary
+*.pdf binary
+*.ttf binary
+*.woff binary
+*.woff2 binary

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
   #%L
-  AWS SAM Tutorial
+  Google Function Tutorial
   %%
   Copyright (C) 2005 - 2021 Daniel Sagenschneider
   %%
@@ -19,7 +19,9 @@
   #L%
   -->
 
-<project>
+<project xmlns="http://maven.apache.org/DECORATION/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/DECORATION/2.0.0 https://maven.apache.org/xsd/decoration-2.0.0.xsd">
 	<body>
         <menu ref="parent" />
 	</body>

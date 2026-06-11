@@ -1,0 +1,3 @@
+source: SPRING
+properties:
+  configuration.class: net.officefloor.tutorial.springwebmvchttpserver.Application

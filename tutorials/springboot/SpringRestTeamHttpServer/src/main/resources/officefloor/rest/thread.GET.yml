@@ -1,0 +1,5 @@
+request:
+  class: net.officefloor.tutorial.springrestteam.RequestThreadService
+  next: query
+query:
+  class: net.officefloor.tutorial.springrestteam.DatabaseQueryService

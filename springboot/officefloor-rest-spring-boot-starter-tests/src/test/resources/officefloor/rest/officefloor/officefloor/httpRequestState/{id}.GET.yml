@@ -1,0 +1,5 @@
+set:
+  class: ${officefloor.package}.HttpRequestStateService
+  next: retrieve
+retrieve:
+  class: ${officefloor.package}.HttpRequestStateRetrieveService

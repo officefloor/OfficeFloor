@@ -1,0 +1,8 @@
+managed-object:
+  source: net.officefloor.vertx.sqlclient.VertxSqlPoolManagedObjectSource
+  properties:
+    host: localhost
+    port: "5433"
+    database: test
+    username: sa
+    password: password

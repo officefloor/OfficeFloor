@@ -1,3 +1,23 @@
+/*-
+ * #%L
+ * Managed Object
+ * %%
+ * Copyright (C) 2005 - 2026 Daniel Sagenschneider
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 package net.officefloor.activity.managedobject.build;
 
 import net.officefloor.activity.compose.build.ComposeArchitect;
@@ -21,8 +41,10 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+/** Employs {@link ManagedObjectArchitect} instances. */
 public class ManagedObjectEmployer {
 
     /**
@@ -55,6 +77,7 @@ public class ManagedObjectEmployer {
         };
     }
 
+    /** {@link ComposeSource} for managed objects. */
     protected static class ManagedObjectComposeSource implements ComposeSource<OfficeManagedObject, ManagedObjectConfiguration> {
 
         @Override
@@ -69,6 +92,7 @@ public class ManagedObjectEmployer {
             OfficeManagedObjectSource managedObjectSource;
             ManagedObjectType<?> managedObjectType;
             ManagedObjectConfiguration moConfiguration = context.getConfiguration();
+
             ManagedObjectSourceConfiguration configuration = moConfiguration.getManagedObject();
 
             // Determine if class
@@ -100,6 +124,14 @@ public class ManagedObjectEmployer {
 
                 // Load the managed object type
                 managedObjectType = officeContext.loadManagedObjectType(managedObjectName, source, propertyList);
+            }
+
+            // Handle start-after ordering
+            List<String> startAfterTypes = configuration.getStartAfter();
+            if (startAfterTypes != null) {
+                for (String type : startAfterTypes) {
+                    officeArchitect.startAfter(managedObjectSource, type);
+                }
             }
 
             // Load the composition handling
@@ -137,8 +169,9 @@ public class ManagedObjectEmployer {
 
             // Provide the type qualifications
             String objectType = managedObjectType.getObjectType().getName();
+            String qualifier = configuration.getQualifier();
             managedObject.addTypeQualification(null, objectType);
-            managedObject.addTypeQualification(managedObjectName, objectType);
+            managedObject.addTypeQualification(qualifier != null ? qualifier : managedObjectName, objectType);
 
             // Return the managed object
             return managedObject;

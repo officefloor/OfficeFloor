@@ -31,7 +31,10 @@ public class HttpInputPathSegment {
 	 * Types of {@link HttpInputPathSegment}.
 	 */
 	public static enum HttpInputPathSegmentEnum {
-		STATIC, PARAMETER
+		/** Static path segment. */
+		STATIC,
+		/** Parameter path segment. */
+		PARAMETER
 	}
 
 	/**

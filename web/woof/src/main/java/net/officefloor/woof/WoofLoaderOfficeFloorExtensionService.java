@@ -22,8 +22,8 @@ package net.officefloor.woof;
 
 import java.util.Properties;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
+import net.officefloor.activity.team.build.TeamDeployer;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
@@ -36,6 +36,8 @@ import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.server.http.HttpServer;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.rest.build.RestEmployer;
+import net.officefloor.activity.team.build.TeamEmployer;
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.woof.WoofLoaderSettings.WoofLoaderConfiguration;
 import net.officefloor.woof.model.teams.WoofTeamsRepositoryImpl;
 import net.officefloor.woof.teams.WoofTeamsLoader;
@@ -142,8 +144,23 @@ public class WoofLoaderOfficeFloorExtensionService
 				context.getLogger().info("Extending Office " + officeName + " with WoOF");
 			}
 
+			// Build property list for interpolation (OfficeFloor-level properties first,
+			// then override properties so they take precedence and are available for
+			// property substitution in YAML team files)
+			PropertyList officeFloorProperties = context.createPropertyList();
+			for (String propName : context.getPropertyNames()) {
+				officeFloorProperties.addProperty(propName).setValue(context.getProperty(propName));
+			}
+			if (finalOverrideProperties != null) {
+				for (String propName : finalOverrideProperties.stringPropertyNames()) {
+					officeFloorProperties.addProperty(propName).setValue(finalOverrideProperties.getProperty(propName));
+				}
+			}
+
 			// Load the optional teams configuration for the application
 			if (configuration.isLoadTeams()) {
+
+				// Load via model (application.teams XML) if available
 				ConfigurationItem teamsConfiguration = configuration.getTeamsConfiguration(context);
 				if (teamsConfiguration != null) {
 
@@ -178,6 +195,13 @@ public class WoofLoaderOfficeFloorExtensionService
 						}
 					});
 				}
+
+				// Load teams from directory
+				String teamsDirectory = WoofLoaderOfficeExtensionService.interpolateRestDirectory(officeFloorDirectory,
+						getOfficeProperty.apply(WoofLoaderOfficeExtensionService.TEAMS_DIRECTORY_PROPERTY,
+								WoofLoaderOfficeExtensionService.TEAMS_DEFAULT_DIRECTORY));
+				TeamDeployer teamDeployer = TeamEmployer.employTeamDeployer(officeFloorDeployer, context, office);
+				teamDeployer.addTeams(teamsDirectory, officeFloorProperties);
 			}
 		}
 	}

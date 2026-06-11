@@ -1,0 +1,229 @@
+~~~
+~~ #%L
+~~ Spring REST Supplier HTTP Server Tutorial
+~~ %%
+~~ Copyright (C) 2005 - 2026 Daniel Sagenschneider
+~~ %%
+~~ Licensed under the Apache License, Version 2.0 (the "License");
+~~ you may not use this file except in compliance with the License.
+~~ You may obtain a copy of the License at
+~~
+~~      http://www.apache.org/licenses/LICENSE-2.0
+~~
+~~ Unless required by applicable law or agreed to in writing, software
+~~ distributed under the License is distributed on an "AS IS" BASIS,
+~~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~~ See the License for the specific language governing permissions and
+~~ limitations under the License.
+~~ #L%
+~~~
+
+~~~
+~~ Spring REST Supplier HTTP Server Tutorial
+~~~
+
+                                               -----------------------
+                                        Spring REST Supplier Tutorial
+                                               -----------------------
+                                                Daniel Sagenschneider
+                                               -----------------------
+
+SupplierSource in OfficeFloor
+
+  The previous tutorial showed how a single
+  {{{/apidocs/net/officefloor/frame/api/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}}
+  registers one managed object type.  This tutorial introduces
+  {{{/apidocs/net/officefloor/compile/spi/supplier/source/SupplierSource.html}SupplierSource}}:
+  a single YAML declaration that registers an entire <<library>> of related managed object
+  types from one source.
+
+  The distinction matters in practice:
+
+   * A Spring bean or individual managed object is always declared independently.  If two
+     objects share internal state (a connection pool, a queue, a DI container) there is no
+     clean place to put that shared state — it ends up as a Spring singleton that both beans
+     reference, coupling unrelated configuration.
+
+   * A
+     {{{/apidocs/net/officefloor/compile/spi/supplier/source/SupplierSource.html}SupplierSource}}
+     <<owns>> the shared state.  It registers all the types that expose that state through
+     their own managed object wrappers.  Callers simply inject whichever type they need;
+     the supplier ensures they all see the same underlying resource.
+
+  Typical use cases:
+
+   * Integrating a <<third-party messaging or streaming library>> (e.g. Kafka, JMS) that
+     naturally provides producer and consumer as a matched pair sharing a connection.
+
+   * Bridging <<another dependency injection framework>> (e.g. Guice, CDI) — the supplier
+     wraps that framework's injector and vends its objects as OfficeFloor managed objects.
+
+   * Providing a <<coherent client set>> for an external service — e.g. a REST client, its
+     retry policy, and its circuit breaker — all wired to the same underlying HTTP connection
+     pool held by the supplier.
+
+  The tutorial models an in-memory messaging service.  One
+  {{{/apidocs/net/officefloor/compile/spi/supplier/source/SupplierSource.html}SupplierSource}}
+  registers both <<<MessagePublisher>>> and <<<MessageSubscriber>>>, both sharing the same
+  internal queue.  The tutorial exposes two endpoints: <<<POST /message>>> to publish and
+  <<<GET /message>>> to receive.
+
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestSupplierHttpServer}Tutorial Source}}
+
+
+
+*Maven dependency
+
+%{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+
+
+*Application class
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestsupplier/SpringRestSupplierApplication.java|ignoreDownloadError=false}
+
+
+
+*The domain types
+
+  <<<MessagePublisher>>> and <<<MessageSubscriber>>> are plain Java classes.  Their
+  constructors are package-private: only
+  {{{/apidocs/net/officefloor/compile/spi/supplier/source/SupplierSource.html}SupplierSource}}
+  should create them, ensuring every instance is backed by the same shared queue.
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestsupplier/MessagePublisher.java|ignoreDownloadError=false}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestsupplier/MessageSubscriber.java|ignoreDownloadError=false}
+
+
+
+*The SupplierSource — <<<MessagingSupplierSource>>>
+
+  {{{/apidocs/net/officefloor/compile/spi/supplier/source/impl/AbstractSupplierSource.html}AbstractSupplierSource}}
+  is extended and
+  {{{/apidocs/net/officefloor/compile/spi/supplier/source/SupplierSourceContext.html}SupplierSourceContext.addManagedObjectSource()}}
+  is called once per type inside
+  {{{/apidocs/net/officefloor/compile/spi/supplier/source/SupplierSource.html}SupplierSource.supply()}}.
+
+  The shared <<<messageQueue>>> field lives on the supplier instance.  Both inline
+  {{{/apidocs/net/officefloor/frame/api/managedobject/source/impl/AbstractManagedObjectSource.html}AbstractManagedObjectSource}}
+  implementations capture it via closure, so every <<<MessagePublisher>>> and every
+  <<<MessageSubscriber>>> created across all requests write to and read from exactly the
+  same deque.
+  {{{/apidocs/net/officefloor/frame/api/build/None.html}None}} is used for both generic
+  parameters because neither managed object source requires OfficeFloor-managed dependencies
+  or declares flow outputs:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestsupplier/MessagingSupplierSource.java|ignoreDownloadError=false}
+
+  The <<<terminate()>>> method is called when OfficeFloor shuts down, giving the supplier
+  the opportunity to release any resources it holds.
+
+
+
+*Configuring the supplier — <<<officefloor/suppliers/>>>
+
+  Suppliers are declared as YAML files in <<<src/main/resources/officefloor/suppliers/>>>.
+  The <<<source>>> field names the
+  {{{/apidocs/net/officefloor/compile/spi/supplier/source/SupplierSource.html}SupplierSource}}
+  implementation.  An optional <<<properties:>>> map is passed to
+  {{{/apidocs/net/officefloor/compile/spi/supplier/source/SupplierSource.html}SupplierSource.supply()}}
+  via the
+  {{{/apidocs/net/officefloor/compile/spi/supplier/source/SupplierSourceContext.html}SupplierSourceContext}}:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/suppliers/messaging.yml|ignoreDownloadError=false}
+
+  One YAML file registers all types that the supplier provides.  Drop any number of YAML
+  files into <<<officefloor/suppliers/>>>; each file is one supplier.
+
+
+
+*Service methods
+
+  <<<MessagePublisher>>> and <<<MessageSubscriber>>> are accepted by type — no qualifier,
+  no explicit wiring required.  OfficeFloor finds the supplier that registered each type and
+  injects the managed object.  The HTTP request body is bound with <<<@RequestBody>>>:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestsupplier/PublishService.java|ignoreDownloadError=false}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestsupplier/SubscribeService.java|ignoreDownloadError=false}
+
+  The request body for <<<POST /message>>>:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestsupplier/Message.java|ignoreDownloadError=false}
+
+
+
+*REST endpoints
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/message.POST.yml|ignoreDownloadError=false}
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/message.GET.yml|ignoreDownloadError=false}
+
+
+
+*Testing
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springrestsupplier/SpringRestSupplierHttpServerTest.java|ignoreDownloadError=false}
+
+  <<<publishedMessageIsReceivedBySubscriber>>> proves the end-to-end path: a message
+  published in one request is visible to the subscriber in the next.  This works because
+  both the publisher and subscriber write to and read from the same deque held by the
+  supplier — not because of any Spring bean or shared static state.
+
+  <<<multipleMessagesAreQueuedInOrder>>> confirms that the queue preserves insertion order:
+  two successive publishes followed by two successive receives return messages in FIFO order.
+
+  <<<receiveReturnsEmptyWhenQueueIsEmpty>>> covers the empty-queue path.
+
+  Note that because the supplier's queue persists for the application lifetime, test order
+  matters: each test should leave the queue empty.  <<<publishedMessageIsReceivedBySubscriber>>>
+  and <<<multipleMessagesAreQueuedInOrder>>> each drain every message they publish, so no
+  leakage occurs between tests.
+
+
+
+*Supplier vs managed object vs Spring bean
+
+*-----------------------+-------------------------------------------------------------------+
+|| Mechanism            || Registers …
+*-----------------------+-------------------------------------------------------------------+
+| Spring <<<@Bean>>>    | One bean per method; shared state requires a separate singleton bean referenced by each other bean.
+*-----------------------+-------------------------------------------------------------------+
+| Managed object YAML   | One managed object per YAML file; no built-in way to share state between two separate files.
+*-----------------------+-------------------------------------------------------------------+
+| Supplier YAML         | Any number of managed object types from one YAML file; the supplier instance holds shared state that all its types access via closure.
+*-----------------------+-------------------------------------------------------------------+
+
+
+
+*What you have now
+
+  After completing this tutorial you can:
+
+   * Understand that
+     {{{/apidocs/net/officefloor/compile/spi/supplier/source/SupplierSource.html}SupplierSource}}
+     exists to register a <<library of related objects>> from a single YAML declaration,
+     with the supplier instance holding any shared state
+
+   * Extend
+     {{{/apidocs/net/officefloor/compile/spi/supplier/source/impl/AbstractSupplierSource.html}AbstractSupplierSource}}
+     and call
+     {{{/apidocs/net/officefloor/compile/spi/supplier/source/SupplierSourceContext.html}SupplierSourceContext.addManagedObjectSource()}}
+     once per type inside <<<supply()>>>
+
+   * Place a YAML file in <<<officefloor/suppliers/>>> with a <<<source:>>> field to
+     activate the supplier, optionally passing <<<properties:>>> for configuration
+
+   * Inject any type the supplier registers into service methods by type, alongside Spring
+     beans and individually declared managed objects, with no additional annotation
+
+   * Implement <<<terminate()>>> to release resources when OfficeFloor shuts down
+
+
+
+Next
+
+  The {{{../SpringRestGovernanceHttpServer/index.html}Spring REST Governance tutorial}} demonstrates
+  how OfficeFloor Governance wraps function execution with framework-managed pre/post lifecycle
+  via YAML configuration — without annotations on the service class.

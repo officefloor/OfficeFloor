@@ -1,0 +1,2 @@
+governance:
+  source: net.officefloor.spring.data.SpringDataTransactionGovernanceSource

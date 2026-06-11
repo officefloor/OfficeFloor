@@ -74,7 +74,7 @@ public class DatabaseHttpServerTest {
 		assertEquals(200, response.getStatus().getStatusCode(), "Should be successful");
 		String body = response.getEntity(null);
 		assertTrue(body.contains("WoOF"), "Should have row from database: " + body);
-		assertTrue(body.endsWith("</html>"), "Should have full request: " + body);
+		assertTrue(body.stripTrailing().endsWith("</html>"), "Should have full request: " + body);
 	}
 
 	// START SNIPPET: test
@@ -88,9 +88,9 @@ public class DatabaseHttpServerTest {
 			// Request page
 			this.server.send(MockWoofServer.mockRequest("/example"));
 
-			// Add row (will pick up parameter values from URL)
+			// Add row (POST/Redirect/GET pattern)
 			MockWoofResponse response = this.server
-					.send(MockWoofServer.mockRequest("/example+addRow?name=Daniel&description=Founder"));
+					.send(MockWoofServer.mockRequest("/addRow?name=Daniel&description=Founder").method(net.officefloor.server.http.HttpMethod.POST));
 			assertEquals(303, response.getStatus().getStatusCode(), "Should follow POST then GET pattern");
 			assertEquals("/example", response.getHeader("location").getValue(), "Ensure redirect to load page");
 
@@ -101,7 +101,7 @@ public class DatabaseHttpServerTest {
 			assertEquals("Founder", resultSet.getString("DESCRIPTION"), "Ensure correct row");
 
 			// Delete row
-			this.server.send(MockWoofServer.mockRequest("/example+deleteRow?id=" + resultSet.getInt("ID")));
+			this.server.send(MockWoofServer.mockRequest("/deleteRow?id=" + resultSet.getInt("ID")));
 
 			// Ensure row is deleted
 			resultSet = statement.executeQuery();

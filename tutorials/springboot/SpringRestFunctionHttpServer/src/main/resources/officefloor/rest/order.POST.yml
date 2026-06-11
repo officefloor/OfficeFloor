@@ -1,0 +1,11 @@
+validate:
+  class: net.officefloor.tutorial.springrestfunction.ValidateOrderLogic
+  outputs:
+    valid: price
+
+price:
+  class: net.officefloor.tutorial.springrestfunction.CalculatePricingLogic
+  next: save
+
+save:
+  class: net.officefloor.tutorial.springrestfunction.SaveOrderLogic

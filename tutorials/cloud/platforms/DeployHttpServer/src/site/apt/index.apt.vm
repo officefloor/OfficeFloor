@@ -28,7 +28,7 @@ Deploy Tutorial
 
   This tutorial demonstrates the ease of deploying OfficeFloor applications.
 
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/DeployHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/cloud/platforms/DeployHttpServer}Tutorial Source}}
 
 
 
@@ -73,4 +73,4 @@ CMD ["java", "-Dhttp.port=8080", "-jar", "server.jar"]
 
 *Next
 
-  The {{{../HttpServletHttpServer/index.html}next tutorial}} looks at deploying to Servlet container (useful for PaaS cloud providers).
+  The {{{../AwsSamHttpServer/index.html}next tutorial}} covers deploying as an AWS Serverless Application Model (SAM) function.

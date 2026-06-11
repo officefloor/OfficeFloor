@@ -8,6 +8,7 @@ package net.officefloor.tutorial.dipojohttpserver.constructor;
 // START SNIPPET: tutorial
 public class ConstructorInjectedTemplateLogic {
 
+	/** Provides template data. */
 	public ConstructorInjectedPojo getTemplateData(ConstructorInjectedPojo dependency) {
 		return dependency;
 	}

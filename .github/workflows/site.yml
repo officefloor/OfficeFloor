@@ -1,0 +1,42 @@
+name: Deploy Site to GitHub Pages
+
+on:
+  workflow_dispatch:
+
+env:
+  BUILD_MAVEN_VERSION: 3.9.2
+
+jobs:
+  deploy-site:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Set up Maven
+      uses: stCarolas/setup-maven@v4.5
+      with:
+        maven-version: ${{ env.BUILD_MAVEN_VERSION }}
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: 17
+
+    - name: Build
+      run: mvn -V -B -e -DskipTests clean install --file bom/pom.xml
+
+    - name: Generate Site
+      run: mvn -V -B -e -Dofficefloor-deploy=site post-site site:stage
+
+    - name: Deploy Site
+      uses: peaceiris/actions-gh-pages@v4
+      with:
+        personal_token: ${{ secrets.SITE_GITHUB_TOKEN }}
+        external_repository: officefloor/officefloor.github.io
+        publish_dir: ./target/staging
+        destination_dir: docs
+        keep_files: true
+        publish_branch: gh-pages

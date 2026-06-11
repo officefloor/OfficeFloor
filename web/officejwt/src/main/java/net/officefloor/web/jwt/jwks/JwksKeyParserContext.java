@@ -149,7 +149,8 @@ public interface JwksKeyParserContext {
 
 	/**
 	 * Obtains the field value from the {@link JsonNode}.
-	 * 
+	 *
+	 * @param <T>          Type of the field value.
 	 * @param node         {@link JsonNode}.
 	 * @param fieldName    Field name.
 	 * @param defaultValue Default value. May be <code>null</code>.

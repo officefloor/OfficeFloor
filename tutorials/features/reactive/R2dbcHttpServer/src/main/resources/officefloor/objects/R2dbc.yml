@@ -1,0 +1,8 @@
+managed-object:
+  source: net.officefloor.r2dbc.R2dbcManagedObjectSource
+  properties:
+    driver: pool
+    protocol: h2:mem
+    database: exampleDb
+    user: sa
+    password: password

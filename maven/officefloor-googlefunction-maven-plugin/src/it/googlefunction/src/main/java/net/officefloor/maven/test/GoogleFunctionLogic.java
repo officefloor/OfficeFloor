@@ -1,6 +1,6 @@
 /*-
  * #%L
- * OfficeFloor SAM Maven Plugin
+ * OfficeFloor Google Function Maven Plugin
  * %%
  * Copyright (C) 2005 - 2021 Daniel Sagenschneider
  * %%

@@ -1,0 +1,4 @@
+path:
+  resource: net.officefloor.tutorial.jaxrshttpserver.JaxRsResource
+  procedure: JAXRS
+  method: path

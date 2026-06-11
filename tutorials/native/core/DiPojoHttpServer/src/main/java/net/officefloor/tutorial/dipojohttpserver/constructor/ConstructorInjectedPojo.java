@@ -12,10 +12,12 @@ public class ConstructorInjectedPojo {
 
 	private final Pojo pojo;
 
+	/** Instantiate with injected {@link Pojo}. */
 	public ConstructorInjectedPojo(Pojo pojo) {
 		this.pojo = pojo;
 	}
 
+	/** Obtains the audience. */
 	public String getAudience() {
 		return this.pojo.getAudience();
 	}

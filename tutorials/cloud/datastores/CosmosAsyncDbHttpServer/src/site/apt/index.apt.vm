@@ -36,15 +36,19 @@ CosmosDB Async Tutorial
    
    * <<<GET /posts>>> to obtain all posts
    
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/CosmosAsyncDbHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/cloud/datastores/CosmosAsyncDbHttpServer}Tutorial Source}}
 
 
 
-*WoOF configuration
+*REST endpoint configuration
 
-  The configuration of the end points are as follows:
-  
-[./images/CosmosAsyncDbHttpServer-configuration.png] CosmosDbHttpServer screen shot.
+  The REST endpoints are configured as follows:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/posts.POST.yml|ignoreDownloadError=false}
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/posts.GET.yml|ignoreDownloadError=false}
+
+%{snippet|file=${project.build.directory}/site-snippets/posts/id.GET.yml|ignoreDownloadError=false}
 
   With the implementation as follows:
     
@@ -67,9 +71,9 @@ CosmosDB Async Tutorial
   
 %{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
 
-  CosmosDB is configured in <<<application.objects>>> as follows:
-  
-%{snippet|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
+  CosmosDB is configured in <<<officefloor/suppliers/CosmosAsyncDb.yml>>> as follows:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/suppliers/CosmosAsyncDb.yml|ignoreDownloadError=false}
 
   For performance reasons, the entities are not dynamically discovered.  As Azure starts instances as required, the application must be brought up quickly to service the first request.  Having to inspect all jars and classes for entities is typically too slow.  Therefore, CosmosDB requires registering all entities with it manually.
   
@@ -93,4 +97,4 @@ CosmosDB Async Tutorial
 
 Next
 
-  The {{{../AzureWebAppsHttpServer/index.html}next tutorial}} {{{https://azure.microsoft.com/services/app-service/web/}Azure Web Apps}}.
+  The {{{../FirestoreHttpServer/index.html}next tutorial}} covers integrating Google Cloud Firestore as an OfficeFloor managed object.

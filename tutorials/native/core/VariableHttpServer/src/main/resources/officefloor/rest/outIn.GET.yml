@@ -1,0 +1,7 @@
+OutSet:
+  class: net.officefloor.tutorial.variablehttpserver.OutLogic
+  method: setValues
+  next: InUse
+InUse:
+  class: net.officefloor.tutorial.variablehttpserver.InLogic
+  method: useValues

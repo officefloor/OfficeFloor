@@ -1,0 +1,3 @@
+getVehicle:
+  class: net.officefloor.tutorial.resthttpserver.RestLogic
+  method: getVehicle

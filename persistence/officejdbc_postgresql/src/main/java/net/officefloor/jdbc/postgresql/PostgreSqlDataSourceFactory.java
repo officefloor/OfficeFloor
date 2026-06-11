@@ -80,8 +80,10 @@ public interface PostgreSqlDataSourceFactory extends DataSourceFactory, Connecti
 	/**
 	 * Configures the {@link BaseDataSource}.
 	 * 
+	 * @param <S>        {@link BaseDataSource} type.
 	 * @param dataSource {@link BaseDataSource}.
 	 * @param context    {@link SourceContext}.
+	 * @return Configured {@link BaseDataSource}.
 	 * @throws Exception If fails to configure the {@link BaseDataSource}.
 	 */
 	static <S extends BaseDataSource> S configureDataSource(S dataSource, SourceContext context) throws Exception {

@@ -33,7 +33,7 @@ public class TemplateLogicJUnit4Test {
 
 		// Send request to add
 		MockHttpResponse response = this.server
-				.sendFollowRedirect(MockHttpServer.mockRequest("/template+add?a=1&b=2").method(HttpMethod.POST));
+				.sendFollowRedirect(MockHttpServer.mockRequest("/add?a=1&b=2").method(HttpMethod.POST));
 		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
 
 		// Ensure added the values
@@ -53,7 +53,7 @@ public class TemplateLogicJUnit4Test {
 	public void callingSystemTest() throws Exception {
 
 		// Send request to add
-		HttpResponse response = this.client.execute(new HttpPost(this.client.url("/template+add?a=1&b=2")));
+		HttpResponse response = this.client.execute(new HttpPost(this.client.url("/add?a=1&b=2")));
 		assertEquals("Should be successful", 200, response.getStatusLine().getStatusCode());
 
 		// Ensure added the values

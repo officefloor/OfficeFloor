@@ -30,13 +30,13 @@ WAR Tutorial
 
   The reason for embedding the WAR, is to enable a phased migration to OfficeFloor.  Forcing a rewrite of the application into OfficeFloor is typically expensive (plus falls under the anti-pattern of "big bang").  Therefore, the WAR application can be embedded in OfficeFloor and functionality slowly migrated out of it to take advantage of OfficeFloor's {{{https://sagenschneider.blogspot.com/2019/02/inversion-of-coupling-control.html}IoCC}}.
    
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/WarHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/legacy/WarHttpServer}Tutorial Source}}
 
 
 
 *WAR Application
 
-  The example WAR application to embed for this tutorial is located {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/WarApp}here}}.
+  The example WAR application to embed for this tutorial is located {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/legacy/WarApp}here}}.
   
   It consists of two servlets. The first is a simple servlet:
   
@@ -64,11 +64,11 @@ WAR Tutorial
 
 *Servlet Dependencies
 
-  Dependencies for the servlets are provided by OfficeFloor.  This may either be through OfficeFloor directly.  Or by incorporating a third party dependency injection library, such as {{{../SpringHttpServer/index.html}Spring}}.
+  Dependencies for the servlets are provided by OfficeFloor.  This may either be through OfficeFloor directly.  Or by incorporating a third party dependency injection library, such as {{{../../spring-officefloor/SpringHttpServer/index.html}Spring}}.
 
-  In the case of this tutorial, OfficeFloor is directly providing the dependency in <<<application.objects>>>:
-  
-%{snippet|id=tutorial|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
+  In the case of this tutorial, OfficeFloor is directly providing the dependency via <<<officefloor/objects/InjectServletDependency.yml>>>:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/objects/InjectServletDependency.yml|ignoreDownloadError=false}
 
   with a custom dependency:
   

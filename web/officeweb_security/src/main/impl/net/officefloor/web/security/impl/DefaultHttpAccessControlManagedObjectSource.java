@@ -45,6 +45,7 @@ public class DefaultHttpAccessControlManagedObjectSource
 	 * Dependency keys.
 	 */
 	public static enum Dependencies {
+		/** HTTP authentication dependency. */
 		HTTP_AUTHENTICATION
 	}
 
