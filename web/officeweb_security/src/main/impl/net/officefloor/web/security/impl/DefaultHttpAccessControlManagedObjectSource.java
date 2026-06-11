@@ -45,6 +45,7 @@ public class DefaultHttpAccessControlManagedObjectSource
 	 * Dependency keys.
 	 */
 	public static enum Dependencies {
+		/** HTTP authentication dependency. */
 		HTTP_AUTHENTICATION
 	}
 
@@ -58,7 +59,7 @@ public class DefaultHttpAccessControlManagedObjectSource
 
 	@Override
 	protected void loadMetaData(MetaDataContext<Dependencies, None> context) throws Exception {
-		context.setObjectClass(HttpAuthentication.class);
+		context.setObjectClass(HttpAccessControl.class);
 		context.setManagedObjectClass(DefaultHttpAccessControlManagedObject.class);
 		context.addDependency(HttpAuthentication.class).setLabel(Dependencies.HTTP_AUTHENTICATION.name());
 		context.addManagedObjectExtension(HttpAccessControl.class,

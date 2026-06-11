@@ -49,7 +49,12 @@ public class SpringWebMvcProcedure extends StaticManagedFunction<SpringWebMvcPro
 	 * Dependency keys.
 	 */
 	public static enum DependencyKeys {
-		SERVER_HTTP_CONNECTION, HTTP_REQUEST_STATE, SERVLET_SERVICER
+		/** Server HTTP connection. */
+		SERVER_HTTP_CONNECTION,
+		/** HTTP request state. */
+		HTTP_REQUEST_STATE,
+		/** Servlet servicer. */
+		SERVLET_SERVICER
 	}
 
 	/**

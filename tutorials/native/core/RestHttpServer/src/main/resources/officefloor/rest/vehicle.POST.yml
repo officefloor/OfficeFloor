@@ -1,0 +1,3 @@
+createVehicle:
+  class: net.officefloor.tutorial.resthttpserver.RestLogic
+  method: createVehicle

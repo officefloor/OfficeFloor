@@ -27,5 +27,14 @@ package net.officefloor.web.build;
  */
 public enum HttpValueLocation {
 
-	PATH, QUERY, HEADER, COOKIE, ENTITY
+	/** Value from the URL path. */
+	PATH,
+	/** Value from the query string. */
+	QUERY,
+	/** Value from a request header. */
+	HEADER,
+	/** Value from a cookie. */
+	COOKIE,
+	/** Value from the request entity body. */
+	ENTITY
 }

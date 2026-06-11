@@ -1,0 +1,115 @@
+~~~
+~~ #%L
+~~ Authentication HTTP Server Tutorial
+~~ %%
+~~ Copyright (C) 2005 - 2020 Daniel Sagenschneider
+~~ %%
+~~ Licensed under the Apache License, Version 2.0 (the "License");
+~~ you may not use this file except in compliance with the License.
+~~ You may obtain a copy of the License at
+~~ 
+~~      http://www.apache.org/licenses/LICENSE-2.0
+~~ 
+~~ Unless required by applicable law or agreed to in writing, software
+~~ distributed under the License is distributed on an "AS IS" BASIS,
+~~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~~ See the License for the specific language governing permissions and
+~~ limitations under the License.
+~~ #L%
+~~~
+
+                                               -----------------------
+                                               Authentication Tutorial 
+                                               -----------------------
+                                                Daniel Sagenschneider
+                                               -----------------------
+
+Authentication Tutorial
+
+  This tutorial looks at configuring authentication.
+  
+  WoOF provides various authentication schemes along with the ability to customise your own authentication scheme (see {{{/apidocs/net/officefloor/web/spi/security/HttpSecuritySource.html}HttpSecuritySource}} for more details).  This tutorial will focus on form based authentication.
+  
+  The below example for this tutorial will demonstrate only allowing a logged in user to view a page.
+
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/native/security/AuthenticationHttpServer}Tutorial Source}}
+
+
+
+*Restricted access page
+
+  The template for the restricted page is as follows.
+
+%{snippet|file=${basedir}/src/main/resources/templates/hello.html|ignoreDownloadError=false}
+
+  With the backing logic class.
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/authenticationhttpserver/HelloLogic.java|ignoreDownloadError=false}
+
+  The dependency on {{{/apidocs/net/officefloor/web/spi/security/HttpSecurity.html}HttpSecurity}} requires the user to be logged in.  Should the user not be authenticated, creation of this dependency will cause a {{{/apidocs/net/officefloor/web/security/AuthenticationRequiredException.html}AuthenticationRequiredException}} to be thrown.  WoOF automatically handles this exception by:
+  
+   [[1]] saving the current request in the HTTP session
+   
+   [[1]] send a challenge (in this case sending back the login page)
+   
+   [[1]] authenticate the user (in this case validate the entered username and password)
+   
+   [[1]] on authenticating the user, continue with the saved request
+   
+  Since the <<<getTemplateData>>> requires a logged in user the page will not be rendered unless there is a logged in user.
+  
+  To allow the page to be rendered with or without a logged in user, depend on {{{/apidocs/net/officefloor/web/security/HttpAuthentication.html}HttpAuthentication}} to check if the user is logged in.
+
+
+
+*Configuring access
+
+  The following is the security YAML configuration for authentication.
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/security/Security.yml|ignoreDownloadError=false}
+
+  While some authentication schemes are straight forward (e.g. {{{/apidocs/net/officefloor/web/security/scheme/BasicHttpSecuritySource.html}Basic}}), others such as {{{/apidocs/net/officefloor/web/security/scheme/FormHttpSecuritySource.html}form based login}} require application specific behaviour (e.g. a form login page).  The <<<flows>>> section wires the <<<FORM_LOGIN_PAGE>>> flow to a redirect function that sends the user to the login page over HTTPS.
+
+  The login path is configured to always use HTTPS:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/login.yml|ignoreDownloadError=false}
+
+  To enable differing credential stores (e.g. database, LDAP, etc), the WoOF supplied authentication depends on a {{{/apidocs/net/officefloor/web/security/store/CredentialStore.html}CredentialStore}} managed object being configured.  In this case a mock implementation is used that validates the user by ensuring the password matches the username.  This is a simple implementation useful for testing.
+
+  For production, another {{{/apidocs/net/officefloor/web/security/store/CredentialStore.html}CredentialStore}} should be used.  WoOF comes with existing implementations for standard credential stores.  Customised implementations may also be used for bespoke environments.
+
+  
+
+*Login page
+
+  The login page template is as follows.
+
+%{snippet|file=${basedir}/src/main/resources/templates/login.html|ignoreDownloadError=false}
+
+  With the backing logic class.
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/authenticationhttpserver/LoginLogic.java|ignoreDownloadError=false}
+
+  The {{{/apidocs/net/officefloor/web/security/scheme/FormHttpSecuritySource.html}FormHttpSecuritySource}} requires the credentials to be provided within a {{{/apidocs/net/officefloor/web/security/HttpCredentials.html}HttpCredentials}} as a parameter.  Using <<<HttpAuthentication>>> directly avoids the need for a <<<@FlowInterface>>> and allows authentication to be triggered programmatically.
+
+
+
+*Remaining code
+
+  The logout page template is included for completeness.
+
+%{snippet|file=${basedir}/src/main/resources/templates/logout.html|ignoreDownloadError=false}
+
+
+
+*Unit Test
+
+  The unit test demonstrates logging in and logging out. 
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/authenticationhttpserver/AuthenticationHttpServerTest.java|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../JwtHttpServer/index.html}next tutorial}} covers JWT security — a single-server application with combined JWT security and authority.

@@ -42,6 +42,7 @@ public interface MethodReturnTranslatorContext<R, T> {
 	 * Specifies the translated return value.
 	 * 
 	 * @param value Translated return value.
+	 * @throws Exception If fails to set the translated return value.
 	 */
 	void setTranslatedReturnValue(T value) throws Exception;
 

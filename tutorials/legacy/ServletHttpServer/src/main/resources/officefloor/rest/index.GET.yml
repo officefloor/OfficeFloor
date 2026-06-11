@@ -1,0 +1,8 @@
+TutorialFilter:
+  procedure: Filter
+  resource: net.officefloor.tutorial.servlethttpserver.TutorialFilter
+  outputs:
+    NEXT: TutorialServlet
+TutorialServlet:
+  procedure: Servlet
+  resource: net.officefloor.tutorial.servlethttpserver.TutorialServlet

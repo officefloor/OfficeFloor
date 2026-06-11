@@ -71,16 +71,22 @@ public class MockWoofServer extends MockHttpServer implements AutoCloseable {
 
 		/**
 		 * Indicates if service from secure port.
+		 *
+		 * @return <code>true</code> if service from secure port.
 		 */
 		boolean secure() default false;
 
 		/**
 		 * {@link HttpMethod} for servicing.
+		 *
+		 * @return {@link HttpMethod} name for servicing.
 		 */
 		String method() default "GET";
 
 		/**
 		 * URL path to service.
+		 *
+		 * @return URL path to service.
 		 */
 		String path() default "/";
 	}
@@ -279,6 +285,12 @@ public class MockWoofServer extends MockHttpServer implements AutoCloseable {
 	 * Enables wrapping the compile and open.
 	 */
 	public static @FunctionalInterface interface WrapCompileAndOpen {
+		/**
+		 * Wraps the compile and open.
+		 *
+		 * @param wrapped {@link WrapCompileAndOpenContext}.
+		 * @throws Exception If fails.
+		 */
 		void wrap(WrapCompileAndOpenContext wrapped) throws Exception;
 	}
 
@@ -286,6 +298,11 @@ public class MockWoofServer extends MockHttpServer implements AutoCloseable {
 	 * Context for {@link WrapCompileAndOpen}.
 	 */
 	public static interface WrapCompileAndOpenContext {
+		/**
+		 * Compiles and opens the {@link MockWoofServer}.
+		 *
+		 * @throws Exception If fails.
+		 */
 		void compileAndOpen() throws Exception;
 	}
 
@@ -361,11 +378,27 @@ public class MockWoofServer extends MockHttpServer implements AutoCloseable {
 	 */
 	protected class MockWoofResponseImpl extends MockHttpResponseImpl implements MockWoofResponse {
 
+		/**
+		 * Instantiate.
+		 *
+		 * @param request           {@link MockHttpRequest}.
+		 * @param version           {@link HttpVersion}.
+		 * @param status            {@link HttpStatus}.
+		 * @param headers           {@link WritableHttpHeader} instances.
+		 * @param cookies           {@link WritableHttpCookie} instances.
+		 * @param entityInputStream Entity {@link InputStream}.
+		 */
 		protected MockWoofResponseImpl(MockHttpRequest request, HttpVersion version, HttpStatus status,
 				List<WritableHttpHeader> headers, List<WritableHttpCookie> cookies, InputStream entityInputStream) {
 			super(request, version, status, headers, cookies, entityInputStream);
 		}
 
+		/**
+		 * Instantiate for failure.
+		 *
+		 * @param request {@link MockHttpRequest}.
+		 * @param failure Failure.
+		 */
 		public MockWoofResponseImpl(MockHttpRequest request, Throwable failure) {
 			super(request, failure);
 		}

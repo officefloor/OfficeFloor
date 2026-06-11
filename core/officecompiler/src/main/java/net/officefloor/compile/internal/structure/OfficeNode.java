@@ -94,8 +94,9 @@ public interface OfficeNode extends LinkOfficeNode, ManagedObjectRegistry, Offic
 
 	/**
 	 * Sources this {@link Office} and all descendant {@link Node} instances.
-	 * 
+	 *
 	 * @param managedObjectSourceVisitor {@link ManagedObjectSourceVisitor}.
+	 * @param autoWirerVisitor           {@link AutoWirerVisitor}.
 	 * @param compileContext             {@link CompileContext}.
 	 * @return <code>true</code> if successfully sourced. Otherwise
 	 *         <code>false</code> with issue reported to the {@link CompilerIssues}.

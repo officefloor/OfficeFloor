@@ -1,0 +1,4 @@
+get:
+  resource: net.officefloor.tutorial.springwebfluxhttpserver.SpringRestController
+  procedure: SpringWebFluxController
+  method: get

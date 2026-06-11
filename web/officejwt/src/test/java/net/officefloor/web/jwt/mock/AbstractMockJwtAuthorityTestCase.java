@@ -23,8 +23,11 @@ package net.officefloor.web.jwt.mock;
 import java.io.IOException;
 import java.util.Arrays;
 
+import net.officefloor.activity.compose.build.ComposeArchitect;
+import net.officefloor.activity.compose.build.ComposeEmployer;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
+import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.server.http.ServerHttpConnection;
@@ -84,8 +87,9 @@ public abstract class AbstractMockJwtAuthorityTestCase {
 		compiler.web((context) -> {
 			WebArchitect web = context.getWebArchitect();
 			OfficeArchitect office = context.getOfficeArchitect();
-			HttpSecurityArchitect security = HttpSecurityArchitectEmployer.employHttpSecurityArchitect(web, office,
-					context.getOfficeSourceContext());
+			OfficeSourceContext sourceContext = context.getOfficeSourceContext();
+			ComposeArchitect compose = ComposeEmployer.employComposeArchitect(office, sourceContext);
+			HttpSecurityArchitect security = HttpSecurityArchitectEmployer.employHttpSecurityArchitect(web, compose, office, sourceContext);
 
 			// Configure JWT security
 			HttpSecurityBuilder jwt = security.addHttpSecurity("JWT", JwtHttpSecuritySource.class.getName());

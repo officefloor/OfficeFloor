@@ -1,0 +1,3 @@
+login:
+  class: net.officefloor.tutorial.jwtauthorityhttpserver.JwtTokens
+  method: login

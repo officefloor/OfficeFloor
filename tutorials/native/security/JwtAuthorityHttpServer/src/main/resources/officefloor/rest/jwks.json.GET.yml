@@ -1,0 +1,2 @@
+JwksPublisher:
+  source: net.officefloor.web.jwt.authority.jwks.JwksPublishSectionSource

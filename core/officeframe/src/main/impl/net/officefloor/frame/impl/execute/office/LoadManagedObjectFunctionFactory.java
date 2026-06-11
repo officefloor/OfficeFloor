@@ -38,7 +38,10 @@ public class LoadManagedObjectFunctionFactory
 	 * Dependency keys for the {@link LoadManagedObjectFunctionFactory}.
 	 */
 	public static enum Dependencies {
-		PARAMETER, MANAGED_OBJECT
+		/** Parameter dependency. */
+		PARAMETER,
+		/** Managed object dependency. */
+		MANAGED_OBJECT
 	}
 
 	/**

@@ -19,8 +19,14 @@
   #L%
   -->
 
-<project>
+<project xmlns="http://maven.apache.org/DECORATION/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/DECORATION/2.0.0 https://maven.apache.org/xsd/decoration-2.0.0.xsd">
 	<body>
-		<menu ref="parent" />
+		<menu name="Getting Started">
+			<item name="About" href="../about.html" />
+			<item name="Tutorials" href="./index.html" />
+			<item name="Getting Help" href="../getting-help.html" />
+		</menu>
 	</body>
 </project>

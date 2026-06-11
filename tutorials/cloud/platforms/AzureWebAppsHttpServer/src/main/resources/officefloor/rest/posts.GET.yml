@@ -1,0 +1,7 @@
+retrieveAllPosts:
+  class: net.officefloor.tutorial.azurewebappshttpserver.AzureLogic
+  method: retrieveAllPosts
+  next: sendPosts
+sendPosts:
+  class: net.officefloor.tutorial.azurewebappshttpserver.AzureLogic
+  method: sendPosts

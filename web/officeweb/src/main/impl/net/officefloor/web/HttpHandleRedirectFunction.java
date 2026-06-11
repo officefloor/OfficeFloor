@@ -47,7 +47,14 @@ public class HttpHandleRedirectFunction
 	 * Dependency keys.
 	 */
 	public static enum HttpHandleRedirectDependencies {
-		COOKIE, SERVER_HTTP_CONNECTION, REQUEST_STATE, SESSION
+		/** Cookie dependency. */
+		COOKIE,
+		/** Server HTTP connection dependency. */
+		SERVER_HTTP_CONNECTION,
+		/** Request state dependency. */
+		REQUEST_STATE,
+		/** Session dependency. */
+		SESSION
 	}
 
 	/**

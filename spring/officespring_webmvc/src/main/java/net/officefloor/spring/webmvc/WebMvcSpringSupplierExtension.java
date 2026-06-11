@@ -100,6 +100,10 @@ public class WebMvcSpringSupplierExtension implements SpringSupplierExtensionSer
 	@Configuration(proxyBeanMethods = false)
 	public static class OfficeFloorEmbeddedTomcatConfiguration {
 
+		/**
+		 * @param contextCustomizers {@link TomcatContextCustomizer} instances.
+		 * @return {@link TomcatServletWebServerFactory}.
+		 */
 		@Bean
 		@Primary
 		public TomcatServletWebServerFactory tomcatServletWebServerFactory(

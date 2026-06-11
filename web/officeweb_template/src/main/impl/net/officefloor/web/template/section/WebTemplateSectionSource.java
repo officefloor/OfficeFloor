@@ -121,7 +121,9 @@ public class WebTemplateSectionSource extends AbstractSectionSource {
 	 * <p>
 	 * Must have a public method for {@link ClassSectionSource}.
 	 */
+	/** No-logic placeholder class for {@link ClassSectionSource}. */
 	public static final class NoLogicClass {
+		/** No-operation input method. */
 		public void notIncludedInput() {
 		}
 	}

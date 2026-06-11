@@ -1,0 +1,8 @@
+managed-object:
+  source: net.officefloor.tutorial.springrestmanagedobject.SessionIdSource
+  scope: PROCESS
+  outputs:
+    LOG: logSession
+
+logSession:
+  class: net.officefloor.tutorial.springrestmanagedobject.SessionLogService

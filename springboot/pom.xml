@@ -13,7 +13,11 @@
 	<name>Spring Boot</name>
 	<description>Provides modules for Spring Boot integration</description>
 	<modules>
-        <module>officefloor_rest_spring_boot_starter</module>
+        <module>officefloor-rest-spring-boot-starter</module>
+        <module>officefloor-rest-spring-boot-3-starter</module>
+        <module>officefloor-rest-spring-boot-4-starter</module>
+        <module>officefloor-rest-spring-boot-starter-tests</module>
+        <module>officefloor-rest-spring-boot-4-starter-tests</module>
 	</modules>
 	<dependencies>
 		<dependency>

@@ -1,0 +1,18 @@
+commit:
+  class: net.officefloor.tutorial.transactionhttpserver.TransactionLogic
+  method: commit
+  next: fail
+  govern:
+    - Transaction
+fail:
+  class: net.officefloor.tutorial.transactionhttpserver.TransactionLogic
+  method: fail
+  govern:
+    - Transaction
+composition:
+  escalations:
+    java.lang.Exception: handleCommitException
+handleCommitException:
+  class: net.officefloor.tutorial.transactionhttpserver.CommitExceptionHandler
+  govern:
+    - Transaction

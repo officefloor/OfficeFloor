@@ -1,0 +1,7 @@
+submit:
+  class: net.officefloor.tutorial.exceptionhttpserver.TemplateLogic
+composition:
+  escalations:
+    java.sql.SQLException: handleSqlException
+handleSqlException:
+  class: net.officefloor.tutorial.exceptionhttpserver.ExceptionHandler

@@ -68,6 +68,7 @@ public class HttpObjectManagedObjectSource<T>
 	 * Dependency keys.
 	 */
 	public static enum HttpObjectDependencies {
+		/** Server HTTP connection dependency. */
 		SERVER_HTTP_CONNECTION
 	}
 

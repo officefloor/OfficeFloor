@@ -27,6 +27,12 @@ package net.officefloor.web.build;
  */
 public interface HttpContentParametersBuilder {
 
+	/**
+	 * Adds a parameter.
+	 *
+	 * @param name Parameter name.
+	 * @return {@link HttpParameterBuilder}.
+	 */
 	HttpParameterBuilder addParameter(String name);
 
 }

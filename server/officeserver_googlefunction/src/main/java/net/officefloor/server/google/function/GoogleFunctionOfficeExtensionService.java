@@ -1,6 +1,6 @@
 /*-
  * #%L
- * AWS SAM HTTP Server
+ * Google Function OfficeFloor Server
  * %%
  * Copyright (C) 2005 - 2020 Daniel Sagenschneider
  * %%
