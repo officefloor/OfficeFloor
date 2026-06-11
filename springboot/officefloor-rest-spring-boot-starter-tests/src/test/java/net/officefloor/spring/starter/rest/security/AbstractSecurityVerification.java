@@ -173,6 +173,54 @@ public abstract class AbstractSecurityVerification extends AbstractMockMvcVerifi
     }
 
     @Test
+    @WithMockUser(username = "User", roles = "ACCESS")
+    public void authorize_Access() throws Exception {
+        this.mvc.perform(get(this.getPath("/authorize")).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("Accessed")));
+    }
+
+    @Test
+    @WithMockUser(username = "User", roles = "NO_ACCESS")
+    public void authorize_NoAccess() throws Exception {
+        this.mvc.perform(get(this.getPath("/authorize")).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden())
+                .andExpect(content().string(equalTo("")));
+    }
+
+    @Test
+    @WithMockUser(username = "User", roles = "ACCESS")
+    public void authorizeInherited_Access() throws Exception {
+        this.mvc.perform(get(this.getPath("/authorized/child")).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("Accessed")));
+    }
+
+    @Test
+    @WithMockUser(username = "User", roles = "NO_ACCESS")
+    public void authorizeInherited_NoAccess() throws Exception {
+        this.mvc.perform(get(this.getPath("/authorized/child")).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden())
+                .andExpect(content().string(equalTo("")));
+    }
+
+    @Test
+    @WithMockUser(username = "User", roles = "ADMIN")
+    public void authorizeInheritedOverride_Access() throws Exception {
+        this.mvc.perform(get(this.getPath("/authorized/override")).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("Accessed")));
+    }
+
+    @Test
+    @WithMockUser(username = "User", roles = "ACCESS")
+    public void authorizeInheritedOverride_NoAccess() throws Exception {
+        this.mvc.perform(get(this.getPath("/authorized/override")).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden())
+                .andExpect(content().string(equalTo("")));
+    }
+
+    @Test
     public void logout() throws Exception {
         this.mvc.perform(post(this.getPath("/logout", true)).with(csrf()))
                 .andExpect(status().is3xxRedirection())
