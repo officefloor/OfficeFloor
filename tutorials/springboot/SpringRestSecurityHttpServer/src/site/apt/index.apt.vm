@@ -7,9 +7,9 @@
 ~~ Licensed under the Apache License, Version 2.0 (the "License");
 ~~ you may not use this file except in compliance with the License.
 ~~ You may obtain a copy of the License at
-~~ 
+~~
 ~~      http://www.apache.org/licenses/LICENSE-2.0
-~~ 
+~~
 ~~ Unless required by applicable law or agreed to in writing, software
 ~~ distributed under the License is distributed on an "AS IS" BASIS,
 ~~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,13 +30,27 @@
 
 Spring Security Integration Tutorial
 
-  This tutorial demonstrates that Spring Security integrates with OfficeFloor REST YAML composition
-  without any extra plumbing.  Adding <<<spring-boot-starter-security>>> to the project is all that
-  is required — Spring Security's filters, authentication context, and annotations are all immediately
-  available inside OfficeFloor service methods, exactly as they would be in a regular Spring MVC
-  controller method.
+  This tutorial demonstrates how to secure OfficeFloor REST endpoints using Spring Security.
+  The preferred approach is to declare the <<<authorize>>> expression directly in the REST YAML
+  configuration — no annotations on service methods are needed.  This keeps authorization policy
+  in the same place as routing, and enables path-level inheritance so an entire section of the API
+  can be secured in one line.
 
-  The tutorial uses eight endpoints to show this:
+  For applications migrating from Spring MVC, OfficeFloor also supports the familiar
+  <<<@PreAuthorize>>>, <<<@Secured>>>, and <<<@RolesAllowed>>> annotations without any extra
+  plumbing — see the {{{Spring_Boot_annotation_compatibility}compatibility section}} below.
+
+  The tutorial covers these endpoints:
+
+  <<YAML authorize (preferred)>>
+
+   * <<<GET /security/yaml>>> — single endpoint secured by <<<authorize:>>> in its YAML file
+
+   * <<<GET /security/admin/report>>> — endpoint that inherits <<<authorize:>>> from its parent path config
+
+   * <<<GET /security/admin/super>>> — endpoint that overrides the inherited expression with a stricter rule
+
+  <<Spring integration>>
 
    * <<<GET /security/public>>> — open to everyone; no authentication required
 
@@ -48,11 +62,13 @@ Spring Security Integration Tutorial
 
    * <<<GET /security/bean>>> — requires authentication; receives a Spring Security bean (<<<UserDetailsService>>>) by type
 
-   * <<<GET /security/preauthorize>>> — requires <<<ADMIN>>> role, enforced by <<<@PreAuthorize>>>
+  <<Spring Boot annotation compatibility>>
 
-   * <<<GET /security/secured>>> — requires <<<ADMIN>>> role, enforced by <<<@Secured>>>
+   * <<<GET /security/preauthorize>>> — <<<ADMIN>>> role enforced by <<<@PreAuthorize>>>
 
-   * <<<GET /security/rolesallowed>>> — requires <<<ADMIN>>> role, enforced by <<<@RolesAllowed>>>
+   * <<<GET /security/secured>>> — <<<ADMIN>>> role enforced by <<<@Secured>>>
+
+   * <<<GET /security/rolesallowed>>> — <<<ADMIN>>> role enforced by <<<@RolesAllowed>>>
 
   {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestSecurityHttpServer}Tutorial Source}}
 
@@ -77,15 +93,65 @@ Spring Security Integration Tutorial
 *Security configuration
 
   The <<<SecurityFilterChain>>> is a standard Spring Security configuration.  <<<@EnableMethodSecurity>>>
-  is added to activate method-level security annotations across the application — including on
-  OfficeFloor service methods.  <<<securedEnabled = true>>> enables <<<@Secured>>> and
-  <<<jsr250Enabled = true>>> enables <<<@RolesAllowed>>>; <<<@PreAuthorize>>> is on by default:
+  is required to activate the SpEL expression evaluator used by <<<authorize:>>> in the YAML files,
+  as well as any method-level annotations on service classes:
 
 %{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestsecurity/SecurityConfig.java|ignoreDownloadError=false}
 
-  Spring Security's filter chain runs before OfficeFloor's handler interceptor, so unauthenticated
-  requests to protected paths are rejected by Spring Security before they ever reach the service
-  method.  No OfficeFloor configuration is involved.
+
+
+*YAML authorize — single endpoint
+
+  The simplest form places an <<<authorize:>>> expression inside the <<<composition:>>> block of
+  the endpoint YAML file.  The expression is a standard Spring Security SpEL string — <<<hasRole()>>>,
+  <<<isAuthenticated()>>>, <<<hasAuthority()>>>, or any custom expression supported by a
+  <<<MethodSecurityExpressionHandler>>>.
+
+  The expression is parsed and compiled once at startup, so there is no per-request parsing overhead.
+  If the expression is syntactically invalid, the application fails to start immediately.
+
+  The service class carries no security annotation — authorization is entirely in the YAML:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/security/yaml.GET.yml|ignoreDownloadError=false}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestsecurity/YamlAuthorizeService.java|ignoreDownloadError=false}
+
+  If the expression evaluates to false, OfficeFloor returns <<<403 Forbidden>>> before the service
+  method is invoked.
+
+
+
+*YAML authorize — path-level inheritance
+
+  Place an <<<authorize:>>> key in a path-config YAML file (a <<<.yml>>> file named after a
+  path segment with no HTTP method suffix) to secure every endpoint under that path with a
+  single declaration.  Child endpoint files need no <<<authorize:>>> entry at all — they inherit
+  the expression automatically.
+
+  The path config for the <<</security/admin>>> subtree:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/security/admin.yml|ignoreDownloadError=false}
+
+  The child endpoint for <<<GET /security/admin/report>>> simply names its service class.  The
+  <<<ADMIN>>> requirement is inherited from the parent:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/security/admin/report.GET.yml|ignoreDownloadError=false}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestsecurity/AdminReportService.java|ignoreDownloadError=false}
+
+
+
+*YAML authorize — overriding an inherited expression
+
+  A child endpoint can tighten or replace the inherited expression by putting its own
+  <<<authorize:>>> inside its <<<composition:>>> block.  The most specific (deepest) expression wins.
+
+  The <<<super>>> endpoint requires a stricter <<<SUPER>>> role even though its parent only
+  requires <<<ADMIN>>>:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/security/admin/super.GET.yml|ignoreDownloadError=false}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestsecurity/SuperAdminService.java|ignoreDownloadError=false}
 
 
 
@@ -154,7 +220,21 @@ Spring Security Integration Tutorial
 
 
 
-*Method-level security — <<<@PreAuthorize>>>
+{Spring_Boot_annotation_compatibility}
+*Spring Boot annotation compatibility
+
+  OfficeFloor fully supports <<<@PreAuthorize>>>, <<<@Secured>>>, and <<<@RolesAllowed>>> on
+  service methods.  These annotations are evaluated by Spring Security's AOP infrastructure before
+  the method is invoked, exactly as they would be in a Spring MVC controller.
+
+  Use annotation-based security when porting an existing Spring Boot application to OfficeFloor,
+  or when the service class is shared between an OfficeFloor REST endpoint and other callers that
+  rely on the annotation.  For new OfficeFloor-first code, prefer the <<<authorize:>>> YAML key
+  so that security policy is declared alongside routing.
+
+
+
+**<<<@PreAuthorize>>>
 
   <<<@PreAuthorize>>> on a service method is evaluated by OfficeFloor before the method is invoked.
   The full Spring Security SpEL expression language is available — <<<hasRole()>>>,
@@ -165,12 +245,9 @@ Spring Security Integration Tutorial
 
 %{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestsecurity/PreAuthorizeService.java|ignoreDownloadError=false}
 
-  If the expression evaluates to false, OfficeFloor returns <<<403 Forbidden>>> before the service
-  method body executes.
 
 
-
-*Method-level security — <<<@PreAuthorize>>> with SpEL bean references
+**<<<@PreAuthorize>>> with SpEL bean references
 
   Spring Security SpEL supports referencing any Spring bean by name using the <<<@beanName>>>
   syntax.  A common pattern centralises role constants in a <<<@Component>>> so that role
@@ -188,7 +265,7 @@ Spring Security Integration Tutorial
 
 
 
-*Method-level security — <<<@Secured>>>
+**<<<@Secured>>>
 
   <<<@Secured>>> accepts one or more role names (including the <<<ROLE_>>> prefix).  Enable it in
   the security configuration with <<<securedEnabled = true>>>:
@@ -199,7 +276,7 @@ Spring Security Integration Tutorial
 
 
 
-*Method-level security — <<<@RolesAllowed>>>
+**<<<@RolesAllowed>>>
 
   The JSR-250 <<<@RolesAllowed>>> annotation works the same way.  Enable it with
   <<<jsr250Enabled = true>>>:
@@ -220,12 +297,10 @@ Spring Security Integration Tutorial
   object from the configured <<<UserDetailsService>>> — useful when the service method inspects
   granted authorities or other fields populated by the real implementation.
 
-  The tests cover all eight endpoints, both test annotations, and access/denial cases for each
-  method-level security annotation:
+  The tests cover YAML authorize (endpoint-level, inherited, and overridden), the Spring integration
+  endpoints, and the annotation-compatibility endpoints:
 
 %{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springrestsecurity/SpringRestSecurityTest.java|ignoreDownloadError=false}
-
-
 
 
 
