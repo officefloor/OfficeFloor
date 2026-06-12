@@ -70,6 +70,12 @@ public class JaxRsSpringSupplierExtension implements SpringSupplierExtension, Sp
 	@Configuration(proxyBeanMethods = false)
 	public static class JerseyFilterConfiguration {
 
+		/**
+		 * Registers Jersey as a filter.
+		 *
+		 * @param config {@link ResourceConfig}.
+		 * @return {@link FilterRegistrationBean}.
+		 */
 		@Bean
 		public FilterRegistrationBean<ServletContainer> jerseyFilterRegistration(ResourceConfig config) {
 			FilterRegistrationBean<ServletContainer> registration = new FilterRegistrationBean<>();
