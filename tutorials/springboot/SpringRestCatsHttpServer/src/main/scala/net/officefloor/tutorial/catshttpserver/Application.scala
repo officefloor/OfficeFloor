@@ -1,8 +1,8 @@
 package net.officefloor.tutorial.catshttpserver
 
 import cats.effect.IO
-import com.fasterxml.jackson.databind.Module
-import com.fasterxml.jackson.module.scala.DefaultScalaModule
+import tools.jackson.databind.JacksonModule
+import tools.jackson.module.scala.DefaultScalaModule
 import doobie.util.transactor.Transactor
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
@@ -16,7 +16,7 @@ import scala.concurrent.ExecutionContext
 class Application {
 
   @Bean
-  def scalaJacksonModule(): Module = DefaultScalaModule
+  def scalaJacksonModule(): JacksonModule = DefaultScalaModule
 
   @Bean
   def transactor(dataSource: DataSource): Transactor[IO] =

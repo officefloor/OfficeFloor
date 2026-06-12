@@ -25,7 +25,7 @@ import java.security.Key;
 import java.util.Base64;
 import java.util.function.Function;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Context for the {@link JwksKeyParser}.

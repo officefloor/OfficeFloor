@@ -68,14 +68,17 @@ public class OfficeFloorServerHttpRequest extends AbstractServerHttpRequest impl
 	}
 
 	/**
-	 * Obtains the query params from the {@link HttpRequest} URI.
+	 * Builds {@link HttpHeaders} from the {@link HttpRequest}.
 	 *
 	 * @param request {@link HttpRequest}.
-	 * @return Query params.
-	 * @throws URISyntaxException If fails to create {@link URI}.
+	 * @return {@link HttpHeaders}.
 	 */
-	private static MultiValueMap<String, String> queryParams(HttpRequest request) throws URISyntaxException {
-		return UriComponentsBuilder.fromUri(uri(request)).build().getQueryParams();
+	private static HttpHeaders buildHeaders(HttpRequest request) {
+		HttpHeaders headers = new HttpHeaders();
+		for (HttpHeader header : request.getHeaders()) {
+			headers.add(header.getName(), header.getValue());
+		}
+		return headers;
 	}
 
 	/**
@@ -94,11 +97,6 @@ public class OfficeFloorServerHttpRequest extends AbstractServerHttpRequest impl
 	private final DataBufferFactory dataBufferFactory;
 
 	/**
-	 * {@link HttpHeaders}.
-	 */
-	private final HttpHeaders httpHeaders;
-
-	/**
 	 * Instantiate.
 	 *
 	 * @param httpRequest       {@link HttpRequest}.
@@ -110,15 +108,19 @@ public class OfficeFloorServerHttpRequest extends AbstractServerHttpRequest impl
 	public OfficeFloorServerHttpRequest(HttpRequest httpRequest, HttpRequestState requestState, String contextPath,
 			DataBufferFactory dataBufferFactory) throws URISyntaxException {
 		super(HttpMethod.valueOf(httpRequest.getMethod().getName()), uri(httpRequest), contextPath,
-				queryParams(httpRequest));
+				buildHeaders(httpRequest));
 		this.httpRequest = httpRequest;
 		this.requestState = requestState;
 		this.dataBufferFactory = dataBufferFactory;
-		HttpHeaders headers = new HttpHeaders();
-		for (HttpHeader header : httpRequest.getHeaders()) {
-			headers.add(header.getName(), header.getValue());
+	}
+
+	@Override
+	protected MultiValueMap<String, String> initQueryParams() {
+		try {
+			return UriComponentsBuilder.fromUri(uri(this.httpRequest)).build().getQueryParams();
+		} catch (URISyntaxException ex) {
+			return new LinkedMultiValueMap<>();
 		}
-		this.httpHeaders = headers;
 	}
 
 	/**
@@ -152,11 +154,6 @@ public class OfficeFloorServerHttpRequest extends AbstractServerHttpRequest impl
 	@Override
 	public HttpMethod getMethod() {
 		return HttpMethod.valueOf(this.httpRequest.getMethod().getName());
-	}
-
-	@Override
-	public HttpHeaders getHeaders() {
-		return this.httpHeaders;
 	}
 
 	@Override

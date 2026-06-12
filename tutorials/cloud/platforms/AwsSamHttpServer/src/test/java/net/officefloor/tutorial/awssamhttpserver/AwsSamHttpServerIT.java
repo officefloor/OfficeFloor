@@ -14,7 +14,7 @@ import org.apache.http.util.EntityUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 import net.officefloor.nosql.dynamodb.test.AbstractDynamoDbConnectJunit.Configuration;
 import net.officefloor.nosql.dynamodb.test.DynamoDbConnectExtension;

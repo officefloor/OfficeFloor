@@ -2,14 +2,14 @@ package net.officefloor.tutorial.springapp;
 
 import static org.junit.Assert.assertEquals;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -66,16 +66,17 @@ public class SpringIT {
 		return new HttpGet(this.url(path));
 	}
 
-	private void doTest(HttpUriRequest request, String body) throws Exception {
+	private void doTest(ClassicHttpRequest request, String body) throws Exception {
 		this.doTest(request, 200, body);
 	}
 
-	private void doTest(HttpUriRequest request, int status, String body) throws Exception {
+	private void doTest(ClassicHttpRequest request, int status, String body) throws Exception {
 		try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
-			HttpResponse response = client.execute(request);
-			String entity = EntityUtils.toString(response.getEntity());
-			assertEquals("Should be successful: " + entity, status, response.getStatusLine().getStatusCode());
-			assertEquals("Incorrect entity", body, entity);
+			try (CloseableHttpResponse response = client.execute(request)) {
+				String entity = EntityUtils.toString(response.getEntity());
+				assertEquals("Should be successful: " + entity, status, response.getCode());
+				assertEquals("Incorrect entity", body, entity);
+			}
 		}
 	}
 

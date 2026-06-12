@@ -24,7 +24,7 @@
 			<artifactId>officejson_default</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.fasterxml.jackson.module</groupId>
+			<groupId>tools.jackson.module</groupId>
 			<artifactId>jackson-module-scala_${scala-series}</artifactId>
 		</dependency>
 		<dependency>

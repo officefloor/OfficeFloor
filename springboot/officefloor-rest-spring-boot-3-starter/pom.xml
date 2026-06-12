@@ -15,6 +15,14 @@
     <description>Spring Boot 3 Starter for OfficeFloor REST</description>
     <dependencyManagement>
         <dependencies>
+            <!-- Override to Spring Boot 3.x BOM -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>org.springdoc</groupId>
                 <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>

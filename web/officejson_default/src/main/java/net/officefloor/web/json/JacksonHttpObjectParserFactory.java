@@ -20,10 +20,9 @@
 
 package net.officefloor.web.json;
 
-import java.io.IOException;
-
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.ObjectMapper;
 
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.ServerHttpConnection;
@@ -66,11 +65,6 @@ public class JacksonHttpObjectParserFactory implements HttpObjectParserFactory {
 		// Create the type for efficient execution
 		JavaType javaType = this.mapper.constructType(objectClass);
 
-		// Determine if can deserialise type
-		if (!this.mapper.canDeserialize(javaType)) {
-			return null;
-		}
-
 		// Can deserialise, so provide parser
 		return new HttpObjectParser<T>() {
 
@@ -90,7 +84,7 @@ public class JacksonHttpObjectParserFactory implements HttpObjectParserFactory {
 				try {
 					return (T) JacksonHttpObjectParserFactory.this.mapper.readValue(connection.getRequest().getEntity(),
 							javaType);
-				} catch (IOException ex) {
+				} catch (JacksonException ex) {
 					throw new HttpException(ex);
 				}
 			}

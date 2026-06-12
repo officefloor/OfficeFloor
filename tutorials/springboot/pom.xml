@@ -23,6 +23,33 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
+			<!-- Hibernate 7 (used by SB4) requires Jakarta Persistence 3.2; root BOM pins 3.1 -->
+			<dependency>
+				<groupId>jakarta.persistence</groupId>
+				<artifactId>jakarta.persistence-api</artifactId>
+				<version>3.2.0</version>
+			</dependency>
+			<!-- SB4 modularised test artifacts -->
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-webmvc-test</artifactId>
+				<version>${spring4-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-resttestclient</artifactId>
+				<version>${spring4-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-restclient</artifactId>
+				<version>${spring4-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-security-test</artifactId>
+				<version>${spring4-version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<build>
@@ -32,6 +59,12 @@
 					<groupId>org.springframework.boot</groupId>
 					<artifactId>spring-boot-maven-plugin</artifactId>
 					<version>${spring4-version}</version>
+				</plugin>
+				<!-- SB4 requires Kotlin 2.x; root BOM pins kotlin-maven-plugin to 1.9.x -->
+				<plugin>
+					<groupId>org.jetbrains.kotlin</groupId>
+					<artifactId>kotlin-maven-plugin</artifactId>
+					<version>${kotlin4-version}</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>

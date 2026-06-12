@@ -29,9 +29,9 @@ public class SwaggerHttpServerTest {
 	public MockWoofServerExtension server = new MockWoofServerExtension();
 
 	@Test
-	public void openApiJson() {
-		OpenAPI openApi = this.server.send(MockWoofServer.mockRequest("/openapi.json")).getJson(200, OpenAPI.class,
-				Json.mapper());
+	public void openApiJson() throws Exception {
+		String body = this.server.send(MockWoofServer.mockRequest("/openapi.json")).getEntity(null);
+		OpenAPI openApi = Json.mapper().readValue(body, OpenAPI.class);
 		assertEquals(4, openApi.getPaths().size(), "Incorrect number of paths");
 	}
 

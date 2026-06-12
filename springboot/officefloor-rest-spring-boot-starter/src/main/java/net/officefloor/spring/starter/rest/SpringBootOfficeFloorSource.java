@@ -20,7 +20,7 @@
 
 package net.officefloor.spring.starter.rest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.models.OpenAPI;
 import net.officefloor.activity.team.build.TeamDeployer;
 import net.officefloor.activity.team.build.TeamEmployer;

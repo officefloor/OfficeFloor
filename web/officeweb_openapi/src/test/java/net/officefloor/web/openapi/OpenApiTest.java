@@ -718,8 +718,9 @@ public class OpenApiTest extends OfficeFrameTestCase {
 				String expectedContent = this.getFileContents(this.findFile(this.getClass(), expectedFileName));
 
 				// Translate to YAML and JSON (round trip for better comparison)
-				Json.mapper().enable(JsonParser.Feature.ALLOW_COMMENTS);
-				OpenAPI expectedApi = Json.mapper().readValue(expectedContent, OpenAPI.class);
+				OpenAPI expectedApi = Json.mapper().readerFor(OpenAPI.class)
+						.with(JsonParser.Feature.ALLOW_COMMENTS)
+						.readValue(expectedContent);
 
 				// Ensure correct JSON
 				MockWoofResponse response = server.send(MockHttpServer.mockRequest("/openapi.json"));
