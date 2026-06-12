@@ -19,7 +19,7 @@
 			<dependency>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-dependencies</artifactId>
-				<version>${spring4-version}</version>
+				<version>${spring-version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -33,22 +33,22 @@
 			<dependency>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-starter-webmvc-test</artifactId>
-				<version>${spring4-version}</version>
+				<version>${spring-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-resttestclient</artifactId>
-				<version>${spring4-version}</version>
+				<version>${spring-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-restclient</artifactId>
-				<version>${spring4-version}</version>
+				<version>${spring-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-security-test</artifactId>
-				<version>${spring4-version}</version>
+				<version>${spring-version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -58,7 +58,7 @@
 				<plugin>
 					<groupId>org.springframework.boot</groupId>
 					<artifactId>spring-boot-maven-plugin</artifactId>
-					<version>${spring4-version}</version>
+					<version>${spring-version}</version>
 				</plugin>
 				<!-- SB4 requires Kotlin 2.x; root BOM pins kotlin-maven-plugin to 1.9.x -->
 				<plugin>

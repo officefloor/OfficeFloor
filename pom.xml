@@ -593,7 +593,7 @@
 								<additionalDependency>
 									<groupId>org.springframework.boot</groupId>
 									<artifactId>spring-boot</artifactId>
-									<version>${spring-version}</version>
+									<version>${spring3-version}</version>
 								</additionalDependency>
 							</additionalDependencies>
 							<!-- Include Google Analytics -->
