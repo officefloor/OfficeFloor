@@ -1,0 +1,4 @@
+composition:
+  authorize: ""
+service:
+  class: ${security.package}.AuthorizeService

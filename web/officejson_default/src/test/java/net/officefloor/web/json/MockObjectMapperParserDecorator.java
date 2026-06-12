@@ -20,8 +20,8 @@
 
 package net.officefloor.web.json;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.cfg.MapperBuilder;
 
 import net.officefloor.frame.api.source.ServiceContext;
 
@@ -53,9 +53,9 @@ public class MockObjectMapperParserDecorator
 	 */
 
 	@Override
-	public void decorateObjectMapper(ObjectMapper mapper) throws Exception {
+	public void decorateObjectMapper(MapperBuilder<?, ?> builder) throws Exception {
 		if (isDecorate) {
-			mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+			builder.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 		}
 	}
 

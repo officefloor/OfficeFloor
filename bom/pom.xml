@@ -79,17 +79,19 @@
 		<gpg-version>3.2.8</gpg-version>
 		<graalvm-js-version>23.0.4</graalvm-js-version>
 		<h2database-version>2.2.224</h2database-version>
-		<hibernate-version>6.2.4.Final</hibernate-version>
+		<hibernate-version>7.2.12.Final</hibernate-version>
 		<hikari-version>5.0.1</hikari-version>
 		<hsqldb-version>2.7.3</hsqldb-version>
 		<httpclient-version>4.5.14</httpclient-version>
-		<jackson-version>2.16.1</jackson-version>
+		<jackson2-version>2.16.1</jackson2-version>
+		<jackson3-version>3.1.2</jackson3-version>
 		<javadoc-version>3.6.0</javadoc-version>
 		<jsonwebtoken-version>0.11.5</jsonwebtoken-version>
-		<junit-version>5.10.1</junit-version>
+		<junit-version>6.0.3</junit-version>
 		<junit-vintage-version>4.13.2</junit-vintage-version>
 		<lombok-version>1.18.44</lombok-version>
 		<kotlin-version>1.9.22</kotlin-version>
+		<kotlin4-version>2.2.21</kotlin4-version>
 		<maven-scm-version>2.0.1</maven-scm-version>
 		<maven-site-version>3.22.0</maven-site-version>
 		<maven-source-version>3.3.0</maven-source-version>
@@ -98,7 +100,7 @@
 		<objectify-version>6.1.1</objectify-version>
 		<objenesis-version>3.4</objenesis-version>
 		<ongres-scram-client>2.1</ongres-scram-client>
-		<persistence-version>3.1.0</persistence-version>
+		<persistence-version>3.2.0</persistence-version>
 		<postgresql-version>42.7.11</postgresql-version>
 		<r2dbc-version>Borca-SR2</r2dbc-version>
 		<reactor-version>2024.0.15</reactor-version>
@@ -110,11 +112,13 @@
 		<scalatest-version>3.3.0-SNAP4</scalatest-version>
 		<servlet-version>6.0.0</servlet-version>
 		<slf4j-version>2.0.17</slf4j-version>
-		<spring-version>3.5.11</spring-version>
+		<spring3-version>3.5.11</spring3-version>
+		<spring-version>4.0.6</spring-version>
 		<swagger-version>2.2.46</swagger-version>
 		<swagger-ui-version>5.11.3</swagger-ui-version>
 		<tika-version>2.9.1</tika-version>
 		<undertow-version>2.4.0.Final</undertow-version>
+		<log4j2-version>2.25.4</log4j2-version>
 		<vertx-version>4.5.3</vertx-version>
 		<wagon-ssh-version>3.5.3</wagon-ssh-version>
 		<zio-version>2.1.5</zio-version>
@@ -930,9 +934,9 @@
 				<scope>import</scope>
 			</dependency>
 			<dependency>
-				<groupId>com.fasterxml.jackson</groupId>
+				<groupId>tools.jackson</groupId>
 				<artifactId>jackson-bom</artifactId>
-				<version>${jackson-version}</version>
+				<version>${jackson3-version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -966,7 +970,7 @@
 			<dependency>
 				<groupId>org.jetbrains.kotlin</groupId>
 				<artifactId>kotlin-bom</artifactId>
-				<version>${kotlin-version}</version>
+				<version>${kotlin4-version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -991,6 +995,13 @@
 				<groupId>com.google.cloud</groupId>
 				<artifactId>libraries-bom</artifactId>
 				<version>${google-libraaries-version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-bom</artifactId>
+				<version>${log4j2-version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -1044,7 +1055,7 @@
 				<plugin>
 					<groupId>org.jetbrains.kotlin</groupId>
 					<artifactId>kotlin-maven-plugin</artifactId>
-					<version>${kotlin-version}</version>
+					<version>${kotlin4-version}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.jetbrains.dokka</groupId>

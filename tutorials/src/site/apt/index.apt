@@ -142,9 +142,3 @@ OfficeFloor Tutorials
 | {{{./springboot/SpringRestZioHttpServer/index.html}ZIO}}        | Integrate ZIO functional effects into OfficeFloor REST composition. | {{{https://zio.dev}ZIO}}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 
-
-* Migration
-
-  If you are interested in a deeper integration, such as hosting Spring beans directly in the
-  OfficeFloor runtime, running without Spring, or deploying to cloud platforms, the
-  {{{./migration.html}Migration Guide}} covers the full journey.

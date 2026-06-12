@@ -20,7 +20,8 @@
 
 package net.officefloor.web.json;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.MapperBuilder;
 
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.frame.api.source.ServiceFactory;
@@ -41,17 +42,17 @@ public class JacksonHttpObjectParserServiceFactory implements HttpObjectParserSe
 	@Override
 	public HttpObjectParserFactory createService(ServiceContext context) throws Throwable {
 
-		// Create the Object Mapper
-		ObjectMapper mapper = new ObjectMapper();
+		// Build the Object Mapper, allowing decorators to configure the builder
+		MapperBuilder<?, ?> builder = new ObjectMapper().rebuild();
 
-		// Decorate the Object Mapper
+		// Decorate the Object Mapper builder
 		for (ObjectMapperParserDecorator decorator : context
 				.loadOptionalServices(ObjectMapperParserDecoratorServiceFactory.class)) {
-			decorator.decorateObjectMapper(mapper);
+			decorator.decorateObjectMapper(builder);
 		}
 
 		// Return factory
-		return new JacksonHttpObjectParserFactory(mapper);
+		return new JacksonHttpObjectParserFactory(builder.build());
 	}
 
 }

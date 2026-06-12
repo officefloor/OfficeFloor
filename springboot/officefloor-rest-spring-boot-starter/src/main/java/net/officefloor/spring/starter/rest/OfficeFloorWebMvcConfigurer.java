@@ -20,7 +20,6 @@
 
 package net.officefloor.spring.starter.rest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PreDestroy;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.frame.api.manage.OfficeFloor;

@@ -20,8 +20,9 @@
 
 package net.officefloor.spring.starter.rest;
 
-import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JacksonModule;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.responses.ApiResponse;
@@ -49,36 +50,35 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 public class OfficeFloorRestAutoConfiguration {
 
     /**
-     * Fallback {@link ObjectMapper} bean for Spring Boot 4+, where Jackson 2.x is no longer
-     * auto-configured (SB4 auto-configures tools.jackson.databind.ObjectMapper instead).
-     * In SB3 this bean is never created because JacksonAutoConfiguration already provides one.
-     * Uses {@code findAndRegisterModules()} so ServiceLoader-registered modules (e.g. KotlinModule)
-     * are picked up automatically.
+     * Fallback {@link ObjectMapper} bean where Jackson 3.x is not auto-configured.
+     * In SB4 this bean is never created because Spring Boot 4 auto-configures
+     * {@code tools.jackson.databind.ObjectMapper} via its Jackson auto-configuration.
+     * Uses {@code findAndRegisterModules()} so ServiceLoader-registered modules are picked up.
      *
      * @return {@link ObjectMapper}.
      */
     @Bean
     @ConditionalOnMissingBean(ObjectMapper.class)
-    public ObjectMapper jackson2ObjectMapper() {
-        return new ObjectMapper().findAndRegisterModules();
+    public ObjectMapper officefloorJacksonObjectMapper() {
+        return JsonMapper.builder().findAndAddModules().build();
     }
 
     /**
      * Registers a {@code KotlinModule} bean when {@code jackson-module-kotlin} is on the
-     * classpath. In Spring Boot 3, {@code JacksonAutoConfiguration} picks up all {@link Module}
-     * beans and installs them on the shared {@link ObjectMapper}, which is required for Jackson to
-     * deserialize Kotlin data classes (which have no no-arg constructor).
+     * classpath. Installs Kotlin support on the OfficeFloor Jackson 3.x {@link ObjectMapper},
+     * which is required for Jackson to deserialize Kotlin data classes (which have no no-arg
+     * constructor).
      *
-     * @return {@link Module} wrapping {@code KotlinModule}.
+     * @return {@link JacksonModule} wrapping {@code KotlinModule}.
      * @throws Exception if reflection fails.
      */
     @Bean
     @ConditionalOnMissingBean(name = "kotlinJacksonModule")
-    @ConditionalOnClass(name = "com.fasterxml.jackson.module.kotlin.KotlinModule")
-    public Module kotlinJacksonModule() throws Exception {
-        Object builder = Class.forName("com.fasterxml.jackson.module.kotlin.KotlinModule$Builder")
+    @ConditionalOnClass(name = "tools.jackson.module.kotlin.KotlinModule")
+    public JacksonModule kotlinJacksonModule() throws Exception {
+        Object builder = Class.forName("tools.jackson.module.kotlin.KotlinModule$Builder")
                 .getDeclaredConstructor().newInstance();
-        return (Module) builder.getClass().getMethod("build").invoke(builder);
+        return (JacksonModule) builder.getClass().getMethod("build").invoke(builder);
     }
 
     /**

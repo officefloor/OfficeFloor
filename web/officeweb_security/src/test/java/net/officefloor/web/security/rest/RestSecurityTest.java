@@ -20,7 +20,7 @@
 
 package net.officefloor.web.security.rest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import net.officefloor.activity.compose.build.ComposeArchitect;
 import net.officefloor.activity.compose.build.ComposeEmployer;
 import net.officefloor.compile.properties.PropertyList;

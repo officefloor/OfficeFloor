@@ -1,6 +1,6 @@
 package net.officefloor.tutorial.jaxrsapp;
 
-import org.glassfish.jersey.internal.inject.AbstractBinder;
+import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.internal.inject.Binder;
 
 /**

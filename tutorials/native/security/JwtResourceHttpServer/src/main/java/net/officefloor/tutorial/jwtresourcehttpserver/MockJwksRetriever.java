@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;

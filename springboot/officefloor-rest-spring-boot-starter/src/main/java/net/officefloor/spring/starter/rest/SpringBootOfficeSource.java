@@ -20,7 +20,7 @@
 
 package net.officefloor.spring.starter.rest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.models.OpenAPI;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -45,6 +45,7 @@ import net.officefloor.spring.starter.rest.argument.SpringBeanSupplierSource;
 import net.officefloor.spring.starter.rest.argument.SpringMvcArguments;
 import net.officefloor.spring.starter.rest.argument.SpringTypeQualifierInterrogator;
 import net.officefloor.spring.starter.rest.cors.ComposeCorsConfiguration;
+import net.officefloor.spring.starter.rest.security.AuthorizeRestMethodDecorator;
 import net.officefloor.spring.starter.rest.response.SpringExceptionHandler;
 import net.officefloor.spring.starter.rest.response.SpringExceptionHandlerServiceFactory;
 import net.officefloor.spring.starter.rest.response.SpringHttpObjectResponderFactory;
@@ -212,6 +213,9 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
 
         // Allow Spring to handle responses
         webArchitect.addHttpObjectResponder(new SpringHttpObjectResponderFactory(springExceptionHandlers));
+
+        // Add YAML authorize decoration
+        restArchitect.addRestMethodDecorator(new AuthorizeRestMethodDecorator());
 
         // Add CORS decoration
         MomentoKey<CorsConfiguration> corsMomento = restArchitect.addRestMethodDecorator((context) -> {

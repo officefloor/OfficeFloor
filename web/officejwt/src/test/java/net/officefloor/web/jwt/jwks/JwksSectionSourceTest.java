@@ -28,7 +28,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.util.Base64;
 import java.util.concurrent.TimeUnit;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.IOException;

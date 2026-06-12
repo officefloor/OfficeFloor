@@ -588,6 +588,14 @@
 							<!-- Ensure good quality JavaDoc -->
 							<failOnError>true</failOnError>
 							<failOnWarnings>true</failOnWarnings>
+							<!-- SB4 moved embedded server classes out of spring-boot; force SB3 jar on aggregate classpath so officespring_webmvc/webflux still compile -->
+							<additionalDependencies>
+								<additionalDependency>
+									<groupId>org.springframework.boot</groupId>
+									<artifactId>spring-boot</artifactId>
+									<version>${spring3-version}</version>
+								</additionalDependency>
+							</additionalDependencies>
 							<!-- Include Google Analytics -->
 							<additionalOptions>
 								<additionalOption>--allow-script-in-comments</additionalOption>

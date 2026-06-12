@@ -24,10 +24,10 @@ import java.math.BigInteger;
 import java.security.Key;
 import java.util.Base64;
 
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.NumericNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TextNode;
+import tools.jackson.databind.node.JsonNodeFactory;
+import tools.jackson.databind.node.NumericNode;
+import tools.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.StringNode;
 
 /**
  * Context for the {@link JwksKeyWriter}.
@@ -107,7 +107,7 @@ public interface JwksKeyWriterContext<K> {
 	 * @param value     Value.
 	 */
 	default void setString(ObjectNode node, String fieldName, String value) {
-		TextNode text = this.getNodeFactory().textNode(value);
+		StringNode text = this.getNodeFactory().stringNode(value);
 		node.set(fieldName, text);
 	}
 

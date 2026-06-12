@@ -1,6 +1,6 @@
 package net.officefloor.tutorial.kotlinhttpserver
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.ObjectMapper
 import net.officefloor.server.http.HttpMethod
 import net.officefloor.woof.mock.MockWoofServer
 import net.officefloor.woof.mock.MockWoofServerRule

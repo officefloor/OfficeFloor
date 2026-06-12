@@ -20,8 +20,8 @@
 
 package net.officefloor.web.json;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.cfg.MapperBuilder;
 
 import net.officefloor.frame.api.source.ServiceContext;
 
@@ -53,9 +53,9 @@ public class MockObjectMapperResponderDecorator
 	 */
 
 	@Override
-	public void decorateObjectMapper(ObjectMapper mapper) throws Exception {
+	public void decorateObjectMapper(MapperBuilder<?, ?> builder) throws Exception {
 		if (isDecorate) {
-			mapper.enable(SerializationFeature.INDENT_OUTPUT);
+			builder.enable(SerializationFeature.INDENT_OUTPUT);
 		}
 	}
 
