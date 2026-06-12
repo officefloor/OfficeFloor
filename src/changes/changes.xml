@@ -22,6 +22,9 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 http://maven.apache.org/xsd/changes-1.0.0.xsd">
 	<body>
+		<release version="4.0.1" date="2026-06-12" description="Spring Boot 4">
+			<action type="add" dev="sagenschneider">Spring Boot 4</action>
+		</release>
 		<release version="4.0.0" date="2026-06-01" description="Rest YAML files">
 			<action type="add" dev="sagenschneider">Rest YAML files</action>
 		</release>
