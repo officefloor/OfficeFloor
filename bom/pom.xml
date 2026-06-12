@@ -45,7 +45,7 @@
 		<module>stage-sonatype</module>
 	</modules>
 	<properties>
-		<revision>4.0.0</revision>
+		<revision>4.0.1</revision>
 		<annotation-version>2.1.1</annotation-version>
 		<ant-version>1.10.15</ant-version>
 		<antrun-version>3.2.0</antrun-version>
@@ -186,7 +186,7 @@
 			<dependency>
 				<groupId>net.officefloor.activity</groupId>
 				<artifactId>officemanagedobject</artifactId>
-				<version>4.0.0</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.activity</groupId>
