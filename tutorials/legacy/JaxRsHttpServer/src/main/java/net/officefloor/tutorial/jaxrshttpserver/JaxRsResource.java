@@ -3,7 +3,7 @@ package net.officefloor.tutorial.jaxrshttpserver;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
@@ -30,7 +30,7 @@ public class JaxRsResource {
 		return new ResponseModel(param);
 	}
 
-	@POST
+	@PUT
 	@Path("/update")
 	@Consumes("application/json")
 	@Produces("application/json")
