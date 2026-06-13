@@ -337,15 +337,40 @@ officefloor/rest/vets.GET.yml      →  GET  /petclinic/vets
 
 
 
-*<<<@RestControllerAdvice>>> — works without change
+*<<<@RestControllerAdvice>>> — works without change; global escalation is the OfficeFloor-idiomatic alternative
 
   Spring <<<@RestControllerAdvice>>> / <<<@ExceptionHandler>>> classes handle exceptions that
-  escape the OfficeFloor composition without any extra configuration.  They are the right
-  choice for application-wide error handling that should apply to both OfficeFloor and native
-  Spring <<<@RestController>>> endpoints.
+  escape the OfficeFloor composition without any extra configuration.  They remain the right
+  choice when the same handler must cover both OfficeFloor and native Spring <<<@RestController>>>
+  endpoints.
+
+  For applications that have fully migrated to OfficeFloor REST composition, the preferred
+  alternative is a global escalation file.  Place a YAML file named after the fully qualified
+  exception class in <<<officefloor/escalation/>>>:
+
++--
+# officefloor/escalation/com.example.exception.NotFoundException.yml
+handle:
+  class: com.example.rest.NotFoundHandler
++--
+
+  The handler is a plain class using the same OfficeFloor function injection pattern as all other
+  composition steps:
+
++--
+public class NotFoundHandler {
+    public void handle(@Parameter NotFoundException ex, ObjectResponse<String> response) {
+        response.send(ex.getMessage());
+    }
+}
++--
+
+  Global escalation takes priority over <<<@RestControllerAdvice>>> for the same exception type.
+  Method and composition escalations declared in individual YAML files take priority over global
+  escalation, so endpoints can always override the application-wide handler when needed.
 
   See the {{{../SpringRestExceptionHttpServer/index.html}Exception Handling tutorial}} for a
-  worked example.
+  worked example of all four levels.
 
 
 
@@ -399,6 +424,12 @@ officefloor/rest/vets.GET.yml      →  GET  /petclinic/vets
   [[9]] Remove <<<@Transactional>>> from service classes; declare <<<govern:>>> in the YAML instead.
 
   [[10]] Verify <<<@RequestBody>>> parameters — they work as-is, no changes required.
+
+  [[11]] Replace application-wide <<<@RestControllerAdvice>>> exception handlers with a YAML file
+         named after the fully qualified exception class under <<<officefloor/escalation/>>>, pointing
+         to a plain handler class that uses <<<@Parameter>>> and <<<ObjectResponse>>>.  Keep
+         <<<@RestControllerAdvice>>> only when the same handler must also cover native Spring
+         <<<@RestController>>> endpoints.
 
 
 
