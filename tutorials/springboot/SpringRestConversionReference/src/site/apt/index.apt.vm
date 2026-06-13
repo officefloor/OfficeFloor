@@ -61,11 +61,11 @@ public class MyApplication {
 *----+----+
 | <<<@PostMapping("/owners")>>> | <<<owners.POST.yml>>> |
 *----+----+
-| <<<@PutMapping("/owners/{id}")>>> | <<<owners/{id}.PUT.yml>>> |
+| <<<@PutMapping("/owners/\{id\}")>>> | <<<owners/\{id\}.PUT.yml>>> |
 *----+----+
-| <<<@DeleteMapping("/owners/{id}")>>> | <<<owners/{id}.DELETE.yml>>> |
+| <<<@DeleteMapping("/owners/\{id\}")>>> | <<<owners/\{id\}.DELETE.yml>>> |
 *----+----+
-| <<<@GetMapping("/owners/{ownerId}/pets/{petId}")>>> | <<<owners/{ownerId}/pets/{petId}.GET.yml>>> |
+| <<<@GetMapping("/owners/\{ownerId\}/pets/\{petId\}")>>> | <<<owners/\{ownerId\}/pets/\{petId\}.GET.yml>>> |
 *----+----+
 
   Nested resource paths follow the same directory convention — the YAML file path mirrors the
