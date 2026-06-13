@@ -10,11 +10,6 @@ import org.junit.Test;
 
 import net.officefloor.server.http.HttpClientRule;
 
-/**
- * Tests the {@link TemplateLogic}.
- * 
- * @author Daniel Sagenschneider
- */
 public class TemplateLogicJUnit4IT {
 
 	// START SNIPPET: integration

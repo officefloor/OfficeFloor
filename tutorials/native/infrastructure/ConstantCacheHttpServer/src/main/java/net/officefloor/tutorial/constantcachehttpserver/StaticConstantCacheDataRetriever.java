@@ -5,11 +5,6 @@ import java.util.Map;
 
 import net.officefloor.cache.constant.ConstantCacheDataRetriever;
 
-/**
- * Static {@link ConstantCacheDataRetriever}.
- * 
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: tutorial
 public class StaticConstantCacheDataRetriever implements ConstantCacheDataRetriever<String, Message> {
 

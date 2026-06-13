@@ -6,11 +6,6 @@ import net.officefloor.tutorial.springwebfluxhttpserver.SpringDependency;
 import net.officefloor.web.HttpPathParameter;
 import reactor.core.publisher.Mono;
 
-/**
- * Migrated Spring REST controller.
- * 
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: tutorial
 public class MigratedRestController {
 

@@ -7,9 +7,6 @@ import java.lang.annotation.Target;
 
 import net.officefloor.plugin.clazz.Qualifier;
 
-/**
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: tutorial
 @Qualifier
 @Retention(RetentionPolicy.RUNTIME)

@@ -5,11 +5,6 @@ import org.eclipse.jetty.webapp.WebAppContext;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
-/**
- * Tests the JAX-RS App.
- * 
- * @author Daniel Sagenschneider
- */
 public class JaxRsAppTest extends JaxRsAppIT {
 
 	private static Server server;

@@ -9,11 +9,6 @@ import net.officefloor.tutorial.jaxrshttpserver.ResponseModel;
 import net.officefloor.web.HttpPathParameter;
 import net.officefloor.web.ObjectResponse;
 
-/**
- * Migrated JAX-RS resource.
- * 
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: tutorial
 public class MigratedResource {
 

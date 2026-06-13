@@ -17,11 +17,6 @@ import net.officefloor.test.OfficeFloorExtension;
 import net.officefloor.test.system.SystemPropertiesExtension;
 import net.officefloor.woof.WoOF;
 
-/**
- * Tests with <code>user.home</code> profile properties.
- * 
- * @author Daniel Sagenschneider
- */
 public class UserHomeProfileTest {
 
 	// START SNIPPET: tutorial

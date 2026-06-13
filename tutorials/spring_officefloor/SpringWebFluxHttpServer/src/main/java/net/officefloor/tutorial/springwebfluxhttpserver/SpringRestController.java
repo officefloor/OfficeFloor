@@ -11,11 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-/**
- * Spring {@link RestController}.
- * 
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: tutorial
 @RestController
 @RequestMapping("/rest")

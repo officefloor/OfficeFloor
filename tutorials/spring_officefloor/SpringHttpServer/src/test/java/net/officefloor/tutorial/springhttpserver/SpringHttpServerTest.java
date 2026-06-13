@@ -11,16 +11,8 @@ import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.woof.mock.MockWoofServerExtension;
 
-/**
- * Tests the Spring HTTP server.
- * 
- * @author Daniel Sagenschneider
- */
 public class SpringHttpServerTest {
 
-	/**
-	 * Run application.
-	 */
 	public static void main(String[] args) throws Exception {
 		OfficeFloorMain.main(args);
 	}

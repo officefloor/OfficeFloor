@@ -15,11 +15,6 @@ import org.junit.Test;
 import net.officefloor.server.http.HttpClientRule;
 import net.officefloor.test.OfficeFloorRule;
 
-/**
- * Ensure appropriately handling exception.
- * 
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: handle
 public class ExceptionHttpServerJUnit4Test {
 

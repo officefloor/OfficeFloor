@@ -2,18 +2,12 @@ package net.officefloor.tutorial.springwebmvchttpserver;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.springframework.stereotype.Controller;
 
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
 import net.officefloor.woof.mock.MockWoofServerExtension;
 
-/**
- * Tests the Spring Web MVC {@link Controller} HTTP Server.
- * 
- * @author Daniel Sagenschneider
- */
 public class SpringWebMvcHttpServerTest {
 
 	// START SNIPPET: tutorial

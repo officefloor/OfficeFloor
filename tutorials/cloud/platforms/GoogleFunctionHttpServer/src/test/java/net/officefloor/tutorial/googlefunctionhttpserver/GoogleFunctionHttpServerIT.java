@@ -22,11 +22,6 @@ import net.officefloor.server.http.HttpClientExtension;
 import net.officefloor.test.UsesDockerTest;
 import net.officefloor.tutorial.googlefunctionhttpserver.GoogleFunctionLogic.Post;
 
-/**
- * Tests the Google Function HTTP Server.
- * 
- * @author Daniel Sagenschneider
- */
 @UsesDockerTest
 public class GoogleFunctionHttpServerIT {
 

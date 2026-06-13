@@ -18,11 +18,6 @@ import jakarta.ws.rs.core.Form;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-/**
- * Tests the JAX-RS application.
- * 
- * @author Daniel Sagenschneider
- */
 public class JaxRsAppIT {
 
 	protected static int PORT = 8081;

@@ -3,17 +3,11 @@ package net.officefloor.tutorial.javascripthttpserver;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
 import net.officefloor.woof.mock.MockWoofServerExtension;
 
-/**
- * Tests the JavaScript HTTP Server.
- * 
- * @author Daniel Sagenschneider
- */
 public class JavaScriptHttpServerTest {
 
 	// START SNIPPET: tutorial

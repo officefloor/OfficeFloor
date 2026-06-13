@@ -22,11 +22,6 @@ import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
 
-/**
- * JAX-RS resource.
- * 
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: tutorial
 @Path("/jaxrs")
 public class JaxRsResource {

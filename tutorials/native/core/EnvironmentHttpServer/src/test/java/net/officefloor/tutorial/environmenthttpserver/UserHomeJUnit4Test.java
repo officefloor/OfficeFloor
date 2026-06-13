@@ -16,11 +16,6 @@ import net.officefloor.server.http.HttpClientRule;
 import net.officefloor.test.OfficeFloorRule;
 import net.officefloor.test.system.SystemPropertiesRule;
 
-/**
- * Tests with <code>user.home</code> properties.
- * 
- * @author Daniel Sagenschneider
- */
 public class UserHomeJUnit4Test {
 
 	// START SNIPPET: tutorial

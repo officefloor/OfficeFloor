@@ -7,11 +7,6 @@ import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
 import net.officefloor.woof.mock.MockWoofServerExtension;
 
-/**
- * Tests the R2DBC Http Server.
- * 
- * @author Daniel Sagenschneider
- */
 public class R2dbcHttpServerTest {
 
 	// START SNIPPET: tutorial

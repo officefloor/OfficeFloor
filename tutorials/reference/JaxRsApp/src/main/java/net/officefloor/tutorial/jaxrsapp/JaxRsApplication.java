@@ -4,11 +4,6 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 import jakarta.ws.rs.ApplicationPath;
 
-/**
- * JAX-RS application.
- * 
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: tutorial
 @ApplicationPath("/")
 public class JaxRsApplication extends ResourceConfig {

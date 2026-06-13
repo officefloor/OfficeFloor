@@ -9,11 +9,6 @@ import org.springframework.boot.webflux.test.autoconfigure.WebFluxTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
-/**
- * Tests the {@link FluxController}.
- * 
- * @author Daniel Sagenschneider
- */
 @ExtendWith(SpringExtension.class)
 @WebFluxTest(FluxController.class)
 public class FluxControllerTest {

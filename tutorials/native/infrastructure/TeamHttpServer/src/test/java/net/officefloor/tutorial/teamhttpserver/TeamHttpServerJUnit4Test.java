@@ -20,11 +20,6 @@ import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.woof.mock.MockWoofServerRule;
 
-/**
- * Tests the {@link TeamHttpServer}.
- * 
- * @author Daniel Sagenschneider
- */
 public class TeamHttpServerJUnit4Test {
 
 	private @Dependency Connection connection; // keep in memory database alive

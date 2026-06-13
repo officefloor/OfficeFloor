@@ -5,11 +5,6 @@ import java.util.List;
 
 import net.officefloor.web.ObjectResponse;
 
-/**
- * Logic for the post page.
- * 
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: tutorial
 public class PostLogic {
 

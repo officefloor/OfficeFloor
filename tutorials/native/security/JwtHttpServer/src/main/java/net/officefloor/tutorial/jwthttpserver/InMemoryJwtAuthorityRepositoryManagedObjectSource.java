@@ -9,43 +9,18 @@ import java.util.function.Function;
 
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.web.jwt.authority.repository.JwtAccessKey;
 import net.officefloor.web.jwt.authority.repository.JwtAuthorityRepository;
 import net.officefloor.web.jwt.authority.repository.JwtRefreshKey;
-import net.officefloor.web.jwt.validate.JwtValidateKey;
 
-/**
- * <p>
- * In memory {@link JwtAuthorityRepository} {@link ManagedObjectSource}.
- * <p>
- * <strong>Production environments should persist {@link JwtValidateKey}
- * instances to persistent storage.</strong> This is only provided for an easier
- * tutorial.
- * 
- * @author Daniel Sagenschneider
- */
 public class InMemoryJwtAuthorityRepositoryManagedObjectSource extends AbstractManagedObjectSource<None, None>
 		implements ManagedObject, JwtAuthorityRepository {
 
-	/**
-	 * {@link JwtRefreshKey} instances.
-	 */
 	private List<JwtRefreshKey> refreshKeys = Collections.synchronizedList(new ArrayList<>());
 
-	/**
-	 * {@link JwtAccessKey} instances.
-	 */
 	private List<JwtAccessKey> accessKeys = Collections.synchronizedList(new ArrayList<>());
 
-	/**
-	 * Clears old keys.
-	 * 
-	 * @param list          List of keys.
-	 * @param context       {@link RetrieveKeysContext}.
-	 * @param getExpireTime Obtains the expire time from the key.
-	 */
 	private <K> void clearOldKeys(List<K> list, RetrieveKeysContext context, Function<K, Long> getExpireTime) {
 		long activeAfter = context.getActiveAfter();
 		Iterator<K> iterator = list.iterator();

@@ -23,11 +23,6 @@ import net.officefloor.test.UsesAwsTest;
 import net.officefloor.test.UsesDockerTest;
 import net.officefloor.tutorial.awssamhttpserver.SamLogic.Post;
 
-/**
- * Integration tests the AWS SAM HTTP Server.
- * 
- * @author Daniel Sagenschneider
- */
 @UsesDockerTest
 @UsesAwsTest
 public class AwsSamHttpServerIT {

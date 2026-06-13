@@ -8,11 +8,6 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 
-/**
- * JAX-RS resource.
- * 
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: tutorial
 @Path("/jaxrs")
 public class JaxRsResource {

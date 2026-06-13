@@ -8,11 +8,6 @@ import lombok.Data;
 import net.officefloor.web.HttpParameters;
 import net.officefloor.web.HttpSessionStateful;
 
-/**
- * Example logic for the template.
- * 
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: example
 public class TemplateLogic {
 
@@ -39,23 +34,10 @@ public class TemplateLogic {
 		private String text;
 	}
 
-	/**
-	 * Provides values from the HTTP session.
-	 * 
-	 * @param posts {@link Posts} being the session bound object.
-	 * @return {@link Posts} to contain values to render to page.
-	 */
 	public Posts getTemplateData(Posts posts) {
 		return posts;
 	}
 
-	/**
-	 * Handles the post form submission.
-	 * 
-	 * @param post  {@link Post} that is dependency injected with HTTP parameters
-	 *              loaded onto it.
-	 * @param posts {@link Posts} that is dependency injected from the HTTP session.
-	 */
 	public void post(Post post, Posts posts) {
 		posts.addPost(post);
 	}

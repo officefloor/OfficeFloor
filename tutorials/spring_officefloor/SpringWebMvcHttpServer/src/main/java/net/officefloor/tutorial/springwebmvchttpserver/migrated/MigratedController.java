@@ -3,11 +3,6 @@ package net.officefloor.tutorial.springwebmvchttpserver.migrated;
 import lombok.Value;
 import net.officefloor.web.HttpQueryParameter;
 
-/**
- * Migrated Spring Web MVC Controller.
- * 
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: tutorial
 public class MigratedController {
 

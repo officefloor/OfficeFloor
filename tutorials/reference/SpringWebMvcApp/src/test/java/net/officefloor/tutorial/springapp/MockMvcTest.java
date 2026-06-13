@@ -9,11 +9,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-/**
- * Tests with {@link MockMvc}.
- * 
- * @author Daniel Sagenschneider
- */
 @SpringBootTest
 @AutoConfigureMockMvc
 public class MockMvcTest {

@@ -4,11 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
-/**
- * JWT Identity.
- * 
- * @author Daniel Sagenschneider
- */
 @Data
 @RequiredArgsConstructor
 @AllArgsConstructor

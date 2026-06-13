@@ -14,11 +14,6 @@ import net.officefloor.web.security.scheme.BasicHttpSecuritySource;
 import net.officefloor.woof.mock.MockWoofServer;
 import net.officefloor.woof.mock.MockWoofServerExtension;
 
-/**
- * Tests the Swagger.
- * 
- * @author Daniel Sagenschneider
- */
 public class SwaggerHttpServerTest {
 
 	public static void main(String[] args) throws Exception {

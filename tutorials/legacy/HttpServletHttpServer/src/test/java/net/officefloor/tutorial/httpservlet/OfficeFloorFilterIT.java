@@ -12,16 +12,8 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import tools.jackson.databind.ObjectMapper;
 
-import jakarta.servlet.http.HttpServlet;
 import net.officefloor.server.http.HttpClientExtension;
-import net.officefloor.server.http.HttpMethod;
-import net.officefloor.server.http.servlet.OfficeFloorFilter;
 
-/**
- * Integration tests the {@link OfficeFloorFilter}.
- * 
- * @author Daniel Sagenschneider
- */
 public class OfficeFloorFilterIT {
 
 	// START SNIPPET: tutorial
@@ -52,9 +44,6 @@ public class OfficeFloorFilterIT {
 	}
 	// END SNIPPET: tutorial
 
-	/**
-	 * Ensure WoOF resource available.
-	 */
 	@Test
 	public void woofResource() throws Exception {
 		HttpResponse response = this.client.execute(new HttpGet(SERVER_URL + "/woof.txt"));
@@ -64,9 +53,6 @@ public class OfficeFloorFilterIT {
 		assertEquals("WOOF RESOURCE", entity, "Incorrect content");
 	}
 
-	/**
-	 * Ensure can invoke {@link HttpServlet}.
-	 */
 	@Test
 	public void servlet() throws Exception {
 		HttpPost post = new HttpPost(SERVER_URL + "/servlet");
@@ -77,10 +63,6 @@ public class OfficeFloorFilterIT {
 		assertEquals("1", entity, "Incorrect response");
 	}
 
-	/**
-	 * Ensure if {@link HttpMethod} not supported that falls back to
-	 * {@link HttpServlet}.
-	 */
 	@Test
 	public void fallbackToServlet() throws Exception {
 		HttpResponse response = this.client.execute(new HttpGet(SERVER_URL + "/increment"));
@@ -89,9 +71,6 @@ public class OfficeFloorFilterIT {
 		assertEquals("Fallback to Servlet", entity, "Incorrect content");
 	}
 
-	/**
-	 * Ensure {@link HttpServlet} resource available.
-	 */
 	@Test
 	public void servletResource() throws Exception {
 		HttpResponse response = this.client.execute(new HttpGet(SERVER_URL + "/servlet.txt"));

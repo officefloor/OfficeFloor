@@ -3,15 +3,9 @@ package net.officefloor.tutorial.httpservlet;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.web.HttpObject;
 import net.officefloor.web.ObjectResponse;
 
-/**
- * Section {@link ClassSectionSource}.
- * 
- * @author Daniel Sagenschneider
- */
 public class Increment {
 
 	@Data

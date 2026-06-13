@@ -7,11 +7,6 @@ import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
 import net.officefloor.woof.mock.MockWoofServerExtension;
 
-/**
- * Tests the Activity HTTP server.
- * 
- * @author Daniel Sagenschneider
- */
 public class ActivityHttpServerTest {
 
 	// START SNIPPET: tutorial

@@ -12,11 +12,6 @@ import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.junit.jupiter.api.Test;
 
-/**
- * Ensure can run as WAR application.
- * 
- * @author Daniel Sagenschneider
- */
 public class SpringIT {
 
 	@Test

@@ -5,11 +5,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
-/**
- * Message entity.
- * 
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: tutorial
 @Entity
 public class Message {

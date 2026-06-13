@@ -32,11 +32,6 @@ public class ExceptionHandlingIntegrationTest {
         assertEquals("Composition handled: thrown", response.getBody());
     }
 
-    /**
-     * Confirms that {@link RestControllerAdvice} {@link ExceptionHandler} methods resolve
-     * exceptions thrown from OfficeFloor service classes when deployed to a real server
-     * (not just under MockMvc).
-     */
     @Test
     public void spring_controller_advice() {
         ResponseEntity<String> response = client.getForEntity("/exception/spring", String.class);

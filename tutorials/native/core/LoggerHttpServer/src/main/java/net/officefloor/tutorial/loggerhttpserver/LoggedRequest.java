@@ -5,11 +5,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import net.officefloor.web.HttpObject;
 
-/**
- * Request to be logged.
- * 
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: tutorial
 @HttpObject
 @Data

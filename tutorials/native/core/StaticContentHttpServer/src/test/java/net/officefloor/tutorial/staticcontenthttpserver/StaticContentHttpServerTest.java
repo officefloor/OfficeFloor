@@ -7,11 +7,6 @@ import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.woof.mock.MockWoofServerExtension;
 
-/**
- * Tests the REST end points.
- * 
- * @author Daniel Sagenschneider
- */
 public class StaticContentHttpServerTest {
 
 	// START SNIPPET: tutorial

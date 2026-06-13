@@ -8,11 +8,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * Spring {@link RestController}.
- * 
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: tutorial
 @RestController
 @RequestMapping("/rest")

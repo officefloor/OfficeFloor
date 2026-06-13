@@ -16,11 +16,6 @@ import net.officefloor.server.http.HttpClientExtension;
 import net.officefloor.test.OfficeFloorExtension;
 import net.officefloor.test.system.SystemPropertiesExtension;
 
-/**
- * Tests with <code>user.home</code> properties.
- * 
- * @author Daniel Sagenschneider
- */
 public class UserHomeTest {
 
 	// START SNIPPET: tutorial

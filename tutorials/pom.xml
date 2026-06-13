@@ -56,6 +56,14 @@
 				</configuration>
 			</plugin>
 			<plugin>
+				<!-- Do not generate JavaDoc for tutorials. Tutorial code is explained by tutorial content. -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
+			<plugin>
 				<groupId>com.github.github</groupId>
 				<artifactId>site-maven-plugin</artifactId>
 				<executions>

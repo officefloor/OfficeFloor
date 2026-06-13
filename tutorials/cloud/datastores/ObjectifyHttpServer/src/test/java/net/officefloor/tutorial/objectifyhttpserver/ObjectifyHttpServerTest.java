@@ -6,8 +6,6 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import com.googlecode.objectify.Objectify;
-
 import net.officefloor.nosql.objectify.mock.ObjectifyExtension;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.mock.MockHttpServer;
@@ -16,11 +14,6 @@ import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
 import net.officefloor.woof.mock.MockWoofServerExtension;
 
-/**
- * Tests the {@link Objectify} HTTP server.
- * 
- * @author Daniel Sagenschneider
- */
 @UsesGCloudTest
 public class ObjectifyHttpServerTest {
 

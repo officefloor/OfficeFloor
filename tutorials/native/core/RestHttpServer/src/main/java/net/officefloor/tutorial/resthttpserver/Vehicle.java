@@ -11,11 +11,6 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import net.officefloor.web.HttpObject;
 
-/**
- * Vehicle.
- * 
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: tutorial
 @Entity
 @HttpObject

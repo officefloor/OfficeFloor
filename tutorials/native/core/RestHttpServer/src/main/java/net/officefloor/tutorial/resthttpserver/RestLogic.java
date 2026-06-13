@@ -6,11 +6,6 @@ import net.officefloor.server.http.HttpStatus;
 import net.officefloor.web.HttpPathParameter;
 import net.officefloor.web.ObjectResponse;
 
-/**
- * REST logic.
- * 
- * @author Daniel Sagenschneider
- */
 public class RestLogic {
 
 	// START SNIPPET: post

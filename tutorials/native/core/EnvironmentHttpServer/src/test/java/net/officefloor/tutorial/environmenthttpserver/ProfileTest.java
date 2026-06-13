@@ -6,11 +6,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import net.officefloor.woof.mock.MockWoofServer;
 import net.officefloor.woof.mock.MockWoofServerExtension;
 
-/**
- * Tests with default properties.
- * 
- * @author Daniel Sagenschneider
- */
 public class ProfileTest {
 
 	// START SNIPPET: tutorial

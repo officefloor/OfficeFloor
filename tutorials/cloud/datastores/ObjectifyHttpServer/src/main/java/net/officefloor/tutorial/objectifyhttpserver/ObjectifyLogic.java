@@ -7,11 +7,6 @@ import com.googlecode.objectify.Objectify;
 import net.officefloor.web.HttpPathParameter;
 import net.officefloor.web.ObjectResponse;
 
-/**
- * {@link Objectify} logic.
- * 
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: tutorial
 public class ObjectifyLogic {
 

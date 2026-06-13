@@ -5,11 +5,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-/**
- * Spring {@link Controller}.
- * 
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: tutorial
 @Controller
 public class SpringController {

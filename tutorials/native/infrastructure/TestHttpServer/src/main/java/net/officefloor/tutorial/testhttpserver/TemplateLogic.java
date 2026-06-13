@@ -8,11 +8,6 @@ import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.HttpParameters;
 
-/**
- * Logic for the template.
- * 
- * @author Daniel Sagenschneider
- */
 @SuppressWarnings("serial")
 // START SNIPPET: tutorial
 public class TemplateLogic {

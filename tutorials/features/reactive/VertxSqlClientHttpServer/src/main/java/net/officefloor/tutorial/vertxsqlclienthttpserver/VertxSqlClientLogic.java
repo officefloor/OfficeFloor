@@ -1,19 +1,12 @@
 package net.officefloor.tutorial.vertxsqlclienthttpserver;
 
 import io.vertx.core.Future;
-import io.vertx.core.Vertx;
 import io.vertx.sqlclient.Pool;
-import io.vertx.sqlclient.SqlClient;
 import io.vertx.sqlclient.Tuple;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.web.HttpPathParameter;
 import net.officefloor.web.ObjectResponse;
 
-/**
- * {@link Vertx} {@link SqlClient} logic.
- * 
- * @author Daniel Sagenschneider
- */
 public class VertxSqlClientLogic {
 
 	// START SNIPPET: sqlclient

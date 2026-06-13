@@ -3,18 +3,10 @@ package net.officefloor.tutorial.servlethttpserver;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import jakarta.servlet.Filter;
-import jakarta.servlet.Servlet;
-import net.officefloor.activity.procedure.Procedure;
 import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
 import net.officefloor.woof.mock.MockWoofServerExtension;
 
-/**
- * Tests {@link Servlet} and {@link Filter} being used in {@link Procedure}.
- * 
- * @author Daniel Sagenschneider
- */
 public class ServletHttpServerTest {
 
 	// START SNIPPET: tutorial

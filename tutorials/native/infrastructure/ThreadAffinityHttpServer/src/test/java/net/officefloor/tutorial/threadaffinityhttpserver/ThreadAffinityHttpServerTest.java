@@ -23,16 +23,8 @@ import net.officefloor.test.skip.SkipExtension;
 import net.officefloor.web.executive.WebThreadAffinityExecutiveSource;
 import net.officefloor.woof.mock.MockWoofServerExtension;
 
-/**
- * Tests the thread affinity.
- * 
- * @author Daniel Sagenschneider
- */
 public class ThreadAffinityHttpServerTest {
 
-	/**
-	 * Run application.
-	 */
 	public static void main(String[] args) throws Exception {
 		// Keep database alive by keeping connection
 		DataSource dataSource = DefaultDataSourceFactory.createDataSource("datasource.properties");

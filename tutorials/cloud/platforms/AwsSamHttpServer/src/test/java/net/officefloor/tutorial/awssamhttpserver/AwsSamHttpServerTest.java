@@ -18,11 +18,6 @@ import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
 import net.officefloor.woof.mock.MockWoofServerExtension;
 
-/**
- * Tests the AWS SAM HTTP Server.
- * 
- * @author Daniel Sagenschneider
- */
 @UsesDockerTest
 public class AwsSamHttpServerTest {
 
