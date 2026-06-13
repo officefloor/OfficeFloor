@@ -1,4 +1,4 @@
-package net.officefloor.tutorial.springresthttpserver;
+package net.officefloor.tutorial.springrestgettingstarted;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 // START SNIPPET: tutorial
 @AutoConfigureTestRestTemplate
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class SpringRestHttpServerRealServerTest {
+public class SpringRestGettingStartedRealServerTest {
 
 	@Autowired
 	private TestRestTemplate restTemplate;
@@ -31,31 +31,6 @@ public class SpringRestHttpServerRealServerTest {
 		ResponseEntity<GreetingResponse> response = restTemplate.getForEntity(
 				"/greeting/OfficeFloor", GreetingResponse.class);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
-		assertEquals(new GreetingResponse("Hello, OfficeFloor!"), response.getBody());
-	}
-
-	@Test
-	public void getFormalGreeting() {
-		ResponseEntity<GreetingResponse> response = restTemplate.getForEntity(
-				"/greeting/formal/Alice", GreetingResponse.class);
-		assertEquals(HttpStatus.OK, response.getStatusCode());
-		assertEquals(new GreetingResponse("Good day, Alice."), response.getBody());
-	}
-
-	@Test
-	public void getCasualGreeting() {
-		ResponseEntity<GreetingResponse> response = restTemplate.getForEntity(
-				"/greeting/casual/Alice", GreetingResponse.class);
-		assertEquals(HttpStatus.OK, response.getStatusCode());
-		assertEquals(new GreetingResponse("Hey, Alice!"), response.getBody());
-	}
-
-	@Test
-	public void getGreetingEntity() {
-		ResponseEntity<GreetingResponse> response = restTemplate.getForEntity(
-				"/greeting/entity/OfficeFloor", GreetingResponse.class);
-		assertEquals(HttpStatus.OK, response.getStatusCode());
-		assertEquals("OfficeFloor", response.getHeaders().getFirst("X-Greeting-Name"));
 		assertEquals(new GreetingResponse("Hello, OfficeFloor!"), response.getBody());
 	}
 }

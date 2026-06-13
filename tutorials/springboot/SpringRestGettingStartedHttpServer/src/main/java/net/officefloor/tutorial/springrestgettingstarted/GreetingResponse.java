@@ -1,4 +1,4 @@
-package net.officefloor.tutorial.springresthttpserver;
+package net.officefloor.tutorial.springrestgettingstarted;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,8 +8,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class GreetingRequest {
+public class GreetingResponse {
 
-	private String name;
+	private String message;
 }
 // END SNIPPET: tutorial
