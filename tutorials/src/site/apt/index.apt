@@ -100,7 +100,7 @@ OfficeFloor Tutorials
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 
 
-* Beyond Spring MVC — Additional OfficeFloor Capabilities
+* Beyond Spring MVC: Additional OfficeFloor Capabilities
 
   The following tutorials cover capabilities that OfficeFloor provides over and above what Spring MVC
   offers.  Thread injection assigns dedicated thread pools to pipeline steps so that socket threads
@@ -119,11 +119,11 @@ OfficeFloor Tutorials
 |                                                              |                                                            | ManagedObjectSource flows\
 |                                                              |                                                            | PROCESS / THREAD / FUNCTION scope
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./springboot/SpringRestSupplierHttpServer/index.html}Supplier}} | Register a library of related managed objects from a single YAML declaration. A SupplierSource holds shared state (connections, queues, DI containers) and vends it through multiple typed wrappers — ideal for third-party library integration. | officefloor/suppliers/\
+| {{{./springboot/SpringRestSupplierHttpServer/index.html}Supplier}} | Register a library of related managed objects from a single YAML declaration. A SupplierSource holds shared state (connections, queues, DI containers) and vends it through multiple typed wrappers, ideal for third-party library integration. | officefloor/suppliers/\
 |                                                              |                                                            | SupplierSource\
 |                                                              |                                                            | Library integration
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./springboot/SpringRestGovernanceHttpServer/index.html}Governance}} | Wrap function execution with framework-managed pre/post lifecycle declared in YAML — no annotations on the service class required. Governed objects implement a typed extension interface; OfficeFloor enrolls them automatically. | officefloor/govern/\
+| {{{./springboot/SpringRestGovernanceHttpServer/index.html}Governance}} | Wrap function execution with framework-managed pre/post lifecycle declared in YAML, with no annotations on the service class required. Governed objects implement a typed extension interface; OfficeFloor enrolls them automatically. | officefloor/govern/\
 |                                                              |                                                            | @Govern, @Enforce, @Disregard\
 |                                                              |                                                            | Auto-wire extensions
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
