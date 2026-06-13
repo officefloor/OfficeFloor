@@ -28,6 +28,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -75,5 +76,13 @@ public class OfficeFloorGovernanceTest extends AbstractMockMvcVerification {
         this.mvc.perform(get(this.getPath("/multi-governed")))
                 .andExpect(status().isOk())
                 .andExpect(content().string(equalTo("1:1")));
+    }
+
+    @Test
+    public void governanceStillAppliedWhenEscalationHandlesException() throws Exception {
+        this.mvc.perform(get(this.getPath("/governed-with-error")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(equalTo("ESCALATION: TEST")));
+        assertEquals(1, trackingComponent.notificationCount, "Governance should have fired before the exception");
     }
 }

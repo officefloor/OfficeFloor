@@ -29,6 +29,7 @@ import java.util.function.Function;
 
 import net.officefloor.activity.compose.build.ComposeArchitect;
 import net.officefloor.activity.compose.build.ComposeEmployer;
+import net.officefloor.activity.escalation.build.EscalationEmployer;
 import net.officefloor.activity.govern.build.GovernanceArchitect;
 import net.officefloor.activity.govern.build.GovernanceEmployer;
 import net.officefloor.activity.managedobject.build.ManagedObjectArchitect;
@@ -92,6 +93,8 @@ public class WoofLoaderOfficeExtensionService implements OfficeExtensionService,
 	public static final String OBJECTS_DIRECTORY_PROPERTY = "officefloor.objects.directory";
 	/** Property name for the suppliers directory. */
 	public static final String SUPPLIERS_DIRECTORY_PROPERTY = "officefloor.suppliers.directory";
+	/** Property name for the escalation directory. */
+	public static final String ESCALATION_DIRECTORY_PROPERTY = "officefloor.escalation.directory";
 	/** Property name for the governance directory. */
 	public static final String GOVERN_DIRECTORY_PROPERTY = "officefloor.govern.directory";
 	/** Property name for the security directory. */
@@ -110,6 +113,8 @@ public class WoofLoaderOfficeExtensionService implements OfficeExtensionService,
 	public static final String OBJECTS_DEFAULT_DIRECTORY = OFFICE_FLOOR_DIRECTORY_TAG + "/objects";
 	/** Default suppliers directory. */
 	public static final String SUPPLIERS_DEFAULT_DIRECTORY = OFFICE_FLOOR_DIRECTORY_TAG + "/suppliers";
+	/** Default escalation directory. */
+	public static final String ESCALATION_DEFAULT_DIRECTORY = OFFICE_FLOOR_DIRECTORY_TAG + "/escalation";
 	/** Default governance directory. */
 	public static final String GOVERN_DEFAULT_DIRECTORY = OFFICE_FLOOR_DIRECTORY_TAG + "/govern";
 	/** Default security directory. */
@@ -173,6 +178,7 @@ public class WoofLoaderOfficeExtensionService implements OfficeExtensionService,
 		String restDirectory = interpolateRestDirectory(officeFloorDirectory, context.getProperty(REST_DIRECTORY_PROPERTY, REST_DEFAULT_DIRECTORY));
 		String objectsDirectory = interpolateRestDirectory(officeFloorDirectory, context.getProperty(OBJECTS_DIRECTORY_PROPERTY, OBJECTS_DEFAULT_DIRECTORY));
 		String suppliersDirectory = interpolateRestDirectory(officeFloorDirectory, context.getProperty(SUPPLIERS_DIRECTORY_PROPERTY, SUPPLIERS_DEFAULT_DIRECTORY));
+		String escalationDirectory = interpolateRestDirectory(officeFloorDirectory, context.getProperty(ESCALATION_DIRECTORY_PROPERTY, ESCALATION_DEFAULT_DIRECTORY));
 		String governDirectory = interpolateRestDirectory(officeFloorDirectory, context.getProperty(GOVERN_DIRECTORY_PROPERTY, GOVERN_DEFAULT_DIRECTORY));
 		String securityDirectory = interpolateRestDirectory(officeFloorDirectory, context.getProperty(SECURITY_DIRECTORY_PROPERTY, SECURITY_DEFAULT_DIRECTORY));
 		String teamsDirectory = interpolateRestDirectory(officeFloorDirectory, context.getProperty(TEAMS_DIRECTORY_PROPERTY, TEAMS_DEFAULT_DIRECTORY));
@@ -261,6 +267,10 @@ public class WoofLoaderOfficeExtensionService implements OfficeExtensionService,
 				WoofLoader woofLoader = new WoofLoaderImpl(new WoofRepositoryImpl(new ModelRepositoryImpl()));
 				woofLoader.loadWoofConfiguration(woofContext);
 			}
+
+			// Load escalation handlers
+			EscalationEmployer.employEscalationArchitect(officeArchitect, compose, context)
+					.addEscalations(escalationDirectory, composeProperties);
 
 			// Load governance
 			GovernanceArchitect governanceArchitect = GovernanceEmployer.employGovernanceArchitect(officeArchitect, compose, context);
