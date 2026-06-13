@@ -1,5 +1,6 @@
 package net.officefloor.tutorial.reactorhttpserver;
 
+import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import net.officefloor.plugin.section.clazz.Parameter;
