@@ -42,10 +42,10 @@ public class EscalationTest {
 
     @Test
     public void single() throws Throwable {
-        HandlerService.exception = null;
         this.doTest((escalationArchitect, properties) ->
                 escalationArchitect.addEscalation(IOException.class.getName(),
-                        "officefloor/escalation/java.io.IOException.yml", properties));
+                        "officefloor/escalation/java.io.IOException.yml", properties),
+                ThrowingService.class);
         assertNotNull(HandlerService.exception, "Should handle exception");
         assertInstanceOf(IOException.class, HandlerService.exception, "Incorrect exception type");
         assertEquals("TEST", HandlerService.exception.getMessage(), "Incorrect exception message");
@@ -53,12 +53,33 @@ public class EscalationTest {
 
     @Test
     public void directory() throws Throwable {
-        HandlerService.exception = null;
         this.doTest((escalationArchitect, properties) ->
-                escalationArchitect.addEscalations("officefloor/escalation", properties));
+                escalationArchitect.addEscalations("officefloor/escalation", properties),
+                ThrowingService.class);
         assertNotNull(HandlerService.exception, "Should handle exception from directory");
         assertInstanceOf(IOException.class, HandlerService.exception, "Incorrect exception type");
         assertEquals("TEST", HandlerService.exception.getMessage(), "Incorrect exception message");
+    }
+
+    @Test
+    public void singleUnchecked() throws Throwable {
+        this.doTest((escalationArchitect, properties) ->
+                escalationArchitect.addEscalation(IllegalStateException.class.getName(),
+                        "officefloor/escalation/java.lang.IllegalStateException.yml", properties),
+                UncheckedThrowingService.class);
+        assertNotNull(UncheckedHandlerService.exception, "Should handle unchecked exception");
+        assertInstanceOf(IllegalStateException.class, UncheckedHandlerService.exception, "Incorrect exception type");
+        assertEquals("UNCHECKED", UncheckedHandlerService.exception.getMessage(), "Incorrect exception message");
+    }
+
+    @Test
+    public void directoryUnchecked() throws Throwable {
+        this.doTest((escalationArchitect, properties) ->
+                escalationArchitect.addEscalations("officefloor/escalation", properties),
+                UncheckedThrowingService.class);
+        assertNotNull(UncheckedHandlerService.exception, "Should handle unchecked exception from directory");
+        assertInstanceOf(IllegalStateException.class, UncheckedHandlerService.exception, "Incorrect exception type");
+        assertEquals("UNCHECKED", UncheckedHandlerService.exception.getMessage(), "Incorrect exception message");
     }
 
     @FunctionalInterface
@@ -66,7 +87,9 @@ public class EscalationTest {
         void setup(EscalationArchitect escalationArchitect, PropertyList properties) throws Exception;
     }
 
-    private void doTest(SetupEscalation setup) throws Throwable {
+    private void doTest(SetupEscalation setup, Class<?> serviceClass) throws Throwable {
+        HandlerService.exception = null;
+        UncheckedHandlerService.exception = null;
         CompileOfficeFloor compile = new CompileOfficeFloor();
         compile.office((office) -> {
             OfficeArchitect officeArchitect = office.getOfficeArchitect();
@@ -79,11 +102,10 @@ public class EscalationTest {
 
             setup.setup(escalationArchitect, properties);
 
-            office.addSection("service", ThrowingService.class);
+            office.addSection("service", serviceClass);
         });
 
         try (OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor()) {
-            HandlerService.exception = null;
             CompileOfficeFloor.invokeProcess(officeFloor, "service.service", null);
         }
     }
@@ -99,6 +121,20 @@ public class EscalationTest {
 
         public void handle(@Parameter IOException ex) {
             HandlerService.exception = ex;
+        }
+    }
+
+    public static class UncheckedThrowingService {
+        public void service() {
+            throw new IllegalStateException("UNCHECKED");
+        }
+    }
+
+    public static class UncheckedHandlerService {
+        public static IllegalStateException exception = null;
+
+        public void handle(@Parameter IllegalStateException ex) {
+            UncheckedHandlerService.exception = ex;
         }
     }
 
