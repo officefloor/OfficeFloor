@@ -342,6 +342,10 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
 					<version>${javadoc-version}</version>
+					<configuration>
+						<!-- Exclude auto-generated model sources -->
+						<excludePackageNames>net.officefloor.model.conform,net.officefloor.model.office,net.officefloor.model.officefloor,net.officefloor.model.section</excludePackageNames>
+					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
