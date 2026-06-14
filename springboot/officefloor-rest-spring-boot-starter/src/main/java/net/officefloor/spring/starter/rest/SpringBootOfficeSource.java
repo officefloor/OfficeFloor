@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -78,7 +78,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-/** {@link AbstractOfficeSource} for Spring Boot. */
+/**
+ * {@link AbstractOfficeSource} for Spring Boot.
+ */
 public class SpringBootOfficeSource extends AbstractOfficeSource {
 
     private final ObjectMapper objectMapper;
@@ -91,20 +93,25 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
 
     private final OpenAPI openApi;
 
+    private final List<SpringExceptionHandler> exceptionHandlers;
+
     /**
      * @param objectMapper       {@link ObjectMapper}.
      * @param restEndpoints      REST endpoints.
      * @param applicationContext {@link ConfigurableApplicationContext}.
      * @param openApi            {@link OpenAPI}.
+     * @param exceptionHandlers  {@link SpringExceptionHandler} instances.
      */
     public SpringBootOfficeSource(ObjectMapper objectMapper,
                                   List<OfficeFloorRestEndpoint> restEndpoints,
                                   ConfigurableApplicationContext applicationContext,
-                                  OpenAPI openApi) {
+                                  OpenAPI openApi,
+                                  List<SpringExceptionHandler> exceptionHandlers) {
         this.objectMapper = objectMapper;
         this.restEndpoints = restEndpoints;
         this.applicationContext = applicationContext;
         this.openApi = openApi;
+        this.exceptionHandlers = exceptionHandlers;
     }
 
     /**
@@ -208,16 +215,14 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
         webArchitect.addHttpObjectParser(new JacksonHttpObjectParserFactory(this.objectMapper));
 
         // Load the Spring Exception Handlers
-        List<SpringExceptionHandler> springExceptionHandlersList = new LinkedList<>();
         for (SpringExceptionHandler springExceptionHandler : officeSourceContext.loadOptionalServices(SpringExceptionHandlerServiceFactory.class)) {
             if (springExceptionHandler != null) {
-                springExceptionHandlersList.add(springExceptionHandler);
+                this.exceptionHandlers.add(springExceptionHandler);
             }
         }
-        SpringExceptionHandler[] springExceptionHandlers = springExceptionHandlersList.toArray(SpringExceptionHandler[]::new);
 
         // Allow Spring to handle responses
-        webArchitect.addHttpObjectResponder(new SpringHttpObjectResponderFactory(springExceptionHandlers));
+        webArchitect.addHttpObjectResponder(new SpringHttpObjectResponderFactory());
 
         // Add YAML authorize decoration
         restArchitect.addRestMethodDecorator(new AuthorizeRestMethodDecorator());
