@@ -1,0 +1,3 @@
+service:
+  class: ${govern.package}.GovernedErrorService
+  govern: [ tracking ]

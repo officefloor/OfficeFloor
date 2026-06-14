@@ -40,6 +40,7 @@ import net.officefloor.plugin.governance.clazz.Enforce;
 import net.officefloor.plugin.governance.clazz.Govern;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
+import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.server.http.HttpClientTestUtil;
 import net.officefloor.web.ObjectResponse;
 import net.officefloor.web.build.HttpInput;
@@ -332,6 +333,42 @@ public class WoofCompositionTest {
         }
         @Enforce
         public void enforce() {}
+    }
+
+    /**
+     * Verifies that escalation composition files are loaded and handle thrown exceptions.
+     */
+    @Test
+    public void escalationLoaded() throws Exception {
+        this.doTest("/error", "\"ESCALATION: TEST\"", null);
+    }
+
+    public static class ErrorService {
+        public void service() throws IOException {
+            throw new IOException("TEST");
+        }
+    }
+
+    public static class EscalationHandlerService {
+        public void handle(@Parameter IOException ex, ObjectResponse<String> response) {
+            response.send("ESCALATION: " + ex.getMessage());
+        }
+    }
+
+    /**
+     * Verifies the escalation directory is overridden by the property.
+     */
+    @Test
+    public void escalationCustomDirectory() throws Exception {
+        this.doTest("/error", "\"CUSTOM_ESCALATION: TEST\"", (context) -> {
+            context.addOverrideProperty(WoofLoaderOfficeExtensionService.ESCALATION_DIRECTORY_PROPERTY, "officefloor/custom-escalation");
+        });
+    }
+
+    public static class CustomEscalationHandlerService {
+        public void handle(@Parameter IOException ex, ObjectResponse<String> response) {
+            response.send("CUSTOM_ESCALATION: " + ex.getMessage());
+        }
     }
 
     @Test
