@@ -35,6 +35,7 @@
 	</skin>
 	<custom>
 		<fluidoSkin>
+			<googleAnalyticsAccountId>G-RRNCKP6QJB</googleAnalyticsAccountId>
 			<googleSearch />
 			<sourceLineNumbersEnabled>false</sourceLineNumbersEnabled>
 			<copyrightClass>pull-right</copyrightClass>
