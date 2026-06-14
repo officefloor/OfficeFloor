@@ -210,6 +210,11 @@
             </dependency>
 			<dependency>
 				<groupId>net.officefloor.activity</groupId>
+				<artifactId>officeescalation</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.activity</groupId>
 				<artifactId>officegovern</artifactId>
 				<version>${revision}</version>
 			</dependency>
@@ -1371,6 +1376,7 @@
 						<extensions>true</extensions>
 						<configuration>
 							<publishingServerId>central</publishingServerId>
+							<deploymentName>net.officefloor ${revision}</deploymentName>
 							<autoPublish>true</autoPublish>
 							<waitUntil>published</waitUntil>
 						</configuration>

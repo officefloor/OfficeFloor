@@ -38,5 +38,12 @@ public class ExceptionHandlingIntegrationTest {
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals("Spring handled: thrown", response.getBody());
     }
+
+    @Test
+    public void global_escalation_handling() {
+        ResponseEntity<String> response = client.getForEntity("/exception/escalation", String.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("Escalation handled: thrown", response.getBody());
+    }
 }
 // END SNIPPET: tutorial

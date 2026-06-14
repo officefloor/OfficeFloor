@@ -26,6 +26,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import net.officefloor.activity.compose.build.ComposeArchitect;
 import net.officefloor.activity.compose.build.ComposeEmployer;
+import net.officefloor.activity.escalation.build.EscalationEmployer;
 import net.officefloor.activity.govern.build.GovernanceEmployer;
 import net.officefloor.activity.managedobject.build.ManagedObjectEmployer;
 import net.officefloor.activity.supplier.build.SupplierEmployer;
@@ -168,6 +169,10 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
         GovernanceEmployer.employGovernanceArchitect(officeArchitect, composeArchitect, officeSourceContext)
                 .addGovernances("officefloor/govern", propertyList)
                 .forEach(composeArchitect::addGovernance);
+
+        // Load global exception handlers from officefloor/escalation/
+        EscalationEmployer.employEscalationArchitect(officeArchitect, composeArchitect, officeSourceContext)
+                .addEscalations("officefloor/escalation", propertyList);
 
         // Undertake Spring Boot extensions
         for (OfficeFloorSpringBootExtension springBootExtension : officeSourceContext.loadOptionalServices(OfficeFloorSpringBootExtensionServiceFactory.class)) {

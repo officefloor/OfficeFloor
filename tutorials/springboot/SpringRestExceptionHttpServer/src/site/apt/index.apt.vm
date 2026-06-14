@@ -33,13 +33,15 @@ Exception Handling in OfficeFloor REST YAML Composition
   This tutorial demonstrates how exceptions (called <escalations> in OfficeFloor) are handled
   within the YAML REST composition when integrating with Spring Boot.
 
-  Three levels of exception handling are covered:
+  Four levels of exception handling are covered:
 
-  [[1]] <<Method escalation>> - the exception is caught and routed to a handler declared on the specific method in the YAML.
+  [[1]] <<Method escalation>> catches the exception and routes it to a handler declared on the specific method in the YAML.
 
-  [[2]] <<Composition escalation>> - the exception is caught and routed to a handler declared at the composition level, applying across all methods.
+  [[2]] <<Composition escalation>> catches the exception and routes it to a handler declared at the composition level, applying across all methods in the file.
 
-  [[3]] <<Spring ControllerAdvice>> - the exception propagates out of the composition and is handled by Spring's <<<@RestControllerAdvice>>> / <<<@ExceptionHandler>>> mechanism.
+  [[3]] <<Global escalation>> catches the exception with an application-wide handler registered via a file in <<<officefloor/escalation/>>>, using the same OfficeFloor function injection pattern as all other handlers.
+
+  [[4]] <<Spring ControllerAdvice>> lets the exception propagate out of the composition and be handled by Spring's <<<@RestControllerAdvice>>> / <<<@ExceptionHandler>>> mechanism.
 
   {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestExceptionHttpServer}Tutorial Source}}
 
@@ -120,6 +122,51 @@ Exception Handling in OfficeFloor REST YAML Composition
 
 
 
+*Global Escalation
+
+  Global escalation registers a single handler for an exception type across the entire application.
+  Any REST endpoint that throws the exception, regardless of which YAML file it belongs to, is
+  routed to this handler.  The handler is written with the same OfficeFloor function injection
+  pattern as all other composition steps, so there is no need to mix Spring and OfficeFloor styles.
+
+**Exception
+
+  A dedicated exception type makes the scope of the global handler explicit:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestexceptionhttpserver/EscalationException.java|ignoreDownloadError=false}
+
+**YAML configuration
+
+  Place a YAML file named after the fully qualified exception class inside
+  <<<officefloor/escalation/>>>.  OfficeFloor discovers all files in that directory on startup and
+  registers each one as a global escalation handler:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/escalation/net.officefloor.tutorial.springrestexceptionhttpserver.EscalationException.yml|ignoreDownloadError=false}
+
+  The REST endpoint YAML requires no escalation configuration, as the global handler is wired
+  automatically:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/exception/escalation.GET.yml|ignoreDownloadError=false}
+
+**Service method
+
+  The service simply throws the exception:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestexceptionhttpserver/EscalationService.java|ignoreDownloadError=false}
+
+**Handler method
+
+  The handler receives the exception via <<<@Parameter>>> and writes the response, identical in
+  structure to a method or composition handler:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestexceptionhttpserver/GlobalExceptionHandler.java|ignoreDownloadError=false}
+
+  <<Priority:>> method escalation takes precedence over composition escalation, which in turn takes
+  precedence over global escalation.  An endpoint can always override the global handler by
+  declaring its own escalation in the YAML.
+
+
+
 *Spring ControllerAdvice
 
   When neither a method nor a composition escalation is configured, the exception propagates out of
@@ -159,9 +206,11 @@ Exception Handling in OfficeFloor REST YAML Composition
 *----+----+
 | Approach | When to use |
 *----+----+
-| Method escalation | Handle an exception only for a specific step in the composition — for example a step with its own distinct recovery path. |
+| Method escalation | Handle an exception only for a specific step in the composition, for example a step with its own distinct recovery path. |
 *----+----+
-| Composition escalation | Handle an exception the same way for every step in the composition — common for infrastructure errors such as database timeouts. |
+| Composition escalation | Handle an exception the same way for every step in the composition, common for infrastructure errors such as database timeouts. |
+*----+----+
+| Global escalation | Handle an exception consistently across all REST endpoints in the application, keeping all handler logic within OfficeFloor function injection. |
 *----+----+
 | Spring ControllerAdvice | Re-use existing application-wide Spring exception handling, or integrate with Spring libraries that register their own advice. |
 *----+----+

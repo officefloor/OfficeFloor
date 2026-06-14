@@ -37,4 +37,11 @@ public class ExceptionHandlingTutorialTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("Spring handled: thrown"));
     }
+
+    @Test
+    public void global_escalation_handling() throws Exception {
+        this.mvc.perform(get("/exception/escalation"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Escalation handled: thrown"));
+    }
 }

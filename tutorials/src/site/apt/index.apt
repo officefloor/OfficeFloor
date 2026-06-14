@@ -51,12 +51,19 @@ OfficeFloor Tutorials
   Your Spring beans, security, persistence, and all other Spring configuration remain unchanged.
   OfficeFloor simply takes over the declaration of REST endpoints via YAML files.
 
+  The starter is published to Maven Central, so no additional repository configuration is needed.
+  Add the single dependency to your <<<pom.xml>>> and Maven downloads it automatically.
+
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 || Tutorial                                                    || Description                                               || Covered
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./springboot/SpringRestHttpServer/index.html}Spring REST}} | Declare REST endpoints as YAML configuration files within a Spring Boot application. Spring beans are injected into service methods automatically. | OfficeFloor REST Spring Boot Starter\
-|                                                              |                                                            | REST YAML composition\
-|                                                              |                                                            | Function injection basics
+| {{{./springboot/SpringRestGettingStartedHttpServer/index.html}Getting Started}} | Add the single starter dependency, write one YAML file, and serve your first REST endpoint. No controllers, no annotations. | OfficeFloor REST Spring Boot Starter\
+|                                                              |                                                            | YAML endpoint basics\
+|                                                              |                                                            | Spring bean injection
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./springboot/SpringRestHttpServer/index.html}Spring REST}} | YAML naming conventions, multi-method service classes, multiple path variables, and custom response headers via ResponseEntity. | YAML naming conventions\
+|                                                              |                                                            | method: for multi-method classes\
+|                                                              |                                                            | ResponseEntity
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./springboot/SpringRestSpringBoot3HttpServer/index.html}Spring Boot 3}} | Add OfficeFloor REST to an existing Spring Boot 3 application using the version-specific starter. Explains which starter to choose for SB3 vs SB4 and how to migrate between them. | officefloor-rest-spring-boot-3-starter\
 |                                                              |                                                            | Starter version selection
