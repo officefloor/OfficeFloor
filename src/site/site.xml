@@ -35,7 +35,6 @@
 	</skin>
 	<custom>
 		<fluidoSkin>
-			<googleAnalyticsAccountId>${google.analytics.id}</googleAnalyticsAccountId>
 			<googleSearch />
 			<sourceLineNumbersEnabled>false</sourceLineNumbersEnabled>
 			<copyrightClass>pull-right</copyrightClass>
@@ -45,6 +44,15 @@
 		<head><![CDATA[
 			<!-- shortcut icon -->
 			<link rel="shortcut icon" href="/favicon.ico" />
+
+			<!-- Google tag (gtag.js) -->
+			<script async src="https://www.googletagmanager.com/gtag/js?id=${google.analytics.id}"></script>
+			<script>
+			  window.dataLayer = window.dataLayer || [];
+			  function gtag(){dataLayer.push(arguments);}
+			  gtag('js', new Date());
+			  gtag('config', '${google.analytics.id}');
+			</script>
 
 			<!-- GitHub corner ribbon -->
 			<script type="text/javascript">
