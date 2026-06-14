@@ -240,9 +240,17 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, HttpExternalRe
 
 		// Determine if external response
 		if (this.isExternal) {
-			this.isWritten = true;
-			this.serverHttpConnection.httpResponseWriter.writeHttpExternalResponse();
-			return; // external response
+			if (escalation == null) {
+				// No escalation so write the buffered external response
+				this.isWritten = true;
+				this.serverHttpConnection.httpResponseWriter.writeHttpExternalResponse();
+				return;
+			}
+
+			// Escalation occurred after external send was prepared but before flush.
+			// Response is still buffered so can be overridden with the error response.
+			this.isExternal = false;
+			this.isSent = false;
 		}
 
 		// Determine if clean up escalation

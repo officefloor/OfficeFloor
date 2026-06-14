@@ -44,6 +44,7 @@ import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.server.http.HttpEscalationHandler;
 import net.officefloor.server.http.HttpException;
+import net.officefloor.server.http.HttpExternalResponse;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.HttpMethod;
@@ -661,8 +662,69 @@ public class ProcessAwareHttpResponseTest implements HttpResponseWriter<ByteBuff
 	}
 
 	/**
+	 * Ensure external response is written when there is no escalation.
+	 */
+	@Test
+	public void externalSendWithNoEscalation() throws IOException {
+
+		// Flag as externally handled (simulates ObjectResponse.send() in Spring integration)
+		HttpExternalResponse.of(this.response).externalSend();
+
+		// Flush with no escalation (happy path — governance committed successfully)
+		this.response.flushResponseToHttpResponseWriter(null);
+
+		// External response should be written; writeHttpResponse should not be called
+		assertTrue(this.isExternalWritten, "Should write external response");
+		assertNull(this.status, "Should not invoke writeHttpResponse");
+	}
+
+	/**
+	 * Ensure a governance escalation after external send overrides the external response with an error.
+	 */
+	@Test
+	public void externalSendWithGovernanceEscalation() throws IOException {
+
+		// Flag as externally handled (simulates ObjectResponse.send())
+		HttpExternalResponse.of(this.response).externalSend();
+
+		// Governance escalation (e.g., transaction commit throws ConstraintViolationException)
+		final Exception escalation = new Exception("Governance failure");
+		this.response.flushResponseToHttpResponseWriter(escalation);
+
+		// Error response should override the prepared external response
+		assertFalse(this.isExternalWritten, "Should NOT write external response");
+		assertSame(HttpStatus.INTERNAL_SERVER_ERROR, this.status, "Should write error status");
+	}
+
+	/**
+	 * Ensure the escalation handler is invoked when a governance escalation overrides an external send.
+	 */
+	@Test
+	public void externalSendWithGovernanceEscalationHandled() throws IOException {
+
+		// Configure escalation handler (e.g., Spring ExceptionControllerAdvice returning 400)
+		this.response.setEscalationHandler((context) -> {
+			context.getServerHttpConnection().getResponse().setStatus(HttpStatus.BAD_REQUEST);
+			context.getServerHttpConnection().getResponse().getEntityWriter().write("Bad Request");
+			return true;
+		});
+
+		// Flag as externally handled
+		HttpExternalResponse.of(this.response).externalSend();
+
+		// Governance escalation
+		this.response.flushResponseToHttpResponseWriter(new Exception("constraint violation"));
+
+		// Handler should have written 400, not the external response
+		assertFalse(this.isExternalWritten, "Should NOT write external response");
+		assertSame(HttpStatus.BAD_REQUEST, this.status, "Should be 400 from escalation handler");
+		assertEquals("Bad Request", MockStreamBufferPool.getContent(this.contentHeadStreamBuffer,
+				ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET), "Incorrect content from handler");
+	}
+
+	/**
 	 * Obtains the stack trace.
-	 * 
+	 *
 	 * @param escalation {@link Throwable}.
 	 * @return Stack trace.
 	 */
@@ -692,6 +754,8 @@ public class ProcessAwareHttpResponseTest implements HttpResponseWriter<ByteBuff
 
 	private StreamBuffer<ByteBuffer> contentHeadStreamBuffer = null;
 
+	private boolean isExternalWritten = false;
+
 	@Override
 	public void writeHttpResponse(HttpVersion version, HttpStatus status, WritableHttpHeader httpHeader,
 			WritableHttpCookie httpCookie, long contentLength, HttpHeaderValue contentType,
@@ -703,6 +767,11 @@ public class ProcessAwareHttpResponseTest implements HttpResponseWriter<ByteBuff
 		this.contentLength = contentLength;
 		this.contentType = contentType;
 		this.contentHeadStreamBuffer = contentHeadStreamBuffer;
+	}
+
+	@Override
+	public void writeHttpExternalResponse() {
+		this.isExternalWritten = true;
 	}
 
 }
