@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import com.google.cloud.firestore.DocumentReference;
 
 import net.officefloor.nosql.firestore.test.AbstractFirestoreConnectJunit.Configuration;
@@ -22,11 +22,6 @@ import net.officefloor.server.http.HttpClientExtension;
 import net.officefloor.test.UsesDockerTest;
 import net.officefloor.tutorial.googlefunctionhttpserver.GoogleFunctionLogic.Post;
 
-/**
- * Tests the Google Function HTTP Server.
- * 
- * @author Daniel Sagenschneider
- */
 @UsesDockerTest
 public class GoogleFunctionHttpServerIT {
 

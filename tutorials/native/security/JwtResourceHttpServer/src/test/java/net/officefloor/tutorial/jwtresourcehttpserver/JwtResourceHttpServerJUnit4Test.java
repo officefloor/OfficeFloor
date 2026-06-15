@@ -9,11 +9,6 @@ import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.jwt.mock.MockJwtAccessTokenRule;
 import net.officefloor.woof.mock.MockWoofServerRule;
 
-/**
- * Tests the JWT Resource HTTP Server.
- * 
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: tutorial
 public class JwtResourceHttpServerJUnit4Test {
 

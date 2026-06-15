@@ -5,11 +5,6 @@ import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 
-/**
- * Handles exception logic.
- * 
- * @author Daniel Sagenschneider
- */
 public class RollbackExceptionHandler {
 
 	public void handle(@Parameter Exception exception, ServerHttpConnection connection)

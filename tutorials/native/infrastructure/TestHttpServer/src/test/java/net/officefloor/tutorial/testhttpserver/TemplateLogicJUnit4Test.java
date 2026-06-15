@@ -17,11 +17,6 @@ import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.test.OfficeFloorRule;
 import net.officefloor.woof.mock.MockWoofServerRule;
 
-/**
- * Tests the {@link TemplateLogic}.
- * 
- * @author Daniel Sagenschneider
- */
 public class TemplateLogicJUnit4Test {
 
 	// START SNIPPET: system

@@ -20,7 +20,7 @@
 
 package net.officefloor.web.json;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

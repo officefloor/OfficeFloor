@@ -6,11 +6,6 @@ import lombok.Data;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.HttpParameters;
 
-/**
- * Logic for the template.
- * 
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: tutorial
 public class TemplateLogic {
 

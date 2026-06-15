@@ -8,11 +8,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import net.officefloor.web.HttpObject;
 
-/**
- * Post.
- * 
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: tutorial
 @Entity
 @HttpObject

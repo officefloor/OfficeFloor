@@ -4,11 +4,6 @@ import java.io.Serializable;
 
 import lombok.Value;
 
-/**
- * Encription of the letter.
- * 
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: example
 @Value
 public class LetterEncryption implements Serializable {

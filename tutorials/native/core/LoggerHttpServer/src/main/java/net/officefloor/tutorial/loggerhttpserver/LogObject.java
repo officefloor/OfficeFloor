@@ -4,11 +4,6 @@ import java.util.logging.Logger;
 
 import net.officefloor.plugin.clazz.Dependency;
 
-/**
- * Object with dependency injected {@link Logger}.
- * 
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: tutorial
 public class LogObject {
 

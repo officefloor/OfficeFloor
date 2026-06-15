@@ -13,11 +13,6 @@ import org.junit.Test;
 import net.officefloor.server.http.HttpClientRule;
 import net.officefloor.test.OfficeFloorRule;
 
-/**
- * Tests the deployed HTTP server.
- * 
- * @author Daniel Sagenschneider
- */
 public class DeployHttpServerTest {
 
 	@Rule

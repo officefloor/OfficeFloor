@@ -17,6 +17,25 @@
 		<basedir>${basedir}</basedir>
 		<projectVersion>${project.version}</projectVersion>
 	</properties>
+	<dependencyManagement>
+		<dependencies>
+			<!-- Override back to Spring Boot 3 for this compatibility tutorial -->
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-dependencies</artifactId>
+				<version>${spring3-version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<!-- Jackson 3.1.2 requires jackson-annotations >= 2.21 (added JsonSerializeAs);
+			     Spring Boot 3.5.x manages 2.19.4 which is missing that class. -->
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-annotations</artifactId>
+				<version>2.21</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 	<dependencies>
 		<!-- START SNIPPET: tutorial -->
 		<dependency>
@@ -40,6 +59,15 @@
 		</dependency>
 	</dependencies>
 	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-maven-plugin</artifactId>
+					<version>${spring3-version}</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

@@ -21,7 +21,7 @@
 package net.officefloor.spring.webflux;
 
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.web.reactive.server.ReactiveWebServerFactory;
+import org.springframework.boot.web.server.reactive.ReactiveWebServerFactory;
 import org.springframework.boot.web.server.WebServer;
 import org.springframework.boot.web.server.WebServerException;
 import org.springframework.context.annotation.Bean;

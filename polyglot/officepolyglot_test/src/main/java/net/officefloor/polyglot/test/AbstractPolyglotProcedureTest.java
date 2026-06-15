@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 import net.officefloor.activity.procedure.Procedure;
 import net.officefloor.activity.procedure.ProcedureLoaderUtil;

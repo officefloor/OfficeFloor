@@ -8,8 +8,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 import jakarta.persistence.EntityManager;
 import net.officefloor.jdbc.h2.test.H2Reset;
@@ -21,11 +21,6 @@ import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.woof.mock.MockObjectResponse;
 import net.officefloor.woof.mock.MockWoofServerExtension;
 
-/**
- * Tests the REST end points.
- * 
- * @author Daniel Sagenschneider
- */
 public class RestHttpServerTest {
 
 	@BeforeEach

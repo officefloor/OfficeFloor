@@ -11,11 +11,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import net.officefloor.web.HttpObject;
 
-/**
- * Post entity.
- * 
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: tutorial
 @Data
 @Entity

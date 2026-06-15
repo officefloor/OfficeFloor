@@ -2,7 +2,7 @@ package net.officefloor.tutorial.springrestsecurity;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithUserDetails;
@@ -19,6 +19,71 @@ public class SpringRestSecurityTest {
 
 	@Autowired
 	private MockMvc mvc;
+
+	// --- YAML authorize (preferred approach) ---
+
+	@Test
+	@WithMockUser(username = "admin", roles = "ADMIN")
+	public void yaml_authorize_grants_admin() throws Exception {
+		mvc.perform(get("/security/yaml"))
+			.andExpect(status().isOk())
+			.andExpect(content().string("Admin via YAML"));
+	}
+
+	@Test
+	@WithMockUser(username = "user", roles = "USER")
+	public void yaml_authorize_denies_non_admin() throws Exception {
+		mvc.perform(get("/security/yaml"))
+			.andExpect(status().isForbidden());
+	}
+
+	@Test
+	@WithMockUser(username = "admin", roles = "ADMIN")
+	public void inherited_authorize_grants_admin() throws Exception {
+		mvc.perform(get("/security/admin/report"))
+			.andExpect(status().isOk())
+			.andExpect(content().string("Admin Report"));
+	}
+
+	@Test
+	@WithMockUser(username = "user", roles = "USER")
+	public void inherited_authorize_denies_non_admin() throws Exception {
+		mvc.perform(get("/security/admin/report"))
+			.andExpect(status().isForbidden());
+	}
+
+	@Test
+	@WithMockUser(username = "superadmin", roles = "SUPER")
+	public void override_authorize_grants_super() throws Exception {
+		mvc.perform(get("/security/admin/super"))
+			.andExpect(status().isOk())
+			.andExpect(content().string("Super Admin Only"));
+	}
+
+	@Test
+	@WithMockUser(username = "admin", roles = "ADMIN")
+	public void override_authorize_denies_admin_without_super() throws Exception {
+		mvc.perform(get("/security/admin/super"))
+			.andExpect(status().isForbidden());
+	}
+
+	@Test
+	@WithMockUser(username = "user", roles = "USER")
+	public void disable_inherited_authorize_grants_non_admin() throws Exception {
+		mvc.perform(get("/security/admin/open"))
+			.andExpect(status().isOk())
+			.andExpect(content().string("Open under Admin"));
+	}
+
+	@Test
+	@WithMockUser(username = "admin", roles = "ADMIN")
+	public void disable_inherited_authorize_grants_admin() throws Exception {
+		mvc.perform(get("/security/admin/open"))
+			.andExpect(status().isOk())
+			.andExpect(content().string("Open under Admin"));
+	}
+
+	// --- Spring Security integration ---
 
 	@Test
 	public void public_endpoint_no_auth_required() throws Exception {

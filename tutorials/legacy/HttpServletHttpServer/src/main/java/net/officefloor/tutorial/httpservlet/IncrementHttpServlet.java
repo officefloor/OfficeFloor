@@ -8,11 +8,6 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-/**
- * {@link HttpServlet} for testing.
- * 
- * @author Daniel Sagenschneider
- */
 @WebServlet("/increment")
 public class IncrementHttpServlet extends HttpServlet {
 

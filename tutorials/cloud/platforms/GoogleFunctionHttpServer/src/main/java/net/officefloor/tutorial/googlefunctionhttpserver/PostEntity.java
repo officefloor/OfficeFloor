@@ -4,11 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * Post entity.
- * 
- * @author Daniel Sagenschneider
- */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

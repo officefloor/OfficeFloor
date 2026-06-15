@@ -131,10 +131,7 @@ public class ClassSectionLoader implements ClassSectionLoaderContext {
 	}
 
 	/**
-	 * Configures single method mode. When the named method is loaded, its object
-	 * dependencies are named by the function object label rather than the type,
-	 * allowing custom {@link net.officefloor.activity.procedure.spi.ProcedureSource} labels to flow through as
-	 * {@link SectionObject} names.
+	 * Configures single method mode, which avoids having to aggregate dependencies.
 	 *
 	 * @param methodName Name of the single method.
 	 * @return <code>this</code> for chaining.

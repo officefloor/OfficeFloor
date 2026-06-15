@@ -15,11 +15,6 @@ import net.officefloor.server.http.HttpClientRule;
 import net.officefloor.test.OfficeFloorRule;
 import net.officefloor.test.system.SystemPropertiesRule;
 
-/**
- * Tests with system property.
- * 
- * @author Daniel Sagenschneider
- */
 public class SystemPropertyJUnit4Test {
 
 	// START SNIPPET: tutorial

@@ -7,8 +7,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
 
-import com.google.cloud.firestore.Firestore;
-
 import net.officefloor.nosql.firestore.test.FirestoreRule;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.test.SkipUtil;
@@ -17,11 +15,6 @@ import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
 import net.officefloor.woof.mock.MockWoofServerRule;
 
-/**
- * Tests the {@link Firestore} HTTP server.
- * 
- * @author Daniel Sagenschneider
- */
 public class FirestoreHttpServerJUnit4Test {
 
 	public @ClassRule static SkipRule ensureDockerAvailable = new SkipRule(SkipUtil.isSkipTestsUsingDocker(),

@@ -18,6 +18,7 @@
 		<module>officeadmin</module>
 		<module>officecompose</module>
 		<module>officedependency</module>
+		<module>officeescalation</module>
 		<module>officegovern</module>
 		<module>officemanagedobject</module>
 		<module>officesupplier</module>

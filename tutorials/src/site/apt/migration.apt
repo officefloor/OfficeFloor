@@ -86,7 +86,7 @@ OfficeFloor Migration Guide
 
   Host existing Spring WebFlux <<<@RestController>>> components within the OfficeFloor runtime.
   Spring MVC natively supports <<<Mono\<T\>>>> and <<<Flux\<T\>>>> return types, and Java 21
-  Virtual Threads provide the non-blocking throughput that WebFlux was designed for — so existing
+  Virtual Threads provide the non-blocking throughput that WebFlux was designed for, so existing
   reactive controller code runs unchanged without migrating to the Spring MVC programming model.
 
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+

@@ -1,7 +1,7 @@
 package net.officefloor.tutorial.scalahttpserver
 
-import com.fasterxml.jackson.databind.Module
-import com.fasterxml.jackson.module.scala.DefaultScalaModule
+import tools.jackson.databind.JacksonModule
+import tools.jackson.module.scala.DefaultScalaModule
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.context.annotation.Bean
@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Bean
 @SpringBootApplication
 class Application {
   @Bean
-  def scalaJacksonModule(): Module = DefaultScalaModule
+  def scalaJacksonModule(): JacksonModule = DefaultScalaModule
 }
 
 object Application extends App {

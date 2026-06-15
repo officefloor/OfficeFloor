@@ -20,10 +20,10 @@
 
 package net.officefloor.activity.compose.build;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.yaml.YAMLFactory;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.Resource;
 import io.github.classgraph.ScanResult;
@@ -40,7 +40,6 @@ import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSubSection;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 
-import java.io.IOException;
 import java.io.Reader;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -81,7 +80,7 @@ public class ComposeEmployer {
                 .getReader();
         try {
             return MAPPER.readValue(compositionConfiguration, configurationClass);
-        } catch (IOException ex) {
+        } catch (JacksonException ex) {
             throw architect.addIssue("Failed to read configuration " + resourceName + " for " + configurationClass.getName(), ex);
         }
     }
@@ -292,7 +291,7 @@ public class ComposeEmployer {
                         // Have content so marshal it
                         try {
                             return MAPPER.treeToValue(content, type);
-                        } catch (JsonProcessingException ex) {
+                        } catch (JacksonException ex) {
                             architect.addIssue("Failed to read composition item " + contentName + " as " + type.getName(), ex);
                             return null; // issue reported and not available
                         }

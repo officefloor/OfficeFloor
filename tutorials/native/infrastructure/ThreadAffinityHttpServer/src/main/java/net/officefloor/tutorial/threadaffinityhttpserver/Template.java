@@ -3,11 +3,6 @@ package net.officefloor.tutorial.threadaffinityhttpserver;
 import jakarta.persistence.EntityManager;
 import lombok.Data;
 
-/**
- * Logic for the template.
- * 
- * @author Daniel Sagenschneider
- */
 public class Template {
 
 	@Data

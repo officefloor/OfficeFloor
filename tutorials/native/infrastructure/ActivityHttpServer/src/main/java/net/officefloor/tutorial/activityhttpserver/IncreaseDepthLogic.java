@@ -2,11 +2,6 @@ package net.officefloor.tutorial.activityhttpserver;
 
 import net.officefloor.plugin.section.clazz.Parameter;
 
-/**
- * Logic to increase the depth.
- * 
- * @author Daniel Sagenschneider
- */
 public class IncreaseDepthLogic {
 
 	// START SNIPPET: tutorial

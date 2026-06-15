@@ -1,14 +1,8 @@
 package net.officefloor.tutorial.variablehttpserver;
 
 import net.officefloor.plugin.section.clazz.Next;
-import net.officefloor.plugin.variable.In;
 import net.officefloor.plugin.variable.Out;
 
-/**
- * Using {@link Out} and {@link In} for variables.
- * 
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: tutorial
 public class OutLogic {
 

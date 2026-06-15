@@ -7,11 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import net.officefloor.web.HttpParameters;
 
-/**
- * Represents a row from the table in the database.
- * 
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: example
 @HttpParameters
 @Data

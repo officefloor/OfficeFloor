@@ -1,0 +1,4 @@
+composition:
+  authorize: "hasRole('ADMIN')"
+service:
+  class: ${security.package}.AuthorizeService

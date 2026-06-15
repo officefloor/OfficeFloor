@@ -5,11 +5,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import net.officefloor.web.HttpObject;
 
-/**
- * Request.
- * 
- * @author Daniel Sagenschneider
- */
 @HttpObject
 @Data
 @AllArgsConstructor

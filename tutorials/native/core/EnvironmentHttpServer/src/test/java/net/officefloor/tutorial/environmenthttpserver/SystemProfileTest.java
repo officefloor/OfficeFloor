@@ -16,11 +16,6 @@ import net.officefloor.test.OfficeFloorExtension;
 import net.officefloor.test.system.SystemPropertiesExtension;
 import net.officefloor.woof.WoOF;
 
-/**
- * Tests with system profile.
- * 
- * @author Daniel Sagenschneider
- */
 public class SystemProfileTest {
 
 	// START SNIPPET: tutorial

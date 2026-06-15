@@ -16,11 +16,6 @@ import net.officefloor.woof.compile.CompileWoof;
 import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
 
-/**
- * Tests the migrated code.
- * 
- * @author Daniel Sagenschneider
- */
 public class MigrateTest {
 
 	private static MockWoofServer server;

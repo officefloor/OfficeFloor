@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.google.cloud.firestore.DocumentReference;
-import com.google.cloud.firestore.Firestore;
 
 import net.officefloor.nosql.firestore.test.FirestoreExtension;
 import net.officefloor.server.http.HttpMethod;
@@ -17,11 +16,6 @@ import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
 import net.officefloor.woof.mock.MockWoofServerExtension;
 
-/**
- * Tests the {@link Firestore} HTTP server.
- * 
- * @author Daniel Sagenschneider
- */
 @UsesDockerTest
 public class FirestoreHttpServerTest {
 

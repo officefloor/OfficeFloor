@@ -53,6 +53,7 @@
 		<asm-version>9.6</asm-version>
 		<compiler-version>3.12.1</compiler-version>
 		<current.year>2026</current.year>
+		<google.analytics.id>G-RRNCKP6QJB</google.analytics.id>
 		<failsafe-version>3.2.3</failsafe-version>
 		<java-lowest-version>17</java-lowest-version>
 		<jetty-version>11.0.16</jetty-version>
@@ -342,6 +343,10 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
 					<version>${javadoc-version}</version>
+					<configuration>
+						<!-- Exclude auto-generated model sources -->
+						<excludePackageNames>net.officefloor.model.conform,net.officefloor.model.office,net.officefloor.model.officefloor,net.officefloor.model.section</excludePackageNames>
+					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -519,6 +524,11 @@
 									<replacetoken>@VERSION</replacetoken>
 									<replacevalue>${revision}</replacevalue>
 								</replace>
+								<replace
+									file="${project.build.directory}/site/index.html">
+									<replacetoken>@GOOGLE_ANALYTICS_ID</replacetoken>
+									<replacevalue>${google.analytics.id}</replacevalue>
+								</replace>
 
 								<!-- GitHub Ribbon on main page -->
 								<replace
@@ -588,6 +598,14 @@
 							<!-- Ensure good quality JavaDoc -->
 							<failOnError>true</failOnError>
 							<failOnWarnings>true</failOnWarnings>
+							<!-- SB4 moved embedded server classes out of spring-boot; force SB3 jar on aggregate classpath so officespring_webmvc/webflux still compile -->
+							<additionalDependencies>
+								<additionalDependency>
+									<groupId>org.springframework.boot</groupId>
+									<artifactId>spring-boot</artifactId>
+									<version>${spring3-version}</version>
+								</additionalDependency>
+							</additionalDependencies>
 							<!-- Include Google Analytics -->
 							<additionalOptions>
 								<additionalOption>--allow-script-in-comments</additionalOption>

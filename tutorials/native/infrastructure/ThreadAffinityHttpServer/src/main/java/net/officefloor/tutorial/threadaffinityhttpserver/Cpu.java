@@ -8,11 +8,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
-/**
- * CPU.
- * 
- * @author Daniel Sagenschneider
- */
 @Entity
 @Data
 @NamedQuery(name = "AllCpus", query = "SELECT C FROM Cpu C")

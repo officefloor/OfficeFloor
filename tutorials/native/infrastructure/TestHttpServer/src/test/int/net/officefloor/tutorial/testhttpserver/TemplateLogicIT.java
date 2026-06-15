@@ -10,11 +10,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import net.officefloor.server.http.HttpClientExtension;
 
-/**
- * Tests the {@link TemplateLogic}.
- * 
- * @author Daniel Sagenschneider
- */
 public class TemplateLogicIT {
 
 	// START SNIPPET: integration

@@ -8,11 +8,6 @@ import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
 import net.officefloor.woof.mock.MockWoofServerExtension;
 
-/**
- * Tests the JAX-RS HTTP Server.
- * 
- * @author Daniel Sagenschneider
- */
 public class JaxRsProcedureHttpServerTest {
 
 	// START SNIPPET: tutorial

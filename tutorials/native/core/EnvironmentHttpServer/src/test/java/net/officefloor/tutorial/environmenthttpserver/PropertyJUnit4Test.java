@@ -6,11 +6,6 @@ import org.junit.Test;
 import net.officefloor.woof.mock.MockWoofServer;
 import net.officefloor.woof.mock.MockWoofServerRule;
 
-/**
- * Tests with default properties.
- * 
- * @author Daniel Sagenschneider
- */
 public class PropertyJUnit4Test {
 
 	// START SNIPPET: tutorial

@@ -1,2 +1,2 @@
-net.officefloor.spring.starter.rest.OfficeFloorRestAutoConfiguration
-net.officefloor.spring.starter.rest.OfficeFloorOpenApiConfiguration
+org.springframework.boot.hibernate.autoconfigure.HibernateJpaAutoConfiguration
+org.springframework.boot.hibernate.autoconfigure.metrics.HibernateMetricsAutoConfiguration

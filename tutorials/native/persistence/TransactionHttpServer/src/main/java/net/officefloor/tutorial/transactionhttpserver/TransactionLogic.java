@@ -4,11 +4,6 @@ import java.io.EOFException;
 
 import net.officefloor.plugin.section.clazz.Parameter;
 
-/**
- * Transaction logic.
- * 
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: tutorial
 public class TransactionLogic {
 

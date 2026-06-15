@@ -7,11 +7,6 @@ import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.web.ObjectResponse;
 import reactor.core.publisher.Mono;
 
-/**
- * Reactor logic.
- * 
- * @author Daniel Sagenschneider
- */
 public class ReactorLogic {
 
 	// START SNIPPET: reactor

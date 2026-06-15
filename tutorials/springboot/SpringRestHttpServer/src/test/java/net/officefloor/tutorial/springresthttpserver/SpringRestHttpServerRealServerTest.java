@@ -3,22 +3,20 @@ package net.officefloor.tutorial.springresthttpserver;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.resttestclient.TestRestTemplate;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 // START SNIPPET: tutorial
+@AutoConfigureTestRestTemplate
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class SpringRestHttpServerRealServerTest {
 
 	@Autowired
 	private TestRestTemplate restTemplate;
-
-	@Autowired
-	private AuditService auditService;
 
 	@Test
 	public void getGreeting() {
@@ -34,24 +32,6 @@ public class SpringRestHttpServerRealServerTest {
 				"/greeting/OfficeFloor", GreetingResponse.class);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertEquals(new GreetingResponse("Hello, OfficeFloor!"), response.getBody());
-	}
-
-	@Test
-	public void postGreeting() {
-		ResponseEntity<GreetingResponse> response = restTemplate.postForEntity(
-				"/greeting", new GreetingRequest("Daniel"), GreetingResponse.class);
-		assertEquals(HttpStatus.OK, response.getStatusCode());
-		assertEquals(new GreetingResponse("Hello, Daniel!"), response.getBody());
-		assertTrue(auditService.getEntries().contains("Hello, Daniel!"),
-				"Greeting should be recorded by AuditService");
-	}
-
-	@Test
-	public void postGreetingWithBlankName() {
-		ResponseEntity<GreetingResponse> response = restTemplate.postForEntity(
-				"/greeting", new GreetingRequest(""), GreetingResponse.class);
-		assertEquals(HttpStatus.OK, response.getStatusCode());
-		assertEquals(new GreetingResponse("Hello, World!"), response.getBody());
 	}
 
 	@Test

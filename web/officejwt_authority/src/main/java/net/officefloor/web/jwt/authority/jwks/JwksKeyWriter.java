@@ -22,8 +22,8 @@ package net.officefloor.web.jwt.authority.jwks;
 
 import java.security.Key;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Creates the JWKS <code>key</code> {@link JsonNode} from the {@link Key}.

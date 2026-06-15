@@ -10,11 +10,6 @@ import net.officefloor.test.logger.LoggerRule;
 import net.officefloor.woof.mock.MockWoofServer;
 import net.officefloor.woof.mock.MockWoofServerRule;
 
-/**
- * Tests the Logger HTTP Server.
- * 
- * @author Daniel Sagenschneider
- */
 public class LoggerHttpServerJUnit4Test {
 
 	// START SNIPPET: tutorial

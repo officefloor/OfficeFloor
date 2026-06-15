@@ -16,11 +16,6 @@ import net.officefloor.web.jwt.authority.AccessToken;
 import net.officefloor.web.jwt.authority.JwtAuthority;
 import net.officefloor.web.jwt.authority.RefreshToken;
 
-/**
- * Undertakes login.
- * 
- * @author Daniel Sagenschneider
- */
 public class JwtTokens {
 
 	// START SNIPPET: login

@@ -8,11 +8,6 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-/**
- * Simple {@link HttpServlet}.
- * 
- * @author Daniel Sagenschneider
- */
 @SuppressWarnings("serial")
 // START SNIPPET: tutorial
 @WebServlet(urlPatterns = "/simple")

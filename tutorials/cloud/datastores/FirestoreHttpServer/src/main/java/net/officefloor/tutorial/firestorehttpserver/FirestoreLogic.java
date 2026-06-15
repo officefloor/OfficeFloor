@@ -9,11 +9,6 @@ import com.google.cloud.firestore.QueryDocumentSnapshot;
 import net.officefloor.web.HttpPathParameter;
 import net.officefloor.web.ObjectResponse;
 
-/**
- * {@link Firestore} logic.
- * 
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: tutorial
 public class FirestoreLogic {
 

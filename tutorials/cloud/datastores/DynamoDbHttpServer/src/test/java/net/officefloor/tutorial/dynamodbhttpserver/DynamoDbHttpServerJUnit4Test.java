@@ -7,7 +7,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
 
 import net.officefloor.nosql.dynamodb.test.DynamoDbRule;
@@ -18,11 +17,6 @@ import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
 import net.officefloor.woof.mock.MockWoofServerRule;
 
-/**
- * Tests the {@link DynamoDBMapper} HTTP server.
- * 
- * @author Daniel Sagenschneider
- */
 public class DynamoDbHttpServerJUnit4Test {
 
 	@ClassRule

@@ -1,10 +1,5 @@
 package net.officefloor.tutorial.jaxrsapp;
 
-/**
- * JAX-RS dependency.
- * 
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: tutorial
 public class JaxRsDependency {
 

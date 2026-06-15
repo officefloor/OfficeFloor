@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,12 +20,13 @@
 
 package net.officefloor.spring.starter.rest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.models.OpenAPI;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import net.officefloor.activity.compose.build.ComposeArchitect;
 import net.officefloor.activity.compose.build.ComposeEmployer;
+import net.officefloor.activity.escalation.build.EscalationEmployer;
 import net.officefloor.activity.govern.build.GovernanceEmployer;
 import net.officefloor.activity.managedobject.build.ManagedObjectEmployer;
 import net.officefloor.activity.supplier.build.SupplierEmployer;
@@ -45,6 +46,7 @@ import net.officefloor.spring.starter.rest.argument.SpringBeanSupplierSource;
 import net.officefloor.spring.starter.rest.argument.SpringMvcArguments;
 import net.officefloor.spring.starter.rest.argument.SpringTypeQualifierInterrogator;
 import net.officefloor.spring.starter.rest.cors.ComposeCorsConfiguration;
+import net.officefloor.spring.starter.rest.security.AuthorizeRestMethodDecorator;
 import net.officefloor.spring.starter.rest.response.SpringExceptionHandler;
 import net.officefloor.spring.starter.rest.response.SpringExceptionHandlerServiceFactory;
 import net.officefloor.spring.starter.rest.response.SpringHttpObjectResponderFactory;
@@ -76,7 +78,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-/** {@link AbstractOfficeSource} for Spring Boot. */
+/**
+ * {@link AbstractOfficeSource} for Spring Boot.
+ */
 public class SpringBootOfficeSource extends AbstractOfficeSource {
 
     private final ObjectMapper objectMapper;
@@ -89,20 +93,25 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
 
     private final OpenAPI openApi;
 
+    private final List<SpringExceptionHandler> exceptionHandlers;
+
     /**
      * @param objectMapper       {@link ObjectMapper}.
      * @param restEndpoints      REST endpoints.
      * @param applicationContext {@link ConfigurableApplicationContext}.
      * @param openApi            {@link OpenAPI}.
+     * @param exceptionHandlers  {@link SpringExceptionHandler} instances.
      */
     public SpringBootOfficeSource(ObjectMapper objectMapper,
                                   List<OfficeFloorRestEndpoint> restEndpoints,
                                   ConfigurableApplicationContext applicationContext,
-                                  OpenAPI openApi) {
+                                  OpenAPI openApi,
+                                  List<SpringExceptionHandler> exceptionHandlers) {
         this.objectMapper = objectMapper;
         this.restEndpoints = restEndpoints;
         this.applicationContext = applicationContext;
         this.openApi = openApi;
+        this.exceptionHandlers = exceptionHandlers;
     }
 
     /**
@@ -168,6 +177,10 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
                 .addGovernances("officefloor/govern", propertyList)
                 .forEach(composeArchitect::addGovernance);
 
+        // Load global exception handlers from officefloor/escalation/
+        EscalationEmployer.employEscalationArchitect(officeArchitect, composeArchitect, officeSourceContext)
+                .addEscalations("officefloor/escalation", propertyList);
+
         // Undertake Spring Boot extensions
         for (OfficeFloorSpringBootExtension springBootExtension : officeSourceContext.loadOptionalServices(OfficeFloorSpringBootExtensionServiceFactory.class)) {
             springBootExtension.extendSpringBootSupport(new OfficeFloorSpringBootExtensionContext() {
@@ -202,16 +215,17 @@ public class SpringBootOfficeSource extends AbstractOfficeSource {
         webArchitect.addHttpObjectParser(new JacksonHttpObjectParserFactory(this.objectMapper));
 
         // Load the Spring Exception Handlers
-        List<SpringExceptionHandler> springExceptionHandlersList = new LinkedList<>();
         for (SpringExceptionHandler springExceptionHandler : officeSourceContext.loadOptionalServices(SpringExceptionHandlerServiceFactory.class)) {
             if (springExceptionHandler != null) {
-                springExceptionHandlersList.add(springExceptionHandler);
+                this.exceptionHandlers.add(springExceptionHandler);
             }
         }
-        SpringExceptionHandler[] springExceptionHandlers = springExceptionHandlersList.toArray(SpringExceptionHandler[]::new);
 
         // Allow Spring to handle responses
-        webArchitect.addHttpObjectResponder(new SpringHttpObjectResponderFactory(springExceptionHandlers));
+        webArchitect.addHttpObjectResponder(new SpringHttpObjectResponderFactory());
+
+        // Add YAML authorize decoration
+        restArchitect.addRestMethodDecorator(new AuthorizeRestMethodDecorator());
 
         // Add CORS decoration
         MomentoKey<CorsConfiguration> corsMomento = restArchitect.addRestMethodDecorator((context) -> {

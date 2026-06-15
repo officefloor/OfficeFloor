@@ -16,11 +16,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import net.officefloor.server.http.HttpClientExtension;
 import net.officefloor.test.OfficeFloorExtension;
 
-/**
- * Ensure appropriately handling exception.
- * 
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: handle
 @ExtendWith(OfficeFloorExtension.class)
 public class ExceptionHttpServerTest {

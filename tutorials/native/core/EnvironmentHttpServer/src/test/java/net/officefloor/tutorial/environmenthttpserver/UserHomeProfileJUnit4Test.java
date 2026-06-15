@@ -17,11 +17,6 @@ import net.officefloor.test.OfficeFloorRule;
 import net.officefloor.test.system.SystemPropertiesRule;
 import net.officefloor.woof.WoOF;
 
-/**
- * Tests with <code>user.home</code> profile properties.
- * 
- * @author Daniel Sagenschneider
- */
 public class UserHomeProfileJUnit4Test {
 
 	// START SNIPPET: tutorial

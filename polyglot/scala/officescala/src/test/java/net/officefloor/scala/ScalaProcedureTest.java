@@ -20,7 +20,9 @@
 
 package net.officefloor.scala;
 
-import com.fasterxml.jackson.module.scala.DefaultScalaModule;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.module.scala.DefaultScalaModule;
 import net.officefloor.activity.impl.procedure.ClassProcedureSource;
 import net.officefloor.activity.procedure.ProcedureLoaderUtil;
 import net.officefloor.activity.procedure.build.ProcedureArchitect;
@@ -52,9 +54,7 @@ import java.util.Set;
  */
 public class ScalaProcedureTest extends AbstractPolyglotProcedureTest {
 
-    static {
-        mapper.registerModule(new DefaultScalaModule());
-    }
+    private static final ObjectMapper scalaMapper = JsonMapper.builder().addModule(new DefaultScalaModule()).build();
 
     /**
      * Ensure no procedures when using non Scala object.
@@ -107,7 +107,7 @@ public class ScalaProcedureTest extends AbstractPolyglotProcedureTest {
         this.officeFloor = compiler.compileAndOpenOfficeFloor();
         MockHttpResponse response = server.value
                 .send(MockHttpServer.mockRequest().header("Content-Type", "application/json")
-                        .entity(mapper.writeValueAsString(new ScalaRequest(1, "test"))));
+                        .entity(scalaMapper.writeValueAsString(new ScalaRequest(1, "test"))));
         response.assertResponse(200, "{\"identifier\":2,\"message\":\"Serviced test\"}");
     }
     

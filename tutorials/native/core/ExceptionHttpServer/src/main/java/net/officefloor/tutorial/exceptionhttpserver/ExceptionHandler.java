@@ -8,11 +8,6 @@ import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 
-/**
- * Handles the exception by logging it.
- *
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: tutorial
 public class ExceptionHandler {
 

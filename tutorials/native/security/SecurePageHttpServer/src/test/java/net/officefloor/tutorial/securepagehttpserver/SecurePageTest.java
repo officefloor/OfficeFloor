@@ -15,11 +15,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import net.officefloor.server.http.HttpClientExtension;
 import net.officefloor.test.OfficeFloorExtension;
 
-/**
- * Tests the Secure Page.
- * 
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: tutorial
 @ExtendWith(OfficeFloorExtension.class)
 public class SecurePageTest {

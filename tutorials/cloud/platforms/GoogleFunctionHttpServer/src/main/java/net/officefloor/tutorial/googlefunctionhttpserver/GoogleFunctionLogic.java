@@ -14,11 +14,6 @@ import net.officefloor.web.HttpObject;
 import net.officefloor.web.HttpPathParameter;
 import net.officefloor.web.ObjectResponse;
 
-/**
- * Logic for the Google Function HTTP Server.
- * 
- * @author Daniel Sagenschneider
- */
 public class GoogleFunctionLogic {
 
 	@HttpObject

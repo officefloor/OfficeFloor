@@ -15,11 +15,6 @@ import net.officefloor.server.http.HttpClientRule;
 import net.officefloor.test.OfficeFloorRule;
 import net.officefloor.test.system.EnvironmentRule;
 
-/**
- * Tests with environment property.
- * 
- * @author Daniel Sagenschneider
- */
 public class EnvironmentPropertyJUnit4Test {
 
 	// START SNIPPET: tutorial

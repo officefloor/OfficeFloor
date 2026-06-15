@@ -11,16 +11,8 @@ import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.woof.mock.MockWoofServerExtension;
 
-/**
- * Ensure correctly renders the page.
- * 
- * @author Daniel Sagenschneider
- */
 public class DiPojoHttpServerTest {
 
-	/**
-	 * Run application.
-	 */
 	public static void main(String[] args) throws Exception {
 		OfficeFloorMain.main(args);
 	}

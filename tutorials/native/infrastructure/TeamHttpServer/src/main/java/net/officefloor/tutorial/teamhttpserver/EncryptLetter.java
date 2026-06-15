@@ -5,11 +5,6 @@ import java.io.Serializable;
 import lombok.Data;
 import net.officefloor.web.HttpParameters;
 
-/**
- * Request to encode the letter.
- * 
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: example
 @Data
 @HttpParameters

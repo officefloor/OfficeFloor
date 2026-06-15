@@ -21,22 +21,23 @@
 package net.officefloor.spring.webmvc;
 
 import java.lang.reflect.Field;
-import java.util.HashSet;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.catalina.Context;
+import org.apache.catalina.Lifecycle;
 import org.apache.catalina.core.StandardContext;
-import org.apache.catalina.startup.Tomcat;
 import org.springframework.beans.factory.ObjectProvider;
+
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.web.embedded.tomcat.TomcatContextCustomizer;
-import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
+import org.springframework.boot.tomcat.TomcatContextCustomizer;
+import org.springframework.boot.tomcat.servlet.TomcatServletWebServerFactory;
 import org.springframework.boot.web.server.WebServer;
 import org.springframework.boot.web.server.WebServerException;
+import org.springframework.boot.web.server.servlet.ServletWebServerFactory;
 import org.springframework.boot.web.servlet.ServletContextInitializer;
-import org.springframework.boot.web.servlet.server.ServletWebServerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -95,7 +96,7 @@ public class WebMvcSpringSupplierExtension implements SpringSupplierExtensionSer
 	}
 
 	/**
-	 * {@link Configuration} to embed {@link OfficeFloor} managed {@link Tomcat}.
+	 * {@link Configuration} to embed {@link OfficeFloor} managed Tomcat.
 	 */
 	@Configuration(proxyBeanMethods = false)
 	public static class OfficeFloorEmbeddedTomcatConfiguration {
@@ -109,7 +110,7 @@ public class WebMvcSpringSupplierExtension implements SpringSupplierExtensionSer
 		public TomcatServletWebServerFactory tomcatServletWebServerFactory(
 				ObjectProvider<TomcatContextCustomizer> contextCustomizers) {
 			TomcatServletWebServerFactory factory = new OfficeFloorServletWebServerFactory();
-			factory.getTomcatContextCustomizers()
+			factory.getContextCustomizers()
 					.addAll(contextCustomizers.orderedStream().collect(Collectors.toList()));
 			return factory;
 		}
@@ -119,36 +120,6 @@ public class WebMvcSpringSupplierExtension implements SpringSupplierExtensionSer
 	 * {@link OfficeFloor} {@link ServletWebServerFactory}.
 	 */
 	public static class OfficeFloorServletWebServerFactory extends TomcatServletWebServerFactory {
-
-		/**
-		 * Removes the {@link Tomcat} initializers that Spring may have attempted to
-		 * include. These are loaded by Tomcat on start up.
-		 * 
-		 * @param context {@link Context}.
-		 */
-		private void removeTomcatInitializers(Context context) {
-			try {
-				// No access, so reflectively access
-				Field initializersField = StandardContext.class.getDeclaredField("initializers");
-				initializersField.setAccessible(true);
-
-				// Obtain the initializers
-				@SuppressWarnings("unchecked")
-				Map<ServletContainerInitializer, Set<Class<?>>> initializers = (Map<ServletContainerInitializer, Set<Class<?>>>) initializersField
-						.get(context);
-
-				// Remove the initializers that Tomcat will add on start up
-				Set<ServletContainerInitializer> initializersKeys = new HashSet<>(initializers.keySet());
-				for (ServletContainerInitializer initializer : initializersKeys) {
-					if (initializer.getClass().getPackage().getName().startsWith("org.apache.tomcat")) {
-						initializers.remove(initializer);
-					}
-				}
-
-			} catch (Exception ex) {
-				throw new WebServerException("Failed to remove Spring context", ex);
-			}
-		}
 
 		/*
 		 * ================== TomcatServletWebServerFactory ====================
@@ -162,14 +133,36 @@ public class WebMvcSpringSupplierExtension implements SpringSupplierExtensionSer
 			Context context = servletManager.getContext();
 
 			// Configure the context
-			ServletContextInitializer[] initializersToUse = this.mergeInitializers(initializers);
-			this.configureContext(context, initializersToUse);
+			this.configureContext(context, Arrays.asList(initializers));
 			this.postProcessContext(context);
 
-			// Remove Tomcat initializers, as loaded by Tomcat
-			this.removeTomcatInitializers(context);
+			// OfficeFloor uses StandardContext (via Tomcat.addWebapp()) which includes
+			// ContextConfig. ContextConfig scans the classpath via service loader and adds
+			// third-party SCIs (e.g., SpringServletContainerInitializer from spring-web, which
+			// causes jersey-spring's SpringWebApplicationInitializer to add ContextLoaderListener).
+			// Spring Boot normally avoids this by using TomcatEmbeddedContext (which skips
+			// ContextConfig service-loader scanning). We replicate that behaviour here by adding a
+			// lifecycle listener that, after ContextConfig runs during CONFIGURE_START_EVENT, removes
+			// all service-loaded SCIs — keeping only DeferredServletContainerInitializers.
+			context.addLifecycleListener(event -> {
+				if (Lifecycle.CONFIGURE_START_EVENT.equals(event.getType())
+						&& event.getLifecycle() instanceof StandardContext ctx) {
+					try {
+						Field initializersField = StandardContext.class.getDeclaredField("initializers");
+						initializersField.setAccessible(true);
+						@SuppressWarnings("unchecked")
+						Map<ServletContainerInitializer, Set<Class<?>>> initializerMap = (Map<ServletContainerInitializer, Set<Class<?>>>) initializersField
+								.get(ctx);
+						initializerMap.keySet()
+								.removeIf(sci -> !sci.getClass().getName().equals(
+										"org.springframework.boot.tomcat.servlet.DeferredServletContainerInitializers"));
+					} catch (Exception ex) {
+						throw new WebServerException("Failed to remove service-loaded SCIs", ex);
+					}
+				}
+			});
 
-			// Ensure start servlet container
+			// Start servlet container (sets servlet context before bean initialization)
 			try {
 				AvailableType[] types = availableTypes.get();
 				ServletSupplierSource.forceStartServletContainer(types);

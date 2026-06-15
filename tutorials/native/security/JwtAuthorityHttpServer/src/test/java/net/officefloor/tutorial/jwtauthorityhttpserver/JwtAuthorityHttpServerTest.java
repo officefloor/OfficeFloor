@@ -18,11 +18,6 @@ import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
 import net.officefloor.woof.mock.MockWoofServerExtension;
 
-/**
- * Tests the JWT Authority HTTP Server.
- * 
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: tutorial
 public class JwtAuthorityHttpServerTest {
 

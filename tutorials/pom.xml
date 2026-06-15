@@ -24,7 +24,6 @@
 	</modules>
 	<properties>
 		<maven.deploy.skip>true</maven.deploy.skip>
-		<skipPublishing>true</skipPublishing>
 	</properties>
 	<build>
 		<plugins>
@@ -49,23 +48,12 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>org.sonatype.central</groupId>
-				<artifactId>central-publishing-maven-plugin</artifactId>
+				<!-- Do not generate JavaDoc for tutorials. Tutorial code is explained by tutorial content. -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
 				<configuration>
-					<skipPublishing>true</skipPublishing>
+					<skip>true</skip>
 				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>com.github.github</groupId>
-				<artifactId>site-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>github-repository</id>
-						<configuration>
-							<skip>true</skip>
-						</configuration>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
 	</build>
@@ -86,4 +74,56 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+	<profiles>
+		<profile>
+			<!-- Ensure tutorials are excluded when releasing to Maven Central -->
+			<id>release-to-maven-central</id>
+			<activation>
+				<property>
+					<name>officefloor-deploy</name>
+					<value>sonatype</value>
+				</property>
+			</activation>
+			<properties>
+				<!-- Exclude own artifact from staging: skipPublishing is checked after staging -->
+				<excludeArtifacts>${project.artifactId}</excludeArtifacts>
+			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<!-- Do not publish tutorials to Maven Central -->
+						<groupId>org.sonatype.central</groupId>
+						<artifactId>central-publishing-maven-plugin</artifactId>
+						<configuration>
+							<skipPublishing>true</skipPublishing>
+						</configuration>
+					</plugin>
+					<plugin>
+						<!-- Do not create source JARs for tutorials during release -->
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-source-plugin</artifactId>
+						<configuration>
+							<skipSource>true</skipSource>
+						</configuration>
+					</plugin>
+					<plugin>
+						<!-- Do not generate JavaDoc for tutorials during release -->
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<configuration>
+							<skip>true</skip>
+						</configuration>
+					</plugin>
+					<plugin>
+						<!-- Do not GPG sign tutorial artifacts during release -->
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<configuration>
+							<skip>true</skip>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>

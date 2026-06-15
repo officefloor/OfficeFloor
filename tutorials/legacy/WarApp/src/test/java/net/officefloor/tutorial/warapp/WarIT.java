@@ -9,11 +9,6 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.junit.Test;
 
-/**
- * Ensure {@link SimpleServlet} loaded via WAR.
- * 
- * @author Daniel Sagenschneider
- */
 public class WarIT {
 
 	@Test

@@ -22,18 +22,10 @@ import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
 import net.officefloor.woof.mock.MockWoofServerExtension;
 
-/**
- * Tests the {@link DatabaseHttpServer}.
- * 
- * @author Daniel Sagenschneider
- */
 public class DatabaseHttpServerTest {
 
 	public final @RegisterExtension FlywayEnableCleanExtension enableClean = new FlywayEnableCleanExtension();
 
-	/**
-	 * Run application.
-	 */
 	public static void main(String[] args) throws Exception {
 
 		// Keep database alive by keeping connection
@@ -49,9 +41,6 @@ public class DatabaseHttpServerTest {
 		flyway.migrate();
 	}
 
-	/**
-	 * Ensure able to connect to database with {@link DataSource}.
-	 */
 	@Test
 	public void testConnection(DataSource dataSource) throws Exception {
 		try (Connection connection = dataSource.getConnection()) {

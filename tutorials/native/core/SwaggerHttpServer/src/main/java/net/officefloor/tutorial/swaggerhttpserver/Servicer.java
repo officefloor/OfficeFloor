@@ -6,11 +6,6 @@ import net.officefloor.web.ObjectResponse;
 import net.officefloor.web.security.HttpAccess;
 import net.officefloor.web.security.HttpAccessControl;
 
-/**
- * Servicer.
- * 
- * @author Daniel Sagenschneider
- */
 public class Servicer {
 
 	public void get(@HttpQueryParameter("parameter") String parameter, ObjectResponse<Response> response) {

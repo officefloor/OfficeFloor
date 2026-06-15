@@ -5,14 +5,8 @@ import java.io.IOException;
 import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.tutorial.servlethttpserver.InjectedDependency;
-import net.officefloor.tutorial.servlethttpserver.TutorialFilter;
 import net.officefloor.web.HttpQueryParameter;
 
-/**
- * Migrated {@link TutorialFilter} to OfficeFloor.
- * 
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: tutorial
 public class MigratedFilter {
 

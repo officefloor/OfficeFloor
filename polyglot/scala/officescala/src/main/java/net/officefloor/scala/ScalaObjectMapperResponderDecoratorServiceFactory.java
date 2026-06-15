@@ -20,8 +20,8 @@
 
 package net.officefloor.scala;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.module.scala.DefaultScalaModule;
+import tools.jackson.databind.cfg.MapperBuilder;
+import tools.jackson.module.scala.DefaultScalaModule;
 
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.web.json.ObjectMapperResponderDecorator;
@@ -49,8 +49,8 @@ public class ScalaObjectMapperResponderDecoratorServiceFactory
 	 */
 
 	@Override
-	public void decorateObjectMapper(ObjectMapper mapper) throws Exception {
-		mapper.registerModule(new DefaultScalaModule());
+	public void decorateObjectMapper(MapperBuilder<?, ?> builder) throws Exception {
+		builder.addModule(new DefaultScalaModule());
 	}
 
 }

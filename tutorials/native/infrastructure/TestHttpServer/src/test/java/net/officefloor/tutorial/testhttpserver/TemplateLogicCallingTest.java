@@ -13,11 +13,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import net.officefloor.server.http.HttpClientExtension;
 import net.officefloor.test.OfficeFloorExtension;
 
-/**
- * Tests the {@link TemplateLogic}.
- * 
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: full-system
 @ExtendWith(OfficeFloorExtension.class)
 public class TemplateLogicCallingTest {

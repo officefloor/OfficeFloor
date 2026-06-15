@@ -1,6 +1,5 @@
 package net.officefloor.tutorial.flywayhttpserver;
 
-import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -10,11 +9,6 @@ import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
 import net.officefloor.woof.mock.MockWoofServerExtension;
 
-/**
- * Tests the {@link Flyway} HTTP server.
- * 
- * @author Daniel Sagenschneider
- */
 public class FlywayHttpServerTest {
 
 	// START SNIPPET: reset

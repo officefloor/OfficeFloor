@@ -15,11 +15,6 @@ import net.officefloor.server.http.HttpClientExtension;
 import net.officefloor.test.OfficeFloorExtension;
 import net.officefloor.test.system.EnvironmentExtension;
 
-/**
- * Tests with environment property.
- * 
- * @author Daniel Sagenschneider
- */
 public class EnvironmentPropertyTest {
 
 	// START SNIPPET: tutorial

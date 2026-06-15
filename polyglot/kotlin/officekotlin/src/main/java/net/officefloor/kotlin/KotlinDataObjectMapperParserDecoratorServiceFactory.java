@@ -20,8 +20,8 @@
 
 package net.officefloor.kotlin;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.module.kotlin.KotlinModule;
+import tools.jackson.databind.cfg.MapperBuilder;
+import tools.jackson.module.kotlin.KotlinModule;
 
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.web.json.ObjectMapperParserDecorator;
@@ -49,8 +49,8 @@ public class KotlinDataObjectMapperParserDecoratorServiceFactory
 	 */
 
 	@Override
-	public void decorateObjectMapper(ObjectMapper mapper) throws Exception {
-		mapper.registerModule(new KotlinModule());
+	public void decorateObjectMapper(MapperBuilder<?, ?> builder) throws Exception {
+		builder.addModule(new KotlinModule.Builder().build());
 	}
 
 }

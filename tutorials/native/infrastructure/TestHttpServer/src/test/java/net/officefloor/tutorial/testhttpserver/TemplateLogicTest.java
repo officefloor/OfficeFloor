@@ -14,16 +14,8 @@ import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.tutorial.testhttpserver.TemplateLogic.Parameters;
 import net.officefloor.woof.mock.MockWoofServerExtension;
 
-/**
- * Tests the {@link TemplateLogic}.
- * 
- * @author Daniel Sagenschneider
- */
 public class TemplateLogicTest {
 
-	/**
-	 * Main to run for manual testing.
-	 */
 	public static void main(String[] args) throws Exception {
 		OfficeFloorMain.main(args);
 	}

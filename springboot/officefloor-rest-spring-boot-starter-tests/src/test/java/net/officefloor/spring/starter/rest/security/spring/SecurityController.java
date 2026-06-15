@@ -91,4 +91,37 @@ public class SecurityController {
         return "Accessed";
     }
 
+    @GetMapping("/authorize")
+    @ResponseBody
+    @PreAuthorize("hasRole('ACCESS')")
+    public String authorize() {
+        return "Accessed";
+    }
+
+    @GetMapping("/authorized/child")
+    @ResponseBody
+    @PreAuthorize("hasRole('ACCESS')")
+    public String authorizedChild() {
+        return "Accessed";
+    }
+
+    @GetMapping("/authorized/override")
+    @ResponseBody
+    @PreAuthorize("hasRole('ADMIN')")
+    public String authorizedOverride() {
+        return "Accessed";
+    }
+
+    @GetMapping("/authorized/open")
+    @ResponseBody
+    public String authorizedOpen() {
+        return "Accessed";
+    }
+
+    @GetMapping("/authorized/open/child")
+    @ResponseBody
+    public String authorizedOpenChild() {
+        return "Accessed";
+    }
+
 }

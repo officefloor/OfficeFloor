@@ -1,13 +1,7 @@
 package net.officefloor.tutorial.jaxrsapp;
 
-import org.glassfish.jersey.internal.inject.AbstractBinder;
-import org.glassfish.jersey.internal.inject.Binder;
+import org.glassfish.hk2.utilities.binding.AbstractBinder;
 
-/**
- * JAX-RS {@link Binder}.
- * 
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: tutorial
 public class JaxRsBinder extends AbstractBinder {
 

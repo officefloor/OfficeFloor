@@ -14,11 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import reactor.core.publisher.Mono;
 
-/**
- * Flux {@link RestController}.
- * 
- * @author Daniel Sagenschneider
- */
 @RestController
 @RequestMapping("/complex")
 public class FluxController {

@@ -15,11 +15,6 @@ import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
 import net.officefloor.woof.mock.MockWoofServerExtension;
 
-/**
- * Tests integration with WAR.
- * 
- * @author Daniel Sagenschneider
- */
 public class WarHttpServerTest {
 
 	// START SNIPPET: tutorial
