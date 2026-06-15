@@ -53,6 +53,7 @@
 		<asm-version>9.6</asm-version>
 		<compiler-version>3.12.1</compiler-version>
 		<current.year>2026</current.year>
+		<google.analytics.id>G-RRNCKP6QJB</google.analytics.id>
 		<failsafe-version>3.2.3</failsafe-version>
 		<java-lowest-version>17</java-lowest-version>
 		<jetty-version>11.0.16</jetty-version>
@@ -522,6 +523,11 @@
 									file="${project.build.directory}/site/index.html">
 									<replacetoken>@VERSION</replacetoken>
 									<replacevalue>${revision}</replacevalue>
+								</replace>
+								<replace
+									file="${project.build.directory}/site/index.html">
+									<replacetoken>@GOOGLE_ANALYTICS_ID</replacetoken>
+									<replacevalue>${google.analytics.id}</replacevalue>
 								</replace>
 
 								<!-- GitHub Ribbon on main page -->

@@ -68,6 +68,7 @@ public class EscalationEmployer {
         };
     }
 
+    /** {@link ComposeSource} for {@link OfficeEscalation}. */
     protected static class EscalationComposeSource implements ComposeSource<OfficeEscalation, ComposeConfiguration> {
 
         @Override

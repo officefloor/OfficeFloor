@@ -51,4 +51,18 @@ public class OfficeFloorEscalationTest extends AbstractMockMvcVerification {
                 .andExpect(status().isOk())
                 .andExpect(content().string(equalTo("UNCHECKED: UNCHECKED")));
     }
+
+    @Test
+    public void httpExceptionStatusAndEntityAreReturnedToClient() throws Exception {
+        this.mvc.perform(get(this.getPath("/http-exception")))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(equalTo("Invalid input")));
+    }
+
+    @Test
+    public void httpExceptionWithNoEntityReturnsStatusOnly() throws Exception {
+        this.mvc.perform(get(this.getPath("/http-exception-no-entity")))
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().string(equalTo("")));
+    }
 }
