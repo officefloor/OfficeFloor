@@ -26,6 +26,7 @@ import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
 import net.officefloor.plugin.section.clazz.MethodParameterAnnotation;
 import net.officefloor.server.http.DateHttpHeaderClock;
 import net.officefloor.server.http.HttpException;
+import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpResponseWriter;
@@ -317,6 +318,21 @@ public class SpringServerHttpConnection extends ProcessAwareServerHttpConnection
 
             // Determine if failure
             if (this.responseFailure != null) {
+
+                // Handle OfficeFloor exception
+                if (this.responseFailure instanceof HttpException httpException) {
+                    this.response.setStatus(httpException.getHttpStatus().getStatusCode());
+                    for (HttpHeader header : httpException.getHttpHeaders()) {
+                        this.response.addHeader(header.getName(), header.getValue());
+                    }
+                    String entity = httpException.getEntity();
+                    if (entity != null) {
+                        this.response.getWriter().write(entity);
+                    }
+                    return;
+                }
+
+                // Propagate failure for Spring handling
                 throw this.responseFailure;
             }
 
