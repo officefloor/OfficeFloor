@@ -40,9 +40,7 @@ public class HttpServletResponseManagedObjectSource extends AbstractManagedObjec
      */
     public static enum DependencyKeys {
         /** Server HTTP connection dependency. */
-        SERVER_HTTP_CONNECTION,
-        /** HTTP external response dependency. */
-        HTTP_EXTERNAL_RESPONSE
+        SERVER_HTTP_CONNECTION
     }
 
     /*
@@ -59,7 +57,6 @@ public class HttpServletResponseManagedObjectSource extends AbstractManagedObjec
         context.setObjectClass(HttpServletResponse.class);
         context.setManagedObjectClass(HttpServletResponseManagedObject.class);
         context.addDependency(DependencyKeys.SERVER_HTTP_CONNECTION, ServerHttpConnection.class);
-        context.addDependency(DependencyKeys.HTTP_EXTERNAL_RESPONSE, HttpExternalResponse.class);
     }
 
     @Override
@@ -77,11 +74,6 @@ public class HttpServletResponseManagedObjectSource extends AbstractManagedObjec
          */
         private SpringServerHttpConnection connection;
 
-        /**
-         * {@link HttpExternalResponse}.
-         */
-        private HttpExternalResponse externalResponse;
-
         /*
          * =============== ManagedObject ================
          */
@@ -89,14 +81,13 @@ public class HttpServletResponseManagedObjectSource extends AbstractManagedObjec
         @Override
         public void loadObjects(ObjectRegistry<DependencyKeys> registry) throws Throwable {
             this.connection = (SpringServerHttpConnection) registry.getObject(DependencyKeys.SERVER_HTTP_CONNECTION);
-            this.externalResponse = (HttpExternalResponse) registry.getObject(DependencyKeys.HTTP_EXTERNAL_RESPONSE);
         }
 
         @Override
         public Object getObject() throws Throwable {
 
-            // Using the HTTP Servlet Response, so external send
-            this.externalResponse.externalSend();
+            // Flag that manually handling response
+            this.connection.flagManuallyHandle();
 
             // Provide Http Servlet Response
             return this.connection.getHttpServletResponse();
