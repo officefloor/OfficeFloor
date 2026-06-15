@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,6 +20,7 @@
 
 package net.officefloor.spring.starter.rest;
 
+import net.officefloor.spring.starter.rest.response.SpringExceptionHandler;
 import tools.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Paths;
@@ -53,6 +54,8 @@ public class OfficeFloorRestSpringBootStarter {
     private final List<OfficeFloorRestEndpoint> restEndpoints = new LinkedList<>();
 
     private final OpenAPI openApi = new OpenAPI();
+
+    private final List<SpringExceptionHandler> exceptionHandlers = new LinkedList<>();
 
     private HttpServletOfficeFloorBridge bridge;
 
@@ -116,7 +119,7 @@ public class OfficeFloorRestSpringBootStarter {
                 // Compile the OfficeFloor
                 OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
                 compiler.setOfficeFloorSource(new SpringBootOfficeFloorSource(this.mapper, this.restEndpoints,
-                        this.applicationContext, this.openApi));
+                        this.applicationContext, this.openApi, this.exceptionHandlers));
                 Map<String, String> sourceProperties = this.properties.getConfig();
                 if (sourceProperties != null) {
                     sourceProperties.forEach(compiler::addProperty);
@@ -152,6 +155,15 @@ public class OfficeFloorRestSpringBootStarter {
      */
     public OpenAPI getOpenApi() {
         return this.openApi;
+    }
+
+    /**
+     * Obtains the {@link SpringExceptionHandler} instances.
+     *
+     * @return {@link SpringExceptionHandler} instances.
+     */
+    public List<SpringExceptionHandler> getSpringExceptionHandlers() {
+        return this.exceptionHandlers;
     }
 
 }

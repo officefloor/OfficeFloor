@@ -20,6 +20,7 @@
 
 package net.officefloor.spring.starter.rest;
 
+import net.officefloor.spring.starter.rest.response.SpringExceptionHandler;
 import tools.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.models.OpenAPI;
 import net.officefloor.activity.team.build.TeamDeployer;
@@ -49,20 +50,25 @@ public class SpringBootOfficeFloorSource extends AbstractOfficeFloorSource {
 
     private final OpenAPI openApi;
 
+    private final List<SpringExceptionHandler> exceptionHandlers;
+
     /**
      * @param objectMapper       {@link ObjectMapper}.
      * @param restEndpoints      REST endpoints.
      * @param applicationContext {@link ConfigurableApplicationContext}.
      * @param openApi            {@link OpenAPI}.
+     * @param exceptionHandlers {@link SpringExceptionHandler} instances.
      */
     public SpringBootOfficeFloorSource(ObjectMapper objectMapper,
                                        List<OfficeFloorRestEndpoint> restEndpoints,
                                        ConfigurableApplicationContext applicationContext,
-                                       OpenAPI openApi) {
+                                       OpenAPI openApi,
+                                       List<SpringExceptionHandler> exceptionHandlers) {
         this.objectMapper = objectMapper;
         this.restEndpoints = restEndpoints;
         this.applicationContext = applicationContext;
         this.openApi = openApi;
+        this.exceptionHandlers = exceptionHandlers;
     }
 
     /*
@@ -89,7 +95,8 @@ public class SpringBootOfficeFloorSource extends AbstractOfficeFloorSource {
         // Configure web handling
         DeployedOffice deployedOffice = officeFloorDeployer.addDeployedOffice(
                 ApplicationOfficeFloorSource.OFFICE_NAME,
-                new SpringBootOfficeSource(this.objectMapper, this.restEndpoints, this.applicationContext, this.openApi),
+                new SpringBootOfficeSource(this.objectMapper, this.restEndpoints, this.applicationContext,
+                        this.openApi, this.exceptionHandlers),
                 "spring");
         for (String propertyName : officeFloorSourceContext.getPropertyNames()) {
             deployedOffice.addProperty(propertyName, officeFloorSourceContext.getProperty(propertyName));

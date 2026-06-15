@@ -35,15 +35,12 @@ import org.springframework.web.servlet.ModelAndView;
 /**
  * {@link net.officefloor.frame.api.managedobject.source.ManagedObjectSource} for the {@link ViewResponse}.
  */
-/** {@link AbstractManagedObjectSource} for view responses. */
 public class ViewResponseManagedObjectSource extends AbstractManagedObjectSource<ViewResponseManagedObjectSource.DependencyKeys, None> {
 
     /** Dependency keys. */
     public static enum DependencyKeys {
         /** Server HTTP connection. */
-        SERVER_HTTP_CONNECTION,
-        /** HTTP external response. */
-        HTTP_EXTERNAL_RESPONSE
+        SERVER_HTTP_CONNECTION
     }
 
     /*
@@ -60,7 +57,6 @@ public class ViewResponseManagedObjectSource extends AbstractManagedObjectSource
         context.setObjectClass(ViewResponse.class);
         context.setManagedObjectClass(ViewResponseManagedObject.class);
         context.addDependency(DependencyKeys.SERVER_HTTP_CONNECTION, ServerHttpConnection.class);
-        context.addDependency(DependencyKeys.HTTP_EXTERNAL_RESPONSE, HttpExternalResponse.class);
     }
 
     @Override
@@ -75,8 +71,6 @@ public class ViewResponseManagedObjectSource extends AbstractManagedObjectSource
 
         private SpringServerHttpConnection connection;
 
-        private HttpExternalResponse externalResponse;
-
         /*
          * ===================== ManagedObject ===================
          */
@@ -84,30 +78,18 @@ public class ViewResponseManagedObjectSource extends AbstractManagedObjectSource
         @Override
         public void loadObjects(ObjectRegistry<DependencyKeys> registry) throws Throwable {
             this.connection = (SpringServerHttpConnection) registry.getObject(DependencyKeys.SERVER_HTTP_CONNECTION);
-            this.externalResponse = (HttpExternalResponse) registry.getObject(DependencyKeys.HTTP_EXTERNAL_RESPONSE);
         }
 
         @Override
         public Object getObject() throws Throwable {
-
-            // Obtain the bridge to render result
-            ModelAndViewBridge renderBridge = this.connection.getRenderModelAndViewBridge();
 
             // Return the view response
             return new ViewResponse() {
                 @Override
                 public void send(String view) {
 
-                    // Send the response
-                    try {
-                        ModelAndView modelAndView = renderBridge.getModelAndView(view);
-                        renderBridge.processDispatchResult(modelAndView, null);
-                    } catch (Exception ex) {
-                        throw new HttpException(ex);
-                    }
-
-                    // Flag that externally handled
-                    ViewResponseManagedObject.this.externalResponse.externalSend();
+                    // Send view response
+                    ViewResponseManagedObject.this.connection.setResponse(null, null, view, null);
                 }
             };
         }

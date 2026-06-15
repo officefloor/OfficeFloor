@@ -87,7 +87,7 @@ public class OfficeFloorWebMvcConfigurer implements WebMvcConfigurer {
                 registry.addInterceptor(
                                 new OfficeFloorHandlerInterceptor(this.starter.getBridge(), endpoint,
                                         this.handlerAdapterProvider, this.dispatcherServletProvider,
-                                        this.applicationContextProvider))
+                                        this.applicationContextProvider, this.starter.getSpringExceptionHandlers()))
                         .addPathPatterns(endpoint.getPath());
             }
 
