@@ -22,6 +22,9 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 http://maven.apache.org/xsd/changes-1.0.0.xsd">
 	<body>
+		<release version="4.0.2" date="2026-06-18" description="Spring delayed repsonse to match Spring Boot Architecture">
+			<action type="add" dev="sagenschneider">Spring delayed repsonse to match Spring Boot Architecture</action>
+		</release>
 		<release version="4.0.1" date="2026-06-12" description="Spring Boot 4">
 			<action type="add" dev="sagenschneider">Spring Boot 4</action>
 		</release>

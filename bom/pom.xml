@@ -45,7 +45,7 @@
 		<module>stage-sonatype</module>
 	</modules>
 	<properties>
-		<revision>4.0.1</revision>
+		<revision>4.0.2</revision>
 		<annotation-version>2.1.1</annotation-version>
 		<ant-version>1.10.17</ant-version>
 		<antrun-version>3.2.0</antrun-version>
