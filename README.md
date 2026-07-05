@@ -51,15 +51,20 @@ This makes endpoints reliable targets for AI coding tools: the full structure is
 
 ## Progressive adoption
 
-Add a single dependency to your existing Spring Boot `pom.xml`:
+Add a single dependency to your existing Spring Boot `pom.xml`, choosing the starter that matches your Spring Boot generation:
 
 ```xml
+<!-- Spring Boot 4.x -->
 <dependency>
   <groupId>net.officefloor.springboot</groupId>
-  <artifactId>officefloor-rest-spring-boot-starter</artifactId>
+  <artifactId>officefloor-rest-spring-boot-4-starter</artifactId>
   <version>4.0.2</version>
 </dependency>
+
+<!-- Spring Boot 3.x: use officefloor-rest-spring-boot-3-starter instead -->
 ```
+
+Add only the starter matching your Spring Boot generation — mixing versions causes runtime binary incompatibilities.
 
 Spring's dependency injection, security, persistence, and actuator configuration remain completely intact. OfficeFloor enriches Spring, it does not replace it. You can start declaring endpoints as YAML files alongside your existing `@RestController` classes and migrate incrementally.
 

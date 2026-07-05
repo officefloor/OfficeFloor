@@ -48,12 +48,14 @@ all readable without opening a single Java file.
 
 ## Progressive adoption — it enriches Spring, it does not replace it
 
-Add a single dependency to your existing Spring Boot `pom.xml`:
+Add a single dependency to your existing Spring Boot `pom.xml` — choose the starter that
+matches your Spring Boot generation (see [Version-specific starters](#version-specific-starters)
+below). For a Spring Boot 4.x application:
 
 ```xml
 <dependency>
   <groupId>net.officefloor.springboot</groupId>
-  <artifactId>officefloor-rest-spring-boot-starter</artifactId>
+  <artifactId>officefloor-rest-spring-boot-4-starter</artifactId>
   <version>4.0.2</version>
 </dependency>
 ```

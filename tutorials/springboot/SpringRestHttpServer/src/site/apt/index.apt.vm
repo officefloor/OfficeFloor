@@ -54,7 +54,7 @@ Spring REST HTTP Server Tutorial
 
 %{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
 
-  The <<<officefloor-rest-spring-boot-starter>>> auto-configures OfficeFloor into the Spring MVC pipeline.  On start-up it scans the classpath for YAML files under <<<officefloor/rest/>>> and registers each one as a {{{/apidocs/net/officefloor/spring/starter/rest/OfficeFloorHandlerInterceptor.html}HandlerInterceptor}} for the corresponding HTTP method and URL path.  No additional Java or XML configuration is needed.
+  The <<<officefloor-rest-spring-boot-4-starter>>> auto-configures OfficeFloor into the Spring MVC pipeline.  On start-up it scans the classpath for YAML files under <<<officefloor/rest/>>> and registers each one as a {{{/apidocs/net/officefloor/spring/starter/rest/OfficeFloorHandlerInterceptor.html}HandlerInterceptor}} for the corresponding HTTP method and URL path.  No additional Java or XML configuration is needed.
 
 
 
