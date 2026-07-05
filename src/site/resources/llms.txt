@@ -1,0 +1,36 @@
+# OfficeFloor
+
+> OfficeFloor is a Spring Boot add-on that adds explicit, AI-friendly YAML orchestration to Spring Boot REST. Each endpoint is a single YAML file declaring its function steps, their order, and how their outputs connect — so the whole endpoint is readable (and generatable) from one file rather than implicit across annotations and Spring's call stack. Spring's dependency injection, security, persistence, and actuator config remain intact; OfficeFloor enriches Spring, it does not replace it.
+
+Key facts for reasoning about OfficeFloor:
+
+- A REST endpoint is a YAML file under `src/main/resources/officefloor/rest/`. The file name encodes method and path as `{path}.{METHOD}.yml` (e.g. `greeting.GET.yml` → `GET /greeting`); directory nesting becomes path segments; `{curly}` segments become path variables.
+- Each top-level entry in the file is a developer-named step declaring a handler via `class:`. The first entry is the entry point. Steps chain via `next:` (unconditional) or an `outputs:` map (conditional branches). Exceptions route via `escalations:`.
+- Handler classes are plain Java — no `@RestController`/`@RequestMapping`. Dependencies inject by type from Spring beans; responses use `ObjectResponse<T>`.
+- Add ONE dependency, matching your Spring Boot generation: `officefloor-rest-spring-boot-4-starter` (Spring Boot 4.x) or `officefloor-rest-spring-boot-3-starter` (Spring Boot 3.x). Never the bare `officefloor-rest-spring-boot-starter` (a shared-source parent, not consumable). Do not mix versions.
+
+## Documentation
+
+- [Getting started](https://raw.githubusercontent.com/officefloor/OfficeFloor/master/docs/getting-started.md): One dependency and one YAML file, from zero to a running endpoint.
+- [Spring Boot plugin overview](https://raw.githubusercontent.com/officefloor/OfficeFloor/master/docs/spring-boot-plugin.md): What the plugin adds to Spring, progressive adoption, and the version-specific starters.
+- [YAML endpoint configuration](https://raw.githubusercontent.com/officefloor/OfficeFloor/master/docs/yaml-endpoint-configuration.md): Full reference for the YAML endpoint file — naming, steps, `next:`/`outputs:`, escalations, governance.
+- [Spring integration](https://raw.githubusercontent.com/officefloor/OfficeFloor/master/docs/spring-integration.md): How handler classes use Spring beans, MVC annotations, security, persistence, and actuator.
+
+## Tutorials
+
+- [Tutorial series (website)](https://officefloor.net/tutorials/index.html): Full narrated series; each tutorial is a complete runnable Spring Boot project.
+- [Tutorial index (markdown)](https://raw.githubusercontent.com/officefloor/OfficeFloor/master/docs/tutorials.md): Categorised list linking each tutorial's runnable source.
+- [Getting Started tutorial](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestGettingStartedHttpServer): Minimal end-to-end example.
+- [Spring REST conversion reference](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestConversionReference): Mechanical substitutions to convert a `@RestController` into YAML composition.
+
+## Reference
+
+- [GitHub repository](https://github.com/officefloor/OfficeFloor): Source, issues, and all tutorial projects.
+- [Maven Central](https://search.maven.org/search?q=g:net.officefloor.springboot): Published starter artifacts.
+- [Website](https://officefloor.net): Project home.
+
+## Optional
+
+- [Inversion of Coupling Control (paper)](http://doi.acm.org/10.1145/2739011.2739013): The paradigm behind OfficeFloor — Continuation, Thread, and Dependency Injection as separate concerns.
+- [Introductory blog post](https://sagenschneider.blogspot.com/2019/02/inversion-of-coupling-control.html): Accessible introduction to Inversion of Coupling Control.
+- [Full documentation as one file](https://officefloor.net/llms-full.txt): README plus all core docs concatenated for ingestion.
