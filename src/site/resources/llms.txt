@@ -13,7 +13,8 @@ Key facts for reasoning about OfficeFloor:
 
 - [Getting started](https://raw.githubusercontent.com/officefloor/OfficeFloor/master/docs/getting-started.md): One dependency and one YAML file, from zero to a running endpoint.
 - [Spring Boot plugin overview](https://raw.githubusercontent.com/officefloor/OfficeFloor/master/docs/spring-boot-plugin.md): What the plugin adds to Spring, progressive adoption, and the version-specific starters.
-- [YAML endpoint configuration](https://raw.githubusercontent.com/officefloor/OfficeFloor/master/docs/yaml-endpoint-configuration.md): Full reference for the YAML endpoint file — naming, steps, `next:`/`outputs:`, escalations, governance.
+- [@RestController vs OfficeFloor YAML](https://raw.githubusercontent.com/officefloor/OfficeFloor/master/docs/comparison.md): The same endpoint written both ways; how the directory layout indexes URL to code, and how the YAML makes an endpoint's flow explicit.
+- [YAML endpoint configuration](https://raw.githubusercontent.com/officefloor/OfficeFloor/master/docs/yaml-endpoint-configuration.md): Full reference for the YAML endpoint file: naming, steps, `next:`/`outputs:`, escalations, governance.
 - [Spring integration](https://raw.githubusercontent.com/officefloor/OfficeFloor/master/docs/spring-integration.md): How handler classes use Spring beans, MVC annotations, security, persistence, and actuator.
 
 ## Tutorials
