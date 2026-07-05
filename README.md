@@ -80,6 +80,11 @@ The underlying paradigm behind OfficeFloor separates three concerns that most fr
 Explicit YAML orchestration is the practical expression of Continuation Injection applied to REST endpoints. Read more in the paper [OfficeFloor: using office patterns to improve software design](http://doi.acm.org/10.1145/2739011.2739013) or the [introductory blog post](https://sagenschneider.blogspot.com/2019/02/inversion-of-coupling-control.html).
 
 
-## Getting started
+## Documentation
 
-See the [tutorial series](http://officefloor.net/tutorials/index.html) for step-by-step guides covering endpoint composition, conditional branching, error flows, Spring integration, and more.
+- [Getting started](docs/getting-started.md): one dependency and one YAML file, from zero to a running endpoint.
+- [Spring Boot plugin overview](docs/spring-boot-plugin.md): what the plugin adds to Spring, progressive adoption, and the version-specific starters.
+- [`@RestController` vs OfficeFloor YAML](docs/comparison.md): the same endpoint written both ways, how the directory layout indexes URL to code, and how the YAML makes an endpoint's flow explicit.
+- [YAML endpoint configuration](docs/yaml-endpoint-configuration.md): full reference for the endpoint file (naming, steps, `next:`/`outputs:`, escalations, governance).
+- [Spring integration](docs/spring-integration.md): how handler classes use Spring beans, MVC annotations, security, persistence, and actuator.
+- [Tutorials](docs/tutorials.md): categorised, runnable examples. The full narrated series is at [officefloor.net/tutorials](http://officefloor.net/tutorials/index.html).
