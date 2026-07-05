@@ -1,0 +1,71 @@
+name: Bug report
+description: Report a problem with OfficeFloor
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug. Please fill in as much as you can —
+        a minimal, reproducible example gets a fix far faster.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the bug, including what you expected instead.
+      placeholder: On start-up, the endpoint at GET /greeting returns 404 instead of the greeting...
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: How can we reproduce it? Include the YAML endpoint file and handler class where relevant.
+      placeholder: |
+        1. Add `src/main/resources/officefloor/rest/greeting.GET.yml` with ...
+        2. Start the application
+        3. Call `GET /greeting`
+    validations:
+      required: true
+  - type: textarea
+    id: yaml
+    attributes:
+      label: Endpoint YAML (if applicable)
+      description: Paste the relevant `officefloor/rest/*.yml` file(s). This will be rendered as code — no backticks needed.
+      render: yaml
+  - type: input
+    id: officefloor-version
+    attributes:
+      label: OfficeFloor version
+      placeholder: e.g. 4.0.2
+    validations:
+      required: true
+  - type: dropdown
+    id: spring-boot-generation
+    attributes:
+      label: Spring Boot generation / starter
+      description: Which version-specific starter are you using?
+      options:
+        - Spring Boot 4.x (officefloor-rest-spring-boot-4-starter)
+        - Spring Boot 3.x (officefloor-rest-spring-boot-3-starter)
+        - Not using the Spring Boot plugin
+        - Other / not sure
+    validations:
+      required: true
+  - type: input
+    id: java-version
+    attributes:
+      label: JDK version
+      placeholder: e.g. Temurin 17.0.11
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: e.g. Ubuntu 24.04, Windows 11, macOS 14
+  - type: textarea
+    id: logs
+    attributes:
+      label: Stack trace / logs
+      description: Any relevant stack trace or log output.
+      render: shell
