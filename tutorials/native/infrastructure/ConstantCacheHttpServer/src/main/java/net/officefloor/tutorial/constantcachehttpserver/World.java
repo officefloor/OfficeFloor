@@ -7,14 +7,8 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import net.officefloor.cache.Cache;
 import net.officefloor.plugin.clazz.Qualifier;
 
-/**
- * Identifies the World {@link Cache}.
- * 
- * @author Daniel Sagenschneider
- */
 @Documented
 @Retention(RUNTIME)
 @Target(PARAMETER)

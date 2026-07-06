@@ -16,11 +16,6 @@ import net.officefloor.test.OfficeFloorRule;
 import net.officefloor.test.system.SystemPropertiesRule;
 import net.officefloor.woof.WoOF;
 
-/**
- * Tests with system profile.
- * 
- * @author Daniel Sagenschneider
- */
 public class SystemProfileJUnit4Test {
 
 	// START SNIPPET: tutorial

@@ -51,12 +51,19 @@ OfficeFloor Tutorials
   Your Spring beans, security, persistence, and all other Spring configuration remain unchanged.
   OfficeFloor simply takes over the declaration of REST endpoints via YAML files.
 
+  The starter is published to Maven Central, so no additional repository configuration is needed.
+  Add the single dependency to your <<<pom.xml>>> and Maven downloads it automatically.
+
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 || Tutorial                                                    || Description                                               || Covered
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./springboot/SpringRestHttpServer/index.html}Spring REST}} | Declare REST endpoints as YAML configuration files within a Spring Boot application. Spring beans are injected into service methods automatically. | OfficeFloor REST Spring Boot Starter\
-|                                                              |                                                            | REST YAML composition\
-|                                                              |                                                            | Function injection basics
+| {{{./springboot/SpringRestGettingStartedHttpServer/index.html}Getting Started}} | Add the single starter dependency, write one YAML file, and serve your first REST endpoint. No controllers, no annotations. | OfficeFloor REST Spring Boot Starter\
+|                                                              |                                                            | YAML endpoint basics\
+|                                                              |                                                            | Spring bean injection
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./springboot/SpringRestHttpServer/index.html}Spring REST}} | YAML naming conventions, multi-method service classes, multiple path variables, and custom response headers via ResponseEntity. | YAML naming conventions\
+|                                                              |                                                            | method: for multi-method classes\
+|                                                              |                                                            | ResponseEntity
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./springboot/SpringRestSpringBoot3HttpServer/index.html}Spring Boot 3}} | Add OfficeFloor REST to an existing Spring Boot 3 application using the version-specific starter. Explains which starter to choose for SB3 vs SB4 and how to migrate between them. | officefloor-rest-spring-boot-3-starter\
 |                                                              |                                                            | Starter version selection
@@ -100,7 +107,7 @@ OfficeFloor Tutorials
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 
 
-* Beyond Spring MVC — Additional OfficeFloor Capabilities
+* Beyond Spring MVC: Additional OfficeFloor Capabilities
 
   The following tutorials cover capabilities that OfficeFloor provides over and above what Spring MVC
   offers.  Thread injection assigns dedicated thread pools to pipeline steps so that socket threads
@@ -119,11 +126,11 @@ OfficeFloor Tutorials
 |                                                              |                                                            | ManagedObjectSource flows\
 |                                                              |                                                            | PROCESS / THREAD / FUNCTION scope
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./springboot/SpringRestSupplierHttpServer/index.html}Supplier}} | Register a library of related managed objects from a single YAML declaration. A SupplierSource holds shared state (connections, queues, DI containers) and vends it through multiple typed wrappers — ideal for third-party library integration. | officefloor/suppliers/\
+| {{{./springboot/SpringRestSupplierHttpServer/index.html}Supplier}} | Register a library of related managed objects from a single YAML declaration. A SupplierSource holds shared state (connections, queues, DI containers) and vends it through multiple typed wrappers, ideal for third-party library integration. | officefloor/suppliers/\
 |                                                              |                                                            | SupplierSource\
 |                                                              |                                                            | Library integration
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./springboot/SpringRestGovernanceHttpServer/index.html}Governance}} | Wrap function execution with framework-managed pre/post lifecycle declared in YAML — no annotations on the service class required. Governed objects implement a typed extension interface; OfficeFloor enrolls them automatically. | officefloor/govern/\
+| {{{./springboot/SpringRestGovernanceHttpServer/index.html}Governance}} | Wrap function execution with framework-managed pre/post lifecycle declared in YAML, with no annotations on the service class required. Governed objects implement a typed extension interface; OfficeFloor enrolls them automatically. | officefloor/govern/\
 |                                                              |                                                            | @Govern, @Enforce, @Disregard\
 |                                                              |                                                            | Auto-wire extensions
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
@@ -142,9 +149,3 @@ OfficeFloor Tutorials
 | {{{./springboot/SpringRestZioHttpServer/index.html}ZIO}}        | Integrate ZIO functional effects into OfficeFloor REST composition. | {{{https://zio.dev}ZIO}}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 
-
-* Migration
-
-  If you are interested in a deeper integration, such as hosting Spring beans directly in the
-  OfficeFloor runtime, running without Spring, or deploying to cloud platforms, the
-  {{{./migration.html}Migration Guide}} covers the full journey.

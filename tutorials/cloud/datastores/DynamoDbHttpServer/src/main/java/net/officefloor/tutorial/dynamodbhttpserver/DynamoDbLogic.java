@@ -7,11 +7,6 @@ import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedScanList;
 import net.officefloor.web.HttpPathParameter;
 import net.officefloor.web.ObjectResponse;
 
-/**
- * {@link DynamoDBMapper} logic.
- * 
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: tutorial
 public class DynamoDbLogic {
 

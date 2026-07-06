@@ -4,11 +4,6 @@ import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.tutorial.springwebfluxhttpserver.ResponseModel;
 import net.officefloor.web.ObjectResponse;
 
-/**
- * Sends the {@link ResponseModel}.
- * 
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: tutorial
 public class SendResponse {
 

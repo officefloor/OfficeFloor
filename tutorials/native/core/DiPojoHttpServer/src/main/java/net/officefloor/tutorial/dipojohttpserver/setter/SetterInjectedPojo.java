@@ -3,11 +3,6 @@ package net.officefloor.tutorial.dipojohttpserver.setter;
 import net.officefloor.plugin.clazz.Dependency;
 import net.officefloor.tutorial.dipojohttpserver.Pojo;
 
-/**
- * Provides setter injection.
- * 
- * @author Daniel Sagenshneider
- */
 // START SNIPPET: tutorial
 public class SetterInjectedPojo {
 

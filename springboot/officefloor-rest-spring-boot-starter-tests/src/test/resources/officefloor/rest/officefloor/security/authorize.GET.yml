@@ -1,0 +1,4 @@
+composition:
+  authorize: "hasRole('ACCESS')"
+service:
+  class: ${security.package}.AuthorizeService

@@ -48,18 +48,25 @@ Each function class declares only its own Spring bean dependencies, injected by 
 
 This makes endpoints reliable targets for AI coding tools: the full structure is explicit in one file, so an AI can read, generate, and refactor endpoints from the YAML alone.
 
+Because the architecture is explicit in the code, this needs no AI-specific tooling: no Model Context Protocol (MCP) server or add-on to reconstruct how endpoints are wired. Documentation is enough. Frameworks whose flow is implicit bolt on such tooling to stay legible to AI; OfficeFloor removes the need.
+
 
 ## Progressive adoption
 
-Add a single dependency to your existing Spring Boot `pom.xml`:
+Add a single dependency to your existing Spring Boot `pom.xml`, choosing the starter that matches your Spring Boot generation:
 
 ```xml
+<!-- Spring Boot 4.x -->
 <dependency>
   <groupId>net.officefloor.springboot</groupId>
-  <artifactId>officefloor-rest-spring-boot-starter</artifactId>
-  <version>4.0.0</version>
+  <artifactId>officefloor-rest-spring-boot-4-starter</artifactId>
+  <version>4.0.2</version>
 </dependency>
+
+<!-- Spring Boot 3.x: use officefloor-rest-spring-boot-3-starter instead -->
 ```
+
+Add only the starter matching your Spring Boot generation — mixing versions causes runtime binary incompatibilities.
 
 Spring's dependency injection, security, persistence, and actuator configuration remain completely intact. OfficeFloor enriches Spring, it does not replace it. You can start declaring endpoints as YAML files alongside your existing `@RestController` classes and migrate incrementally.
 
@@ -75,6 +82,11 @@ The underlying paradigm behind OfficeFloor separates three concerns that most fr
 Explicit YAML orchestration is the practical expression of Continuation Injection applied to REST endpoints. Read more in the paper [OfficeFloor: using office patterns to improve software design](http://doi.acm.org/10.1145/2739011.2739013) or the [introductory blog post](https://sagenschneider.blogspot.com/2019/02/inversion-of-coupling-control.html).
 
 
-## Getting started
+## Documentation
 
-See the [tutorial series](http://officefloor.net/tutorials/index.html) for step-by-step guides covering endpoint composition, conditional branching, error flows, Spring integration, and more.
+- [Getting started](docs/getting-started.md): one dependency and one YAML file, from zero to a running endpoint.
+- [Spring Boot plugin overview](docs/spring-boot-plugin.md): what the plugin adds to Spring, progressive adoption, and the version-specific starters.
+- [`@RestController` vs OfficeFloor YAML](docs/comparison.md): the same endpoint written both ways, how the directory layout indexes URL to code, and how the YAML makes an endpoint's flow explicit.
+- [YAML endpoint configuration](docs/yaml-endpoint-configuration.md): full reference for the endpoint file (naming, steps, `next:`/`outputs:`, escalations, governance).
+- [Spring integration](docs/spring-integration.md): how handler classes use Spring beans, MVC annotations, security, persistence, and actuator.
+- [Tutorials](docs/tutorials.md): categorised, runnable examples. The full narrated series is at [officefloor.net/tutorials](http://officefloor.net/tutorials/index.html).

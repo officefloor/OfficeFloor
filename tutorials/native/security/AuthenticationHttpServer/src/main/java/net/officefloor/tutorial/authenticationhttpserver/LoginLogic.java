@@ -8,11 +8,6 @@ import net.officefloor.web.security.HttpAuthentication;
 import net.officefloor.web.security.HttpCredentials;
 import net.officefloor.web.security.scheme.HttpCredentialsImpl;
 
-/**
- * Logic for <code>login</code> page.
- *
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: tutorial
 public class LoginLogic {
 

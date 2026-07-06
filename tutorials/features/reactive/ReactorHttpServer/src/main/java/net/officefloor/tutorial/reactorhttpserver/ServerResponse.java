@@ -4,11 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * Server response.
- * 
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: tutorial
 @Data
 @AllArgsConstructor

@@ -6,11 +6,6 @@ import net.officefloor.web.HttpPathParameter;
 import net.officefloor.web.ObjectResponse;
 import reactor.core.publisher.Mono;
 
-/**
- * R2DBC logic.
- * 
- * @author Daniel Sagenschneider
- */
 public class R2dbcLogic {
 
 	// START SNIPPET: r2dbc

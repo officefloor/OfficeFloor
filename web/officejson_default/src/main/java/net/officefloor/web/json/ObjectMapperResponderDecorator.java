@@ -20,22 +20,22 @@
 
 package net.officefloor.web.json;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.MapperBuilder;
 
 /**
- * Decorates the {@link ObjectMapper} for the
+ * Decorates the {@link tools.jackson.databind.ObjectMapper} for the
  * {@link JacksonHttpObjectResponderFactory}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
 public interface ObjectMapperResponderDecorator {
 
 	/**
-	 * Decorates the {@link ObjectMapper}.
-	 * 
-	 * @param mapper {@link ObjectMapper}.
-	 * @throws Exception If fails to decorate the {@link ObjectMapper}.
+	 * Decorates the {@link tools.jackson.databind.ObjectMapper} builder.
+	 *
+	 * @param builder {@link MapperBuilder}.
+	 * @throws Exception If fails to decorate.
 	 */
-	void decorateObjectMapper(ObjectMapper mapper) throws Exception;
+	void decorateObjectMapper(MapperBuilder<?, ?> builder) throws Exception;
 
 }

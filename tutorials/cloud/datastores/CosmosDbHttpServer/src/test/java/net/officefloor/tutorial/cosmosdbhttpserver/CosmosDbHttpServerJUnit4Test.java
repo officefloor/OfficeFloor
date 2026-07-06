@@ -10,7 +10,6 @@ import org.junit.Test;
 import org.junit.rules.RuleChain;
 
 import com.azure.cosmos.CosmosContainer;
-import com.azure.cosmos.CosmosDatabase;
 import com.azure.cosmos.models.PartitionKey;
 
 import net.officefloor.nosql.cosmosdb.CosmosEntities;
@@ -23,11 +22,6 @@ import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
 import net.officefloor.woof.mock.MockWoofServerRule;
 
-/**
- * Tests the {@link CosmosDatabase} HTTP server.
- * 
- * @author Daniel Sagenschneider
- */
 public class CosmosDbHttpServerJUnit4Test {
 
 	@ClassRule

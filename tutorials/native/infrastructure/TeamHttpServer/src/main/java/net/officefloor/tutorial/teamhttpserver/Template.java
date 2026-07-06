@@ -13,11 +13,6 @@ import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.web.HttpSessionStateful;
 
-/**
- * Logic for the template.
- * 
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: values
 @HttpSessionStateful // caches this object in session
 public class Template implements Serializable {

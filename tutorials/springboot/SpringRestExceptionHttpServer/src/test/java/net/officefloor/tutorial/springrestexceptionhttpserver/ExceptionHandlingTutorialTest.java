@@ -2,8 +2,9 @@ package net.officefloor.tutorial.springrestexceptionhttpserver;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -36,5 +37,19 @@ public class ExceptionHandlingTutorialTest {
         this.mvc.perform(get("/exception/spring"))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("Spring handled: thrown"));
+    }
+
+    @Test
+    public void global_escalation_bad_request() throws Exception {
+        this.mvc.perform(get("/exception/escalation"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON));
+    }
+
+    @Test
+    public void global_escalation_not_found() throws Exception {
+        this.mvc.perform(get("/exception/not-found"))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON));
     }
 }

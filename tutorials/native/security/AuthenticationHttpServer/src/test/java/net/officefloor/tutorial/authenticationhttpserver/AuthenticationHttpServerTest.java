@@ -14,16 +14,8 @@ import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.session.HttpSessionManagedObjectSource;
 import net.officefloor.woof.mock.MockWoofServerExtension;
 
-/**
- * Tests the Secure Link.
- * 
- * @author Daniel Sagenschneider
- */
 public class AuthenticationHttpServerTest {
 
-	/**
-	 * Main to run for manual testing.
-	 */
 	public static void main(String[] args) throws Exception {
 		OfficeFloorMain.main(args);
 	}

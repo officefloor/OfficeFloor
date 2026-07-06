@@ -2,11 +2,6 @@ package net.officefloor.tutorial.loggerhttpserver;
 
 import java.util.logging.Logger;
 
-/**
- * Logic for logging {@link LoggedRequest}.
- * 
- * @author Daniel Sagenschneider
- */
 public class LogLogic {
 
 	// START SNIPPET: tutorial

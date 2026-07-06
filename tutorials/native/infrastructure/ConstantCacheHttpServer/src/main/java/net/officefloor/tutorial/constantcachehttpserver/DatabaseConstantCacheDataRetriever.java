@@ -10,11 +10,6 @@ import javax.sql.DataSource;
 import net.officefloor.cache.constant.ConstantCacheDataRetriever;
 import net.officefloor.plugin.clazz.Dependency;
 
-/**
- * Database {@link ConstantCacheDataRetriever}.
- * 
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: tutorial
 public class DatabaseConstantCacheDataRetriever implements ConstantCacheDataRetriever<String, Message> {
 

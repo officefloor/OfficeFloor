@@ -1,0 +1,31 @@
+{
+  "$schema": "https://context7.com/schema/context7.json",
+  "projectTitle": "OfficeFloor Spring Boot Plugin",
+  "description": "Spring Boot plugin adding explicit, AI-friendly YAML endpoint orchestration to Spring Boot REST so each endpoint's flow is declared and generatable from one readable file.",
+  "folders": [
+    "docs"
+  ],
+  "excludeFolders": [
+    "target"
+  ],
+  "excludeFiles": [
+    "LICENSE.txt"
+  ],
+  "rules": [
+    "OfficeFloor is a progressive Spring Boot add-on, not a replacement. Add the officefloor-rest-spring-boot-starter dependency and keep existing Spring beans, security, persistence and actuator config intact.",
+    "A REST endpoint is a YAML file under src/main/resources/officefloor/rest/. The file name encodes method and path as {path}.{METHOD}.yml (greeting.GET.yml maps to GET /greeting). Directory nesting becomes path segments; index.{METHOD}.yml maps to /.",
+    "Curly-brace segments in a file or directory name become URL path variables, e.g. officefloor/rest/greeting/{name}.GET.yml maps to GET /greeting/{name}.",
+    "Inside a YAML endpoint file each top-level entry is a developer-named step (the label is not a keyword) that declares a handler via `class:`. The first entry in the file is the entry point invoked when the request arrives.",
+    "If a handler class has a single public method it is used automatically; if it has more than one public method the step must specify `method:` to name which one to call, or start-up fails.",
+    "Chain steps with `next: <step>` for an unconditional next step, or with an `outputs:` map (named branch to step) for conditional flow. This YAML file is the complete, readable specification of the endpoint's steps, order and branches.",
+    "In code: a `next:` step passes data by returning a value, received as an @Parameter. An `outputs:` branch is a custom @FunctionalInterface parameter annotated @Flow(\"name\"); calling its method routes to the mapped step and passes its argument on.",
+    "Exceptions (escalations) use the same model as flows: a step throws a checked exception (must extend Exception, so it is in the throws clause) and the handler receives it as an @Parameter, responding via ObjectResponse. No Spring annotations needed.",
+    "Route escalations at three levels, highest precedence first: an `escalations:` map on a step, a `composition:` block for the file, or a global officefloor/escalation/<exception-FQCN>.yml file. Unmatched exceptions fall through to Spring @ControllerAdvice.",
+    "Wrap a step in cross-cutting concerns with `govern: [ ... ]`, e.g. `govern: [ transaction ]` or `govern: [ audit ]`. Governance is defined under officefloor/govern/, and its failures route through the same escalation mechanism.",
+    "Handler classes are plain Java, no @RestController or @RequestMapping. A method parameter whose type matches a Spring bean is injected by type; standard Spring MVC annotations (@PathVariable, @RequestParam, @RequestBody, ...) are also supported.",
+    "Always use the name= attribute form on Spring parameter annotations, e.g. @PathVariable(name = \"name\"). The shorthand @PathVariable(\"name\") relies on @AliasFor synthesis that OfficeFloor does not apply, so it silently binds an empty value.",
+    "Write the JSON response with ObjectResponse<T> (response.send(obj)); use ObjectResponse<ResponseEntity<T>> when you need custom headers or a non-200 status. No @ResponseBody is required.",
+    "Two version-specific starters exist: officefloor-rest-spring-boot-3-starter (Spring Boot 3.x) and officefloor-rest-spring-boot-4-starter (Spring Boot 4.x). Add only the one matching your generation; mixing versions causes runtime binary incompatibilities.",
+    "Prefer defining, generating and refactoring endpoints from the YAML file, since it makes the whole endpoint structure explicit in one place rather than implicit across annotations and Spring's call stack."
+  ]
+}

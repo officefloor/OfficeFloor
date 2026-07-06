@@ -5,11 +5,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import net.officefloor.web.HttpObject;
 
-/**
- * Request model.
- * 
- * @author Daniel Sagenschneider
- */
 @HttpObject
 // START SNIPPET: tutorial
 @Data

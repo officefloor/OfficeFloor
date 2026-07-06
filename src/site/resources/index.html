@@ -19,10 +19,11 @@
 <!doctype html>
 <html>
 <head>
-<title>OfficeFloor - AI-Augmented Spring Boot REST via Explicit Function Orchestration</title>
+<title>OfficeFloor - AI-Augmented Spring Boot REST via Function Injection (Explicit Function Orchestration)</title>
 <meta name="author" content="Daniel Sagenschneider" />
 <meta http-equiv="Content-Language" content="en" />
 <link rel="shortcut icon" href="./favicon.ico" />
+<link rel="canonical" href="https://officefloor.net/" />
 
 <meta charset="utf-8">
 <meta name="viewport"
@@ -37,27 +38,56 @@
 
 <!-- Social Media sharing -->
 <meta name="description"
-	content="OfficeFloor adds explicit function orchestration to Spring Boot REST. AI tools can read, write, and refactor endpoints without parsing Java. Add OfficeFloor progressively to your existing Spring app." />
+	content="OfficeFloor brings Function Injection (Explicit Function Orchestration) to Spring Boot REST. Function Injection indexes the codebase into small, focused functions so AI tools can navigate directly to the relevant code and make surgical changes. Add OfficeFloor progressively to your existing Spring app." />
 
 <!-- Twitter Card data -->
 <meta name="twitter:card" content="summary">
 <meta name="twitter:site" content="@sagenschneider">
-<meta name="twitter:title" content="OfficeFloor - AI-Augmented Spring Boot REST via Explicit Function Orchestration">
+<meta name="twitter:title" content="OfficeFloor - AI-Augmented Spring Boot REST via Function Injection (Explicit Function Orchestration)">
 <meta name="twitter:description"
-	content="OfficeFloor adds explicit function orchestration to Spring Boot REST. AI tools can read, write, and refactor endpoints without parsing Java. Add OfficeFloor progressively to your existing Spring app.">
+	content="OfficeFloor brings Function Injection (Explicit Function Orchestration) to Spring Boot REST. Function Injection indexes the codebase into small, focused functions so AI tools can navigate directly to the relevant code and make surgical changes. Add OfficeFloor progressively to your existing Spring app.">
 <meta name="twitter:creator" content="@sagenschneider">
 <meta name="twitter:image"
-	content="http://officefloor.net/images/OfficeFloorBannerImage.png">
+	content="https://officefloor.net/images/OfficeFloorBannerImage.png">
 
 <!-- Open Graph data -->
-<meta property="og:title" content="OfficeFloor - AI-Augmented Spring Boot REST via Explicit Function Orchestration" />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="http://officefloor.net" />
+<meta property="og:title" content="OfficeFloor - AI-Augmented Spring Boot REST via Function Injection (Explicit Function Orchestration)" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://officefloor.net/" />
 <meta property="og:image"
-	content="http://officefloor.net/images/OfficeFloorBannerImage.png" />
+	content="https://officefloor.net/images/OfficeFloorBannerImage.png" />
 <meta property="og:description"
-	content="OfficeFloor adds explicit function orchestration to Spring Boot REST. AI tools can read, write, and refactor endpoints without parsing Java. Add OfficeFloor progressively to your existing Spring app." />
+	content="OfficeFloor brings Function Injection (Explicit Function Orchestration) to Spring Boot REST. Function Injection indexes the codebase into small, focused functions so AI tools can navigate directly to the relevant code and make surgical changes. Add OfficeFloor progressively to your existing Spring app." />
 <meta property="og:site_name" content="OfficeFloor" />
+
+<!-- Structured data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "OfficeFloor",
+  "url": "https://officefloor.net/",
+  "description": "OfficeFloor brings Function Injection (Explicit Function Orchestration) to Spring Boot REST. An endpoint's steps, branches and error flows are declared in one YAML file whose directory path maps to the URL, so developers and AI tools can navigate directly from a URL to the relevant code. Add OfficeFloor progressively to an existing Spring Boot application.",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Cross-platform (JVM)",
+  "programmingLanguage": "Java",
+  "license": "https://www.apache.org/licenses/LICENSE-2.0",
+  "isAccessibleForFree": true,
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "Daniel Sagenschneider"
+  },
+  "image": "https://officefloor.net/images/OfficeFloorBannerImage.png",
+  "sameAs": [
+    "https://github.com/officefloor/OfficeFloor"
+  ]
+}
+</script>
 
 </head>
 <body>
@@ -76,7 +106,8 @@
 				<span id="version">v@VERSION</span> &nbsp; <a class="link-button"
 					href="./about.html">About</a>&nbsp;&nbsp;&nbsp;<a
 					class="link-button" href="./tutorials/index.html">Tutorials</a>&nbsp;&nbsp;&nbsp;<a
-					class="link-button" href="http://sagenschneider.blogspot.com">Blog</a>			</div>
+					class="link-button" href="http://blog.officefloor.net">Blog</a>
+			</div>
 			<div class="col-hidden col-sm-1"></div>
 		</div>
 	</header>
@@ -85,14 +116,14 @@
 		<div class="row text-center">
 			<div class="col-12">
 				<h1>OfficeFloor</h1>
-				<h2 class="banner-subtitle">Explicit function orchestration for AI-augmented Spring Boot REST</h2>
+				<h2 class="banner-subtitle">Function Injection for AI-augmented Spring Boot REST</h2>
 				<div class="ioc">
 					<p>
-						OfficeFloor adds function orchestration to <a href="https://spring.io/projects/spring-boot"
+						OfficeFloor brings Function Injection (Explicit Function Orchestration) to <a href="https://spring.io/projects/spring-boot"
 							target="_blank">Spring Boot</a>.
 						Each endpoint is one YAML file, each step one function.
 						OfficeFloor wires the functions together and Spring injects the dependencies into each.
-						OfficeFloor's explicit configuration lets AI tools read, write, and refactor endpoints without parsing your codebase.
+						Function Injection indexes the codebase into small, focused functions so AI tools can navigate directly to the relevant code and make surgical changes.
 					</p>
 					<p>
 						<a class="start-now" href="./tutorials/index.html">View Tutorials &rarr;</a>
@@ -120,9 +151,7 @@
 				<pre class="code-block"><span class="code-comment">&lt;!-- Add to existing pom.xml --&gt;</span>
 &lt;dependency&gt;
   &lt;groupId&gt;net.officefloor.springboot&lt;/groupId&gt;
-  &lt;artifactId&gt;
-    officefloor-rest-spring-boot-starter
-  &lt;/artifactId&gt;
+  &lt;artifactId&gt;officefloor-rest-spring-boot-starter&lt;/artifactId&gt;
   &lt;version&gt;@VERSION&lt;/version&gt;
 &lt;/dependency&gt;</pre>
 			</div>
@@ -152,7 +181,7 @@ audit:
   class: AuditGreetingLogic</pre>
 			</div>
 			<div class="col-12 col-md-6 info-text">
-				<h3>AI-readable explicit function orchestration alongside <code>@RestController</code></h3>
+				<h3>AI-readable Function Injection alongside <code>@RestController</code></h3>
 				<p>In a Spring <code>@RestController</code>, the flow between
 					validation, business logic, and auditing is implicit, living in the
 					call stack and framework conventions rather than in any single
@@ -163,8 +192,9 @@ audit:
 					No function knows about the others, and no annotation
 					describes the wiring. The YAML file is the complete specification.</p>
 				<p>Conditional branching, sequential composition, and error flows
-					are all declared in the same file. The complete endpoint logic is
-					readable without opening a single Java file.</p>
+					are all declared in the same file. The YAML indexes the codebase into
+					small, focused functions so AI tools can navigate directly to the
+					relevant code and make surgical changes.</p>
 				<p>
 					<a href="./tutorials/index.html">See the full tutorial series &rarr;</a>
 				</p>
@@ -175,18 +205,28 @@ audit:
 	<section class="container">
 		<div class="row align-items-center">
 			<div class="col-12 col-md-6 info-text">
-				<h3>Why explicit function orchestration makes AI development reliable</h3>
+				<h3>Why Function Injection makes AI development reliable</h3>
 				<p>In a Spring controller, the flow between an endpoint's steps
 					is implicit, spread across the call stack and framework conventions:
 					which function runs next, which branch handles a validation failure,
 					which step writes the response. This is opaque to AI coding tools.</p>
 				<p>OfficeFloor's YAML files are the specification. Every
 					endpoint's steps, their order, and their conditional branches
-					are explicit in one file. An AI tool can read, generate,
-					and refactor endpoints from the YAML alone, without needing to
-					understand the full codebase.</p>
-				<p>Explicit orchestration gives AI a reliable, unambiguous surface
-					to work with instead of implicit framework conventions.</p>
+					are explicit in one file. Function Injection indexes the codebase
+					into small, focused functions so AI tools can navigate directly to
+					the relevant code and make surgical changes.</p>
+				<p>Just as Dependency Injection made dependencies first-class in
+					the architecture by making them explicit, named, and wired in
+					configuration rather than constructed inline, Function Injection
+					makes function flow first-class. The wiring between functions is
+					declared in configuration, not buried in the call stack.</p>
+				<p>Function Injection gives AI an explicit, contextual index into the
+					codebase instead of implicit framework conventions.</p>
+				<p>And because that index lives in the code itself, OfficeFloor needs no AI
+					tooling to stay legible: no Model Context Protocol (MCP) server or add-on to
+					reconstruct how endpoints are wired. Documentation is enough. Where a
+					framework's flow is implicit, such tooling is bolted on to recover what the
+					code does not state; Function Injection removes the need.</p>
 				<p>
 					<a
 						href="https://sagenschneider.blogspot.com/2019/02/inversion-of-coupling-control.html"
@@ -244,22 +284,14 @@ audit:
 	</footer>
 
 
-	<script type="text/javascript">
-		// Google
-		var _gaq = _gaq || [];
-		_gaq.push([ '_setAccount', 'UA-23477455-1' ]);
-		_gaq.push([ '_trackPageview' ]);
+	<!-- Google tag (gtag.js) -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=@GOOGLE_ANALYTICS_ID"></script>
+	<script>
+	  window.dataLayer = window.dataLayer || [];
+	  function gtag(){dataLayer.push(arguments);}
+	  gtag('js', new Date());
 
-		(function() {
-			var ga = document.createElement('script');
-			ga.type = 'text/javascript';
-			ga.async = true;
-			ga.src = ('https:' == document.location.protocol ? 'https://ssl'
-					: 'http://www')
-					+ '.google-analytics.com/ga.js';
-			var s = document.getElementsByTagName('script')[0];
-			s.parentNode.insertBefore(ga, s);
-		})();
+	  gtag('config', '@GOOGLE_ANALYTICS_ID');
 	</script>
 	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
 		integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"

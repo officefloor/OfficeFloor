@@ -10,11 +10,6 @@ import net.officefloor.test.logger.LoggerExtension;
 import net.officefloor.woof.mock.MockWoofServer;
 import net.officefloor.woof.mock.MockWoofServerExtension;
 
-/**
- * Tests the Logger HTTP Server.
- * 
- * @author Daniel Sagenschneider
- */
 public class LoggerHttpServerTest {
 
 	// START SNIPPET: tutorial

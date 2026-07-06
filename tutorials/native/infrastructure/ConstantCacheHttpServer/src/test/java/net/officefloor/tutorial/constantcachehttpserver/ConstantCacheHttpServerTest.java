@@ -3,16 +3,10 @@ package net.officefloor.tutorial.constantcachehttpserver;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import net.officefloor.cache.Cache;
 import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
 import net.officefloor.woof.mock.MockWoofServerExtension;
 
-/**
- * Tests the constant {@link Cache} HTTP Server.
- * 
- * @author Daniel Sagenschneider
- */
 public class ConstantCacheHttpServerTest {
 
 	// START SNIPPET: tutorial

@@ -11,11 +11,6 @@ import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
 import net.officefloor.woof.mock.MockWoofServerExtension;
 
-/**
- * Tests the variables are passed between methods.
- * 
- * @author Daniel Sagenschneider
- */
 public class VariableHttpServerTest {
 
 	// START SNIPPET: mockServer

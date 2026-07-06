@@ -13,11 +13,6 @@ import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.HttpQueryParameter;
 
-/**
- * Provides logic for the template.
- * 
- * @author Daniel Sagenschneider
- */
 public class Template {
 
 	// START SNIPPET: getRows

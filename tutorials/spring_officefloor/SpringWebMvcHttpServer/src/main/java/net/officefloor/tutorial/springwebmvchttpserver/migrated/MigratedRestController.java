@@ -6,11 +6,6 @@ import net.officefloor.tutorial.springwebmvchttpserver.SpringDependency;
 import net.officefloor.web.HttpPathParameter;
 import net.officefloor.web.ObjectResponse;
 
-/**
- * Migrated Spring REST controller.
- * 
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: tutorial
 public class MigratedRestController {
 

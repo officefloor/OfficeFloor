@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import com.azure.cosmos.CosmosDatabase;
 import com.azure.cosmos.models.PartitionKey;
 
 import net.officefloor.nosql.cosmosdb.CosmosEntities;
@@ -21,11 +20,6 @@ import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
 import net.officefloor.woof.mock.MockWoofServerExtension;
 
-/**
- * Tests the {@link CosmosDatabase} HTTP server.
- * 
- * @author Daniel Sagenschneider
- */
 @UsesDockerTest
 public class CosmosDbHttpServerTest {
 

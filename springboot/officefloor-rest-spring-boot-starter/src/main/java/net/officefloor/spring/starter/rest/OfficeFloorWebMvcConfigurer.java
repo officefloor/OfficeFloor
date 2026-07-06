@@ -20,7 +20,6 @@
 
 package net.officefloor.spring.starter.rest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PreDestroy;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -88,7 +87,7 @@ public class OfficeFloorWebMvcConfigurer implements WebMvcConfigurer {
                 registry.addInterceptor(
                                 new OfficeFloorHandlerInterceptor(this.starter.getBridge(), endpoint,
                                         this.handlerAdapterProvider, this.dispatcherServletProvider,
-                                        this.applicationContextProvider))
+                                        this.applicationContextProvider, this.starter.getSpringExceptionHandlers()))
                         .addPathPatterns(endpoint.getPath());
             }
 

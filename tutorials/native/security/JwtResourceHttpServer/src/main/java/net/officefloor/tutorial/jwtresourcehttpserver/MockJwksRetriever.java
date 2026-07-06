@@ -8,21 +8,13 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import lombok.Data;
 import net.officefloor.web.jwt.jwks.JwksRetriever;
 
-/**
- * <p>
- * Mock {@link JwksRetriever}.
- * <p>
- * Typically this would be HTTPS call to JWT authority server.
- * 
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: tutorial
 public class MockJwksRetriever implements JwksRetriever {
 

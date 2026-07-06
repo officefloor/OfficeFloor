@@ -4,11 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * Depth of modules.
- * 
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: tutorial
 @Data
 @AllArgsConstructor

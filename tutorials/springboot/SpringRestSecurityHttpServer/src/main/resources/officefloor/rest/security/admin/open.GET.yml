@@ -1,0 +1,4 @@
+composition:
+  authorize: ""
+service:
+  class: net.officefloor.tutorial.springrestsecurity.OpenAdminService

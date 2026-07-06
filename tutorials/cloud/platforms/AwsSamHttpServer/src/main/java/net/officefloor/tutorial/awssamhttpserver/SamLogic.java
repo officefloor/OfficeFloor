@@ -10,11 +10,6 @@ import net.officefloor.web.HttpObject;
 import net.officefloor.web.HttpPathParameter;
 import net.officefloor.web.ObjectResponse;
 
-/**
- * Logic for the AWS SAM HTTP Server.
- * 
- * @author Daniel Sagenschneider
- */
 public class SamLogic {
 
 	@HttpObject

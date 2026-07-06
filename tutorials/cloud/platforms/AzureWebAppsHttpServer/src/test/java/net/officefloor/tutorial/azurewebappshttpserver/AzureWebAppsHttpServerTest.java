@@ -20,11 +20,6 @@ import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
 import net.officefloor.woof.mock.MockWoofServerExtension;
 
-/**
- * Tests the Azure HTTP server.
- * 
- * @author Daniel Sagenschneider
- */
 @UsesDockerTest
 public class AzureWebAppsHttpServerTest {
 

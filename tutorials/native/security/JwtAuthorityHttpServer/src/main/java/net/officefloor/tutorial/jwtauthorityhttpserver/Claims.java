@@ -4,11 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
-/**
- * JWT claims.
- * 
- * @author Daniel Sagenschneider
- */
 @Data
 @RequiredArgsConstructor
 @AllArgsConstructor

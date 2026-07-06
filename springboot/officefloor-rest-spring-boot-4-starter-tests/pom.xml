@@ -19,7 +19,7 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>4.0.6</version>
+                <version>${spring-version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -27,12 +27,6 @@
                 <groupId>org.springdoc</groupId>
                 <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
                 <version>3.0.3</version>
-            </dependency>
-            <!-- Force Jakarta Persistence 3.2 required by Hibernate 7 (OfficeFloor BOM pins 3.1) -->
-            <dependency>
-                <groupId>jakarta.persistence</groupId>
-                <artifactId>jakarta.persistence-api</artifactId>
-                <version>3.2.0</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

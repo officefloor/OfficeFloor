@@ -13,16 +13,8 @@ import net.officefloor.tutorial.sessionhttpserver.TemplateLogic.Post;
 import net.officefloor.tutorial.sessionhttpserver.TemplateLogic.Posts;
 import net.officefloor.woof.mock.MockWoofServerExtension;
 
-/**
- * Tests the Session HTTP Server.
- * 
- * @author Daniel Sagenschneider
- */
 public class SessionHttpServerTest {
 
-	/**
-	 * Run application.
-	 */
 	public static void main(String[] args) throws Exception {
 		OfficeFloorMain.main(args);
 	}

@@ -5,11 +5,6 @@ import java.io.IOException;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.security.HttpAccess;
 
-/**
- * Secured resource.
- * 
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: tutorial
 public class SecuredResource {
 

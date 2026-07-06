@@ -15,11 +15,6 @@ import net.officefloor.web.jwt.authority.AccessToken;
 import net.officefloor.web.jwt.authority.JwtAuthority;
 import net.officefloor.web.jwt.authority.RefreshToken;
 
-/**
- * Undertakes login.
- * 
- * @author Daniel Sagenschneider
- */
 public class JwtTokens {
 
 	public static final String REFRESH_TOKEN_COOKIE_NAME = "RefreshToken";

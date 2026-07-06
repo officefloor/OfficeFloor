@@ -10,8 +10,8 @@
 	<groupId>net.officefloor.springboot</groupId>
 	<artifactId>springboot</artifactId>
 	<packaging>pom</packaging>
-	<name>Spring Boot</name>
-	<description>Provides modules for Spring Boot integration</description>
+	<name>OfficeFloor Spring Boot</name>
+	<description>Modules integrating OfficeFloor with Spring Boot, including the OfficeFloor REST YAML orchestration starters.</description>
 	<modules>
         <module>officefloor-rest-spring-boot-starter</module>
         <module>officefloor-rest-spring-boot-3-starter</module>

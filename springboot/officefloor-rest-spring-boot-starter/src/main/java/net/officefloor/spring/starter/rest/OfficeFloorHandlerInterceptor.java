@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,6 +24,7 @@ import jakarta.servlet.AsyncContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
+import net.officefloor.server.http.HttpExternalResponse;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.impl.NonMaterialisedHttpHeaders;
@@ -35,6 +36,7 @@ import net.officefloor.server.http.servlet.HttpServletOfficeFloorBridge;
 import net.officefloor.server.stream.StreamBufferPool;
 import net.officefloor.server.stream.impl.ByteSequence;
 import net.officefloor.server.stream.impl.ThreadLocalStreamBufferPool;
+import net.officefloor.spring.starter.rest.response.SpringExceptionHandler;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.cors.CorsProcessor;
@@ -45,9 +47,12 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 
 import java.nio.ByteBuffer;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-/** {@link HandlerInterceptor} to bridge OfficeFloor REST handling. */
+/**
+ * {@link HandlerInterceptor} to bridge OfficeFloor REST handling.
+ */
 public class OfficeFloorHandlerInterceptor implements HandlerInterceptor {
 
     /**
@@ -68,24 +73,29 @@ public class OfficeFloorHandlerInterceptor implements HandlerInterceptor {
 
     private final ObjectProvider<ApplicationContext> applicationContextProvider;
 
+    private final List<SpringExceptionHandler> exceptionHandlers;
+
     /**
      * Instantiate.
      *
-     * @param bridge                       {@link HttpServletOfficeFloorBridge}.
-     * @param restEndpoint                 {@link OfficeFloorRestEndpoint}.
-     * @param handlerAdapterProvider       {@link ObjectProvider} for {@link RequestMappingHandlerAdapter}.
-     * @param dispatcherServletProvider    {@link ObjectProvider} for {@link DispatcherServlet}.
-     * @param applicationContextProvider   {@link ObjectProvider} for {@link ApplicationContext}.
+     * @param bridge                     {@link HttpServletOfficeFloorBridge}.
+     * @param restEndpoint               {@link OfficeFloorRestEndpoint}.
+     * @param handlerAdapterProvider     {@link ObjectProvider} for {@link RequestMappingHandlerAdapter}.
+     * @param dispatcherServletProvider  {@link ObjectProvider} for {@link DispatcherServlet}.
+     * @param applicationContextProvider {@link ObjectProvider} for {@link ApplicationContext}.
+     * @param exceptionHandlers          {@link SpringExceptionHandler} instances.
      */
     public OfficeFloorHandlerInterceptor(HttpServletOfficeFloorBridge bridge,
                                          OfficeFloorRestEndpoint restEndpoint,
                                          ObjectProvider<RequestMappingHandlerAdapter> handlerAdapterProvider,
                                          ObjectProvider<DispatcherServlet> dispatcherServletProvider,
-                                         ObjectProvider<ApplicationContext> applicationContextProvider) {
+                                         ObjectProvider<ApplicationContext> applicationContextProvider,
+                                         List<SpringExceptionHandler> exceptionHandlers) {
         this.bridge = bridge;
         this.handlerAdapterProvider = handlerAdapterProvider;
         this.dispatcherServletProvider = dispatcherServletProvider;
         this.applicationContextProvider = applicationContextProvider;
+        this.exceptionHandlers = exceptionHandlers;
 
         // Build the handling of rest endpoints
         for (OfficeFloorRestMethod restMethod : restEndpoint.getRestMethods()) {
@@ -147,13 +157,32 @@ public class OfficeFloorHandlerInterceptor implements HandlerInterceptor {
                 this.bridge.getHttpServerLocation(), request.isSecure(), () -> httpMethod, () -> requestUri,
                 HttpVersion.getHttpVersion(request.getProtocol()), httpHeaders, entity, null, null,
                 this.bridge.isIncludeEscalationStackTrace(), writer, bufferPool,
-                request, response, handler, handlerAdapter, dispatcherServlet, applicationContext);
+                request, response, handler, handlerAdapter, dispatcherServlet, applicationContext, this.exceptionHandlers);
 
         // Undertake servicing
         AsyncContext async = request.startAsync();
         input.service(connection, (escalation) -> {
             try {
+
+                // Flag that externally handled (by Spring), so OfficeFloor does not overwrite
+                HttpExternalResponse.of(connection.getResponse()).externalSend();
+
+                // Handle escalation
+                if (escalation != null) {
+                    connection.setResponse(null, null, null, escalation);
+                    escalation = null;
+                }
+
+                // Undertake writing response
+                try {
+                    connection.writeResponse();
+                } catch (Throwable ex) {
+                    escalation = ex;
+                }
+
+                // Complete response
                 connection.getServiceFlowCallback().run(escalation);
+
             } finally {
                 async.complete();
             }

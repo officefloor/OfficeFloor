@@ -22,8 +22,9 @@ package net.officefloor.scalatest;
 
 import java.io.IOException;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.module.scala.DefaultScalaModule;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.module.scala.DefaultScalaModule;
 
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
@@ -39,11 +40,7 @@ public class ScalaMockWoofServerStaticAccess {
 	/**
 	 * {@link ObjectMapper}.
 	 */
-	private static ObjectMapper mapper = new ObjectMapper();
-
-	static {
-		mapper.registerModule(new DefaultScalaModule());
-	}
+	private static final ObjectMapper mapper = JsonMapper.builder().addModule(new DefaultScalaModule()).build();
 
 	/**
 	 * Obtains {@link MockHttpRequestBuilder} for '/'.

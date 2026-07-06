@@ -7,8 +7,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
 
-import com.googlecode.objectify.Objectify;
-
 import net.officefloor.nosql.objectify.mock.ObjectifyRule;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.test.SkipUtil;
@@ -17,11 +15,6 @@ import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
 import net.officefloor.woof.mock.MockWoofServerRule;
 
-/**
- * Tests the {@link Objectify} HTTP server.
- * 
- * @author Daniel Sagenschneider
- */
 public class ObjectifyHttpServerJUnit4Test {
 
 	@ClassRule

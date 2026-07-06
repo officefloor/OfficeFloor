@@ -77,9 +77,9 @@ public class OfficeFloorServerHttpResponse extends AbstractListenerServerHttpRes
 
 	@Override
 	protected void applyStatusCode() {
-		Integer statusCode = this.getRawStatusCode();
+		org.springframework.http.HttpStatusCode statusCode = this.getStatusCode();
 		if (statusCode != null) {
-			this.httpResponse.setStatus(HttpStatus.getHttpStatus(statusCode));
+			this.httpResponse.setStatus(HttpStatus.getHttpStatus(statusCode.value()));
 		}
 	}
 

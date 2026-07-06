@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import com.azure.cosmos.CosmosAsyncDatabase;
 import com.azure.cosmos.models.PartitionKey;
 
 import net.officefloor.nosql.cosmosdb.CosmosAsyncEntities;
@@ -23,11 +22,6 @@ import net.officefloor.woof.mock.MockWoofServer;
 import net.officefloor.woof.mock.MockWoofServerExtension;
 import reactor.core.publisher.Mono;
 
-/**
- * Tests the {@link CosmosAsyncDatabase} HTTP server.
- * 
- * @author Daniel Sagenschneider
- */
 @UsesDockerTest
 public class CosmosAsyncDbHttpServerTest {
 

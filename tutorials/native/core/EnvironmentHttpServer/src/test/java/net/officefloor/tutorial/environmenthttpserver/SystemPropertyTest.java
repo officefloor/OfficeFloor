@@ -15,11 +15,6 @@ import net.officefloor.server.http.HttpClientExtension;
 import net.officefloor.test.OfficeFloorExtension;
 import net.officefloor.test.system.SystemPropertiesExtension;
 
-/**
- * Tests with system property.
- * 
- * @author Daniel Sagenschneider
- */
 public class SystemPropertyTest {
 
 	// START SNIPPET: tutorial

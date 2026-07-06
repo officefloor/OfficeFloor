@@ -12,14 +12,14 @@
     <artifactId>officefloor-rest-spring-boot-4-starter</artifactId>
     <version>${revision}</version>
     <name>OfficeFloor REST Spring Boot 4 Starter</name>
-    <description>Spring Boot 4 Starter for OfficeFloor REST</description>
+    <description>Spring Boot 4.x starter adding OfficeFloor's explicit, AI-friendly YAML orchestration to Spring Boot REST: declare each endpoint's flow in one readable file alongside your existing Spring beans.</description>
     <dependencyManagement>
         <dependencies>
             <!-- Override inherited Spring Boot 3.x BOM with Spring Boot 4.x -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>4.0.6</version>
+                <version>${spring-version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

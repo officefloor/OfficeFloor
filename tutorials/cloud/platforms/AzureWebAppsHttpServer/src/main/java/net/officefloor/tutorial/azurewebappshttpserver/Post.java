@@ -9,11 +9,6 @@ import net.officefloor.nosql.cosmosdb.CosmosEntity;
 import net.officefloor.nosql.cosmosdb.CosmosPartitionKey;
 import net.officefloor.web.HttpObject;
 
-/**
- * Post.
- * 
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: tutorial
 @CosmosEntity(containerId = "POST")
 @HttpObject

@@ -1,0 +1,4 @@
+composition:
+  authorize: "hasRole('SUPER')"
+service:
+  class: net.officefloor.tutorial.springrestsecurity.SuperAdminService

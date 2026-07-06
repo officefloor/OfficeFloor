@@ -5,11 +5,6 @@ import org.springframework.context.annotation.Bean;
 
 import net.officefloor.spring.SpringSupplierSource;
 
-/**
- * Provides Spring configuration.
- * 
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: tutorial
 @SpringBootApplication
 public class SpringBootConfiguration {

@@ -4,11 +4,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-/**
- * Setup database.
- * 
- * @author Daniel Sagenschneider
- */
 public class Setup {
 
 	public void setup(Connection connection) throws SQLException {

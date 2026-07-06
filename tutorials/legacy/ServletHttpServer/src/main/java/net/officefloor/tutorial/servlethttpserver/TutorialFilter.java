@@ -8,13 +8,7 @@ import jakarta.servlet.http.HttpFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import net.officefloor.plugin.clazz.Dependency;
-import net.officefloor.servlet.procedure.FilterProcedureSource;
 
-/**
- * {@link HttpFilter} for the {@link FilterProcedureSource}.
- * 
- * @author Daniel Sagenschneider
- */
 @SuppressWarnings("serial")
 // START SNIPPET: tutorial
 public class TutorialFilter extends HttpFilter {

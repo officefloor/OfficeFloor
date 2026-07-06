@@ -12,7 +12,7 @@
     <version>${revision}</version>
     <packaging>pom</packaging>
     <name>OfficeFloor REST Spring Boot Starter</name>
-    <description>Spring Boot Starter for OfficeFloor REST - common source shared by version-specific starters</description>
+    <description>Shared source for the OfficeFloor REST Spring Boot starters. Not a usable dependency on its own; add officefloor-rest-spring-boot-4-starter (Spring Boot 4.x) or officefloor-rest-spring-boot-3-starter (Spring Boot 3.x) instead.</description>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -32,6 +32,10 @@
         <dependency>
             <groupId>net.officefloor.activity</groupId>
             <artifactId>officesupplier</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.officefloor.activity</groupId>
+            <artifactId>officeescalation</artifactId>
         </dependency>
         <dependency>
             <groupId>net.officefloor.activity</groupId>

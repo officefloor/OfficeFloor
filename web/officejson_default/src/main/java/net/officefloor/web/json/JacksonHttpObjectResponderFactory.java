@@ -24,9 +24,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.ObjectMapper;
 
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.server.http.HttpHeaderValue;
@@ -56,28 +55,26 @@ public class JacksonHttpObjectResponderFactory implements HttpObjectResponderFac
 	 */
 	public static String getEntity(Throwable escalation, ObjectMapper mapper) throws IOException {
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-		writeError(buffer, escalation, initiateObjectMapper(mapper));
+		writeError(buffer, escalation, mapper);
 		return buffer.toString();
 	}
 
 	/**
-	 * Initialises the {@link ObjectMapper}.
-	 * 
-	 * @param mapper {@link ObjectMapper}.
-	 * @return Initialised {@link ObjectMapper}.
+	 * Wraps an {@link OutputStream} to suppress close, preventing Jackson from closing the HTTP response stream.
 	 */
-	private static ObjectMapper initiateObjectMapper(ObjectMapper mapper) {
-
-		// Always disable close on finish
-		mapper.disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET);
-
-		// Return the mapper for use
-		return mapper;
+	private static OutputStream nonClosing(OutputStream out) {
+		return new OutputStream() {
+			@Override public void write(int b) throws IOException { out.write(b); }
+			@Override public void write(byte[] b, int off, int len) throws IOException { out.write(b, off, len); }
+			@Override public void write(byte[] b) throws IOException { out.write(b); }
+			@Override public void flush() throws IOException { out.flush(); }
+			@Override public void close() {}
+		};
 	}
 
 	/**
 	 * Writes the {@link Escalation}.
-	 * 
+	 *
 	 * @param output     {@link OutputStream} to write the {@link Escalation}.
 	 * @param escalation {@link Throwable} {@link Escalation}.
 	 * @throws IOException If fails to write.
@@ -90,7 +87,7 @@ public class JacksonHttpObjectResponderFactory implements HttpObjectResponderFac
 		if ((message == null) || (message.trim().length() == 0)) {
 			message = escalation.getClass().getSimpleName();
 		}
-		mapper.writeValue(output, message);
+		mapper.writeValue(nonClosing(output), message);
 
 		output.write(ERROR_MESSAGE_SUFFIX);
 	}
@@ -122,7 +119,7 @@ public class JacksonHttpObjectResponderFactory implements HttpObjectResponderFac
 	 * @param mapper {@link ObjectMapper}.
 	 */
 	public JacksonHttpObjectResponderFactory(ObjectMapper mapper) {
-		this.mapper = initiateObjectMapper(mapper);
+		this.mapper = mapper;
 	}
 
 	/*
@@ -140,11 +137,6 @@ public class JacksonHttpObjectResponderFactory implements HttpObjectResponderFac
 		// Create the type for efficient execution
 		JavaType javaType = this.mapper.constructType(objectType);
 
-		// Determine if can deserialise type
-		if (!mapper.canDeserialize(javaType)) {
-			return null;
-		}
-
 		// Return the object responder
 		return new HttpObjectResponder<T>() {
 
@@ -157,7 +149,7 @@ public class JacksonHttpObjectResponderFactory implements HttpObjectResponderFac
 			public void send(HttpObjectResponderContext<T> context) throws IOException {
 				HttpResponse response = context.getServerHttpConnection().getResponse();
 				response.setContentType(contentType, null);
-				JacksonHttpObjectResponderFactory.this.mapper.writeValue(response.getEntity(), context.getResponseObject());
+				JacksonHttpObjectResponderFactory.this.mapper.writeValue(nonClosing(response.getEntity()), context.getResponseObject());
 			}
 		};
 	}

@@ -9,11 +9,6 @@ import net.officefloor.web.security.HttpAccess;
 import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.security.HttpAuthentication;
 
-/**
- * Logic for <code>hello</code> page.
- *
- * @author Daniel Sagenschneider
- */
 // START SNIPPET: tutorial
 public class HelloLogic {
 

@@ -102,17 +102,12 @@ public class OfficeFloorEndPoint extends AbstractEndpoint<Void, OfficeFloorEndPo
 	 */
 
 	@Override
-	protected void createSSLContext(SSLHostConfig sslHostConfig) throws Exception {
+	protected void createSSLContext(SSLHostConfig sslHostConfig) {
 		throw OfficeFloorSocketWrapper.noSocket();
 	}
 
 	@Override
 	protected InetSocketAddress getLocalAddress() throws IOException {
-		throw OfficeFloorSocketWrapper.noSocket();
-	}
-
-	@Override
-	public boolean getDeferAccept() {
 		throw OfficeFloorSocketWrapper.noSocket();
 	}
 
