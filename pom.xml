@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<name>OfficeFloor</name>
-	<description>OfficeFloor</description>
+	<description>OfficeFloor is a Java application framework introducing Inversion of Coupling Control. It includes a Spring Boot add-on that provides explicit, AI-friendly YAML orchestration for REST endpoints.</description>
 
 	<parent>
 		<groupId>net.officefloor</groupId>

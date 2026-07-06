@@ -23,6 +23,7 @@
 <meta name="author" content="Daniel Sagenschneider" />
 <meta http-equiv="Content-Language" content="en" />
 <link rel="shortcut icon" href="./favicon.ico" />
+<link rel="canonical" href="https://officefloor.net/" />
 
 <meta charset="utf-8">
 <meta name="viewport"
@@ -47,17 +48,46 @@
 	content="OfficeFloor brings Function Injection (Explicit Function Orchestration) to Spring Boot REST. Function Injection indexes the codebase into small, focused functions so AI tools can navigate directly to the relevant code and make surgical changes. Add OfficeFloor progressively to your existing Spring app.">
 <meta name="twitter:creator" content="@sagenschneider">
 <meta name="twitter:image"
-	content="http://officefloor.net/images/OfficeFloorBannerImage.png">
+	content="https://officefloor.net/images/OfficeFloorBannerImage.png">
 
 <!-- Open Graph data -->
 <meta property="og:title" content="OfficeFloor - AI-Augmented Spring Boot REST via Function Injection (Explicit Function Orchestration)" />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="http://officefloor.net" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://officefloor.net/" />
 <meta property="og:image"
-	content="http://officefloor.net/images/OfficeFloorBannerImage.png" />
+	content="https://officefloor.net/images/OfficeFloorBannerImage.png" />
 <meta property="og:description"
 	content="OfficeFloor brings Function Injection (Explicit Function Orchestration) to Spring Boot REST. Function Injection indexes the codebase into small, focused functions so AI tools can navigate directly to the relevant code and make surgical changes. Add OfficeFloor progressively to your existing Spring app." />
 <meta property="og:site_name" content="OfficeFloor" />
+
+<!-- Structured data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "OfficeFloor",
+  "url": "https://officefloor.net/",
+  "description": "OfficeFloor brings Function Injection (Explicit Function Orchestration) to Spring Boot REST. An endpoint's steps, branches and error flows are declared in one YAML file whose directory path maps to the URL, so developers and AI tools can navigate directly from a URL to the relevant code. Add OfficeFloor progressively to an existing Spring Boot application.",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Cross-platform (JVM)",
+  "programmingLanguage": "Java",
+  "license": "https://www.apache.org/licenses/LICENSE-2.0",
+  "isAccessibleForFree": true,
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "Daniel Sagenschneider"
+  },
+  "image": "https://officefloor.net/images/OfficeFloorBannerImage.png",
+  "sameAs": [
+    "https://github.com/officefloor/OfficeFloor"
+  ]
+}
+</script>
 
 </head>
 <body>
@@ -192,6 +222,11 @@ audit:
 					declared in configuration, not buried in the call stack.</p>
 				<p>Function Injection gives AI an explicit, contextual index into the
 					codebase instead of implicit framework conventions.</p>
+				<p>And because that index lives in the code itself, OfficeFloor needs no AI
+					tooling to stay legible: no Model Context Protocol (MCP) server or add-on to
+					reconstruct how endpoints are wired. Documentation is enough. Where a
+					framework's flow is implicit, such tooling is bolted on to recover what the
+					code does not state; Function Injection removes the need.</p>
 				<p>
 					<a
 						href="https://sagenschneider.blogspot.com/2019/02/inversion-of-coupling-control.html"
