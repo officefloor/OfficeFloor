@@ -48,6 +48,8 @@ Each function class declares only its own Spring bean dependencies, injected by 
 
 This makes endpoints reliable targets for AI coding tools: the full structure is explicit in one file, so an AI can read, generate, and refactor endpoints from the YAML alone.
 
+Because the architecture is explicit in the code, this needs no AI-specific tooling: no Model Context Protocol (MCP) server or add-on to reconstruct how endpoints are wired. Documentation is enough. Frameworks whose flow is implicit bolt on such tooling to stay legible to AI; OfficeFloor removes the need.
+
 
 ## Progressive adoption
 

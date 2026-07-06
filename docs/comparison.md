@@ -58,6 +58,15 @@ contextual grounding: routes are enumerable by listing a directory, and the code
 one deterministic file lookup away. As a codebase grows to hundreds of endpoints, that difference
 compounds.
 
+### No AI tooling required
+
+Because the architecture is explicit in the code, an AI assistant needs no tooling layer to make
+OfficeFloor legible: no Model Context Protocol (MCP) server or similar add-on that reconstructs how
+endpoints are wired. Documentation is enough, because the structure the model needs is already
+stated in the files and their layout. When a framework's flow is implicit, the common response is to
+bolt on such tooling so an assistant can recover what the code does not state. OfficeFloor removes
+that need: the legibility lives in the source, so an AI works from plain file access and the docs.
+
 ## 2. Orchestration: the endpoint's flow in one file
 
 Once you have navigated to the file, it is the map into the code. This section shows what that file
