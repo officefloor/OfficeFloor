@@ -116,7 +116,7 @@
 		<spring-version>4.1.0</spring-version>
 		<swagger-version>2.2.46</swagger-version>
 		<swagger-ui-version>5.11.3</swagger-ui-version>
-		<tika-version>2.9.1</tika-version>
+		<tika-version>3.2.2</tika-version>
 		<undertow-version>2.4.0.Final</undertow-version>
 		<log4j2-version>2.25.4</log4j2-version>
 		<vertx-version>4.5.3</vertx-version>

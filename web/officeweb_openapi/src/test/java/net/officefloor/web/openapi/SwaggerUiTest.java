@@ -171,7 +171,7 @@ public class SwaggerUiTest {
 	private void doSwaggerInitializerTest(String path, String... propertyNameValuePairs) throws Exception {
 		this.doSwaggerTest(path, (server, response) -> {
 			assertEquals(200, response.getStatus().getStatusCode(), "Should be successful (path: " + path + ")");
-			assertEquals("application/javascript", response.getHeader("content-type").getValue(),
+			assertEquals("text/javascript", response.getHeader("content-type").getValue(),
 					"Incorrect Content-Type");
 			String entity = response.getEntity(null);
 			assertFalse(entity.contains("petstore"), "Should not contain petstore url\n\n" + entity);
