@@ -1,0 +1,34 @@
+name: Feature request
+description: Suggest an idea or improvement for OfficeFloor
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting an improvement. Describing the underlying problem
+        (not only your proposed solution) helps us find the best design.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem are you trying to solve?
+      description: The use case or limitation you are hitting today.
+      placeholder: When composing an endpoint I cannot express ... so I have to ...
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: What you would like OfficeFloor to do. Sketch the YAML or API if relevant.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Other approaches or workarounds you have tried or thought about.
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Anything else — links, examples, related issues.
