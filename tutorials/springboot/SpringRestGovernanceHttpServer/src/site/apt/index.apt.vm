@@ -1,0 +1,241 @@
+~~~
+~~ #%L
+~~ Spring REST Governance HTTP Server Tutorial
+~~ %%
+~~ Copyright (C) 2005 - 2026 Daniel Sagenschneider
+~~ %%
+~~ Licensed under the Apache License, Version 2.0 (the "License");
+~~ you may not use this file except in compliance with the License.
+~~ You may obtain a copy of the License at
+~~
+~~      http://www.apache.org/licenses/LICENSE-2.0
+~~
+~~ Unless required by applicable law or agreed to in writing, software
+~~ distributed under the License is distributed on an "AS IS" BASIS,
+~~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~~ See the License for the specific language governing permissions and
+~~ limitations under the License.
+~~ #L%
+~~~
+
+~~~
+~~ Spring REST Governance HTTP Server Tutorial
+~~~
+
+                                               -----------------------
+                                       Spring REST Governance Tutorial
+                                               -----------------------
+                                                Daniel Sagenschneider
+                                               -----------------------
+
+Governance in OfficeFloor
+
+  Governance is OfficeFloor's mechanism for wrapping function execution with
+  framework-managed pre/post lifecycle.  Where the previous tutorials introduced managed
+  objects (per-request state) and suppliers (libraries of related objects), governance
+  answers the question: <<who ensures the correct lifecycle is applied to those objects>>,
+  consistently, without relying on the caller to remember?
+
+  Spring addresses this with AOP proxies ({{{https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/transaction/annotation/Transactional.html}@Transactional}},
+  {{{https://docs.spring.io/spring-security/site/docs/current/api/org/springframework/security/access/prepost/PreAuthorize.html}@PreAuthorize}}, etc.).
+  OfficeFloor's governance is conceptually similar but operates at the framework
+  execution level rather than the proxy level:
+
+   * Governance is declared in a YAML file in <<<officefloor/govern/>>>, named, and
+     applied to individual REST functions via <<<govern: [ name ]>>> in their YAML
+     configuration.  No annotation on the service class is required.
+
+   * The governed objects are managed objects that implement a typed extension interface.
+     OfficeFloor detects eligibility at compile time and enrolls them automatically.
+
+   * The governance lifecycle — begin, enforce (commit), disregard (rollback) — is
+     managed entirely by the OfficeFloor runtime, not by a proxy that must intercept
+     every call path.
+
+  The tutorial demonstrates this by attaching an <<<audit>>> governance to one REST
+  endpoint and leaving the other ungoverned.  Both share the same <<<AuditRecord>>>
+  managed object.  The response event list shows exactly when governance fires relative
+  to the function body.
+
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestGovernanceHttpServer}Tutorial Source}}
+
+
+
+*Maven dependency
+
+%{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+
+
+*Application class
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestgovernance/SpringRestGovernanceApplication.java|ignoreDownloadError=false}
+
+
+
+*The governance extension interface — <<<Auditable>>>
+
+  Each governance infers its extension type from the parameter of the method annotated
+  with {{{/apidocs/net/officefloor/plugin/governance/clazz/Govern.html}@Govern}}.  Any
+  managed object implementing that type in a governed function is enrolled automatically
+  via <<<OfficeGovernance.enableAutoWireExtensions()>>>.
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestgovernance/Auditable.java|ignoreDownloadError=false}
+
+
+
+*The governed managed object — <<<AuditRecord>>>
+
+  <<<AuditRecord>>> is a PROCESS-scoped managed object declared in
+  <<<officefloor/managedobjects/>>>.  It implements <<<Auditable>>>, which is what makes
+  it eligible for governance enrollment.  Because the scope is PROCESS, each request gets
+  a fresh instance with an empty event list — the perfect scratchpad for tracking what
+  happened within that request.
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestgovernance/AuditRecord.java|ignoreDownloadError=false}
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/managedobjects/AuditRecord.yml|ignoreDownloadError=false}
+
+
+
+*The governance — <<<AuditGovernance>>>
+
+  A class-based governance uses three annotations from the
+  <<<net.officefloor.plugin.governance.clazz>>> package:
+
+   * {{{/apidocs/net/officefloor/plugin/governance/clazz/Govern.html}@Govern}} — called
+     by OfficeFloor <<before>> the function body executes, once per enrolled managed
+     object.  The parameter type declares the extension interface.  Analogous to beginning
+     a transaction.
+
+   * {{{/apidocs/net/officefloor/plugin/governance/clazz/Enforce.html}@Enforce}} — called
+     by OfficeFloor <<after>> the function body completes successfully.  Analogous to
+     committing a transaction.
+
+   * {{{/apidocs/net/officefloor/plugin/governance/clazz/Disregard.html}@Disregard}} —
+     called by OfficeFloor when the function throws an unhandled exception.  Analogous to
+     rolling back a transaction.
+
+  A new instance of the governance class is created per function invocation, so storing
+  the enrolled object as a field is safe and shared across all three lifecycle methods:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestgovernance/AuditGovernance.java|ignoreDownloadError=false}
+
+  For more complex governance — declaring flow outputs, injecting dependencies, or
+  performing asynchronous setup — extend
+  {{{/apidocs/net/officefloor/compile/spi/governance/source/impl/AbstractGovernanceSource.html}AbstractGovernanceSource}}
+  and reference the class with <<<source:>>> in the YAML instead of <<<class:>>>.
+
+
+
+*Configuring governance — <<<officefloor/govern/>>>
+
+  Governance is declared as YAML files in <<<src/main/resources/officefloor/govern/>>>.
+  The file name becomes the governance name used in <<<govern:>>> lists.  The <<<class>>>
+  field names the governance implementation:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/govern/audit.yml|ignoreDownloadError=false}
+
+  Any number of YAML files may be placed in <<<officefloor/govern/>>>; each declares one
+  governance.  A <<<source:>>> field accepts a custom
+  {{{/apidocs/net/officefloor/compile/spi/governance/source/impl/AbstractGovernanceSource.html}AbstractGovernanceSource}}
+  implementation for cases that require flow outputs or properties:
+
++--
+governance:
+  source: com.example.MyGovernanceSource
+  properties:
+    timeout.ms: 5000
++--
+
+
+
+*Service methods
+
+  The governed service carries <<<govern: [ audit ]>>> in its REST YAML.  No annotation
+  is needed on the service class itself:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestgovernance/GovernedService.java|ignoreDownloadError=false}
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/governed.GET.yml|ignoreDownloadError=false}
+
+  The ungoverned service is identical in code but carries no <<<govern:>>> declaration.
+  <<<AuditGovernance>>> is never activated for this function even though <<<AuditRecord>>>
+  implements <<<Auditable>>>:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestgovernance/UngovernedService.java|ignoreDownloadError=false}
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/ungoverned.GET.yml|ignoreDownloadError=false}
+
+
+
+*Testing
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springrestgovernance/SpringRestGovernanceHttpServerTest.java|ignoreDownloadError=false}
+
+  <<<governedEndpointRunsGovernanceBeforeServiceBody>>> reads the event list from the
+  response and asserts three things: <<<"governance-begin">>> is present (proving
+  {{{/apidocs/net/officefloor/plugin/governance/clazz/Govern.html}@Govern}} ran),
+  <<<"service-called">>> is present (proving the service body ran), and
+  <<<"governance-begin">>> precedes <<<"service-called">>> in the list (proving
+  {{{/apidocs/net/officefloor/plugin/governance/clazz/Govern.html}@Govern}} fires
+  <<before>> the function body).
+
+  Note that <<<"governance-commit">>> does not appear in the response: the HTTP response
+  is sent during the service method body, and {{{/apidocs/net/officefloor/plugin/governance/clazz/Enforce.html}@Enforce}}
+  runs after the method returns.  This is correct behaviour — enforcement is a post-response
+  cleanup, exactly as a database commit happens after the application logic completes.
+
+  <<<ungovernedEndpointSkipsGovernance>>> confirms that a function without a <<<govern:>>>
+  declaration never activates the governance even when its managed objects implement the
+  extension interface.
+
+
+
+*Governance vs Spring AOP
+
+*----------------------+----------------------------------------------------------------------+
+|| Mechanism           || How it wraps a function
+*----------------------+----------------------------------------------------------------------+
+| Spring <<<@Transactional>>> (AOP) | A proxy intercepts calls to the annotated method. The annotation must be on a Spring-managed bean. Self-invocation (calling the method from within the same class) bypasses the proxy and skips the transaction.
+*----------------------+----------------------------------------------------------------------+
+| OfficeFloor Governance | The OfficeFloor runtime wraps the function at the framework level, before the method is invoked. No proxy is involved. Any function in any YAML pipeline can be governed regardless of whether its class is a Spring bean, and self-invocation is not a concept in a pipeline model.
+*----------------------+----------------------------------------------------------------------+
+
+  Governance is particularly useful when the governed logic spans multiple pipeline steps,
+  when the governed object is a managed object rather than a Spring bean, or when you want
+  the governance declaration to live in the YAML alongside the pipeline it wraps rather than
+  scattered across Java annotations.
+
+
+
+*What you have now
+
+  After completing this tutorial you can:
+
+   * Declare a class-based governance in <<<officefloor/govern/>>> using
+     {{{/apidocs/net/officefloor/plugin/governance/clazz/Govern.html}@Govern}},
+     {{{/apidocs/net/officefloor/plugin/governance/clazz/Enforce.html}@Enforce}}, and
+     {{{/apidocs/net/officefloor/plugin/governance/clazz/Disregard.html}@Disregard}}
+     to implement begin, commit, and rollback lifecycle
+
+   * Define a governance extension interface and implement it on managed objects to make
+     them automatically eligible for enrollment
+
+   * Apply the governance to individual REST functions via <<<govern: [ name ]>>> in the
+     REST YAML — no annotation required on the service class
+
+   * Understand that {{{/apidocs/net/officefloor/plugin/governance/clazz/Enforce.html}@Enforce}}
+     runs after the HTTP response is sent, making it suitable for cleanup and commit rather
+     than for populating the response
+
+   * Extend {{{/apidocs/net/officefloor/compile/spi/governance/source/impl/AbstractGovernanceSource.html}AbstractGovernanceSource}}
+     for governances that need flow outputs, dependencies, or YAML-injected properties
+
+
+
+Next
+
+  The {{{../SpringRestVariableHttpServer/index.html}Variables tutorial}} demonstrates
+  passing state downstream through a procedure flow without coupling callers to callees
+  using <<<Out\<T\>>>> and <<<@Val>>>.

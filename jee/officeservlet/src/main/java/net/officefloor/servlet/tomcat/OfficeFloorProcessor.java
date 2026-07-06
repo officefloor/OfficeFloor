@@ -197,7 +197,7 @@ public class OfficeFloorProcessor extends AbstractProcessor {
 			int statusCode = this.response.getStatus();
 			String message = this.response.getMessage();
 			if ((message != null) && (message.length() > 0)) {
-				failure = new HttpException(statusCode, message);
+				failure = new HttpException(HttpStatus.getHttpStatus(statusCode), null, message);
 			}
 		}
 		if (failure == null) {

@@ -20,7 +20,6 @@
 
 package net.officefloor.web.jwt;
 
-import java.io.IOException;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -32,9 +31,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.crypto.DefaultJwtSignatureValidator;
@@ -108,7 +109,6 @@ public class JwtHttpSecuritySource<C> extends
 	 * 
 	 * @param validateKeysFactory {@link JwtValidateKeysFactory}. May be
 	 *                            <code>null</code> to not override.
-	 * @throws T If failure in {@link ContextRunnable}.
 	 */
 	public static void setOverrideKeys(JwtValidateKeysFactory validateKeysFactory) {
 		if (validateKeysFactory != null) {
@@ -184,7 +184,16 @@ public class JwtHttpSecuritySource<C> extends
 	 * Flow keys.
 	 */
 	public static enum Flows {
-		RETRIEVE_KEYS, RETRIEVE_ROLES, NO_JWT, INVALID_JWT, EXPIRED_JWT
+		/** Retrieve keys flow. */
+		RETRIEVE_KEYS,
+		/** Retrieve roles flow. */
+		RETRIEVE_ROLES,
+		/** No JWT flow. */
+		NO_JWT,
+		/** Invalid JWT flow. */
+		INVALID_JWT,
+		/** Expired JWT flow. */
+		EXPIRED_JWT
 	}
 
 	/**
@@ -200,7 +209,9 @@ public class JwtHttpSecuritySource<C> extends
 	/**
 	 * {@link ObjectMapper}.
 	 */
-	private static final ObjectMapper mapper = new ObjectMapper();
+	private static final ObjectMapper mapper = JsonMapper.builder()
+			.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+			.build();
 
 	/**
 	 * {@link JwtClaims} {@link JavaType}.
@@ -212,18 +223,6 @@ public class JwtHttpSecuritySource<C> extends
 	 */
 	private static final JavaType jwtHeaderJavaType = mapper.constructType(JwtHeader.class);
 
-	static {
-		// Ensure JSON deserialising is valid
-		if (!mapper.canDeserialize(jwtClaimsJavaType)) {
-			throw new IllegalStateException("Unable to deserialize " + JwtClaims.class.getSimpleName());
-		}
-		if (!mapper.canDeserialize(jwtHeaderJavaType)) {
-			throw new IllegalStateException("Unable to deserialize " + JwtHeader.class.getSimpleName());
-		}
-
-		// Ensure ignore unknown properties (avoid added "exp" causing problems)
-		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-	}
 
 	/**
 	 * {@link Clock}.
@@ -286,10 +285,6 @@ public class JwtHttpSecuritySource<C> extends
 
 		// Ensure claims class can be deserialised
 		this.claimsJavaType = mapper.constructType(this.claimsClass);
-		if (!mapper.canDeserialize(this.claimsJavaType)) {
-			throw new IOException("Unable to deserialise " + this.claimsClass.getName() + " to load JWT claims");
-		}
-
 		// Load the possible JWT keys override
 		this.keysOverride = threadLocalKeysOverride.get();
 		if ((this.keysOverride == null) || (this.keysOverride.validateKeysFactory == null)) {
@@ -389,8 +384,8 @@ public class JwtHttpSecuritySource<C> extends
 			try {
 				validateKeys = this.jwtValidateKeys.getState(this.startupTimeout, TimeUnit.MILLISECONDS);
 			} catch (TimeoutException ex) {
-				context.accessControlChange(null, new HttpException(HttpStatus.SERVICE_UNAVAILABLE,
-						new TimeoutException("Server timed out loading JWT keys")));
+				context.accessControlChange(null, new HttpException(HttpStatus.SERVICE_UNAVAILABLE, null,
+						"Server timed out loading JWT keys"));
 				return; // must obtain validate keys
 			}
 		}
@@ -426,7 +421,7 @@ public class JwtHttpSecuritySource<C> extends
 		JwtClaims validateClaims;
 		try {
 			validateClaims = mapper.readValue(claimsBytes, jwtClaimsJavaType);
-		} catch (IOException e) {
+		} catch (JacksonException e) {
 			// Must be able to parse claims
 			this.challenge(ChallengeReason.INVALID_JWT, context);
 			return;
@@ -456,7 +451,7 @@ public class JwtHttpSecuritySource<C> extends
 		JwtHeader header;
 		try {
 			header = mapper.readValue(headerBytes, jwtHeaderJavaType);
-		} catch (IOException ex) {
+		} catch (JacksonException ex) {
 			// Must be able to parse header
 			this.challenge(ChallengeReason.INVALID_JWT, context);
 			return;
@@ -510,7 +505,7 @@ public class JwtHttpSecuritySource<C> extends
 		C claims;
 		try {
 			claims = mapper.readValue(claimsBytes, this.claimsJavaType);
-		} catch (IOException ex) {
+		} catch (JacksonException ex) {
 			// Must be able to parse claims
 			this.challenge(ChallengeReason.INVALID_JWT, context);
 			return;

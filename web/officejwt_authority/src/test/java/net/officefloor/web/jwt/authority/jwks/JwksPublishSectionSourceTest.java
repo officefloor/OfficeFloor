@@ -28,7 +28,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -192,10 +192,7 @@ public class JwksPublishSectionSourceTest extends OfficeFrameTestCase implements
 		// Attempt to obtain the keys
 		MockHttpResponse response = this.getJwksKeys(new JwtValidateKey[] { new JwtValidateKey(unknownKey) },
 				HttpStatus.INTERNAL_SERVER_ERROR, (mockResponse) -> mockResponse);
-		assertEquals("Incorrect response",
-				JacksonHttpObjectResponderFactory
-						.getEntity(new HttpException(new Exception("No JwksKeyWriter for key UNKNOWN")), mapper),
-				response.getEntity(null));
+		assertEquals("Incorrect response", "No JwksKeyWriter for key UNKNOWN", response.getEntity(null));
 
 		// Ensure verify
 		this.verifyMockObjects();

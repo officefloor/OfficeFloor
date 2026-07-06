@@ -1,0 +1,3 @@
+retrievePost:
+  class: net.officefloor.tutorial.azurewebappshttpserver.AzureLogic
+  method: retrievePost

@@ -1,0 +1,201 @@
+package net.officefloor.tutorial.springrestsecurity;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithUserDetails;
+import org.springframework.test.web.servlet.MockMvc;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+// START SNIPPET: tutorial
+@SpringBootTest
+@AutoConfigureMockMvc
+public class SpringRestSecurityTest {
+
+	@Autowired
+	private MockMvc mvc;
+
+	// --- YAML authorize (preferred approach) ---
+
+	@Test
+	@WithMockUser(username = "admin", roles = "ADMIN")
+	public void yaml_authorize_grants_admin() throws Exception {
+		mvc.perform(get("/security/yaml"))
+			.andExpect(status().isOk())
+			.andExpect(content().string("Admin via YAML"));
+	}
+
+	@Test
+	@WithMockUser(username = "user", roles = "USER")
+	public void yaml_authorize_denies_non_admin() throws Exception {
+		mvc.perform(get("/security/yaml"))
+			.andExpect(status().isForbidden());
+	}
+
+	@Test
+	@WithMockUser(username = "admin", roles = "ADMIN")
+	public void inherited_authorize_grants_admin() throws Exception {
+		mvc.perform(get("/security/admin/report"))
+			.andExpect(status().isOk())
+			.andExpect(content().string("Admin Report"));
+	}
+
+	@Test
+	@WithMockUser(username = "user", roles = "USER")
+	public void inherited_authorize_denies_non_admin() throws Exception {
+		mvc.perform(get("/security/admin/report"))
+			.andExpect(status().isForbidden());
+	}
+
+	@Test
+	@WithMockUser(username = "superadmin", roles = "SUPER")
+	public void override_authorize_grants_super() throws Exception {
+		mvc.perform(get("/security/admin/super"))
+			.andExpect(status().isOk())
+			.andExpect(content().string("Super Admin Only"));
+	}
+
+	@Test
+	@WithMockUser(username = "admin", roles = "ADMIN")
+	public void override_authorize_denies_admin_without_super() throws Exception {
+		mvc.perform(get("/security/admin/super"))
+			.andExpect(status().isForbidden());
+	}
+
+	@Test
+	@WithMockUser(username = "user", roles = "USER")
+	public void disable_inherited_authorize_grants_non_admin() throws Exception {
+		mvc.perform(get("/security/admin/open"))
+			.andExpect(status().isOk())
+			.andExpect(content().string("Open under Admin"));
+	}
+
+	@Test
+	@WithMockUser(username = "admin", roles = "ADMIN")
+	public void disable_inherited_authorize_grants_admin() throws Exception {
+		mvc.perform(get("/security/admin/open"))
+			.andExpect(status().isOk())
+			.andExpect(content().string("Open under Admin"));
+	}
+
+	// --- Spring Security integration ---
+
+	@Test
+	public void public_endpoint_no_auth_required() throws Exception {
+		mvc.perform(get("/security/public"))
+			.andExpect(status().isOk())
+			.andExpect(content().string("Hello, World!"));
+	}
+
+	@Test
+	public void protected_endpoint_requires_authentication() throws Exception {
+		mvc.perform(get("/security/me"))
+			.andExpect(status().isUnauthorized());
+	}
+
+	@Test
+	@WithMockUser(username = "daniel", roles = "USER")
+	public void current_user_via_authentication_principal() throws Exception {
+		mvc.perform(get("/security/me"))
+			.andExpect(status().isOk())
+			.andExpect(content().string("Hello, daniel!"));
+	}
+
+	@Test
+	@WithUserDetails("user")
+	public void with_user_details_loads_real_user() throws Exception {
+		mvc.perform(get("/security/me"))
+			.andExpect(status().isOk())
+			.andExpect(content().string("Hello, user!"));
+	}
+
+	@Test
+	@WithMockUser(username = "daniel", roles = {"USER", "ADMIN"})
+	public void user_roles_from_granted_authorities() throws Exception {
+		mvc.perform(get("/security/roles"))
+			.andExpect(status().isOk())
+			.andExpect(content().string("ROLE_ADMIN, ROLE_USER"));
+	}
+
+	@Test
+	@WithMockUser(username = "daniel", roles = "USER")
+	public void authentication_as_direct_parameter() throws Exception {
+		mvc.perform(get("/security/auth"))
+			.andExpect(status().isOk())
+			.andExpect(content().string("Authenticated as: daniel"));
+	}
+
+	@Test
+	@WithMockUser(username = "daniel", roles = "USER")
+	public void spring_security_bean_injected_as_parameter() throws Exception {
+		mvc.perform(get("/security/bean"))
+			.andExpect(status().isOk())
+			.andExpect(content().string("Loaded: user"));
+	}
+
+	@Test
+	@WithMockUser(username = "admin", roles = "ADMIN")
+	public void pre_authorize_grants_admin() throws Exception {
+		mvc.perform(get("/security/preauthorize"))
+			.andExpect(status().isOk())
+			.andExpect(content().string("Admin access via @PreAuthorize"));
+	}
+
+	@Test
+	@WithMockUser(username = "user", roles = "USER")
+	public void pre_authorize_denies_non_admin() throws Exception {
+		mvc.perform(get("/security/preauthorize"))
+			.andExpect(status().isForbidden());
+	}
+
+	@Test
+	@WithMockUser(username = "admin", roles = "ADMIN")
+	public void secured_grants_admin() throws Exception {
+		mvc.perform(get("/security/secured"))
+			.andExpect(status().isOk())
+			.andExpect(content().string("Admin access via @Secured"));
+	}
+
+	@Test
+	@WithMockUser(username = "user", roles = "USER")
+	public void secured_denies_non_admin() throws Exception {
+		mvc.perform(get("/security/secured"))
+			.andExpect(status().isForbidden());
+	}
+
+	@Test
+	@WithMockUser(username = "admin", roles = "ADMIN")
+	public void roles_allowed_grants_admin() throws Exception {
+		mvc.perform(get("/security/rolesallowed"))
+			.andExpect(status().isOk())
+			.andExpect(content().string("Admin access via @RolesAllowed"));
+	}
+
+	@Test
+	@WithMockUser(username = "user", roles = "USER")
+	public void roles_allowed_denies_non_admin() throws Exception {
+		mvc.perform(get("/security/rolesallowed"))
+			.andExpect(status().isForbidden());
+	}
+
+	@Test
+	@WithMockUser(username = "admin", roles = "ADMIN")
+	public void spel_bean_reference_grants_admin() throws Exception {
+		mvc.perform(get("/security/rolebean"))
+			.andExpect(status().isOk())
+			.andExpect(content().string("Admin access via @PreAuthorize SpEL bean reference"));
+	}
+
+	@Test
+	@WithMockUser(username = "user", roles = "USER")
+	public void spel_bean_reference_denies_non_admin() throws Exception {
+		mvc.perform(get("/security/rolebean"))
+			.andExpect(status().isForbidden());
+	}
+}
+// END SNIPPET: tutorial

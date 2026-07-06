@@ -22,7 +22,7 @@ package net.officefloor.web.jwt.authority;
 
 import java.security.Key;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 import net.officefloor.compile.impl.structure.ManagedObjectSourceNodeImpl;
 import net.officefloor.compile.test.issues.MockCompilerIssues;

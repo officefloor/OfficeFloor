@@ -152,6 +152,8 @@ public abstract class AbstractStartSamMojo extends AbstractMojo {
 
 	/**
 	 * Ensures the template.yaml file exists.
+	 *
+	 * @throws MojoExecutionException If fails to ensure the template.yaml file exists.
 	 */
 	public void ensureTemplateYamlFileExists() throws MojoExecutionException {
 
@@ -214,6 +216,8 @@ public abstract class AbstractStartSamMojo extends AbstractMojo {
 
 	/**
 	 * Undertakes SAM build.
+	 *
+	 * @throws MojoExecutionException If the SAM build fails.
 	 */
 	public void samBuild() throws MojoExecutionException {
 
@@ -233,6 +237,8 @@ public abstract class AbstractStartSamMojo extends AbstractMojo {
 
 	/**
 	 * Copies in the maven dependencies.
+	 *
+	 * @throws MojoExecutionException If fails to copy the dependencies.
 	 */
 	public void copyDependencies() throws MojoExecutionException {
 
@@ -284,7 +290,8 @@ public abstract class AbstractStartSamMojo extends AbstractMojo {
 
 	/**
 	 * Ensure the docker network is created.
-	 * 
+	 *
+	 * @return {@link DockerNetworkInstance}.
 	 * @throws MojoExecutionException If fails to create network.
 	 */
 	public DockerNetworkInstance dockerNetwork() throws MojoExecutionException {

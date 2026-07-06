@@ -31,6 +31,7 @@ import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.OfficeObjectNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.SectionObjectNode;
 import net.officefloor.compile.internal.structure.CompileContext;
@@ -168,6 +169,32 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 	@Override
 	public SectionNode getSectionNode() {
 		return this.section;
+	}
+
+	@Override
+	public boolean pruneIfUnused() {
+
+		// Remove from section node
+		if (!this.section.removeSectionObjectIfUnused(this)) {
+			return false; // still used
+		}
+
+		// Capture possible outward link to further section object
+		SectionObjectNode outerSectionObject = null;
+		if ((this.linkedObjectNode != null) && (this.linkedObjectNode instanceof SectionObjectNode)) {
+			outerSectionObject = (SectionObjectNode) this.linkedObjectNode;
+		}
+
+		// Unlink
+		this.linkedObjectNode = null;
+
+		// Remove possible outer section object
+		if (outerSectionObject != null) {
+			outerSectionObject.pruneIfUnused();
+		}
+
+		// As here, removed
+		return true;
 	}
 
 	@Override

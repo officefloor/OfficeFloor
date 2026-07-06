@@ -158,6 +158,11 @@ public class LogTestSupport implements TestSupport, BeforeAllCallback, AfterAllC
 	 * @param <T> Possible {@link Throwable}.
 	 */
 	public static interface TestCapture<T extends Throwable> {
+		/**
+		 * Runs the test logic.
+		 *
+		 * @throws T Possible {@link Throwable}.
+		 */
 		void run() throws T;
 	}
 

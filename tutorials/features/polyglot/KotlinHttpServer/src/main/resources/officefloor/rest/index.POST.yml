@@ -1,0 +1,4 @@
+Kotlin:
+  resource: net.officefloor.tutorial.kotlinhttpserver.KotlinLogicKt
+  procedure: Kotlin
+  method: service

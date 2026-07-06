@@ -32,6 +32,7 @@ import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.AutoWire;
 import net.officefloor.compile.internal.structure.AutoWireLink;
 import net.officefloor.compile.internal.structure.AutoWirer;
+import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
 import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
@@ -122,7 +123,7 @@ public class GovernanceNodeImpl implements GovernanceNode {
 	 * {@link ManagedObjectNode} instances being governed by this
 	 * {@link Governance}.
 	 */
-	private final List<ManagedObjectNode> governedManagedObjects = new LinkedList<>();
+	private final List<BoundManagedObjectNode> governedManagedObjects = new LinkedList<>();
 
 	/**
 	 * Flags whether to auto-wire the {@link GovernerableManagedObject} instances.
@@ -262,7 +263,7 @@ public class GovernanceNodeImpl implements GovernanceNode {
 		AutoWireLink<GovernanceNode, ManagedObjectExtensionNode>[] links = autoWirer.getAutoWireLinks(this,
 				new AutoWire(governanceType.getExtensionType()));
 		for (AutoWireLink<GovernanceNode, ManagedObjectExtensionNode> link : links) {
-			ManagedObjectNode managedObjectNode = (ManagedObjectNode) link.getTargetNode(this.officeNode);
+			BoundManagedObjectNode managedObjectNode = (BoundManagedObjectNode) link.getTargetNode(this.officeNode);
 			managedObjectNode.addGovernance(this, this.officeNode);
 			this.governedManagedObjects.add(managedObjectNode);
 		}

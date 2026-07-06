@@ -1,0 +1,8 @@
+managed-object:
+  source: net.officefloor.jpa.hibernate.HibernateJpaManagedObjectSource
+  properties:
+    persistence.unit.name: test
+    persistence.dependency: datasource
+    hibernate.hbm2ddl.auto: validate
+  start-after:
+    - net.officefloor.flyway.FlywayMigration

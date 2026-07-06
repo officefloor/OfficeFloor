@@ -124,7 +124,8 @@ public class HttpClientTestUtil {
 
 	/**
 	 * Create the {@link HttpClientBuilder}.
-	 * 
+	 *
+	 * @param timeout Timeout in milliseconds.
 	 * @return {@link HttpClientBuilder}.
 	 */
 	public static HttpClientBuilder createHttpClientBuilder(int timeout) {

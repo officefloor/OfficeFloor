@@ -47,11 +47,24 @@ import net.officefloor.server.stream.StreamBufferPool;
 public class HttpServletHttpResponseWriter implements HttpResponseWriter<ByteBuffer> {
 
 	/**
+	 * Thread-local byte array reused across writes to avoid heap allocation on
+	 * each call. Grows to the largest chunk seen on that thread.
+	 */
+	private static final ThreadLocal<byte[]> WRITE_BUFFER = ThreadLocal.withInitial(() -> new byte[1024]);
+
+	/**
 	 * {@link ByteBufferWriter}.
 	 */
 	private static final ByteBufferWriter byteBufferWriter = (buffer, outputStream) -> {
-		for (int position = BufferJvmFix.position(buffer); position < BufferJvmFix.limit(buffer); position++) {
-			outputStream.write(buffer.get());
+		int length = BufferJvmFix.limit(buffer) - BufferJvmFix.position(buffer);
+		if (length > 0) {
+			byte[] bytes = WRITE_BUFFER.get();
+			if (bytes.length < length) {
+				bytes = new byte[length];
+				WRITE_BUFFER.set(bytes);
+			}
+			buffer.get(bytes, 0, length);
+			outputStream.write(bytes, 0, length);
 		}
 	};
 

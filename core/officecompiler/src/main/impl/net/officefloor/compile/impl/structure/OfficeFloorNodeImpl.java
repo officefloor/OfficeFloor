@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -747,6 +747,9 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
             inputMo.addTypeQualification(typeQualifier, objectType.getName());
             LinkUtil.linkManagedObjectSourceInput(mos, inputMo, this.context.getCompilerIssues(), this);
 
+            // Bind the input managed object to its managed object source
+            inputMo.setBoundOfficeFloorManagedObjectSource(mos);
+
             // Register the external service input factory
             this.externalServiceInputFactories.put(inputObjectName, input);
         }
@@ -1138,6 +1141,25 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 
             // Load the managed object type
             ManagedObjectType<?> moType = mo.getManagedObjectSourceNode().loadManagedObjectType(compileContext);
+            if (moType == null) {
+                return; // must have type
+            }
+
+            // Load the auto-wiring for the extensions
+            for (Class<?> extensionType : moType.getExtensionTypes()) {
+                managedObjectAutoWirer.addAutoWireTarget(mo, new AutoWire(extensionType));
+            }
+        });
+        this.inputManagedObjects.values().forEach((mo) -> {
+
+            // Do not autowire if not bound
+            ManagedObjectSourceNode mos = mo.getBoundManagedObjectSourceNode();
+            if (mos == null) {
+                return; // must be bound to auto-wire
+            }
+
+            // Load the managed object type
+            ManagedObjectType<?> moType = mos.loadManagedObjectType(compileContext);
             if (moType == null) {
                 return; // must have type
             }

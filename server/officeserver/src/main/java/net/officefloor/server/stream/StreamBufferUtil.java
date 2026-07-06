@@ -1,3 +1,23 @@
+/*-
+ * #%L
+ * HTTP Server
+ * %%
+ * Copyright (C) 2005 - 2026 Daniel Sagenschneider
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 package net.officefloor.server.stream;
 
 import java.io.IOException;
@@ -17,6 +37,7 @@ public class StreamBufferUtil {
 	 * @param headBuffer   Head {@link StreamBuffer}.
 	 * @param outputStream Target {@link OutputStream}.
 	 * @param bufferPool   {@link StreamBufferPool}.
+	 * @throws IOException If fails to write.
 	 */
 	public static void write(StreamBuffer<ByteBuffer> headBuffer, OutputStream outputStream,
 			StreamBufferPool<ByteBuffer> bufferPool) throws IOException {
@@ -82,16 +103,29 @@ public class StreamBufferUtil {
 	}
 
 	/**
+	 * Thread-local byte array reused across writes to avoid heap allocation on
+	 * each call. Grows to the largest chunk seen on that thread.
+	 */
+	private static final ThreadLocal<byte[]> WRITE_BUFFER = ThreadLocal.withInitial(() -> new byte[8192]);
+
+	/**
 	 * Writes the {@link ByteBuffer} to the {@link OutputStream}.
-	 * 
+	 *
 	 * @param buffer       {@link ByteBuffer}.
 	 * @param outputStream {@link OutputStream}.
 	 * @throws IOException If fails to write {@link ByteBuffer} content to the
 	 *                     {@link OutputStream}.
 	 */
 	private static final void write(ByteBuffer buffer, OutputStream outputStream) throws IOException {
-		for (int position = BufferJvmFix.position(buffer); position < BufferJvmFix.limit(buffer); position++) {
-			outputStream.write(buffer.get());
+		int length = BufferJvmFix.limit(buffer) - BufferJvmFix.position(buffer);
+		if (length > 0) {
+			byte[] bytes = WRITE_BUFFER.get();
+			if (bytes.length < length) {
+				bytes = new byte[length];
+				WRITE_BUFFER.set(bytes);
+			}
+			buffer.get(bytes, 0, length);
+			outputStream.write(bytes, 0, length);
 		}
 	};
 

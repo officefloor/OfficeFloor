@@ -1,0 +1,3 @@
+source: net.officefloor.nosql.dynamodb.DynamoDbSupplierSource
+properties:
+  dynamo.entity.locators: net.officefloor.tutorial.dynamodbhttpserver.DynamoDbEntities

@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Thread Affinity</title>
+<link href="./css/Site.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+	<h1 th:text="${model.threadName}">Thread Name</h1>
+	<h2>CPUs</h2>
+	<ul>
+		<li th:each="cpu : ${model.cpus}" th:text="${cpu.cpuNumber}">0</li>
+	</ul>
+</body>
+</html>

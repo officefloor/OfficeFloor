@@ -1,26 +1,94 @@
+/*-
+ * #%L
+ * Composition
+ * %%
+ * Copyright (C) 2005 - 2026 Daniel Sagenschneider
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 package net.officefloor.activity.compose.build;
 
+import net.officefloor.activity.compose.ComposeConfiguration;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.office.OfficeGovernance;
+import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.section.SectionInput;
+
+import java.util.function.Predicate;
 
 /**
  * Builds the composed {@link net.officefloor.frame.api.function.ManagedFunction} instances.
  */
-public interface ComposeArchitect<S> {
+public interface ComposeArchitect {
 
     /**
-     * {@link SectionInput} name to invoke the composition.
-     */
-    public static final String INPUT_NAME = "procedure";
-
-    /**
-     * Adds a composition.
+     * Adds {@link OfficeSectionInput} that will be available to link in composition via <code>#inputName</code>.
      *
-     * @param sectionName Name to identify the resulting {@link net.officefloor.compile.spi.office.OfficeSection}.
-     * @param resourceName Name of resource defining the composition.
-     * @param properties {@link PropertyList} to configure the composition.
-     * @return {@link net.officefloor.compile.spi.office.OfficeSection} or {@link net.officefloor.compile.spi.section.SubSection}.
+     * @param inputName Name for input in composition.
+     * @param input     {@link OfficeSectionInput}.
      */
-    S addComposition(String sectionName, String resourceName, PropertyList properties);
+    void addInput(String inputName, OfficeSectionInput input);
+
+    /**
+     * Adds {@link OfficeGovernance} for the composition.
+     *
+     * @param governanceName Name used in composition for the {@link OfficeGovernance}.
+     * @param goverance      {@link OfficeGovernance}.
+     */
+    void addGovernance(String governanceName, OfficeGovernance goverance);
+
+    /**
+     * Determines if compositions are available in the resource directory.
+     *
+     * @param resourceDirectory Name of directory containing the compositions.
+     * @param itemNameFilter    {@link Predicate} to filter item names (file name minus extension).
+     *                          Only items whose name passes the filter are considered.
+     * @return <code>true</code> if at least one matching composition is available.
+     * @throws Exception If fails to check for compositions.
+     */
+    boolean isCompositionsAvailable(String resourceDirectory, Predicate<String> itemNameFilter) throws Exception;
+
+    /**
+     * Builds the item requiring composition.
+     *
+     * @param sectionName   Name of the {@link net.officefloor.compile.spi.office.OfficeSection} to contain the composition.
+     * @param source        {@link ComposeSource} to source the item requiring composition.
+     * @param resourceName  Name of resource defining the composition.
+     * @param properties    {@link PropertyList} to configure the composition.
+     * @param configuration {@link Class} extending {@link ComposeConfiguration} to provide additional configuration for the item being built.
+     * @param <C>           Configuration type.
+     * @param <T>           Built item type.
+     * @return Built item.
+     * @throws Exception If fails to build item.
+     */
+    <C extends ComposeConfiguration, T> T addComposition(String sectionName, ComposeSource<T, C> source,
+                                                         String resourceName, PropertyList properties,
+                                                         Class<C> configuration) throws Exception;
+
+    /**
+     * Builds a directory of items requiring composition.
+     *
+     * @param namespace Namespace to isolate the compositions ({@link net.officefloor.compile.spi.section.source.SectionSource}) instances from other compositions.
+     * @param composer          {@link DirectoryItemComposer} to source the items requiring composition.
+     * @param resourceDirectory Name of directory containing the compositions.
+     * @param properties        {@link PropertyList} to configure the compositions.
+     * @param listener          {@link ComposeListener} to receive the built items.
+     * @param <T>               Build item type.
+     * @throws Exception If fails to build the items.
+     */
+    <T> void addCompositions(String namespace, DirectoryItemComposer<T> composer, String resourceDirectory,
+                             PropertyList properties, ComposeListener<T> listener) throws Exception;
 
 }

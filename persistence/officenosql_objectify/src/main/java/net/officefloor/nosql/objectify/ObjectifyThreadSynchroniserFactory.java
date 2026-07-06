@@ -80,8 +80,6 @@ public class ObjectifyThreadSynchroniserFactory implements ThreadSynchroniserFac
 	 * Instantiate.
 	 * 
 	 * @param objectifyFactory {@link ObjectifyFactory}.
-	 * @throws Exception If fails to access {@link ObjectifyFactory} for
-	 *                   {@link ThreadLocal} details.
 	 */
 	public ObjectifyThreadSynchroniserFactory(ObjectifyFactory objectifyFactory) {
 		this.objectifyFactory = objectifyFactory;

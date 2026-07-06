@@ -1,0 +1,43 @@
+name: Site Link Check
+
+on:
+  workflow_dispatch:
+
+env:
+  BUILD_MAVEN_VERSION: 3.9.2
+
+jobs:
+  linkcheck:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Set up Maven
+      uses: stCarolas/setup-maven@v4.5
+      with:
+        maven-version: ${{ env.BUILD_MAVEN_VERSION }}
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: 17
+
+    - name: Build
+      run: mvn -V -B -e -DskipTests -DskipITs clean install --file bom/pom.xml
+
+    - name: Generate Site
+      run: mvn -V -B -e -Dofficefloor-deploy=site post-site
+
+    - name: Stage Site
+      run: |
+        mvn -V -B -e site:stage -P site-link-check
+        cp -R target/site/apidocs/ target/staging/
+
+    - name: Run Link Check
+      uses: lycheeverse/lychee-action@v2
+      with:
+        args: --offline --root-dir ${{ github.workspace }}/target/staging/ "${{ github.workspace }}/target/staging/**/*.html"
+        fail: true

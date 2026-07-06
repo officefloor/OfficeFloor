@@ -35,11 +35,14 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
+import net.officefloor.activity.compose.build.ComposeArchitect;
+import net.officefloor.activity.compose.build.ComposeEmployer;
+import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
@@ -172,9 +175,7 @@ public class JwtHttpSecurityIntegrateTest {
 	public void timeoutOnNoKeys() throws Exception {
 		jwtDecodeCollectorHandler = (collector) -> {
 		};
-		String errorEntity = JacksonHttpObjectResponderFactory
-				.getEntity(new HttpException(new TimeoutException("Server timed out loading JWT keys")), mapper);
-		this.doJwtTest("Bearer NO.KEYS.AVAILBLE", HttpStatus.SERVICE_UNAVAILABLE, errorEntity,
+		this.doJwtTest("Bearer NO.KEYS.AVAILBLE", HttpStatus.SERVICE_UNAVAILABLE, "Server timed out loading JWT keys",
 				JwtHttpSecuritySource.PROEPRTY_STARTUP_TIMEOUT, "0");
 	}
 
@@ -351,8 +352,7 @@ public class JwtHttpSecurityIntegrateTest {
 		String otherToken = Jwts.builder().signWith(keyPair.getPrivate()).claim("role", "other").compact();
 		MockHttpRequestBuilder request = MockHttpServer.mockRequest(ROLE_PATH);
 		request.header("Authorization", "Bearer " + otherToken);
-		this.server.send(request).assertResponse(HttpStatus.FORBIDDEN.getStatusCode(),
-				JacksonHttpObjectResponderFactory.getEntity(new HttpException(HttpStatus.FORBIDDEN), mapper));
+		this.server.send(request).assertResponse(HttpStatus.FORBIDDEN.getStatusCode(), "");
 
 		// JWT for role
 		String roleToken = Jwts.builder().signWith(keyPair.getPrivate()).claim("role", "allow").compact();
@@ -576,7 +576,7 @@ public class JwtHttpSecurityIntegrateTest {
 	 *                                 header.
 	 * @param expectedStatus           Expected {@link HttpStatus}.
 	 * @param expectedEntity           Expected entity content.
-	 * @param httpSecuirtyProperties   {@link HttpSecuritySource} {@link Property}
+	 * @param httpSecurityProperties   {@link HttpSecuritySource} {@link Property}
 	 *                                 name/value pairs.
 	 */
 	private void doJwtTest(String authorizationHeaderValue, HttpStatus expectedStatus, String expectedEntity,
@@ -620,10 +620,12 @@ public class JwtHttpSecurityIntegrateTest {
 		compiler.mockHttpServer((server) -> this.server = server);
 		compiler.web((context) -> {
 			OfficeArchitect office = context.getOfficeArchitect();
+			OfficeSourceContext sourceContext = context.getOfficeSourceContext();
+			ComposeArchitect compose = ComposeEmployer.employComposeArchitect(office, sourceContext);
 
 			// Load the JWT security
 			HttpSecurityArchitect security = HttpSecurityArchitectEmployer.employHttpSecurityArchitect(
-					context.getWebArchitect(), context.getOfficeArchitect(), context.getOfficeSourceContext());
+					context.getWebArchitect(), compose, office, sourceContext);
 			HttpSecurityBuilder jwt = security.addHttpSecurity("JWT", JwtHttpSecuritySource.class.getName());
 			boolean isClaimsClassConfigured = false;
 			for (int i = 0; i < httpSecuirtyProperties.length; i += 2) {

@@ -1,0 +1,13 @@
+service:
+  class: ${TestClass}$GovernedService
+  govern:
+    - governance_0
+    - governance_1
+    - governance_2
+    - governance_3
+    - governance_4
+    - governance_5
+    - governance_6
+    - governance_7
+    - governance_8
+    - governance_9

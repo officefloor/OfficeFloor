@@ -1,0 +1,23 @@
+package net.officefloor.tutorial.r2dbchttpserver;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
+
+import net.officefloor.woof.mock.MockWoofResponse;
+import net.officefloor.woof.mock.MockWoofServer;
+import net.officefloor.woof.mock.MockWoofServerExtension;
+
+public class R2dbcHttpServerTest {
+
+	// START SNIPPET: tutorial
+	@RegisterExtension
+	public final MockWoofServerExtension server = new MockWoofServerExtension();
+
+	@Test
+	public void getData() {
+		MockWoofResponse response = this.server.send(MockWoofServer.mockRequest("/message/1"));
+		response.assertJson(200, new Message("TEST"));
+	}
+	// END SNIPPET: tutorial
+
+}

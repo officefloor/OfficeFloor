@@ -47,6 +47,7 @@ import org.junit.Assert
 import java.io.IOException
 import net.officefloor.plugin.clazz.FlowInterface
 import net.officefloor.plugin.clazz.Qualified
+import net.officefloor.server.http.HttpStatus
 
 /**
  * Primitives.
@@ -117,7 +118,7 @@ fun web(
  * HttpException.
  */
 fun httpException() {
-    throw HttpException(422, "test")
+    throw HttpException(HttpStatus.getHttpStatus(422), null, "test")
 }
 
 /**

@@ -37,7 +37,12 @@ public interface WebRouteNode {
 	 * Indicates possible matching of {@link WebRouteNode}.
 	 */
 	public enum WebRouteResultEnum {
-		NO_MATCH, MATCH_PATH_NOT_METHOD, MATCH
+		/** No path match. */
+		NO_MATCH,
+		/** Path matches but not the HTTP method. */
+		MATCH_PATH_NOT_METHOD,
+		/** Full match. */
+		MATCH
 	}
 
 	/**

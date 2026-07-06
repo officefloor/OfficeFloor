@@ -1,0 +1,11 @@
+save:
+  class: net.officefloor.tutorial.securepagehttpserver.CardLogic
+  method: save
+  next: getTemplateData
+getTemplateData:
+  class: net.officefloor.tutorial.securepagehttpserver.CardLogic
+  method: getTemplateData
+  next: render
+render:
+  procedure: Thymeleaf
+  resource: card

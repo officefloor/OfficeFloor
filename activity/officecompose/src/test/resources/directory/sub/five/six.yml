@@ -1,0 +1,2 @@
+six:
+  class: ${TestClass}$DirectoryService

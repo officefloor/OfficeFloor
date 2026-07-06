@@ -24,11 +24,11 @@ import java.security.Key;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.JsonNodeFactory;
+import tools.jackson.databind.node.ObjectNode;
 
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
@@ -46,6 +46,7 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.source.PrivateSource;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.server.http.HttpException;
+import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.jwt.authority.JwtAuthority;
 import net.officefloor.web.jwt.jwks.JwksSectionSource;
@@ -242,8 +243,8 @@ public class JwksPublishSectionSource extends AbstractSectionSource {
 
 							// Ensure the key is written
 							if (keyContext == null) {
-								throw new HttpException(new Exception("No " + JwksKeyWriter.class.getSimpleName()
-										+ " for key " + key.getAlgorithm()));
+								throw new HttpException(HttpStatus.INTERNAL_SERVER_ERROR, null,
+										"No " + JwksKeyWriter.class.getSimpleName() + " for key " + key.getAlgorithm());
 							}
 
 							// Provide time window for key

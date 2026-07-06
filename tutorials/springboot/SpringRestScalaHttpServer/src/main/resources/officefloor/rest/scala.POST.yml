@@ -1,0 +1,4 @@
+Scala:
+  resource: net.officefloor.tutorial.scalahttpserver.ScalaService$
+  procedure: Scala
+  method: service

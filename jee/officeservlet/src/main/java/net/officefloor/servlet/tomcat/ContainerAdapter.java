@@ -84,10 +84,10 @@ public class ContainerAdapter extends CoyoteAdapter {
 		 */
 
 		@Override
-		public Request createRequest() {
+		public Request createRequest(org.apache.coyote.Request coyoteRequest) {
 
 			// Create the request
-			Request request = this.delegate.createRequest();
+			Request request = this.delegate.createRequest(coyoteRequest);
 
 			// Specify the wrapper to directly invoke
 			request.getMappingData().wrapper = this.wrapper;
@@ -101,8 +101,8 @@ public class ContainerAdapter extends CoyoteAdapter {
 		 */
 
 		@Override
-		public Response createResponse() {
-			return this.delegate.createResponse();
+		public Response createResponse(org.apache.coyote.Response coyoteResponse) {
+			return this.delegate.createResponse(coyoteResponse);
 		}
 
 		@Override

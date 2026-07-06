@@ -27,8 +27,11 @@ import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.frame.api.source.ServiceFactory;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.web.AbstractWebArchitectTest.RegisteredResponse;
+import net.officefloor.web.AbstractWebArchitectVerification.RegisteredResponse;
+import net.officefloor.web.build.HttpEscalationResponder;
+import net.officefloor.web.build.HttpEscalationResponderContext;
 import net.officefloor.web.build.HttpObjectResponder;
+import net.officefloor.web.build.HttpObjectResponderContext;
 import net.officefloor.web.build.HttpObjectResponderFactory;
 import net.officefloor.web.build.HttpObjectResponderServiceFactory;
 
@@ -77,25 +80,20 @@ public class MockHttpObjectResponderServiceFactory
 			}
 
 			@Override
-			public Class<RegisteredResponse> getObjectType() {
-				return RegisteredResponse.class;
-			}
-
-			@Override
-			public void send(RegisteredResponse object, ServerHttpConnection connection) throws IOException {
-				HttpResponse response = connection.getResponse();
+			public void send(HttpObjectResponderContext<RegisteredResponse> context) throws IOException {
+				HttpResponse response = context.getServerHttpConnection().getResponse();
 				response.setContentType(this.getContentType(), null);
 				Writer writer = response.getEntityWriter();
 				writer.write("{ registered: ");
-				writer.write(object.getContent());
+				writer.write(context.getResponseObject().getContent());
 				writer.write(" }");
 			}
 		};
 	}
 
 	@Override
-	public <E extends Throwable> HttpObjectResponder<E> createHttpEscalationResponder(Class<E> escalationType) {
-		return new HttpObjectResponder<E>() {
+	public <E extends Throwable> HttpEscalationResponder<E> createHttpEscalationResponder(Class<E> escalationType, boolean isOfficeFloorEscalation) {
+		return new HttpEscalationResponder<E>() {
 
 			@Override
 			public String getContentType() {
@@ -103,17 +101,12 @@ public class MockHttpObjectResponderServiceFactory
 			}
 
 			@Override
-			public Class<E> getObjectType() {
-				return escalationType;
-			}
-
-			@Override
-			public void send(E object, ServerHttpConnection connection) throws IOException {
-				HttpResponse response = connection.getResponse();
+			public void send(HttpEscalationResponderContext<E> context) throws IOException {
+				HttpResponse response = context.getServerHttpConnection().getResponse();
 				response.setContentType(this.getContentType(), null);
 				Writer writer = response.getEntityWriter();
 				writer.write("{ registeredError: ");
-				writer.write(object.getMessage());
+				writer.write(context.getEscalation().getMessage());
 				writer.write(" }");
 			}
 		};

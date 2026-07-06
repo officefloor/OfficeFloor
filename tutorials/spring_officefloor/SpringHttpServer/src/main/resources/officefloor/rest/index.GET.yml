@@ -1,0 +1,6 @@
+getTemplate:
+  class: net.officefloor.tutorial.springhttpserver.Template
+  next: render
+render:
+  procedure: Thymeleaf
+  resource: greeting

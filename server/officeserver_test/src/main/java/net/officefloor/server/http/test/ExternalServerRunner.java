@@ -1,6 +1,6 @@
 /*-
  * #%L
- * Provides testing using HttpServlet
+ * Testing of HTTP Server
  * %%
  * Copyright (C) 2005 - 2021 Daniel Sagenschneider
  * %%
@@ -51,6 +51,11 @@ public class ExternalServerRunner {
 	 */
 	@FunctionalInterface
 	public static interface StartExternalServer {
+		/**
+		 * Starts the external server.
+		 *
+		 * @throws Exception If fails to start the external server.
+		 */
 		void startExternalServer() throws Exception;
 	}
 

@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,6 +23,7 @@ package net.officefloor.server.http.mock;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import tools.jackson.core.JacksonException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -36,7 +37,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Supplier;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
@@ -362,7 +363,7 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
         String entity;
         try {
             entity = mapper.writeValueAsString(jsonObject);
-        } catch (IOException ex) {
+        } catch (JacksonException ex) {
             throw new AssertionError(ex.getMessage(), ex);
         }
 
@@ -1386,7 +1387,7 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
             // Return the JSON object from entity
             try {
                 return mapper.readValue(entity, clazz);
-            } catch (IOException ex) {
+            } catch (JacksonException ex) {
                 throw new AssertionError(ex.getMessage(), ex);
             }
         }
@@ -1403,7 +1404,7 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
             String expectedEntity;
             try {
                 expectedEntity = mapper.writeValueAsString(entity);
-            } catch (IOException ex) {
+            } catch (JacksonException ex) {
                 throw new AssertionError(ex.getMessage(), ex);
             }
 

@@ -42,10 +42,11 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import io.jsonwebtoken.Jwts;
 import net.officefloor.compile.properties.Property;
@@ -101,7 +102,10 @@ public class JwtAuthorityManagedObjectSource
 	 * {@link Flow} keys.
 	 */
 	public static enum Flows {
-		RETRIEVE_ENCODE_KEYS, RETRIEVE_REFRESH_KEYS
+		/** Retrieve encode keys flow. */
+		RETRIEVE_ENCODE_KEYS,
+		/** Retrieve refresh keys flow. */
+		RETRIEVE_REFRESH_KEYS
 	}
 
 	/**
@@ -243,22 +247,15 @@ public class JwtAuthorityManagedObjectSource
 	/**
 	 * {@link ObjectMapper}.
 	 */
-	private static final ObjectMapper mapper = new ObjectMapper();
+	private static final ObjectMapper mapper = JsonMapper.builder()
+			.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+			.build();
 
 	/**
 	 * {@link TimeWindow} {@link JavaType}.
 	 */
 	private static final JavaType timeWindowJavaType = mapper.constructType(TimeWindow.class);
 
-	static {
-		// Ensure JSON deserialising is valid
-		if (!mapper.canDeserialize(timeWindowJavaType)) {
-			throw new IllegalStateException("Unable to deserialize " + TimeWindow.class.getSimpleName());
-		}
-
-		// Ensure ignore unknown properties (avoid added "exp" causing problems)
-		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-	}
 
 	/**
 	 * Generates a random string.
@@ -839,14 +836,8 @@ public class JwtAuthorityManagedObjectSource
 		// Obtain the identity class
 		this.identityClass = sourceContext.loadClass(sourceContext.getProperty(PROPERTY_IDENTITY_CLASS));
 
-		// Load and ensure valid identity class
+		// Load identity class
 		this.identityJavaType = mapper.constructType(this.identityClass);
-		if (!mapper.canSerialize(this.identityClass)) {
-			throw new IllegalStateException("Unable to serialize " + this.identityClass.getName());
-		}
-		if (!mapper.canDeserialize(this.identityJavaType)) {
-			throw new IllegalStateException("Unable to deserialize " + this.identityClass.getName());
-		}
 
 		// Obtain access token properties
 		this.accessTokenExpirationPeriod = Long.parseLong(sourceContext.getProperty(
@@ -944,7 +935,7 @@ public class JwtAuthorityManagedObjectSource
 					try {
 						JsonNode keyNode = mapper.readTree(serialisedKeyContent);
 						msg.append("{ ");
-						Iterator<String> fieldNames = keyNode.fieldNames();
+						Iterator<String> fieldNames = keyNode.propertyNames().iterator();
 						boolean isFirst = true;
 						while (fieldNames.hasNext()) {
 							String fieldName = fieldNames.next();

@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import net.officefloor.compile.impl.office.OfficeAvailableSectionInputTypeImpl;
 import net.officefloor.compile.impl.section.OfficeSectionTypeImpl;
@@ -55,6 +56,7 @@ import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeBindings;
 import net.officefloor.compile.internal.structure.OfficeNode;
+import net.officefloor.compile.internal.structure.OfficeObjectNode;
 import net.officefloor.compile.internal.structure.SectionInputNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.SectionObjectNode;
@@ -559,6 +561,51 @@ public class SectionNodeImpl implements SectionNode {
 	}
 
 	@Override
+	public boolean removeSectionObjectIfUnused(SectionObjectNode sectionObject) {
+
+		// Find entry for section object within this section
+		Optional<Map.Entry<String, SectionObjectNode>> sectionObjectOptional = this.objects.entrySet().stream()
+				.filter((entry) -> entry.getValue() == sectionObject).findFirst();
+		if (sectionObjectOptional.isEmpty()) {
+			return false; // can not remove, as not from this section
+		}
+		Map.Entry<String, SectionObjectNode> sectionObjectEntry = sectionObjectOptional.get();
+
+		// Determine if any other children using section object
+		boolean isUsingSectionObject = this.isUsingSectionObjectNode(this.getChildNodes(), sectionObject);
+		if (isUsingSectionObject) {
+			return false; // can not remove, as used by another child
+		}
+
+		// As here, remove the section object and indicate removed
+		this.objects.remove(sectionObjectEntry.getKey());
+		return true;
+	}
+
+	/**
+	 * Indicates if any {@link Node} or it's children are linked to the {@link SectionObjectNode}.
+	 */
+	private boolean isUsingSectionObjectNode(Node[] nodes, SectionObjectNode sectionObject) {
+
+		// Determine if any child uses the section object
+		for (Node node : nodes) {
+			if (node instanceof LinkObjectNode linkObject) {
+                if (linkObject.getLinkedObjectNode() == sectionObject) {
+					return true; // section object linked
+				}
+			}
+
+			// Recursively look at further children (as sub section objects may be linked)
+			if (this.isUsingSectionObjectNode(node.getChildNodes(), sectionObject)) {
+				return true; // section object linked
+			}
+		}
+
+		// As here, not using section object
+		return false;
+	}
+
+	@Override
 	public SectionType loadSectionType(CompileContext compileContext) {
 
 		// Obtain the listing of input types sorted by name
@@ -782,11 +829,11 @@ public class SectionNodeImpl implements SectionNode {
 			}
 
 			// Auto-wire the object
-			AutoWireLink<SectionObjectNode, LinkObjectNode>[] links = autoWirer.getAutoWireLinks(object,
+			AutoWireLink<SectionObjectNode, LinkObjectNode> link = autoWirer.getAutoWireLink(object,
 					new AutoWire(objectType.getTypeQualifier(), objectType.getObjectType()));
-			if (links.length == 1) {
-				LinkUtil.linkAutoWireObjectNode(object, links[0].getTargetNode(this.office), this.office, autoWirer,
-						compileContext, this.context.getCompilerIssues(), (link) -> object.linkObjectNode(link));
+			if (link != null) {
+				LinkUtil.linkAutoWireObjectNode(object, link.getTargetNode(this.office), this.office, autoWirer,
+						compileContext, this.context.getCompilerIssues(), object::linkObjectNode);
 			}
 		});
 	}

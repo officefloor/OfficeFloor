@@ -73,13 +73,7 @@
 							<goal>descriptor</goal>
 						</goals>
 					</execution>
-					<execution>
-						<id>site-documentation</id>
-						<phase>pre-site</phase>
-						<goals>
-							<goal>report</goal>
-						</goals>
-					</execution>
+
 				</executions>
 			</plugin>
 		</plugins>
@@ -136,9 +130,14 @@
 				</reportSets>
 			</plugin>
 			<plugin>
-				<!-- Generate Maven plug-in documentation -->
+				<!-- Disable default report goal (removed in maven-plugin-plugin 3.10.x) -->
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-plugin-plugin</artifactId>
+				<reportSets>
+					<reportSet>
+						<reports/>
+					</reportSet>
+				</reportSets>
 			</plugin>
 		</plugins>
 	</reporting>

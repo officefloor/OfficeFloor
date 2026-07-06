@@ -47,6 +47,7 @@ import net.officefloor.compile.internal.structure.ManagedFunctionVisitor;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.OfficeBindings;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.OfficeTeamNode;
 import net.officefloor.compile.internal.structure.ResponsibleTeamNode;
@@ -71,6 +72,7 @@ import net.officefloor.compile.spi.office.ResponsibleTeam;
 import net.officefloor.compile.spi.section.FunctionFlow;
 import net.officefloor.compile.spi.section.FunctionObject;
 import net.officefloor.compile.spi.section.SectionFunction;
+import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.function.ManagedFunction;
@@ -388,7 +390,7 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void buildManagedFunction(OfficeBuilder officeBuilder, CompileContext compileContext) {
+	public void buildManagedFunction(OfficeBuilder officeBuilder, OfficeBindings officeBindings, CompileContext compileContext) {
 
 		// Obtain the type for this function
 		ManagedFunctionType<?, ?> functionType = this.loadManagedFunctionType(compileContext);
@@ -509,8 +511,18 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 				continue; // must have linked managed object
 			}
 
-			// Link function object to managed object
+			// Obtain the linked managed object name
 			String linkedManagedObjectName = linkedManagedObject.getBoundManagedObjectName();
+
+			// Determine if function scoped managed object
+			OfficeNode office = this.sectionNode.getOfficeNode();
+			if (linkedManagedObject.buildFunctionManagedObject(objectName, functionBuilder, office, officeBindings, compileContext)) {
+
+				// Built onto the managed function, so link to function object
+				linkedManagedObjectName = objectName;
+			}
+
+			// Link function object to managed object
 			if (objectKey != null) {
 				functionBuilder.linkManagedObject(objectKey, linkedManagedObjectName, objectClass);
 			} else {

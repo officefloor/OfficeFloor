@@ -24,7 +24,7 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.List;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpResponse;

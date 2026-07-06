@@ -37,6 +37,7 @@ public class TranslateHttpPathToWebServicerFunction
 	 * Dependency keys.
 	 */
 	public static enum Dependencies {
+		/** HTTP path. */
 		HTTP_PATH
 	}
 

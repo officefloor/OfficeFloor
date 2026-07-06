@@ -33,6 +33,7 @@ import net.officefloor.plugin.variable.Out;
 import net.officefloor.plugin.variable.Val;
 import net.officefloor.plugin.variable.Var;
 import net.officefloor.server.http.HttpException;
+import net.officefloor.server.http.HttpStatus;
 import net.officefloor.web.*;
 
 import java.io.IOException;
@@ -178,7 +179,7 @@ public class JavaDefaultProcedureTest extends AbstractPolyglotProcedureTest {
 
 	public static class HttpExceptionLogic {
 		public void httpException() throws HttpException {
-			throw new HttpException(422, "test");
+			throw new HttpException(HttpStatus.getHttpStatus(422), null, "test");
 		}
 	}
 

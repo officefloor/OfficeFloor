@@ -63,7 +63,7 @@ public interface Office {
 	 * {@link ManagedObjectScope#PROCESS} scoped {@link ManagedObject} objects are
 	 * available.
 	 * 
-	 * @return
+	 * @return Names of the available objects.
 	 */
 	String[] getObjectNames();
 

@@ -28,7 +28,7 @@ import java.io.StringWriter;
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.web.AbstractWebArchitectTest.RegisteredObject;
+import net.officefloor.web.AbstractWebArchitectVerification.RegisteredObject;
 import net.officefloor.web.build.HttpObjectParser;
 import net.officefloor.web.build.HttpObjectParserFactory;
 import net.officefloor.web.build.HttpObjectParserServiceFactory;

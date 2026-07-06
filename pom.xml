@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<name>OfficeFloor</name>
-	<description>OfficeFloor</description>
+	<description>OfficeFloor is a Java application framework introducing Inversion of Coupling Control. It includes a Spring Boot add-on that provides explicit, AI-friendly YAML orchestration for REST endpoints.</description>
 
 	<parent>
 		<groupId>net.officefloor</groupId>
@@ -44,6 +44,7 @@
 		<module>cache</module>
 		<module>jee</module>
 		<module>spring</module>
+		<module>springboot</module>
 		<module>maven</module>
 		<module>tutorials</module>
 	</modules>
@@ -52,15 +53,16 @@
 		<asm-version>9.6</asm-version>
 		<compiler-version>3.12.1</compiler-version>
 		<current.year>2026</current.year>
+		<google.analytics.id>G-RRNCKP6QJB</google.analytics.id>
 		<failsafe-version>3.2.3</failsafe-version>
 		<java-lowest-version>17</java-lowest-version>
 		<jetty-version>11.0.16</jetty-version>
-		<maven-version>3.9.8</maven-version>
+		<maven-version>3.9.16</maven-version>
 		<maven-changes-version>2.12.1</maven-changes-version>
 		<maven.compiler.source>${java-lowest-version}</maven.compiler.source>
 		<maven.compiler.target>${java-lowest-version}</maven.compiler.target>
 		<maven-plugin-version>3.10.2</maven-plugin-version>
-		<maven-project-info-reports-version>3.4.5</maven-project-info-reports-version>
+		<maven-project-info-reports-version>3.9.0</maven-project-info-reports-version>
 		<maven-shade-version>3.5.1</maven-shade-version>
 		<maven-surefire-version>3.2.5</maven-surefire-version>
 		<openjfx-version>${java-lowest-version}-ea+25</openjfx-version>
@@ -123,7 +125,7 @@
 			<dependency>
 				<groupId>org.apache.maven.plugin-testing</groupId>
 				<artifactId>maven-plugin-testing-harness</artifactId>
-				<version>3.3.0</version>
+				<version>3.5.1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.maven.wagon</groupId>
@@ -273,7 +275,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-assembly-plugin</artifactId>
-					<version>3.6.0</version>
+					<version>3.8.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -298,12 +300,12 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-enforcer-plugin</artifactId>
-					<version>3.4.1</version>
+					<version>3.6.2</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
-					<version>3.6.0</version>
+					<version>3.10.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
@@ -329,6 +331,11 @@
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-project-info-reports-plugin</artifactId>
+					<version>${maven-project-info-reports-version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-source-plugin</artifactId>
 					<version>${maven-source-version}</version>
 				</plugin>
@@ -336,6 +343,10 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
 					<version>${javadoc-version}</version>
+					<configuration>
+						<!-- Exclude auto-generated model sources -->
+						<excludePackageNames>net.officefloor.model.conform,net.officefloor.model.office,net.officefloor.model.officefloor,net.officefloor.model.section</excludePackageNames>
+					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -367,6 +378,9 @@
 						<addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
 						<emptyLineAfterHeader>true</emptyLineAfterHeader>
 						<ignoreNoFileToScan>true</ignoreNoFileToScan>
+						<roots>
+							<root>src/main</root>
+						</roots>
 						<failOnMissingHeader>true</failOnMissingHeader>
 						<canUpdateDescription>true</canUpdateDescription>
 						<excludes>
@@ -396,147 +410,12 @@
 				<plugin>
 					<groupId>org.jacoco</groupId>
 					<artifactId>jacoco-maven-plugin</artifactId>
-					<version>0.8.12</version>
+					<version>0.8.14</version>
 				</plugin>
 				<plugin>
 					<groupId>net.alchim31.maven</groupId>
 					<artifactId>scala-maven-plugin</artifactId>
 					<version>${scala-maven-version}</version>
-				</plugin>
-				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself. -->
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>org.apache.maven.plugins</groupId>
-										<artifactId>maven-verifier-plugin</artifactId>
-										<versionRange>[1.0,)</versionRange>
-										<goals>
-											<goal>verify</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>org.apache.maven.plugins</groupId>
-										<artifactId>maven-antrun-plugin</artifactId>
-										<versionRange>[1.6,)</versionRange>
-										<goals>
-											<goal>run</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											org.codehaus.mojo
-										</groupId>
-										<artifactId>
-											javacc-maven-plugin
-										</artifactId>
-										<versionRange>
-											[2.6,)
-										</versionRange>
-										<goals>
-											<goal>javacc</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											org.apache.maven.plugins
-										</groupId>
-										<artifactId>
-											maven-plugin-plugin
-										</artifactId>
-										<versionRange>
-											[2.6,)
-										</versionRange>
-										<goals>
-											<goal>descriptor</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											org.codehaus.mojo
-										</groupId>
-										<artifactId>
-											flatten-maven-plugin
-										</artifactId>
-										<versionRange>
-											[1.0.0,)
-										</versionRange>
-										<goals>
-											<goal>flatten</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											net.alchim31.maven
-										</groupId>
-										<artifactId>
-											scala-maven-plugin
-										</artifactId>
-										<versionRange>
-											[4.0.1,)
-										</versionRange>
-										<goals>
-											<goal>compile</goal>
-											<goal>testCompile</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											org.jetbrains.kotlin
-										</groupId>
-										<artifactId>
-											kotlin-maven-plugin
-										</artifactId>
-										<versionRange>
-											[1.3.41,)
-										</versionRange>
-										<goals>
-											<goal>test-compile</goal>
-											<goal>compile</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
-					</configuration>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -645,6 +524,11 @@
 									<replacetoken>@VERSION</replacetoken>
 									<replacevalue>${revision}</replacevalue>
 								</replace>
+								<replace
+									file="${project.build.directory}/site/index.html">
+									<replacetoken>@GOOGLE_ANALYTICS_ID</replacetoken>
+									<replacevalue>${google.analytics.id}</replacevalue>
+								</replace>
 
 								<!-- GitHub Ribbon on main page -->
 								<replace
@@ -710,10 +594,18 @@
 						<configuration>
 							<!-- Ignore generated code that have no control over -->
 							<excludePackageNames>
-								net.officefloor.web.template.parse</excludePackageNames>
+								net.officefloor.web.template.parse,net.officefloor.tutorial*,net.officefloor.activity.model,net.officefloor.model.conform,net.officefloor.model.office,net.officefloor.model.officefloor,net.officefloor.model.section,net.officefloor.woof.model.objects,net.officefloor.woof.model.resources,net.officefloor.woof.model.teams,net.officefloor.woof.model.woof</excludePackageNames>
 							<!-- Ensure good quality JavaDoc -->
 							<failOnError>true</failOnError>
 							<failOnWarnings>true</failOnWarnings>
+							<!-- SB4 moved embedded server classes out of spring-boot; force SB3 jar on aggregate classpath so officespring_webmvc/webflux still compile -->
+							<additionalDependencies>
+								<additionalDependency>
+									<groupId>org.springframework.boot</groupId>
+									<artifactId>spring-boot</artifactId>
+									<version>${spring3-version}</version>
+								</additionalDependency>
+							</additionalDependencies>
 							<!-- Include Google Analytics -->
 							<additionalOptions>
 								<additionalOption>--allow-script-in-comments</additionalOption>
@@ -746,46 +638,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-				<!-- Run HTTP server for staged site content for linkcheck
-				report -->
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-maven-plugin</artifactId>
-				<version>${jetty-version}</version>
-				<inherited>false</inherited>
-				<configuration>
-					<supportedPackagings>
-						<supportedPackaging>pom</supportedPackaging>
-					</supportedPackagings>
-					<httpConnector>
-						<port>9999</port>
-					</httpConnector>
-					<webAppSourceDirectory>${basedir}/target/site/
-					</webAppSourceDirectory>
-					<stopKey>OfficeFloor</stopKey>
-					<stopPort>9966</stopPort>
-					<stopWait>10</stopWait>
-				</configuration>
-				<executions>
-					<execution>
-						<id>Start HTTP Server of staged site for linkcheck</id>
-						<phase>pre-site</phase>
-						<goals>
-							<goal>start</goal>
-						</goals>
-						<configuration>
-							<daemon>true</daemon>
-						</configuration>
-					</execution>
-					<execution>
-						<id>Stop HTTP Server of staged site for linkcheck</id>
-						<phase>post-site</phase>
-						<goals>
-							<goal>stop</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
 	</build>
 	<reporting>
@@ -794,15 +646,10 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-project-info-reports-plugin</artifactId>
 				<version>${maven-project-info-reports-version}</version>
-				<inherited>true</inherited>
+				<inherited>false</inherited>
 				<reportSets>
 					<reportSet>
-						<reports>
-							<report>index</report>
-						</reports>
-						<configuration>
-							<skipEmptyReport>false</skipEmptyReport>
-						</configuration>
+						<reports />
 					</reportSet>
 				</reportSets>
 			</plugin>
@@ -821,39 +668,6 @@
 						</reports>
 					</reportSet>
 				</reportSets>
-			</plugin>
-			<plugin>
-				<!-- Report on broken links in site. -->
-				<!-- To obtain link check report for stage site: -->
-				<!-- 1) mvn -DskipTests clean install post-site -->
-				<!-- 2) mvn site:stage -P site-link-check -->
-				<!-- 3) cp -R target/site/apidocs/ target/staging/ -->
-				<!-- 4) rm -rf target/site -->
-				<!-- 5) mv target/staging/ target/site -->
-				<!-- 6) rm -rf target/linkcheck -->
-				<!-- 7) rm -rf target/site/linkcheck.html -->
-				<!-- 8) mvn -N post-site -->
-				<!-- 9) report available at
-				${basedir}/target/site/linkcheck.html -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-linkcheck-plugin</artifactId>
-				<version>1.2</version>
-				<inherited>false</inherited>
-				<configuration>
-					<baseURL>http://localhost:9999</baseURL>
-					<timeout>10000</timeout>
-					<forceSite>false</forceSite>
-					<excludedPages>
-						<excludedPage>apidocs/**</excludedPage>
-					</excludedPages>
-					<excludedLinks>
-						<excludedLink>//dl.acm.org/**</excludedLink>
-						<excludedLink>http://dl.acm.org/**</excludedLink>
-						<excludedLink>https://dl.acm.org/**</excludedLink>
-						<excludedLink>http://localhost:7878/hi/World</excludedLink>
-						<excludedLink>#</excludedLink>
-					</excludedLinks>
-				</configuration>
 			</plugin>
 		</plugins>
 	</reporting>
@@ -937,37 +751,10 @@
 			<distributionManagement>
 				<site>
 					<id>github-pages-site</id>
-					<name>GitHub pages - deployed by GitHub site plugin</name>
-					<url>docs</url>
+					<name>GitHub pages - deployed by GitHub Action</name>
+					<url>https://officefloor.net</url>
 				</site>
 			</distributionManagement>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>com.github.github</groupId>
-						<artifactId>site-maven-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>release-site-to-github</id>
-								<goals>
-									<goal>site</goal>
-								</goals>
-								<phase>site-deploy</phase>
-								<configuration>
-									<repositoryOwner>officefloor</repositoryOwner>
-									<repositoryName>officefloor.github.io</repositoryName>
-									<server>github</server>
-									<path>
-										${project.distributionManagement.site.url}</path>
-									<merge>true</merge>
-									<message>Site version ${project.version}</message>
-									<noJekyll>true</noJekyll>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
 		</profile>
 		<profile>
 			<id>continuous-integration</id>

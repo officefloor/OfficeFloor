@@ -1,0 +1,250 @@
+~~~
+~~ #%L
+~~ Spring REST HTTP Server Tutorial
+~~ %%
+~~ Copyright (C) 2005 - 2026 Daniel Sagenschneider
+~~ %%
+~~ Licensed under the Apache License, Version 2.0 (the "License");
+~~ you may not use this file except in compliance with the License.
+~~ You may obtain a copy of the License at
+~~
+~~      http://www.apache.org/licenses/LICENSE-2.0
+~~
+~~ Unless required by applicable law or agreed to in writing, software
+~~ distributed under the License is distributed on an "AS IS" BASIS,
+~~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~~ See the License for the specific language governing permissions and
+~~ limitations under the License.
+~~ #L%
+~~~
+
+                                               -----------------------
+                                         Spring REST HTTP Server Tutorial
+                                               -----------------------
+                                                Daniel Sagenschneider
+                                               -----------------------
+
+Spring REST HTTP Server Tutorial
+
+  This tutorial covers the YAML endpoint model in depth: naming conventions, multi-method service
+  classes, multiple path variables, and custom response headers.  It assumes you have already
+  completed the {{{../SpringRestGettingStartedHttpServer/index.html}Getting Started tutorial}}.
+
+  The tutorial exposes these endpoints:
+
+   * <<<GET /greeting>>> returns <<<\{"message":"Hello, World!"\}>>> using a Spring bean
+
+   * <<<GET /greeting/\{name\}>>> returns a personalised greeting using a path parameter
+
+   * <<<GET /greeting/formal/\{name\}>>> and <<<GET /greeting/casual/\{name\}>>> served by two methods
+     of the same class, illustrating the <<<method:>>> key
+
+   * <<<GET /greeting/entity/\{name\}>>> returns custom response headers via <<<ResponseEntity>>>
+
+   * <<<GET /greeting/\{style\}/\{name\}>>> demonstrates two path variables in one endpoint
+
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestHttpServer}Tutorial Source}}
+
+
+
+*Maven dependency
+
+  The starter is published to Maven Central, so no additional repository configuration is needed.
+  Adding a single dependency to <<<pom.xml>>> is all that is required:
+
+%{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+  The <<<officefloor-rest-spring-boot-4-starter>>> auto-configures OfficeFloor into the Spring MVC pipeline.  On start-up it scans the classpath for YAML files under <<<officefloor/rest/>>> and registers each one as a {{{/apidocs/net/officefloor/spring/starter/rest/OfficeFloorHandlerInterceptor.html}HandlerInterceptor}} for the corresponding HTTP method and URL path.  No additional Java or XML configuration is needed.
+
+
+
+*Application class
+
+  The application entry point is a standard Spring Boot class:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springresthttpserver/SpringRestApplication.java|ignoreDownloadError=false}
+
+
+
+*YAML endpoint files — path and method from the file name
+
+  Endpoints are declared as YAML files placed under <<<src/main/resources/officefloor/rest/>>>.  The file name encodes both the HTTP method and the URL path:
+
++--
+officefloor/rest/
+├── greeting.GET.yml             →  GET  /greeting
+└── greeting/
+    ├── {name}.GET.yml           →  GET  /greeting/{name}
+    ├── entity/
+    │   └── {name}.GET.yml       →  GET  /greeting/entity/{name}
+    ├── formal/
+    │   └── {name}.GET.yml       →  GET  /greeting/formal/{name}
+    ├── casual/
+    │   └── {name}.GET.yml       →  GET  /greeting/casual/{name}
+    └── {style}/
+        └── {name}.GET.yml       →  GET  /greeting/{style}/{name}
++--
+
+  The naming convention is <<<\{path\}.\{METHOD\}.yml>>>.  Directory structure below <<<officefloor/rest/>>> becomes the URL path, so deeper URLs are produced simply by nesting files in sub-directories.  Curly-brace segments such as <<<\{name\}>>> become URL path parameters.  The special filename <<<index.\{METHOD\}.yml>>> maps to the root path <<</>>>.
+
+
+
+*YAML endpoint files — entries are named steps
+
+  Inside each YAML file, entries are named steps.  The label on each entry is a developer-chosen
+  name used to wire steps together — it is not a keyword.  A step entry identifies the Java class
+  that implements it:
+
++--
+myLabel:
+  class: com.example.MyLogic
++--
+
+  The <<first entry>> in the file is always called when the HTTP request arrives.
+
+  When a class has only one public method that method is used automatically.
+
+
+
+**Multi-method classes — <<<method:>>> is required
+
+  When a class has more than one public method, OfficeFloor cannot determine which to call and
+  the application fails to start:
+
++--
+Require configuring method for service (GreetingStyleLogic) as it contains
+multiple public methods (casual, formal)
++--
+
+  Every YAML entry that references such a class <<must>> include <<<method:>>> to name which
+  method to invoke.
+
+  <<<GreetingStyleLogic>>> is a single class with two independent greeting styles, each serving
+  its own endpoint:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springresthttpserver/GreetingStyleLogic.java|ignoreDownloadError=false}
+
+  The <<<formal>>> endpoint YAML specifies <<<method: formal>>>:
+
+%{snippet|file=${project.build.directory}/site-snippets/greeting/formal/name.GET.yml|ignoreDownloadError=false}
+
+  The <<<casual>>> endpoint specifies <<<method: casual>>>:
+
+%{snippet|file=${project.build.directory}/site-snippets/greeting/casual/name.GET.yml|ignoreDownloadError=false}
+
+  Both entries reference the same class but each picks a different method.  The rule holds
+  regardless of how many entries reference the class or whether those entries appear in one YAML
+  file or several.
+
+
+
+*Spring bean injection — parameters injected by type
+
+  The <<<GreetingService>>> is a plain Spring <<<@Service>>>:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springresthttpserver/GreetingService.java|ignoreDownloadError=false}
+
+  OfficeFloor registers every bean in the Spring application context as a managed object.  Any parameter of a service method whose type matches a Spring bean is injected automatically — no annotation is needed on that parameter.
+
+  The handler for <<<GET /greeting>>> receives the bean and uses {{{/apidocs/net/officefloor/web/ObjectResponse.html}ObjectResponse}} to write the JSON response:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springresthttpserver/GetGreetingLogic.java|ignoreDownloadError=false}
+
+  {{{/apidocs/net/officefloor/web/ObjectResponse.html}ObjectResponse\<T\>}} serialises the object to JSON and writes it to the HTTP response.
+
+
+
+**ObjectResponse with ResponseEntity — Spring-compatible headers and status
+
+  For full Spring compatibility, <<<ObjectResponse>>> also accepts a <<<ResponseEntity\<T\>>>> as its type parameter.  This lets you set custom response headers or a non-200 status code while keeping the same dependency-injected style:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springresthttpserver/GetGreetingEntityLogic.java|ignoreDownloadError=false}
+
+  Using <<<ObjectResponse\<ResponseEntity\<GreetingResponse\>\>>>> gives full control over the HTTP response while staying consistent with the rest of the OfficeFloor programming model.  When you only need the body and a 200 status, <<<ObjectResponse\<T\>>>> is simpler; reach for the <<<ResponseEntity>>> form when you need headers or a specific status code.
+
+
+
+*Spring annotations on parameters
+
+  Service methods can use all the standard Spring MVC parameter annotations.  The handler for <<<GET /greeting/\{name\}>>> uses <<<@PathVariable>>>:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springresthttpserver/GetNamedGreetingLogic.java|ignoreDownloadError=false}
+
+  Both Spring annotations (<<<@PathVariable>>>, <<<@RequestParam>>>, <<<@RequestHeader>>>, <<<@CookieValue>>>, <<<@RequestBody>>>, <<<@ModelAttribute>>>, <<<@RequestPart>>>) and OfficeFloor's own annotations ({{{/apidocs/net/officefloor/web/HttpPathParameter.html}@HttpPathParameter}}, {{{/apidocs/net/officefloor/web/HttpQueryParameter.html}@HttpQueryParameter}}, {{{/apidocs/net/officefloor/web/HttpHeaderParameter.html}@HttpHeaderParameter}}, {{{/apidocs/net/officefloor/web/HttpObject.html}@HttpObject}}) are available on any service method parameter.
+
+  <<Note:>> always use the <<<name =>>> attribute form — <<<@PathVariable(name = "name")>>>
+  and <<<@RequestParam(name = "name")>>>.  The shorthand <<<@PathVariable("name")>>> sets
+  the <<<value>>> attribute, which requires <<<@AliasFor>>> annotation synthesis to alias to
+  <<<name>>>; OfficeFloor resolves arguments from raw Java reflection where that synthesis is
+  not applied, so the shorthand silently produces an empty name and the binding fails.
+
+
+
+*Multiple path variables — nested resource URLs
+
+  A URL path with two variable segments — such as <<<GET /greeting/\{style\}/\{name\}>>> —
+  is declared by nesting the YAML file inside a variable-named directory:
+
++--
+officefloor/rest/
+└── greeting/
+    └── {style}/
+        └── {name}.GET.yml     →  GET  /greeting/{style}/{name}
++--
+
+  Both variables are available in the service method.  Use the <<<name =>>> attribute form on
+  <<<@PathVariable>>> — the shorthand <<<@PathVariable("style")>>> silently fails in OfficeFloor
+  because raw Java reflection does not apply the <<<@AliasFor>>> alias:
+
+%{snippet|file=${project.build.directory}/site-snippets/greeting/style/name.GET.yml|ignoreDownloadError=false}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springresthttpserver/GetStyledGreetingLogic.java|ignoreDownloadError=false}
+
+  Literal path segments always take priority over variable segments during routing.  The test
+  below confirms that <<<GET /greeting/royal/Alice>>> resolves the two-variable endpoint
+  while <<<GET /greeting/formal/Alice>>> still routes to the dedicated
+  <<<greeting/formal/\{name\}.GET.yml>>> endpoint:
+
++--
+// routes to greeting/{style}/{name}.GET.yml  → "royal: Hello, Alice!"
+GET /greeting/royal/Alice
+
+// routes to greeting/formal/{name}.GET.yml   → "Good day, Alice."  (literal wins)
+GET /greeting/formal/Alice
++--
+
+
+
+*Testing
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springresthttpserver/SpringRestHttpServerTest.java|ignoreDownloadError=false}
+
+
+
+*Running against a real server
+
+  Because the application is standard Spring Boot, it can be run directly without any test harness:
+
++--
+mvn spring-boot:run
++--
+
+  With the server running, the endpoints respond to plain HTTP:
+
++--
+curl http://localhost:8080/greeting
+{"message":"Hello, World!"}
+
+curl http://localhost:8080/greeting/OfficeFloor
+{"message":"Hello, OfficeFloor!"}
++--
+
+  The integration test does the same thing programmatically.  <<<@SpringBootTest(webEnvironment = RANDOM_PORT)>>> starts an embedded server on a random port and <<<TestRestTemplate>>> makes real HTTP calls — no MockMvc involved:
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springresthttpserver/SpringRestHttpServerRealServerTest.java|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../SpringRestSpringBoot3HttpServer/index.html}Spring Boot 3 tutorial}} shows how to add OfficeFloor REST to an existing Spring Boot 3 application and explains which version-specific starter to choose.

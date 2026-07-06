@@ -1,0 +1,3 @@
+security:
+  challenge:
+    any-role: [ endpoint-override ]

@@ -21,7 +21,7 @@
 package net.officefloor.spring.webflux;
 
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.web.reactive.server.ReactiveWebServerFactory;
+import org.springframework.boot.web.server.reactive.ReactiveWebServerFactory;
 import org.springframework.boot.web.server.WebServer;
 import org.springframework.boot.web.server.WebServerException;
 import org.springframework.context.annotation.Bean;
@@ -67,6 +67,7 @@ public class WebFluxSpringSupplierExtension implements SpringSupplierExtensionSe
 	@Configuration(proxyBeanMethods = false)
 	public static class OfficeFloorEmbeddedWebFluxConfiguration {
 
+		/** @return {@link ReactiveWebServerFactory} for OfficeFloor. */
 		@Bean
 		@Primary
 		public ReactiveWebServerFactory reactiveWebServerFactory() {

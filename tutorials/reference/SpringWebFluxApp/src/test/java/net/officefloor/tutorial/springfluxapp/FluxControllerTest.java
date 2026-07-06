@@ -1,0 +1,55 @@
+package net.officefloor.tutorial.springfluxapp;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webflux.test.autoconfigure.WebFluxTest;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.web.reactive.server.WebTestClient;
+
+@ExtendWith(SpringExtension.class)
+@WebFluxTest(FluxController.class)
+public class FluxControllerTest {
+
+	@Autowired
+	private WebTestClient webTestClient;
+
+	@Test
+	public void inject() {
+		this.webTestClient.get().uri("/complex/inject").exchange().expectStatus().isOk().expectBody(String.class)
+				.value((body) -> assertEquals(body, "Inject Dependency"));
+	}
+
+	@Test
+	public void status() {
+		this.webTestClient.get().uri("/complex/status").exchange().expectStatus().isCreated().expectBody(String.class)
+				.value((body) -> assertEquals(body, "Status"));
+	}
+
+	@Test
+	public void pathParam() {
+		this.webTestClient.get().uri("/complex/path/value").exchange().expectStatus().isOk().expectBody(String.class)
+				.value((body) -> assertEquals(body, "Parameter value"));
+	}
+
+	@Test
+	public void queryParam() {
+		this.webTestClient.get().uri("/complex/query?param=value").exchange().expectStatus().isOk()
+				.expectBody(String.class).value((body) -> assertEquals(body, "Parameter value"));
+	}
+
+	@Test
+	public void header() {
+		this.webTestClient.get().uri("/complex/header").header("header", "value").exchange().expectStatus().isOk()
+				.expectBody(String.class).value((body) -> assertEquals(body, "Header value"));
+	}
+
+	@Test
+	public void post() {
+		this.webTestClient.post().uri("/complex").bodyValue("value").exchange().expectStatus().isOk()
+				.expectBody(String.class).value((body) -> assertEquals(body, "Body value"));
+	}
+
+}

@@ -57,6 +57,7 @@ public class ConnectionManagedObjectSource
 	 * Dependency keys.
 	 */
 	public static enum DependencyKeys {
+		/** Data source dependency. */
 		DATA_SOURCE
 	}
 

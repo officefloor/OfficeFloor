@@ -620,12 +620,11 @@ public class SupplierNodeImpl implements SupplierNode {
 					}
 
 					// Auto-wire the thread local
-					AutoWireLink<SupplierThreadLocalNode, LinkObjectNode>[] links = autoWirer.getAutoWireLinks(
+					AutoWireLink<SupplierThreadLocalNode, LinkObjectNode> link = autoWirer.getAutoWireLink(
 							threadLocal, new AutoWire(threadLocal.getQualifier(), threadLocal.getType()));
-					if (links.length == 1) {
-						LinkUtil.linkAutoWireObjectNode(threadLocal, links[0].getTargetNode(office), office, autoWirer,
-								compileContext, this.context.getCompilerIssues(),
-								(link) -> threadLocal.linkObjectNode(link));
+					if (link != null) {
+						LinkUtil.linkAutoWireObjectNode(threadLocal, link.getTargetNode(office), office, autoWirer,
+								compileContext, this.context.getCompilerIssues(), threadLocal::linkObjectNode);
 					}
 				});
 	}

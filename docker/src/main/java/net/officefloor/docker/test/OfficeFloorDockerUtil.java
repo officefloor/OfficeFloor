@@ -152,11 +152,12 @@ public class OfficeFloorDockerUtil {
 	/**
 	 * Ensures the image is available. If not, will build image from input build
 	 * directory.
-	 * 
+	 *
 	 * @param imageName             Name of image to check exists or build.
 	 * @param defaultTagName        Default tag name.
 	 * @param buildDirectoryFactory {@link BuildDirectoryFactory} to use if image
 	 *                              not built.
+	 * @throws Exception If fails to ensure the image is available.
 	 */
 	@SuppressWarnings("resource")
 	public static void ensureImageAvailable(String imageName, String defaultTagName,

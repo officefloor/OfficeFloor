@@ -24,12 +24,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+import net.officefloor.compile.spi.office.OfficeSection;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -122,17 +124,18 @@ public class AugmentManagedFunctionTest {
 			namespace.addProperty(ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME, MockFunction.class.getName());
 			namespace.addSectionFunction("function", "function");
 		});
-		OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor();
+		try (OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor()) {
 
-		// Reset for test
-		object = null;
+			// Reset for test
+			object = null;
 
-		// Execute the method (with augmented object)
-		FunctionManager function = officeFloor.getOffice("OFFICE").getFunctionManager("SECTION.function");
-		function.invokeProcess(null, null);
+			// Execute the method (with augmented object)
+			FunctionManager function = officeFloor.getOffice("OFFICE").getFunctionManager("SECTION.function");
+			function.invokeProcess(null, null);
 
-		// Should have loaded the augmented object
-		assertSame(mockObject, object, "Should load augmented object");
+			// Should have loaded the augmented object
+			assertSame(mockObject, object, "Should load augmented object");
+		}
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
@@ -207,17 +210,18 @@ public class AugmentManagedFunctionTest {
 				}
 			}, null);
 		});
-		OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor();
+		try (OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor()) {
 
-		// Reset for test
-		object = null;
+			// Reset for test
+			object = null;
 
-		// Execute the method (with augmented object)
-		FunctionManager function = officeFloor.getOffice("OFFICE").getFunctionManager("SECTION.SUB_SECTION.function");
-		function.invokeProcess(null, null);
+			// Execute the method (with augmented object)
+			FunctionManager function = officeFloor.getOffice("OFFICE").getFunctionManager("SECTION.SUB_SECTION.function");
+			function.invokeProcess(null, null);
 
-		// Should have loaded the augmented object
-		assertSame(mockObject, object, "Should load augmented object");
+			// Should have loaded the augmented object
+			assertSame(mockObject, object, "Should load augmented object");
+		}
 	}
 
 	/**
@@ -269,14 +273,15 @@ public class AugmentManagedFunctionTest {
 					MockAdministeredFunction.class.getName());
 			namespace.addSectionFunction("function", "function");
 		});
-		OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor();
+		try (OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor()) {
 
-		// Execute the method (with augmented administration)
-		FunctionManager function = officeFloor.getOffice("OFFICE").getFunctionManager("SECTION.function");
-		function.invokeProcess(null, null);
+			// Execute the method (with augmented administration)
+			FunctionManager function = officeFloor.getOffice("OFFICE").getFunctionManager("SECTION.function");
+			function.invokeProcess(null, null);
 
-		// Should run both pre/post administration
-		assertEquals("ADMIN FUNCTION ADMIN ", content.toString(), "Should run augmented administration");
+			// Should run both pre/post administration
+			assertEquals("ADMIN FUNCTION ADMIN ", content.toString(), "Should run augmented administration");
+		}
 	}
 
 	public static class MockAdministration {
@@ -338,6 +343,116 @@ public class AugmentManagedFunctionTest {
 	public static class MockIssueFunction {
 		public void function() {
 			fail("Should not be invoked");
+		}
+	}
+
+	@Test
+	public void augmentLinkedFunctionObject() throws Throwable {
+
+		// Create the managed object
+		MockObject mockObject = new MockObject();
+
+		// Compile the OfficeFloor with augmented managed function
+		CompileOfficeFloor compile = new CompileOfficeFloor();
+		compile.office((context) -> {
+
+			// Add Class Section that links objects to SectionObject
+			context.addSection("SECTION", MockFunction.class);
+
+			// Augment the function object
+			context.getOfficeArchitect().addManagedFunctionAugmentor((augment) -> {
+
+				// Obtain the object to augment
+				AugmentedFunctionObject object = augment.getFunctionObject(MockObject.class.getName());
+
+				// Even though linked to section object, not linked to bound managed object
+				assertTrue(object.isLinked(), "Should be linked to SectionObject");
+
+				// Add the managed object
+				OfficeManagedObject managedObject = context.getOfficeArchitect()
+						.addOfficeManagedObjectSource("MOS", new Singleton(mockObject))
+						.addOfficeManagedObject("MO", ManagedObjectScope.FUNCTION);
+
+				// Provide qualifier so can't auto-wire (section object)
+				managedObject.addTypeQualification("not_autowire", MockObject.class.getName());
+
+				// Link (overwriting link to SectionObject)
+				object.unlink();
+				augment.link(object, managedObject);
+			});
+		});
+		try (OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor()) {
+
+			// Reset for test
+			object = null;
+
+			// Execute the method (with augmented object)
+			FunctionManager function = officeFloor.getOffice("OFFICE").getFunctionManager("SECTION.function");
+			function.invokeProcess(null, null);
+
+			// Should have loaded the augmented object
+			assertSame(mockObject, object, "Should load augmented object");
+		}
+	}
+
+	@Test
+	public void augmentLinkedFunctionObjectToReusedSectionObject() throws Throwable {
+
+		// Create the managed object
+		MockObject initialObject = new MockObject();
+		MockObject augmentObject = new MockObject();
+
+		// Compile the OfficeFloor with augmented managed function
+		CompileOfficeFloor compile = new CompileOfficeFloor();
+		compile.office((context) -> {
+			OfficeArchitect architect = context.getOfficeArchitect();
+
+			// Add Class Section that links objects to SectionObject
+			OfficeSection section = context.addSection("SECTION", MockReuseSectionObject.class);
+
+			// Add the managed object
+			OfficeManagedObject managedObject = context.getOfficeArchitect()
+					.addOfficeManagedObjectSource("initial", new Singleton(initialObject))
+					.addOfficeManagedObject("initial", ManagedObjectScope.THREAD);
+			architect.link(section.getOfficeSectionObject(MockObject.class.getName()), managedObject);
+
+			// Augment only one of the functions (so needs to keep the Section Object)
+			context.getOfficeArchitect().addManagedFunctionAugmentor((augment) -> {
+				if ("SECTION.function".equals(augment.getManagedFunctionName())) {
+					AugmentedFunctionObject object = augment.getFunctionObject(MockObject.class.getName());
+					assertTrue(object.isLinked(), "Should be linked to Section Object");
+
+					// Add the managed object
+					OfficeManagedObject augmentManagedObject = context.getOfficeArchitect()
+							.addOfficeManagedObjectSource("augment", new Singleton(augmentObject))
+							.addOfficeManagedObject("augment", ManagedObjectScope.FUNCTION);
+					object.unlink();
+					augment.link(object, augmentManagedObject);
+				}
+			});
+		});
+		try (OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor()) {
+
+			// Reset for test
+			object = null;
+
+			// Execute the method (with initial object)
+			officeFloor.getOffice("OFFICE").getFunctionManager("SECTION.reuse").invokeProcess(null, null);
+			assertSame(initialObject, object, "Should load initial object");
+
+			// Execute the method (with augmented object)
+			officeFloor.getOffice("OFFICE").getFunctionManager("SECTION.function").invokeProcess(null, null);
+			assertSame(augmentObject, object, "Should load augmented object");
+		}
+	}
+
+	public static class MockReuseSectionObject {
+		public void function(MockObject object) {
+			AugmentManagedFunctionTest.object = object;
+		}
+
+		public void reuse(MockObject object) {
+			AugmentManagedFunctionTest.object = object;
 		}
 	}
 

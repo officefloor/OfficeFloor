@@ -1,0 +1,3 @@
+post:
+  class: net.officefloor.tutorial.swaggerhttpserver.Servicer
+  method: post

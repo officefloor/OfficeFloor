@@ -53,6 +53,17 @@ public interface AutoWirer<N extends Node> {
 	void addAutoWireTarget(Function<OfficeNode, ? extends N> targetNodeFactory, AutoWire... targetAutoWires);
 
 	/**
+	 * Selects the appropriate {@link AutoWireLink} instance.
+	 *
+	 * @param sourceNode Source {@link Node} to link target.
+	 * @param sourceAutoWires Source {@link AutoWire} instances to match against
+	 * 	                         target {@link AutoWire} instances.
+	 * @return Matching {@link AutoWireLink} instance or <code>null</code> if no link.
+	 * @param <S> Source {@link Node} type.
+	 */
+	<S extends Node> AutoWireLink<S, N> getAutoWireLink(S sourceNode, AutoWire... sourceAutoWires);
+
+	/**
 	 * Selects the appropriate {@link AutoWireLink} instances.
 	 * 
 	 * @param                 <S> Source {@link Node} type.

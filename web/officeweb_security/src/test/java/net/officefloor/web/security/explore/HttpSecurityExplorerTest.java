@@ -25,14 +25,18 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
+import net.officefloor.activity.compose.build.ComposeArchitect;
+import net.officefloor.activity.compose.build.ComposeEmployer;
 import net.officefloor.compile.spi.office.ExecutionManagedFunction;
 import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.Parameter;
+import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.compile.CompileWebContext;
 import net.officefloor.web.compile.WebCompileOfficeFloor;
 import net.officefloor.web.security.build.HttpSecurityArchitect;
@@ -137,8 +141,14 @@ public class HttpSecurityExplorerTest extends OfficeFrameTestCase {
 		Map<String, SecurityVerify> verifiers = new HashMap<>();
 		Closure<Boolean> isExplored = new Closure<>(false);
 		compiler.web((context) -> {
-			HttpSecurityArchitect security = HttpSecurityArchitectEmployer.employHttpSecurityArchitect(
-					context.getWebArchitect(), context.getOfficeArchitect(), context.getOfficeSourceContext());
+
+			// Employ the architects
+			OfficeArchitect office = context.getOfficeArchitect();
+			OfficeSourceContext sourceContext = context.getOfficeSourceContext();
+			WebArchitect web = context.getWebArchitect();
+			ComposeArchitect compose = ComposeEmployer.employComposeArchitect(office, sourceContext);
+			HttpSecurityArchitect security = HttpSecurityArchitectEmployer
+					.employHttpSecurityArchitect(web, compose, office, sourceContext);
 
 			// Load the securities
 			for (SecurityVerify verifier : verifications) {

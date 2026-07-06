@@ -2,7 +2,6 @@
  [![Website](https://img.shields.io/website-up-down-green-red/http/officefloor.net.svg?label=http://officefloor.net)](http://officefloor.net)
 
  ![Continuous Integration](https://github.com/officefloor/OfficeFloor/workflows/Continuous%20Integration/badge.svg)
- [![Codacy Badge](https://api.codacy.com/project/badge/Grade/814039475f634e7183c8cca435446459)](https://www.codacy.com/app/officefloor/OfficeFloor?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=officefloor/OfficeFloor&amp;utm_campaign=Badge_Grade)
  [![codecov](https://codecov.io/gh/officefloor/OfficeFloor/branch/master/graph/badge.svg)](https://codecov.io/gh/officefloor/OfficeFloor)
 
  [![Maven Central](https://img.shields.io/maven-central/v/net.officefloor/officefloor.svg)](https://search.maven.org/search?q=a:officefloor)
@@ -10,33 +9,84 @@
 
 # OfficeFloor
 
-OfficeFloor - inversion of coupling control
+**Explicit YAML orchestration for AI-augmented Spring Boot REST**
 
-> Inversion of Control = Dependency Injection + Continuation Injection + Thread Injection
+OfficeFloor is a Spring Boot add-on. It adds explicit YAML-based function orchestration alongside your existing Spring beans, security, persistence, and controllers. Spring's dependency injection keeps doing what it does; OfficeFloor makes the wiring between endpoint steps visible in one file rather than scattered across annotations and framework conventions.
 
-More information available at [http://officefloor.net](http://officefloor.net)
+More information and tutorials at [http://officefloor.net](http://officefloor.net)
+
+
+## What it adds to Spring
+
+A Spring `@RestController` that handles validation, business logic, and auditing in one class works fine, but the flow between those concerns is implicit. It lives in the framework's call stack and Spring's wiring rules, not in any single readable artefact. That opacity costs time when reasoning about an endpoint, and it limits how reliably AI coding tools can read or generate endpoint code.
+
+OfficeFloor introduces an explicit YAML file per endpoint that declares the function steps, their order, and how outputs connect, while each function class continues to use Spring beans via normal injection.
+
+
+## Explicit YAML orchestration
+
+The file name encodes the HTTP method and URL path. The file body declares each function step, its class, and how outputs connect to the next step:
+
+```yaml
+# File: src/main/resources/officefloor/rest/greeting.POST.yml
+# Mapped to: POST /greeting
+
+validate:
+  class: ValidateGreetingLogic
+  outputs:
+    valid: build
+
+build:
+  class: PostGreetingLogic
+  next: audit
+
+audit:
+  class: AuditGreetingLogic
+```
+
+Each function class declares only its own Spring bean dependencies, injected by Spring exactly as they would be in any other bean. No function knows about the others. The YAML file is the complete specification of the endpoint: its steps, their order, and their conditional branches, all readable without opening a single Java file.
+
+This makes endpoints reliable targets for AI coding tools: the full structure is explicit in one file, so an AI can read, generate, and refactor endpoints from the YAML alone.
+
+Because the architecture is explicit in the code, this needs no AI-specific tooling: no Model Context Protocol (MCP) server or add-on to reconstruct how endpoints are wired. Documentation is enough. Frameworks whose flow is implicit bolt on such tooling to stay legible to AI; OfficeFloor removes the need.
+
+
+## Progressive adoption
+
+Add a single dependency to your existing Spring Boot `pom.xml`, choosing the starter that matches your Spring Boot generation:
+
+```xml
+<!-- Spring Boot 4.x -->
+<dependency>
+  <groupId>net.officefloor.springboot</groupId>
+  <artifactId>officefloor-rest-spring-boot-4-starter</artifactId>
+  <version>4.0.2</version>
+</dependency>
+
+<!-- Spring Boot 3.x: use officefloor-rest-spring-boot-3-starter instead -->
+```
+
+Add only the starter matching your Spring Boot generation — mixing versions causes runtime binary incompatibilities.
+
+Spring's dependency injection, security, persistence, and actuator configuration remain completely intact. OfficeFloor enriches Spring, it does not replace it. You can start declaring endpoints as YAML files alongside your existing `@RestController` classes and migrate incrementally.
 
 
 ## Inversion of Coupling Control
 
-OfficeFloor completes inversion of control by adding two new paradigms:
+The underlying paradigm behind OfficeFloor separates three concerns that most frameworks conflate:
 
-* **Continuation Injection**: to inject functions to orchestrate application behaviour
-* **Thread Injection**: to inject/select thread (pools) to execute particular functions
-* *Dependency (State) Injection*: to inject objects for state into functions (currently only paradigm implemented by "inversion of control" frameworks)
- 
-In doing this, OfficeFloor is capable of running different threading models (e.g. both asynchronous single threaded and synchronous multi-threaded).  In actual fact, OfficeFloor opens up mixing the threading models within the application and even introduces ability for taking advantage of thread affinity to CPUs.
+* **Continuation Injection**: injecting functions to orchestrate application behaviour (what the YAML files express)
+* **Thread Injection**: injecting the thread (pool) to execute a particular function
+* **Dependency Injection**: injecting objects for state into functions
 
-This follows OfficeFloor modeling people in an office environment (where the project name originated from).  As per the paper [OfficeFloor: using office patterns to improve software design](http://doi.acm.org/10.1145/2739011.2739013) ( [free download here](http://www.officefloor.net/about.html) ), OfficeFloor follows:
+Explicit YAML orchestration is the practical expression of Continuation Injection applied to REST endpoints. Read more in the paper [OfficeFloor: using office patterns to improve software design](http://doi.acm.org/10.1145/2739011.2739013) or the [introductory blog post](https://sagenschneider.blogspot.com/2019/02/inversion-of-coupling-control.html).
 
-* Office being an application that makes decisions on information
-* Tasks within the Office as functions/methods (weaved together with *Continuation Injection*)
-* Office employees/workers as threads that undertake the functions/methods (assigned via *Thread Injection*)
-* Forms being the objects (manage state via *Dependency Injection*)
 
-This allows OfficeFloor to better align to how business processes actually work:
+## Documentation
 
-* Workers synchronously working through tasks/functions of the processes
-* Workers working asynchronously with each other
-
-In other words, people think/behave synchronously but organise asynchronously.  Hence, both thread models are in play in modelling business processes.  Furthermore, OfficeFloor makes development of asynchronous applications easier.  This is achieved by allowing the developer to avoid asynchronous coding by having synchronous functions co-ordinated asynchronously (just like workers above).
+- [Getting started](docs/getting-started.md): one dependency and one YAML file, from zero to a running endpoint.
+- [Spring Boot plugin overview](docs/spring-boot-plugin.md): what the plugin adds to Spring, progressive adoption, and the version-specific starters.
+- [`@RestController` vs OfficeFloor YAML](docs/comparison.md): the same endpoint written both ways, how the directory layout indexes URL to code, and how the YAML makes an endpoint's flow explicit.
+- [YAML endpoint configuration](docs/yaml-endpoint-configuration.md): full reference for the endpoint file (naming, steps, `next:`/`outputs:`, escalations, governance).
+- [Spring integration](docs/spring-integration.md): how handler classes use Spring beans, MVC annotations, security, persistence, and actuator.
+- [Tutorials](docs/tutorials.md): categorised, runnable examples. The full narrated series is at [officefloor.net/tutorials](http://officefloor.net/tutorials/index.html).

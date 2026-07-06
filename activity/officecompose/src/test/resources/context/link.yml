@@ -1,0 +1,6 @@
+service:
+  class: ${TestClass}$StartService
+
+link:
+  class: ${TestClass}$LinkService
+

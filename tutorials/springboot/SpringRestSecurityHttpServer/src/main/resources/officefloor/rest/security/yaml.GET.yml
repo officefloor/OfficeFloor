@@ -1,0 +1,4 @@
+composition:
+  authorize: "hasRole('ADMIN')"
+service:
+  class: net.officefloor.tutorial.springrestsecurity.YamlAuthorizeService

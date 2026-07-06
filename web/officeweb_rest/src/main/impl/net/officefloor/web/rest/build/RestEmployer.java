@@ -1,105 +1,273 @@
+/*-
+ * #%L
+ * Web REST
+ * %%
+ * Copyright (C) 2005 - 2026 Daniel Sagenschneider
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 package net.officefloor.web.rest.build;
 
-import io.github.classgraph.ClassGraph;
-import io.github.classgraph.Resource;
-import io.github.classgraph.ScanResult;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.yaml.YAMLFactory;
+import net.officefloor.activity.compose.ComposeConfiguration;
 import net.officefloor.activity.compose.build.ComposeArchitect;
+import net.officefloor.activity.compose.build.ComposeContext;
+import net.officefloor.activity.compose.build.ComposeEmployer;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.office.ExecutionExplorer;
 import net.officefloor.compile.spi.office.OfficeArchitect;
-import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.server.http.HttpMethod;
-import net.officefloor.web.build.HttpInput;
 import net.officefloor.web.build.WebArchitect;
 
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+/** Employs the REST architecture. */
 public class RestEmployer {
 
     /**
      * Employs the {@link RestArchitect}.
      *
-     * @param officeArchitect  {@link OfficeArchitect}.
-     * @param webArchitect     {@link WebArchitect}.
-     * @param composeArchitect {@link ComposeArchitect}.
-     * @param context          {@link OfficeSourceContext}.
+     * @param officeArchitect     {@link OfficeArchitect}.
+     * @param webArchitect        {@link WebArchitect}.
+     * @param composeArchitect    {@link ComposeArchitect}.
+     * @param officeSourceContext {@link OfficeSourceContext}.
      * @return {@link RestArchitect}.
      */
-    public static RestArchitect employRestArchitect(OfficeArchitect officeArchitect, WebArchitect webArchitect, ComposeArchitect<OfficeSection> composeArchitect, OfficeSourceContext context) {
-        return new RestArchitect() {
+    public static RestArchitect employRestArchitect(OfficeArchitect officeArchitect, WebArchitect webArchitect, ComposeArchitect composeArchitect, OfficeSourceContext officeSourceContext) {
+        return new RestArchitectImpl(officeArchitect, webArchitect, composeArchitect, officeSourceContext);
+    }
 
-            @Override
-            public RestEndpoint addRestService(boolean isSecure, HttpMethod method, String restPath, String compositionLocation, PropertyList properties) {
+    /**
+     * Determines if REST endpoints are configured.
+     *
+     * @param resourceDirectory Directory containing the REST configuration.
+     * @return <code>true</code> if REST endpoint configuration available.
+     * @throws Exception If fails to check for REST configuration files.
+     */
+    public static boolean isRestAvailable(String resourceDirectory) throws Exception {
+        return ComposeEmployer.isCompositionsAvailable(resourceDirectory, RestEmployer::isRestCompositionFile);
+    }
 
-                // Obtain the REST input
-                HttpInput httpInput = webArchitect.getHttpInput(isSecure, method.getName(), restPath);
+    /**
+     * @param itemName Item name.
+     * @return Whether the item is a REST composition file.
+     */
+    protected static boolean isRestCompositionFile(String itemName) {
+        int lastDot = itemName.lastIndexOf('.');
+        return lastDot > 0;
+    }
 
-                // Compose servicing
-                OfficeSection servicing = composeArchitect.addComposition("REST_" + method.getName() + "_" + restPath, compositionLocation, properties);
+    /** {@link RestArchitect} implementation. */
+    protected static class RestArchitectImpl implements RestArchitect {
 
-                // Obtain the service input (allowing listening on execution exploration)
-                OfficeSectionInput serviceInput = servicing.getOfficeSectionInput(ComposeArchitect.INPUT_NAME);
+        private final OfficeArchitect officeArchitect;
+        private final WebArchitect webArchitect;
+        private final ComposeArchitect composeArchitect;
+        private final OfficeSourceContext officeSourceContext;
 
-                // Handle REST request
-                officeArchitect.link(httpInput.getInput(), serviceInput);
+        private final List<RestMethodDecorator<?>> decorators = new LinkedList<>();
 
-                // Return the rest end point
-                return new RestEndpointImpl(isSecure, method, restPath, httpInput, serviceInput);
-            }
+        /**
+         * @param officeArchitect     {@link OfficeArchitect}.
+         * @param webArchitect        {@link WebArchitect}.
+         * @param composeArchitect    {@link ComposeArchitect}.
+         * @param officeSourceContext {@link OfficeSourceContext}.
+         */
+        protected RestArchitectImpl(OfficeArchitect officeArchitect, WebArchitect webArchitect, ComposeArchitect composeArchitect, OfficeSourceContext officeSourceContext) {
+            this.officeArchitect = officeArchitect;
+            this.webArchitect = webArchitect;
+            this.composeArchitect = composeArchitect;
+            this.officeSourceContext = officeSourceContext;
 
-            @Override
-            public void addRestServices(boolean isSecure, String resourceDirectory, PropertyList properties, RestEndpointListener listener) {
+            // Add secure decorator
+            this.decorators.add(new SecureRestMethodDecorator());
+        }
 
-                // Determine the resource prefix
-                while (resourceDirectory.endsWith("/")) {
-                    resourceDirectory = resourceDirectory.substring(0, resourceDirectory.length() - 1);
+        /*
+         * ================== RestArchitect =========================
+         */
+
+        @Override
+        public boolean isRestAvailable(String resourceDirectory) throws Exception {
+            return this.composeArchitect.isCompositionsAvailable(resourceDirectory, RestEmployer::isRestCompositionFile);
+        }
+
+        @Override
+        public <M> MomentoKey<M> addRestMethodDecorator(RestMethodDecorator<M> decorator) {
+            int decoratorIndex = this.decorators.size();
+            this.decorators.add(decorator);
+            return new MomentoKeyImpl<>(decoratorIndex);
+        }
+
+        @Override
+        public RestEndpoint addRestService(boolean isSecure, HttpMethod method, String restPath, String compositionLocation, PropertyList properties, RestConfiguration endpointConfiguration) throws Exception {
+
+            // Compose servicing
+            ComposedEndpoint composedEndpoint = this.composeArchitect.addComposition("REST_" + method.getName() + "_" + restPath,
+                    RestEmployer::createComposedEndpoint, compositionLocation, properties,
+                    ComposeConfiguration.class);
+
+            // Create root context
+            final RestPathContextImpl root = new RestPathContextImpl("/", null);
+
+            // Obtain the rest path context
+            RestPathContextImpl restPathContext = root.getRestPathContext(restPath);
+            restPathContext.addConfiguration(endpointConfiguration);
+
+            // Add the REST method
+            restPathContext.addRestMethod(new RestMethodContextImpl<>(isSecure, method, restPathContext,
+                    composedEndpoint.input, composedEndpoint.configuration, this.officeArchitect, this.webArchitect,
+                    this.composeArchitect, this.officeSourceContext));
+
+            // Decorate the REST methods
+            restPathContext.decorateRestMethods(this.decorators);
+
+            // Create and return the REST endpoint
+            return restPathContext.buildRestEndpoint(this.webArchitect, this.officeArchitect, this.officeSourceContext);
+        }
+
+        @Override
+        public Map<String, RestEndpoint> addRestServices(boolean isSecure, String resourceDirectory, PropertyList properties) throws Exception {
+
+            // Create root context
+            final RestPathContextImpl root = new RestPathContextImpl("/", null);
+
+            // Load the rest end points
+            Map<String, RestPathContextImpl> restEndpoints = new HashMap<>();
+            composeArchitect.addCompositions("REST", (composeContext, composeListener) -> {
+
+                // Obtain the compose path
+                String composePath = composeContext.getItemName();
+
+                // Determine end point path and method
+                String endpointPath;
+                HttpMethod endpointMethod;
+                int index = composePath.lastIndexOf('.');
+                if (index <= 0) {
+                    // No method
+                    endpointPath = composePath;
+                    endpointMethod = null;
+
+                } else {
+                    // Obtain the method and path
+                    endpointPath = composePath.substring(0, index);
+                    endpointMethod = HttpMethod.getHttpMethod(composePath.substring(index + ".".length()).toUpperCase());
                 }
-                resourceDirectory = resourceDirectory + "/";
 
-                // Load the resources
-                try (ScanResult result = new ClassGraph().acceptPaths(resourceDirectory).scan()) {
-                    for (String yamlExtension : new String[] { "yml", "yaml"}) {
-                        for (Resource resource : result.getResourcesWithExtension(yamlExtension)) {
+                // Handle root
+                if ("index".equalsIgnoreCase(endpointPath)) {
+                    endpointPath = "/";
+                }
 
-                            // Obtain the path
-                            String classpathResourcePath = resource.getPath();
-                            String resourcePath = classpathResourcePath.substring(resourceDirectory.length());
+                // Include slash to begin path
+                if (!endpointPath.startsWith("/")) {
+                    endpointPath = "/" + endpointPath;
+                }
 
-                            // Obtain the path and method
-                            String pathMinusExtension = resourcePath.substring(0, resourcePath.length() - (".".length() + yamlExtension.length()));
+                // Obtain the endpoint to load
+                RestPathContextImpl endpointContext = root.getRestPathContext(endpointPath);
 
-                            // Split to method and path
-                            int index = pathMinusExtension.lastIndexOf('.');
-                            if (index > 0) {
+                // Load appropriate information
+                if (endpointMethod == null) {
 
-                                // Obtain the method and path
-                                String method = pathMinusExtension.substring(index + ".".length());
-                                String path = pathMinusExtension.substring(0, index);
+                    // Configuration to the general REST endpoint
+                    RestEndpointConfig endpointConfig = composeContext.getConfiguration(RestEndpointConfig.class);
+                    endpointContext.addConfiguration(new RestConfiguration() {
+                        @Override
+                        public <T> T getConfiguration(String itemName, Class<T> type) {
 
-                                // Handle root
-                                if ("index".equalsIgnoreCase(path)) {
-                                    path = "/";
-                                }
+                            // Obtain the node for the item
+                            JsonNode node = endpointConfig.getItems().get(itemName);
+                            if (node == null) {
+                                return null; // nothing configured
+                            }
 
-                                // Inform configuring end point
-                                RestEndpointContextImpl endpointContext = new RestEndpointContextImpl(isSecure, HttpMethod.getHttpMethod(method.toUpperCase()), path);
-                                if (listener != null) {
-                                    listener.initialise(endpointContext);
-                                }
-
-                                // Add the REST path
-                                RestEndpoint endpoint = this.addRestService(endpointContext.isSecure(), endpointContext.getHttpMethod(), endpointContext.getPath(), classpathResourcePath, properties);
-
-                                // Inform listener
-                                if (listener != null) {
-                                    listener.endpoint(endpoint);
-                                }
+                            // Translate to configuration type
+                            try {
+                                return ComposeEmployer.MAPPER.treeToValue(node, type);
+                            } catch (Exception ex) {
+                                officeArchitect.addIssue("Failed to obtain configuration item " + itemName + " from " + composePath + " (for type " + type.getName() + ")", ex);
+                                return null;
                             }
                         }
-                    }
+                    });
+
+                } else {
+
+                    // Create the composition for handling the REST method
+                    ComposedEndpoint composedEndpoint = composeContext.addComposition(
+                            "REST_" + composePath,
+                            RestEmployer::createComposedEndpoint, ComposeConfiguration.class);
+
+                    // Create and initialise the context
+                    RestMethodContextImpl<?> methodContext = new RestMethodContextImpl<>(
+                            isSecure, endpointMethod, endpointContext,
+                            composedEndpoint.input, composedEndpoint.configuration, this.officeArchitect,
+                            this.webArchitect, this.composeArchitect, this.officeSourceContext);
+                    endpointContext.addRestMethod(methodContext);
                 }
+
+            }, resourceDirectory, properties, (itemName, item) -> {
+                // Need all files read before end point creation
+            });
+
+            // Decorate the REST methods
+            root.decorateRestMethods(this.decorators);
+
+            // Build the REST endpoints
+            Map<String, RestEndpoint> endpoints = new HashMap<>();
+            root.loadRestEndpoints(endpoints, this.webArchitect, this.officeArchitect, this.officeSourceContext);
+
+            // Return the REST endpoints
+            return endpoints;
+        }
+    }
+
+    /** Composed REST endpoint. */
+    protected static class ComposedEndpoint {
+        private final OfficeSectionInput input;
+        private final RestConfiguration configuration;
+
+        /**
+         * @param input         {@link OfficeSectionInput}.
+         * @param configuration {@link RestConfiguration}.
+         */
+        public ComposedEndpoint(OfficeSectionInput input, RestConfiguration configuration) {
+            this.input = input;
+            this.configuration = configuration;
+        }
+    }
+
+    /**
+     * @param context {@link ComposeContext}.
+     * @return {@link ComposedEndpoint}.
+     */
+    protected static ComposedEndpoint createComposedEndpoint(ComposeContext<?> context) {
+        return new ComposedEndpoint(context.getStartFunction(), new RestConfiguration() {
+
+            @Override
+            public <T> T getConfiguration(String itemName, Class<T> type) {
+                return context.getConfiguration(itemName, type);
             }
-        };
+        });
     }
 
 }

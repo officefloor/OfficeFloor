@@ -152,15 +152,14 @@ public class MockWoofServerTest {
 	}
 
 	/**
-	 * Ensure can use convenient JSON {@link HttpException} assertion.
+	 * Ensure {@link HttpException} handled by {@link WoOF}.
 	 */
 	@Test
-	public void jsonHttpException() throws Exception {
-		Throwable failure = new HttpException(HttpStatus.FORBIDDEN, "Mock Failure");
-		MockSection.failure = failure;
+	public void jsonHttpException() {
+		final String entity = "Mock Failure";
+		MockSection.failure = new HttpException(HttpStatus.FORBIDDEN, null, entity);
 		MockWoofResponse response = this.server.send(MockWoofServer.mockRequest("/failure"));
-		assertEquals(403, response.getStatus().getStatusCode(), "Should be correct status");
-		response.assertJsonError(failure);
+		response.assertResponse(403, entity);
 	}
 
 	/**

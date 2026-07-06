@@ -22,7 +22,7 @@ package net.officefloor.web.jwt.mock;
 
 import java.security.KeyPair;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;

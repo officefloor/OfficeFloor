@@ -15,9 +15,15 @@
 	<description>Activity functionality for OfficeFloor</description>
 	<modules>
 		<module>officeactivity</module>
+		<module>officeadmin</module>
+		<module>officecompose</module>
 		<module>officedependency</module>
+		<module>officeescalation</module>
+		<module>officegovern</module>
+		<module>officemanagedobject</module>
+		<module>officesupplier</module>
+		<module>officeteam</module>
 		<module>officeprocedure</module>
-        <module>officecompose</module>
 	</modules>
 	<dependencies>
 		<dependency>

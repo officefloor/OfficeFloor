@@ -1,0 +1,147 @@
+~~~
+~~ #%L
+~~ Spring REST Getting Started Tutorial
+~~ %%
+~~ Copyright (C) 2005 - 2026 Daniel Sagenschneider
+~~ %%
+~~ Licensed under the Apache License, Version 2.0 (the "License");
+~~ you may not use this file except in compliance with the License.
+~~ You may obtain a copy of the License at
+~~
+~~      http://www.apache.org/licenses/LICENSE-2.0
+~~
+~~ Unless required by applicable law or agreed to in writing, software
+~~ distributed under the License is distributed on an "AS IS" BASIS,
+~~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~~ See the License for the specific language governing permissions and
+~~ limitations under the License.
+~~ #L%
+~~~
+
+~~~
+~~ Spring REST Getting Started Tutorial
+~~~
+
+                                               -----------------------
+                                          Spring REST Getting Started
+                                               -----------------------
+                                                Daniel Sagenschneider
+                                               -----------------------
+
+Spring REST Getting Started
+
+  This tutorial gets you from zero to a running REST endpoint.  Add one dependency to your
+  <<<pom.xml>>>, write one YAML file, and your endpoint is live.  No controllers, no
+  <<<@RequestMapping>>>, no Spring MVC configuration.
+
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestGettingStartedHttpServer}Tutorial Source}}
+
+
+
+*Maven dependency
+
+  The starter is published to Maven Central, so no additional repository configuration is needed.
+  Adding a single dependency to <<<pom.xml>>> is all that is required:
+
+%{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+
+
+*Application class
+
+  The application entry point is a standard Spring Boot class with no OfficeFloor-specific code:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestgettingstarted/SpringRestGettingStartedApplication.java|ignoreDownloadError=false}
+
+
+
+*Your first endpoint
+
+  An endpoint is a YAML file placed under <<<src/main/resources/officefloor/rest/>>>.  The file
+  name encodes the HTTP method and the URL path:
+
++--
+officefloor/rest/
+└── greeting.GET.yml     →  GET  /greeting
++--
+
+  The YAML file names the Java class that handles the request:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/greeting.GET.yml|ignoreDownloadError=false}
+
+  The handler is a plain Java class with no framework annotations on the class itself:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestgettingstarted/GetGreetingLogic.java|ignoreDownloadError=false}
+
+  OfficeFloor registers every Spring bean in the application context as a managed object.
+  <<<GreetingService>>> is a plain Spring <<<@Service>>> injected automatically by type into any
+  service method parameter whose type matches:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestgettingstarted/GreetingService.java|ignoreDownloadError=false}
+
+  {{{/apidocs/net/officefloor/web/ObjectResponse.html}ObjectResponse\<T\>}} serialises the object to JSON and writes it to the HTTP response.
+  No <<<@ResponseBody>>> or <<<@RestController>>> is needed.
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestgettingstarted/GreetingResponse.java|ignoreDownloadError=false}
+
+
+
+*Path parameter
+
+  A path variable in the URL is expressed by a curly-brace file or directory name:
+
++--
+officefloor/rest/
+└── greeting/
+    └── {name}.GET.yml   →  GET  /greeting/{name}
++--
+
+%{snippet|file=${project.build.directory}/site-snippets/greeting/name.GET.yml|ignoreDownloadError=false}
+
+  The handler receives the path variable as a <<<@PathVariable>>> parameter.  Always use the
+  <<<name =>>> attribute form.  The shorthand <<<@PathVariable("name")>>> sets the <<<value>>>
+  attribute; OfficeFloor resolves arguments from raw Java reflection where <<<@AliasFor>>>
+  synthesis is not applied, so the shorthand silently produces an empty name and the binding fails:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestgettingstarted/GetNamedGreetingLogic.java|ignoreDownloadError=false}
+
+
+
+*Testing
+
+  The application is a standard Spring Boot application, so tests use <<<MockMvc>>>:
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springrestgettingstarted/SpringRestGettingStartedTest.java|ignoreDownloadError=false}
+
+
+
+*Running against a real server
+
+  Because the application is standard Spring Boot, it can be run directly:
+
++--
+mvn spring-boot:run
++--
+
+  With the server running, the endpoints respond to plain HTTP:
+
++--
+curl http://localhost:8080/greeting
+{"message":"Hello, World!"}
+
+curl http://localhost:8080/greeting/OfficeFloor
+{"message":"Hello, OfficeFloor!"}
++--
+
+  The integration test does the same thing programmatically.  <<<@SpringBootTest(webEnvironment = RANDOM_PORT)>>>
+  starts an embedded server on a random port and <<<TestRestTemplate>>> makes real HTTP calls:
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springrestgettingstarted/SpringRestGettingStartedRealServerTest.java|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../SpringRestHttpServer/index.html}Spring REST tutorial}} covers YAML naming conventions in
+  depth, multi-method service classes, multiple path variables, and custom response headers via
+  <<<ResponseEntity>>>.

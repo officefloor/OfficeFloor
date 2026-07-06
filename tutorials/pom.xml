@@ -14,70 +14,17 @@
 	<name>Tutorials</name>
 	<description>Tutorials for OfficeFloor</description>
 	<modules>
-		<module>ActivityHttpServer</module>
-		<module>AuthenticationHttpServer</module>
-		<module>AwsSamHttpServer</module>
-		<module>AzureWebAppsHttpServer</module>
-		<module>CatsHttpServer</module>
-		<module>ConstantCacheHttpServer</module>
-		<module>CorsHttpServer</module>
-		<module>CosmosAsyncDbHttpServer</module>
-		<module>CosmosDbHttpServer</module>
-		<module>DatabaseHttpServer</module>
-		<module>DeployHttpServer</module>
-		<module>DiPojoHttpServer</module>
-		<module>DynamicHttpServer</module>
-		<module>DynamoDbHttpServer</module>
-		<module>EnvironmentHttpServer</module>
-		<module>ExceptionHttpServer</module>
-		<module>FirestoreHttpServer</module>
-		<module>FlywayHttpServer</module>
-		<module>GoogleFunctionHttpServer</module>
-		<module>GraphicalConfigurationExample</module>
-		<module>HttpServletHttpServer</module>
-		<module>InheritHttpServer</module>
-		<module>InteractiveHttpServer</module>
-		<module>JavaScriptApp</module>
-		<module>JavaScriptHttpServer</module>
-		<module>JaxRsApp</module>
-		<module>JaxRsHttpServer</module>
-		<module>JaxRsWarHttpServer</module>
-		<module>JwtAuthorityHttpServer</module>
-		<module>JwtHttpServer</module>
-		<module>JwtResourceHttpServer</module>
-		<module>KotlinHttpServer</module>
-		<module>LoggerHttpServer</module>
-		<module>NavigateHttpServer</module>
-		<module>ObjectifyHttpServer</module>
-		<module>PrototypeHttpServer</module>
-		<module>R2dbcHttpServer</module>
-		<module>RawHttpServer</module>
-		<module>ReactorHttpServer</module>
-		<module>RestHttpServer</module>
-		<module>ScalaHttpServer</module>
-		<module>SectionHttpServer</module>
-		<module>SecurePageHttpServer</module>
-		<module>SecureLinkHttpServer</module>
-		<module>ServletHttpServer</module>
-		<module>SessionHttpServer</module>
-		<module>SpringWebFluxApp</module>
-		<module>SpringWebFluxHttpServer</module>
-		<module>SpringWebMvcApp</module>
-		<module>SpringWebMvcHttpServer</module>
-		<module>SpringHttpServer</module>
-		<module>StartBeforeHttpServer</module>
-		<module>StaticContentHttpServer</module>
-		<module>SwaggerHttpServer</module>
-		<module>TeamHttpServer</module>
-		<module>TestHttpServer</module>
-		<module>ThreadAffinityHttpServer</module>
-		<module>TransactionHttpServer</module>
-		<module>VariableHttpServer</module>
-		<module>VertxSqlClientHttpServer</module>
-		<module>WarApp</module>
-		<module>WarHttpServer</module>
-		<module>ZioHttpServer</module>
+		<module>springboot</module>
+		<module>spring_officefloor</module>
+		<module>native</module>
+		<module>features</module>
+		<module>cloud</module>
+		<module>legacy</module>
+		<module>reference</module>
 	</modules>
+	<properties>
+		<maven.deploy.skip>true</maven.deploy.skip>
+	</properties>
 	<build>
 		<plugins>
 			<plugin>
@@ -101,23 +48,12 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>org.sonatype.plugins</groupId>
-				<artifactId>nexus-staging-maven-plugin</artifactId>
+				<!-- Do not generate JavaDoc for tutorials. Tutorial code is explained by tutorial content. -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
 				<configuration>
-					<skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
+					<skip>true</skip>
 				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>com.github.github</groupId>
-				<artifactId>site-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>github-repository</id>
-						<configuration>
-							<skip>true</skip>
-						</configuration>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
 	</build>
@@ -138,4 +74,56 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+	<profiles>
+		<profile>
+			<!-- Ensure tutorials are excluded when releasing to Maven Central -->
+			<id>release-to-maven-central</id>
+			<activation>
+				<property>
+					<name>officefloor-deploy</name>
+					<value>sonatype</value>
+				</property>
+			</activation>
+			<properties>
+				<!-- Exclude own artifact from staging: skipPublishing is checked after staging -->
+				<excludeArtifacts>${project.artifactId}</excludeArtifacts>
+			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<!-- Do not publish tutorials to Maven Central -->
+						<groupId>org.sonatype.central</groupId>
+						<artifactId>central-publishing-maven-plugin</artifactId>
+						<configuration>
+							<skipPublishing>true</skipPublishing>
+						</configuration>
+					</plugin>
+					<plugin>
+						<!-- Do not create source JARs for tutorials during release -->
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-source-plugin</artifactId>
+						<configuration>
+							<skipSource>true</skipSource>
+						</configuration>
+					</plugin>
+					<plugin>
+						<!-- Do not generate JavaDoc for tutorials during release -->
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<configuration>
+							<skip>true</skip>
+						</configuration>
+					</plugin>
+					<plugin>
+						<!-- Do not GPG sign tutorial artifacts during release -->
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<configuration>
+							<skip>true</skip>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>

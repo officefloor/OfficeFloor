@@ -31,7 +31,8 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public interface InputManagedObjectNode extends LinkObjectNode, BoundManagedObjectNode, OfficeFloorInputManagedObject {
+public interface InputManagedObjectNode extends LinkObjectNode, BoundManagedObjectNode, ManagedObjectExtensionNode
+		, OfficeFloorInputManagedObject {
 
 	/**
 	 * {@link Node} type.

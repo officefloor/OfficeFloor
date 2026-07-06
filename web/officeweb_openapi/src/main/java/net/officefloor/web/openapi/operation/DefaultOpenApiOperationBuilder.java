@@ -354,7 +354,7 @@ public class DefaultOpenApiOperationBuilder implements OpenApiOperationBuilder {
 				}
 
 				// Ensure referenced schemas are included
-				if (isIncludeResponse) {
+				if (isIncludeResponse && (resolvedSchema != null)) {
 					resolvedSchema.referencedSchemas
 							.forEach((key, schema) -> context.getComponents().addSchemas(key, schema));
 				}

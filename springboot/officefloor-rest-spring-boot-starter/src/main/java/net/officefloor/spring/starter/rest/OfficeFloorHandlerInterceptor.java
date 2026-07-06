@@ -1,0 +1,195 @@
+/*-
+ * #%L
+ * OfficeFloor REST Spring Boot Starter
+ * %%
+ * Copyright (C) 2005 - 2026 Daniel Sagenschneider
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
+package net.officefloor.spring.starter.rest;
+
+import jakarta.servlet.AsyncContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
+import net.officefloor.server.http.HttpExternalResponse;
+import net.officefloor.server.http.HttpVersion;
+import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.impl.NonMaterialisedHttpHeaders;
+import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
+import net.officefloor.server.http.servlet.HttpServletEntityByteSequence;
+import net.officefloor.server.http.servlet.HttpServletHttpResponseWriter;
+import net.officefloor.server.http.servlet.HttpServletNonMaterialisedHttpHeaders;
+import net.officefloor.server.http.servlet.HttpServletOfficeFloorBridge;
+import net.officefloor.server.stream.StreamBufferPool;
+import net.officefloor.server.stream.impl.ByteSequence;
+import net.officefloor.server.stream.impl.ThreadLocalStreamBufferPool;
+import net.officefloor.spring.starter.rest.response.SpringExceptionHandler;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.context.ApplicationContext;
+import org.springframework.web.cors.CorsProcessor;
+import org.springframework.web.cors.DefaultCorsProcessor;
+import org.springframework.web.servlet.DispatcherServlet;
+import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
+
+import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * {@link HandlerInterceptor} to bridge OfficeFloor REST handling.
+ */
+public class OfficeFloorHandlerInterceptor implements HandlerInterceptor {
+
+    /**
+     * {@link StreamBufferPool}.
+     */
+    private static final StreamBufferPool<ByteBuffer> bufferPool = new ThreadLocalStreamBufferPool(
+            () -> ByteBuffer.allocate(1024), 10, 1000);
+
+    private static final CorsProcessor corsProcessor = new DefaultCorsProcessor();
+
+    private final HttpServletOfficeFloorBridge bridge;
+
+    private final Map<String, OfficeFloorRestMethod> servicing = new HashMap<>();
+
+    private final ObjectProvider<RequestMappingHandlerAdapter> handlerAdapterProvider;
+
+    private final ObjectProvider<DispatcherServlet> dispatcherServletProvider;
+
+    private final ObjectProvider<ApplicationContext> applicationContextProvider;
+
+    private final List<SpringExceptionHandler> exceptionHandlers;
+
+    /**
+     * Instantiate.
+     *
+     * @param bridge                     {@link HttpServletOfficeFloorBridge}.
+     * @param restEndpoint               {@link OfficeFloorRestEndpoint}.
+     * @param handlerAdapterProvider     {@link ObjectProvider} for {@link RequestMappingHandlerAdapter}.
+     * @param dispatcherServletProvider  {@link ObjectProvider} for {@link DispatcherServlet}.
+     * @param applicationContextProvider {@link ObjectProvider} for {@link ApplicationContext}.
+     * @param exceptionHandlers          {@link SpringExceptionHandler} instances.
+     */
+    public OfficeFloorHandlerInterceptor(HttpServletOfficeFloorBridge bridge,
+                                         OfficeFloorRestEndpoint restEndpoint,
+                                         ObjectProvider<RequestMappingHandlerAdapter> handlerAdapterProvider,
+                                         ObjectProvider<DispatcherServlet> dispatcherServletProvider,
+                                         ObjectProvider<ApplicationContext> applicationContextProvider,
+                                         List<SpringExceptionHandler> exceptionHandlers) {
+        this.bridge = bridge;
+        this.handlerAdapterProvider = handlerAdapterProvider;
+        this.dispatcherServletProvider = dispatcherServletProvider;
+        this.applicationContextProvider = applicationContextProvider;
+        this.exceptionHandlers = exceptionHandlers;
+
+        // Build the handling of rest endpoints
+        for (OfficeFloorRestMethod restMethod : restEndpoint.getRestMethods()) {
+            this.servicing.put(restMethod.getHttpMethod().getName().toUpperCase(), restMethod);
+        }
+    }
+
+
+    /*
+     * ====================== HandlerInterceptor =========================
+     */
+
+    @Override
+    public boolean preHandle(HttpServletRequest request,
+                             HttpServletResponse response,
+                             Object handler) throws Exception {
+
+        // Obtain the handling REST Method
+        OfficeFloorRestMethod restMethod = this.servicing.get(request.getMethod().toUpperCase());
+        if (restMethod == null) {
+            return true; // skip, not handled by OfficeFloor
+        }
+
+        // Service the end point
+        ExternalServiceInput<ServerHttpConnection, ProcessAwareServerHttpConnectionManagedObject<ByteBuffer>> input = restMethod.getExternalServiceInput();
+
+        // Obtain the handler adapter
+        RequestMappingHandlerAdapter handlerAdapter = this.handlerAdapterProvider.getObject();
+
+        // Obtain the dispatch servlet
+        DispatcherServlet dispatcherServlet = this.dispatcherServletProvider.getObject();
+
+        // Obtain the application context
+        ApplicationContext applicationContext = this.applicationContextProvider.getObject();
+
+        // Create the request headers
+        NonMaterialisedHttpHeaders httpHeaders = new HttpServletNonMaterialisedHttpHeaders(request);
+
+        // Create the entity content
+        ByteSequence entity;
+        synchronized (request) {
+            entity = new HttpServletEntityByteSequence(request);
+        }
+
+        // Create the writer of the response
+        HttpServletHttpResponseWriter writer;
+        synchronized (response) {
+            writer = new HttpServletHttpResponseWriter(response, bufferPool);
+        }
+
+        // Strip the servlet context path from request URI
+        String contextPath = request.getContextPath();
+        String requestUri = request.getRequestURI().substring(contextPath != null ? contextPath.length() : 0)
+                + (request.getQueryString() != null ? "?" + request.getQueryString() : "");
+
+        // Create the server HTTP connection
+        net.officefloor.server.http.HttpMethod httpMethod = net.officefloor.server.http.HttpMethod.getHttpMethod(request.getMethod());
+        SpringServerHttpConnection connection = new SpringServerHttpConnection(
+                this.bridge.getHttpServerLocation(), request.isSecure(), () -> httpMethod, () -> requestUri,
+                HttpVersion.getHttpVersion(request.getProtocol()), httpHeaders, entity, null, null,
+                this.bridge.isIncludeEscalationStackTrace(), writer, bufferPool,
+                request, response, handler, handlerAdapter, dispatcherServlet, applicationContext, this.exceptionHandlers);
+
+        // Undertake servicing
+        AsyncContext async = request.startAsync();
+        input.service(connection, (escalation) -> {
+            try {
+
+                // Flag that externally handled (by Spring), so OfficeFloor does not overwrite
+                HttpExternalResponse.of(connection.getResponse()).externalSend();
+
+                // Handle escalation
+                if (escalation != null) {
+                    connection.setResponse(null, null, null, escalation);
+                    escalation = null;
+                }
+
+                // Undertake writing response
+                try {
+                    connection.writeResponse();
+                } catch (Throwable ex) {
+                    escalation = ex;
+                }
+
+                // Complete response
+                connection.getServiceFlowCallback().run(escalation);
+
+            } finally {
+                async.complete();
+            }
+        });
+
+        // Handled
+        return false;
+    }
+
+}

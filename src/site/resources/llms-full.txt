@@ -1,0 +1,1142 @@
+# OfficeFloor: Full Documentation
+
+> Explicit, AI-friendly YAML orchestration for Spring Boot REST. This file concatenates the README and all core documentation for ingestion by AI tools. Source: https://github.com/officefloor/OfficeFloor
+
+---
+
+
+
+<!-- ===== SOURCE: README.md ===== -->
+
+
+ [![Website](https://img.shields.io/website-up-down-green-red/http/officefloor.net.svg?label=http://officefloor.net)](http://officefloor.net)
+
+ ![Continuous Integration](https://github.com/officefloor/OfficeFloor/workflows/Continuous%20Integration/badge.svg)
+ [![codecov](https://codecov.io/gh/officefloor/OfficeFloor/branch/master/graph/badge.svg)](https://codecov.io/gh/officefloor/OfficeFloor)
+
+ [![Maven Central](https://img.shields.io/maven-central/v/net.officefloor/officefloor.svg)](https://search.maven.org/search?q=a:officefloor)
+ ![GitHub](https://img.shields.io/github/license/officefloor/OfficeFloor)
+
+# OfficeFloor
+
+**Explicit YAML orchestration for AI-augmented Spring Boot REST**
+
+OfficeFloor is a Spring Boot add-on. It adds explicit YAML-based function orchestration alongside your existing Spring beans, security, persistence, and controllers. Spring's dependency injection keeps doing what it does; OfficeFloor makes the wiring between endpoint steps visible in one file rather than scattered across annotations and framework conventions.
+
+More information and tutorials at [http://officefloor.net](http://officefloor.net)
+
+
+## What it adds to Spring
+
+A Spring `@RestController` that handles validation, business logic, and auditing in one class works fine, but the flow between those concerns is implicit. It lives in the framework's call stack and Spring's wiring rules, not in any single readable artefact. That opacity costs time when reasoning about an endpoint, and it limits how reliably AI coding tools can read or generate endpoint code.
+
+OfficeFloor introduces an explicit YAML file per endpoint that declares the function steps, their order, and how outputs connect, while each function class continues to use Spring beans via normal injection.
+
+
+## Explicit YAML orchestration
+
+The file name encodes the HTTP method and URL path. The file body declares each function step, its class, and how outputs connect to the next step:
+
+```yaml
+# File: src/main/resources/officefloor/rest/greeting.POST.yml
+# Mapped to: POST /greeting
+
+validate:
+  class: ValidateGreetingLogic
+  outputs:
+    valid: build
+
+build:
+  class: PostGreetingLogic
+  next: audit
+
+audit:
+  class: AuditGreetingLogic
+```
+
+Each function class declares only its own Spring bean dependencies, injected by Spring exactly as they would be in any other bean. No function knows about the others. The YAML file is the complete specification of the endpoint: its steps, their order, and their conditional branches, all readable without opening a single Java file.
+
+This makes endpoints reliable targets for AI coding tools: the full structure is explicit in one file, so an AI can read, generate, and refactor endpoints from the YAML alone.
+
+
+## Progressive adoption
+
+Add a single dependency to your existing Spring Boot `pom.xml`, choosing the starter that matches your Spring Boot generation:
+
+```xml
+<!-- Spring Boot 4.x -->
+<dependency>
+  <groupId>net.officefloor.springboot</groupId>
+  <artifactId>officefloor-rest-spring-boot-4-starter</artifactId>
+  <version>4.0.2</version>
+</dependency>
+
+<!-- Spring Boot 3.x: use officefloor-rest-spring-boot-3-starter instead -->
+```
+
+Add only the starter matching your Spring Boot generation — mixing versions causes runtime binary incompatibilities.
+
+Spring's dependency injection, security, persistence, and actuator configuration remain completely intact. OfficeFloor enriches Spring, it does not replace it. You can start declaring endpoints as YAML files alongside your existing `@RestController` classes and migrate incrementally.
+
+
+## Inversion of Coupling Control
+
+The underlying paradigm behind OfficeFloor separates three concerns that most frameworks conflate:
+
+* **Continuation Injection**: injecting functions to orchestrate application behaviour (what the YAML files express)
+* **Thread Injection**: injecting the thread (pool) to execute a particular function
+* **Dependency Injection**: injecting objects for state into functions
+
+Explicit YAML orchestration is the practical expression of Continuation Injection applied to REST endpoints. Read more in the paper [OfficeFloor: using office patterns to improve software design](http://doi.acm.org/10.1145/2739011.2739013) or the [introductory blog post](https://sagenschneider.blogspot.com/2019/02/inversion-of-coupling-control.html).
+
+
+## Documentation
+
+- [Getting started](docs/getting-started.md): one dependency and one YAML file, from zero to a running endpoint.
+- [Spring Boot plugin overview](docs/spring-boot-plugin.md): what the plugin adds to Spring, progressive adoption, and the version-specific starters.
+- [`@RestController` vs OfficeFloor YAML](docs/comparison.md): the same endpoint written both ways, how the directory layout indexes URL to code, and how the YAML makes an endpoint's flow explicit.
+- [YAML endpoint configuration](docs/yaml-endpoint-configuration.md): full reference for the endpoint file (naming, steps, `next:`/`outputs:`, escalations, governance).
+- [Spring integration](docs/spring-integration.md): how handler classes use Spring beans, MVC annotations, security, persistence, and actuator.
+- [Tutorials](docs/tutorials.md): categorised, runnable examples. The full narrated series is at [officefloor.net/tutorials](http://officefloor.net/tutorials/index.html).
+
+
+---
+
+
+<!-- ===== SOURCE: docs/getting-started.md ===== -->
+
+# Getting Started with the OfficeFloor Spring Boot Plugin
+
+This gets you from zero to a running REST endpoint. Add one dependency to your `pom.xml`,
+write one YAML file, and your endpoint is live. No controllers, no `@RequestMapping`, no Spring
+MVC configuration.
+
+Full tutorial source:
+[SpringRestGettingStartedHttpServer](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestGettingStartedHttpServer)
+
+## 1. Add the Maven dependency
+
+The starter is published to Maven Central, so no extra repository configuration is needed. Add
+the single dependency that matches your Spring Boot generation:
+
+```xml
+<!-- Spring Boot 4.x -->
+<dependency>
+  <groupId>net.officefloor.springboot</groupId>
+  <artifactId>officefloor-rest-spring-boot-4-starter</artifactId>
+  <version>4.0.2</version>
+</dependency>
+
+<!-- Spring Boot 3.x -->
+<dependency>
+  <groupId>net.officefloor.springboot</groupId>
+  <artifactId>officefloor-rest-spring-boot-3-starter</artifactId>
+  <version>4.0.2</version>
+</dependency>
+```
+
+## 2. Application class — standard Spring Boot
+
+The entry point is an ordinary `@SpringBootApplication` class with no OfficeFloor-specific code:
+
+```java
+@SpringBootApplication
+public class SpringRestGettingStartedApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(SpringRestGettingStartedApplication.class, args);
+    }
+}
+```
+
+## 3. Your first endpoint
+
+An endpoint is a YAML file placed under `src/main/resources/officefloor/rest/`. The file name
+encodes the HTTP method and the URL path:
+
+```text
+officefloor/rest/
+└── greeting.GET.yml     →  GET  /greeting
+```
+
+The YAML file names the Java class that handles the request:
+
+```yaml
+service:
+  class: net.officefloor.tutorial.springrestgettingstarted.GetGreetingLogic
+```
+
+Here `service` is a developer-chosen step name — it is not a keyword. The handler is a plain
+Java class with no framework annotations on the class itself:
+
+```java
+public class GetGreetingLogic {
+
+    public void service(GreetingService greetingService, ObjectResponse<GreetingResponse> response) {
+        response.send(new GreetingResponse(greetingService.greet("World")));
+    }
+}
+```
+
+OfficeFloor registers every Spring bean in the application context as a managed object.
+`GreetingService` is a plain Spring `@Service`, injected automatically by type into any service
+method parameter whose type matches:
+
+```java
+@Service
+public class GreetingService {
+
+    public String greet(String name) {
+        return "Hello, " + name + "!";
+    }
+}
+```
+
+`ObjectResponse<T>` serialises the object to JSON and writes it to the HTTP response — no
+`@ResponseBody` or `@RestController` is needed.
+
+## 4. Path parameters
+
+A path variable in the URL is expressed by a curly-brace file or directory name:
+
+```text
+officefloor/rest/
+└── greeting/
+    └── {name}.GET.yml   →  GET  /greeting/{name}
+```
+
+```yaml
+service:
+  class: net.officefloor.tutorial.springrestgettingstarted.GetNamedGreetingLogic
+```
+
+The handler receives the path variable as a `@PathVariable` parameter. **Always use the
+`name =` attribute form.** The shorthand `@PathVariable("name")` sets the `value` attribute;
+OfficeFloor resolves arguments from raw Java reflection where `@AliasFor` synthesis is not
+applied, so the shorthand silently produces an empty name and the binding fails.
+
+```java
+public class GetNamedGreetingLogic {
+
+    public void service(
+            @PathVariable(name = "name") String name,
+            GreetingService greetingService,
+            ObjectResponse<GreetingResponse> response) {
+        response.send(new GreetingResponse(greetingService.greet(name)));
+    }
+}
+```
+
+## 5. Run it
+
+Because the application is standard Spring Boot, it can be run directly:
+
+```bash
+mvn spring-boot:run
+```
+
+```bash
+curl http://localhost:8080/greeting
+{"message":"Hello, World!"}
+
+curl http://localhost:8080/greeting/OfficeFloor
+{"message":"Hello, OfficeFloor!"}
+```
+
+## 6. Testing
+
+The application is a standard Spring Boot application, so tests use `MockMvc`, or
+`@SpringBootTest(webEnvironment = RANDOM_PORT)` with `TestRestTemplate` for real HTTP calls
+against an embedded server.
+
+## Next
+
+* [YAML Endpoint Configuration](yaml-endpoint-configuration.md) — naming conventions, multi-step flows, branching, escalations and governance
+* [Spring Integration](spring-integration.md) — bean injection, Spring MVC annotations, `ResponseEntity`
+
+
+---
+
+
+<!-- ===== SOURCE: docs/spring-boot-plugin.md ===== -->
+
+# OfficeFloor Spring Boot Plugin
+
+**Explicit, AI-friendly YAML orchestration for Spring Boot REST endpoints.**
+
+OfficeFloor is a Spring Boot add-on. It adds explicit YAML-based function orchestration
+alongside your existing Spring beans, security, persistence and controllers. Spring's
+dependency injection keeps doing what it does; OfficeFloor makes the wiring between the
+steps of an endpoint visible in a single file rather than scattered across annotations and
+framework conventions.
+
+Website and tutorials: [https://officefloor.net](https://officefloor.net)
+
+## Why this is more AI-friendly than raw Spring
+
+A Spring `@RestController` that handles validation, business logic and auditing in one class
+works fine, but the *flow* between those concerns is implicit. It lives in the framework's
+call stack and Spring's wiring rules, not in any single readable artefact. That opacity costs
+time when reasoning about an endpoint, and it limits how reliably AI coding tools can read or
+generate endpoint code.
+
+OfficeFloor introduces an explicit YAML file per endpoint that declares the function steps,
+their order, and how outputs connect — while each function class continues to use Spring beans
+via normal injection. The full structure of an endpoint is explicit in one file, so an AI (or a
+human) can read, generate and refactor endpoints from the YAML alone, without tracing implicit
+framework behaviour across multiple Java files.
+
+```yaml
+# File: src/main/resources/officefloor/rest/greeting.POST.yml
+# Mapped to: POST /greeting
+
+validate:
+  class: ValidateGreetingLogic
+  outputs:
+    valid: build
+
+build:
+  class: PostGreetingLogic
+  next: audit
+
+audit:
+  class: AuditGreetingLogic
+```
+
+Each function class declares only its own Spring bean dependencies, injected by Spring exactly
+as they would be in any other bean. No function knows about the others. The YAML file is the
+complete specification of the endpoint: its steps, their order, and their conditional branches,
+all readable without opening a single Java file.
+
+## Progressive adoption — it enriches Spring, it does not replace it
+
+Add a single dependency to your existing Spring Boot `pom.xml` — choose the starter that
+matches your Spring Boot generation (see [Version-specific starters](#version-specific-starters)
+below). For a Spring Boot 4.x application:
+
+```xml
+<dependency>
+  <groupId>net.officefloor.springboot</groupId>
+  <artifactId>officefloor-rest-spring-boot-4-starter</artifactId>
+  <version>4.0.2</version>
+</dependency>
+```
+
+The starter auto-configures OfficeFloor into the Spring MVC pipeline. On start-up it scans the
+classpath for YAML files under `officefloor/rest/` and registers each one as a handler for the
+corresponding HTTP method and URL path. No additional Java or XML configuration is required.
+
+Spring's dependency injection, security, persistence and actuator configuration remain
+completely intact. You can start declaring endpoints as YAML files alongside your existing
+`@RestController` classes and migrate incrementally.
+
+## Version-specific starters
+
+Two starters are published — add only the one matching your Spring Boot generation. Mixing
+versions can cause `NoSuchMethodError` or other binary incompatibilities at runtime.
+
+| Spring Boot version | Starter artifact |
+| --- | --- |
+| Spring Boot 3.x | `officefloor-rest-spring-boot-3-starter` |
+| Spring Boot 4.x | `officefloor-rest-spring-boot-4-starter` |
+
+## The underlying paradigm: Inversion of Coupling Control
+
+The paradigm behind OfficeFloor separates three concerns that most frameworks conflate:
+
+* **Continuation Injection** — injecting functions to orchestrate application behaviour (what the YAML files express)
+* **Thread Injection** — injecting the thread (pool) to execute a particular function
+* **Dependency Injection** — injecting objects for state into functions (this is what Spring already provides)
+
+Explicit YAML orchestration is the practical expression of Continuation Injection applied to
+REST endpoints. Read more in the paper
+[OfficeFloor: using office patterns to improve software design](http://doi.acm.org/10.1145/2739011.2739013)
+or the [introductory blog post](https://sagenschneider.blogspot.com/2019/02/inversion-of-coupling-control.html).
+
+## Where to go next
+
+* [Getting Started](getting-started.md) — from zero to a running endpoint with one dependency and one YAML file
+* [YAML Endpoint Configuration](yaml-endpoint-configuration.md) — the full endpoint model reference
+* [Spring Integration](spring-integration.md) — bean injection, Spring MVC annotations, responses
+* [Tutorials](tutorials.md) — the full Spring Boot tutorial series
+
+
+---
+
+
+<!-- ===== SOURCE: docs/comparison.md ===== -->
+
+# `@RestController` vs OfficeFloor YAML: the same endpoint, two ways
+
+OfficeFloor does not replace Spring MVC. It adds an explicit YAML orchestration layer *on top of*
+your existing Spring Boot application, using the same beans, the same security, the same
+persistence. Two things change, and both make an endpoint easier for a developer or an AI tool to
+work with:
+
+1. **How you find the code behind a URL.** OfficeFloor's YAML files sit in a directory tree that
+   mirrors the URL structure, so the filesystem is a direct index from URL to code. With Spring the
+   route is declared in an annotation that can live in any class in any package.
+2. **Where an endpoint's flow lives.** Having reached that one file, it names every step and class
+   in the endpoint. In a `@RestController` the flow between validation, business logic and
+   persistence is implicit in one method's call stack.
+
+Together these give a clean drill-down: navigate from a URL straight to a single file, and from that
+file straight into the exact code involved, with all of its context. The two sections below follow
+those two points in order.
+
+> **Not a competition.** Everything below runs inside Spring Boot. Dependency injection, Spring
+> Security, Spring Data and Actuator behave identically. OfficeFloor is a progressive add-on: you
+> can keep your `@RestController` classes and introduce YAML endpoints alongside them.
+
+## 1. Navigating from a URL to the code
+
+Given a URL such as `GET /greeting/{name}`, how do you, or an AI tool, find the code that handles
+it?
+
+**With OfficeFloor the URL *is* the path on disk.** Directory nesting mirrors the path segments,
+`{curly}` names become path variables, and the suffix (`.GET`, `.POST`) is the HTTP method. The
+`officefloor/rest/` tree reads as a table of contents for the whole API:
+
+```
+src/main/resources/officefloor/rest/
+  greeting.GET.yml         ->  GET  /greeting
+  greeting/
+    {name}.GET.yml         ->  GET  /greeting/{name}
+  order.POST.yml           ->  POST /order
+```
+
+An assistant resolves a URL in two deterministic hops, with no searching required:
+
+1. **URL to file.** Map the URL by path to its `.yml` file. No annotation parsing, no call-graph
+   analysis. Every route in the application can be enumerated just by listing the tree above.
+2. **File to code.** That file names every step and handler class in the endpoint's flow (shown in
+   the next section). The assistant loads exactly those classes, and no others, giving it the
+   complete and minimal context for the endpoint.
+
+**With `@RestController` there is no positional relationship between the URL and the code.** The
+handler can live in any class, in any package. The route is often spread across a class-level
+`@RequestMapping` prefix and a method-level `@GetMapping` suffix that must be concatenated to
+recover the full path. Resolving a URL means scanning the controller layer and parsing annotations;
+understanding the endpoint then means following the call stack out of the controller method to
+discover which collaborators are involved. An AI assistant has to ingest and reason over a large
+amount of unrelated code just to find where a route is declared and what it touches.
+
+This is the difference that matters most for AI-assisted development. The project layout itself is
+contextual grounding: routes are enumerable by listing a directory, and the code for any route is
+one deterministic file lookup away. As a codebase grows to hundreds of endpoints, that difference
+compounds.
+
+## 2. Orchestration: the endpoint's flow in one file
+
+Once you have navigated to the file, it is the map into the code. This section shows what that file
+holds, from the simplest endpoint to a multi-step flow.
+
+### Case 1: a simple endpoint (`GET /greeting`)
+
+For a single-step endpoint the two approaches are almost identical. There is little flow to make
+explicit, so the value of orchestration is small.
+
+#### With `@RestController`
+
+```java
+@RestController
+public class GreetingController {
+
+    private final GreetingService greetingService;
+
+    public GreetingController(GreetingService greetingService) {
+        this.greetingService = greetingService;
+    }
+
+    @GetMapping("/greeting")
+    public GreetingResponse greeting() {
+        return new GreetingResponse(greetingService.greet("World"));
+    }
+}
+```
+
+#### With OfficeFloor
+
+```yaml
+# src/main/resources/officefloor/rest/greeting.GET.yml
+service:
+  class: GetGreetingLogic
+```
+
+```java
+public class GetGreetingLogic {
+
+    public void service(GreetingService greetingService, ObjectResponse<GreetingResponse> response) {
+        response.send(new GreetingResponse(greetingService.greet("World")));
+    }
+}
+```
+
+Same `GreetingService` bean, injected the same way. The file name `greeting.GET.yml` encodes the
+method and path, so no `@GetMapping` is needed. For an endpoint this small, that is the only
+difference worth noting.
+
+### Case 2: a multi-step endpoint (`POST /order`)
+
+The picture changes when an endpoint has real flow: validate the request, branch on the result,
+price the order, then persist it. This is where the orchestration becomes visible.
+
+#### With `@RestController`
+
+The flow lives inside one method. The order of steps, the validation branch, and how data passes
+from one step to the next are all implicit in the Java control flow:
+
+```java
+@RestController
+public class OrderController {
+
+    private final PricingService pricingService;
+    private final OrderService orderService;
+
+    public OrderController(PricingService pricingService, OrderService orderService) {
+        this.pricingService = pricingService;
+        this.orderService = orderService;
+    }
+
+    @PostMapping("/order")
+    public OrderResponse order(@RequestBody OrderRequest request) {
+
+        // validate
+        if (request.getProductId() == null || request.getProductId().isBlank()
+                || request.getQuantity() <= 0) {
+            return new OrderResponse(null, request.getProductId(), request.getQuantity(), 0.0);
+        }
+
+        // price
+        double total = pricingService.calculateTotal(request.getProductId(), request.getQuantity());
+
+        // save
+        String orderId = orderService.createOrder(request.getProductId(), request.getQuantity(), total);
+        return new OrderResponse(orderId, request.getProductId(), request.getQuantity(), total);
+    }
+}
+```
+
+To understand this endpoint you read the method top to bottom and reconstruct the flow in your
+head. As it grows, with more branches, error handling and cross-cutting concerns, that
+reconstruction gets harder. It is exactly the part an AI tool cannot see from annotations alone.
+
+#### With OfficeFloor
+
+The flow is declared in the YAML file. Each step is a small, independent handler class:
+
+```yaml
+# src/main/resources/officefloor/rest/order.POST.yml
+validate:
+  class: ValidateOrderLogic
+  outputs:
+    valid: price      # only the "valid" branch continues
+
+price:
+  class: CalculatePricingLogic
+  next: save          # pass the priced order on
+
+save:
+  class: SaveOrderLogic
+```
+
+```java
+public class ValidateOrderLogic {
+
+    @FunctionalInterface
+    public interface ValidOrderFlow {
+        void flow(OrderRequest order);
+    }
+
+    public void service(
+            @RequestBody OrderRequest request,
+            @Flow("valid") ValidOrderFlow validFlow,
+            ObjectResponse<OrderResponse> response) {
+        if (request.getProductId() == null || request.getProductId().isBlank()
+                || request.getQuantity() <= 0) {
+            response.send(new OrderResponse(null, request.getProductId(), request.getQuantity(), 0.0));
+        } else {
+            validFlow.flow(request);   // routes to the "valid" -> price step
+        }
+    }
+}
+```
+
+```java
+public class CalculatePricingLogic {
+
+    public PricedOrder price(@Parameter OrderRequest order, PricingService pricingService) {
+        double total = pricingService.calculateTotal(order.getProductId(), order.getQuantity());
+        return new PricedOrder(order.getProductId(), order.getQuantity(), total);   // becomes next step's @Parameter
+    }
+}
+```
+
+```java
+public class SaveOrderLogic {
+
+    public void save(@Parameter PricedOrder order, OrderService orderService,
+            ObjectResponse<OrderResponse> response) {
+        String orderId = orderService.createOrder(order.getProductId(), order.getQuantity(), order.getTotal());
+        response.send(new OrderResponse(orderId, order.getProductId(), order.getQuantity(), order.getTotal()));
+    }
+}
+```
+
+The YAML file is the complete, readable specification of the endpoint: its steps, their order, and
+the conditional branch, all in one place. It also names the exact set of classes involved, so from
+this one file both a developer and an AI tool know precisely which code to open for full context.
+Each handler knows only its own inputs and its own Spring beans. None of them knows about the
+others.
+
+## What stays exactly the same
+
+| Concern | `@RestController` | OfficeFloor YAML |
+| --- | --- | --- |
+| Dependency injection | Spring beans injected by type | Spring beans injected by type (identical) |
+| Spring Security | Unchanged | Unchanged |
+| Spring Data / persistence | Unchanged | Unchanged |
+| Bean Validation, Actuator, OpenAPI | Unchanged | Unchanged |
+| Request/response binding | `@RequestBody`, `@PathVariable`, `@RequestParam` | The same annotations are supported |
+
+## What changes
+
+| Aspect | `@RestController` | OfficeFloor YAML |
+| --- | --- | --- |
+| Finding the code for a URL | Scan and parse annotations across many classes | List a directory; open the matching file path |
+| Enumerating all routes | Static analysis of every controller | List the `officefloor/rest/` tree |
+| Knowing which classes an endpoint touches | Follow the call stack out of the controller | The file names every class in the flow |
+| Where the flow lives | Implicit in the method's call stack | Explicit in the `.yml` file |
+| Routing | `@GetMapping` / `@PostMapping` | Encoded in the file name and directory path |
+| Branching between steps | `if` / method calls in Java | `outputs:` map in YAML |
+| Passing data downstream | Local variables | Return value becomes next step's `@Parameter` |
+| Error routing | `@ControllerAdvice`, try/catch | `escalations:` (unmatched fall through to `@ControllerAdvice`) |
+| AI reads / generates the flow | Must infer from annotations plus call stack | Reads and generates from one file |
+
+## When to use which
+
+- **Reach for a `@RestController`** when an endpoint is a single step with little internal flow.
+  The YAML adds ceremony without buying much explicitness (see Case 1).
+- **Reach for OfficeFloor YAML** when you want endpoints that are navigable from the URL alone and
+  whose flow is explicit: multiple steps, conditional branches, shared error handling, or
+  cross-cutting concerns (governance and transactions). This is also what lets AI tooling jump from
+  a URL to the exact code with full context.
+- **You do not have to choose globally.** Both live in the same application. Migrate the endpoints
+  that benefit and leave the rest.
+
+## Next steps
+
+- [Getting started](getting-started.md): one dependency, one YAML file, from zero to a running endpoint.
+- [YAML endpoint configuration](yaml-endpoint-configuration.md): the full reference for steps, `next:`/`outputs:`, escalations and governance.
+- [Spring REST to OfficeFloor conversion reference](https://officefloor.net/tutorials/springboot/SpringRestConversionReference/index.html): the mechanical substitutions to convert a `@RestController` into YAML composition.
+- [Tutorial series](https://officefloor.net/tutorials/index.html): complete runnable examples for each capability.
+
+
+---
+
+
+<!-- ===== SOURCE: docs/yaml-endpoint-configuration.md ===== -->
+
+# YAML Endpoint Configuration Reference
+
+This is the complete model for declaring Spring Boot REST endpoints as OfficeFloor YAML files.
+Every endpoint's structure — its steps, their order, and their conditional branches — is
+explicit in one file, which is what makes endpoints reliable targets for AI coding tools.
+
+## File location and naming — path and method from the file name
+
+Endpoints are YAML files placed under `src/main/resources/officefloor/rest/`. The file name
+encodes both the HTTP method and the URL path. The naming convention is `{path}.{METHOD}.yml`:
+
+```text
+officefloor/rest/
+├── greeting.GET.yml             →  GET  /greeting
+└── greeting/
+    ├── {name}.GET.yml           →  GET  /greeting/{name}
+    ├── entity/
+    │   └── {name}.GET.yml       →  GET  /greeting/entity/{name}
+    ├── formal/
+    │   └── {name}.GET.yml       →  GET  /greeting/formal/{name}
+    └── {style}/
+        └── {name}.GET.yml       →  GET  /greeting/{style}/{name}
+```
+
+Rules:
+
+* Directory structure below `officefloor/rest/` becomes the URL path — deeper URLs are produced by nesting files in sub-directories.
+* Curly-brace segments such as `{name}` become URL path parameters.
+* The special filename `index.{METHOD}.yml` maps to the root path `/`.
+
+On start-up the starter scans the classpath for these YAML files and registers each one as a
+handler for its HTTP method and URL path. No additional Java or XML configuration is needed.
+
+## Steps — entries are named, the first is the entry point
+
+Inside each YAML file, top-level entries are named steps. The label on each entry is a
+developer-chosen name used to wire steps together — **it is not a keyword.** A step identifies
+the Java class that implements it:
+
+```yaml
+myLabel:
+  class: com.example.MyLogic
+```
+
+The **first entry** in the file is always called when the HTTP request arrives.
+
+When a class has only one public method, that method is used automatically.
+
+## `method:` — required for multi-method classes
+
+When a class has more than one public method, OfficeFloor cannot determine which to call and the
+application fails to start with:
+
+```text
+Require configuring method for service (GreetingStyleLogic) as it contains
+multiple public methods (casual, formal)
+```
+
+Every YAML entry that references such a class must include `method:` to name which method to
+invoke:
+
+```yaml
+# greeting/formal/{name}.GET.yml
+service:
+  class: net.officefloor.tutorial.springresthttpserver.GreetingStyleLogic
+  method: formal
+```
+
+```yaml
+# greeting/casual/{name}.GET.yml
+service:
+  class: net.officefloor.tutorial.springresthttpserver.GreetingStyleLogic
+  method: casual
+```
+
+Both entries reference the same class but each picks a different method.
+
+## `next:` — an unconditional next step
+
+Use `next:` to chain to the next step unconditionally after the current step completes:
+
+```yaml
+service:
+  class: net.officefloor.tutorial.catshttpserver.ServiceLogic
+  method: service
+  next: send
+
+send:
+  class: net.officefloor.tutorial.catshttpserver.ServiceLogic
+  method: send
+```
+
+### How data flows to a `next:` step in code
+
+The value a handler method **returns** becomes the input to the `next:` step. The receiving
+method declares a parameter annotated with `@Parameter` (from
+`net.officefloor.plugin.section.clazz.Parameter`) to receive it. Returning a value plus `next:`
+is the lightweight way to pass data downstream when there is no branching:
+
+```java
+// The step with `next: save` returns a PricedOrder ...
+public class CalculatePricingLogic {
+    public PricedOrder price(@Parameter OrderRequest order, PricingService pricingService) {
+        double total = pricingService.calculateTotal(order.getProductId(), order.getQuantity());
+        return new PricedOrder(order.getProductId(), order.getQuantity(), total);
+    }
+}
+
+// ... and the `save` step receives it as an @Parameter
+public class SaveOrderLogic {
+    public void save(@Parameter PricedOrder order, OrderService orderService,
+                     ObjectResponse<OrderResponse> response) {
+        String orderId = orderService.createOrder(order.getProductId(), order.getQuantity(), order.getTotal());
+        response.send(new OrderResponse(orderId, order.getProductId(), order.getQuantity(), order.getTotal()));
+    }
+}
+```
+
+Only the type matters for the wiring: the return type of one step is matched to the `@Parameter`
+type of the next.
+
+## `outputs:` — conditional branches
+
+A step may declare named outputs. Each output maps a branch name to the step to run when the
+handler triggers that output — enabling conditional flow:
+
+```yaml
+validate:
+  class: net.officefloor.tutorial.springrestfunction.ValidateOrderLogic
+  outputs:
+    valid: price
+
+price:
+  class: net.officefloor.tutorial.springrestfunction.CalculatePricingLogic
+  next: save
+
+save:
+  class: net.officefloor.tutorial.springrestfunction.SaveOrderLogic
+```
+
+Here `validate` continues to `price` only via its `valid` output; `price` then always continues
+to `save`. The whole flow — validate, then price, then save — is readable without opening any
+Java file.
+
+### How an output is defined and triggered in code — `@Flow`
+
+The output name in the YAML (`valid`) is not magic — it is matched to a **flow** declared in the
+handler. A flow is a custom `@FunctionalInterface` parameter annotated with `@Flow` (from
+`net.officefloor.plugin.section.clazz.Flow`), where the annotation value is the output name. The
+handler *triggers* the branch by calling the interface's method; the argument passed becomes the
+`@Parameter` of the receiving step:
+
+```java
+public class ValidateOrderLogic {
+
+    // Custom functional interface = the "valid" branch. Its argument type (OrderRequest)
+    // becomes the @Parameter of the target step (price).
+    @FunctionalInterface
+    public interface ValidOrderFlow {
+        void flow(OrderRequest order);
+    }
+
+    public void service(
+            @RequestBody OrderRequest request,
+            @Flow("valid") ValidOrderFlow validFlow,       // maps to `outputs: { valid: price }`
+            ObjectResponse<OrderResponse> response) {
+        if (request.getProductId() == null || request.getProductId().isBlank()
+                || request.getQuantity() <= 0) {
+            // Invalid: respond directly and short-circuit — `price`/`save` never run.
+            response.send(new OrderResponse(null, request.getProductId(), request.getQuantity(), 0.0));
+        } else {
+            // Valid: route to whatever step `valid` is mapped to in the YAML (here, price).
+            validFlow.flow(request);
+        }
+    }
+}
+```
+
+Key points:
+
+* `@Flow("valid")` binds the parameter to the YAML output named `valid`; the class name of the functional interface (`ValidOrderFlow`) is arbitrary.
+* Calling `validFlow.flow(request)` transfers execution to the mapped step. The argument (`request`) arrives there as an `@Parameter`.
+* A step can declare several `@Flow` parameters for several outputs, and simply not call the ones whose branches should not run — that is how conditional and short-circuit routing is expressed.
+* This keeps each class ignorant of the others: `ValidateOrderLogic` never names `CalculatePricingLogic`. The YAML `outputs:` map is the single place the wiring lives.
+
+## `escalations:` — exception handling
+
+Exceptions (called *escalations* in OfficeFloor) are handled with the **same function-injection
+model** as `outputs:` and `next:`: a handler is a plain Java class whose method receives the
+routed value as an `@Parameter` and writes the response with `ObjectResponse`. The one
+difference is *how the branch is triggered* — a step does not call a `@Flow` method, it simply
+**throws the exception**, and OfficeFloor routes it to the matching handler.
+
+### The exception must be checked (`extends Exception`)
+
+For OfficeFloor to discover and route an escalation, the exception must be a **checked**
+exception so that it appears in the method's `throws` clause. That `throws` clause is how the
+YAML wiring is validated at start-up:
+
+```java
+public class MockException extends Exception {
+    public MockException(String message) {
+        super(message);
+    }
+}
+```
+
+The service step just declares and throws it — it names no handler:
+
+```java
+public class MethodService {
+    public void service() throws MockException {
+        throw new MockException("thrown");
+    }
+}
+```
+
+### The handler receives the exception as `@Parameter`
+
+The thrown exception is passed to the handler exactly like any other step input — via
+`@Parameter` (from `net.officefloor.plugin.section.clazz.Parameter`). This is the same
+annotation used to receive a `next:` return value or a `@Flow` argument; for an escalation the
+value is the thrown exception object:
+
+```java
+public class MethodExceptionHandler {
+    public void handle(@Parameter MockException ex, ObjectResponse<String> response) {
+        response.send("Method handled: " + ex.getMessage());
+    }
+}
+```
+
+No Spring-specific annotations are needed. The handler can return a `ResponseEntity` (via
+`ObjectResponse<ResponseEntity<T>>`) to set the HTTP status and a `ProblemDetail` body.
+
+### Three levels of routing (highest precedence first)
+
+The Java classes are written identically regardless of which level catches the exception — the
+level is chosen entirely in YAML.
+
+**1. Method escalation** — declared under the step that throws, applies to that step only:
+
+```yaml
+service:
+  class: net.officefloor.tutorial.springrestexceptionhttpserver.MethodService
+  escalations:
+    net.officefloor.tutorial.springrestexceptionhttpserver.MockException: handler
+
+handler:
+  class: net.officefloor.tutorial.springrestexceptionhttpserver.MethodExceptionHandler
+```
+
+**2. Composition escalation** — declared in a `composition:` block at the top of the file,
+applies to every step in that file:
+
+```yaml
+composition:
+  escalations:
+    net.officefloor.tutorial.springrestexceptionhttpserver.MockException: handler
+
+service:
+  class: net.officefloor.tutorial.springrestexceptionhttpserver.CompositionService
+
+handler:
+  class: net.officefloor.tutorial.springrestexceptionhttpserver.CompositionExceptionHandler
+```
+
+**3. Global escalation** — application-wide, one file per exception type under
+`officefloor/escalation/`, the file name being the fully qualified exception class name. Endpoint
+YAMLs need no escalation config; the global handler wires automatically. This is the preferred
+OfficeFloor-native replacement for Spring's `@RestControllerAdvice`:
+
+```yaml
+# File: officefloor/escalation/com.example.EscalationNotFoundException.yml
+handle:
+  class: com.example.GlobalExceptionHandler
+  method: handleNotFound
+```
+
+When one handler class serves several exception types, use `method:` in each escalation file to
+pick the method. Global escalation also catches exceptions thrown by governance (e.g. a
+`TransactionSystemException` at transaction commit), since governance failures route through the
+same mechanism.
+
+**Precedence:** method escalation → composition escalation → global escalation. An endpoint can
+always override a global handler by declaring its own.
+
+### Fall-through to Spring `@RestControllerAdvice`
+
+If no method, composition, or global escalation matches, the exception propagates out of the
+OfficeFloor composition and is handled by Spring's standard
+`@RestControllerAdvice` / `@ExceptionHandler` infrastructure. This lets OfficeFloor endpoints
+participate in an existing Spring application's exception handling with no extra config. Prefer
+global escalation for new applications; use the Spring fall-through when integrating with
+existing `@ControllerAdvice` handlers.
+
+## `govern:` — cross-cutting concerns
+
+Wrap a step's execution with governance — such as a database transaction or auditing — using a
+`govern:` list. Governance is defined once (under `officefloor/govern/`) and applied per step:
+
+```yaml
+# apply a transaction around the step
+service:
+  class: net.officefloor.tutorial.springrestdatajpa.CreateArticleService
+  govern: [ transaction ]
+```
+
+```yaml
+# apply audit governance around the step
+service:
+  class: net.officefloor.tutorial.springrestgovernance.GovernedService
+  govern: [ audit ]
+```
+
+## Other configuration folders
+
+Alongside `officefloor/rest/`, endpoints can draw on:
+
+* `officefloor/escalation/` — global exception handlers, named by exception class
+* `officefloor/govern/` — governance definitions referenced by `govern:`
+* `officefloor/managedobjects/` — custom managed object state sources
+
+## Putting it together
+
+```yaml
+# src/main/resources/officefloor/rest/greeting.POST.yml  →  POST /greeting
+
+validate:
+  class: ValidateGreetingLogic
+  outputs:
+    valid: build
+
+build:
+  class: PostGreetingLogic
+  next: audit
+
+audit:
+  class: AuditGreetingLogic
+```
+
+Each function class declares only its own Spring bean dependencies, injected by Spring exactly
+as they would be in any other bean. No function knows about the others. The YAML file is the
+complete specification of the endpoint.
+
+See [Spring Integration](spring-integration.md) for how the handler methods obtain Spring beans
+and use Spring MVC parameter annotations.
+
+
+---
+
+
+<!-- ===== SOURCE: docs/spring-integration.md ===== -->
+
+# Spring Integration
+
+OfficeFloor handler classes are plain Java. They obtain Spring beans and HTTP data using
+standard Spring dependency injection and Spring MVC parameter annotations. OfficeFloor enriches
+Spring; it does not replace it.
+
+## Bean injection — parameters injected by type
+
+OfficeFloor registers every bean in the Spring application context as a managed object. Any
+parameter of a service method whose type matches a Spring bean is injected automatically — no
+annotation is needed on that parameter.
+
+```java
+@Service
+public class GreetingService {
+    public String greet(String name) {
+        return "Hello, " + name + "!";
+    }
+}
+```
+
+```java
+public class GetGreetingLogic {
+    public void service(GreetingService greetingService, ObjectResponse<GreetingResponse> response) {
+        response.send(new GreetingResponse(greetingService.greet("World")));
+    }
+}
+```
+
+The class carries no `@RestController`, `@RequestMapping` or `@ResponseBody`. The YAML file wires
+the class to a URL and HTTP method (see
+[YAML Endpoint Configuration](yaml-endpoint-configuration.md)).
+
+## Spring MVC parameter annotations
+
+Service methods can use all the standard Spring MVC parameter annotations, plus OfficeFloor's own
+web annotations:
+
+* Spring: `@PathVariable`, `@RequestParam`, `@RequestHeader`, `@CookieValue`, `@RequestBody`, `@ModelAttribute`, `@RequestPart`
+* OfficeFloor: `@HttpPathParameter`, `@HttpQueryParameter`, `@HttpHeaderParameter`, `@HttpObject`
+
+```java
+public class GetNamedGreetingLogic {
+    public void service(
+            @PathVariable(name = "name") String name,
+            GreetingService greetingService,
+            ObjectResponse<GreetingResponse> response) {
+        response.send(new GreetingResponse(greetingService.greet(name)));
+    }
+}
+```
+
+### Always use the `name =` attribute form
+
+Use `@PathVariable(name = "name")` and `@RequestParam(name = "name")`. The shorthand
+`@PathVariable("name")` sets the `value` attribute, which requires `@AliasFor` annotation
+synthesis to alias to `name`. OfficeFloor resolves arguments from raw Java reflection where that
+synthesis is not applied, so the shorthand **silently produces an empty value and the binding
+fails.**
+
+## Responses — `ObjectResponse<T>`
+
+`ObjectResponse<T>` serialises the object to JSON and writes it to the HTTP response. Declare it
+as a method parameter and call `send(...)`:
+
+```java
+response.send(new GreetingResponse(...));
+```
+
+### Custom headers and status — `ObjectResponse<ResponseEntity<T>>`
+
+For full Spring compatibility, `ObjectResponse` also accepts a `ResponseEntity<T>` as its type
+parameter. This lets you set custom response headers or a non-200 status code while keeping the
+same dependency-injected style:
+
+```java
+public void service(ObjectResponse<ResponseEntity<GreetingResponse>> response) {
+    HttpHeaders headers = new HttpHeaders();
+    headers.add("X-Greeting", "custom");
+    response.send(new ResponseEntity<>(new GreetingResponse("Hello"), headers, HttpStatus.OK));
+}
+```
+
+When you only need the body and a 200 status, `ObjectResponse<T>` is simpler; reach for the
+`ResponseEntity` form when you need headers or a specific status code.
+
+## What stays exactly the same as any Spring Boot app
+
+* `@SpringBootApplication` entry point
+* Spring Security, Spring Data JPA, Bean Validation, Actuator, Thymeleaf and other Spring Boot starters
+* `@Service`, `@Component`, `@Repository`, `@Configuration` beans and `@Qualifier` injection
+* Testing with `MockMvc` and `@SpringBootTest(webEnvironment = RANDOM_PORT)` + `TestRestTemplate`
+
+See the [Tutorials](tutorials.md) for worked examples of each of these integrations.
+
+
+---
+
+
+<!-- ===== SOURCE: docs/tutorials.md ===== -->
+
+# Spring Boot Plugin Tutorials
+
+The OfficeFloor Spring Boot tutorial series covers the YAML endpoint model and its integration
+with the wider Spring ecosystem. Each tutorial is a complete, runnable Spring Boot project.
+
+The full series with narrated explanations is on the website:
+[https://officefloor.net/tutorials/index.html](https://officefloor.net/tutorials/index.html).
+Each entry below links to its runnable source on GitHub.
+
+## Start here
+
+* **[Getting Started](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestGettingStartedHttpServer)** — from zero to a running REST endpoint: one dependency, one YAML file. See also [Getting Started](getting-started.md).
+* **[Spring REST HTTP Server](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestHttpServer)** — the YAML endpoint model in depth: naming conventions, multi-method service classes, multiple path variables, custom response headers.
+* **[Spring Boot 3 REST](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestSpringBoot3HttpServer)** — choosing the correct version-specific starter for your Spring Boot generation.
+* **[Spring REST to OfficeFloor Conversion Reference](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestConversionReference)** — the mechanical substitutions to convert a Spring MVC `@RestController` into YAML composition.
+
+## Endpoint flow and composition
+
+* **[Function](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestFunctionHttpServer)** — multi-step endpoints with `next:` and `outputs:` (Continuation Injection).
+* **[Variable](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestVariableHttpServer)** — passing values downstream between functions using variables.
+* **[Exception](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestExceptionHttpServer)** — handling exceptions (escalations) via `escalations:` and global handlers.
+* **[Governance](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestGovernanceHttpServer)** — wrapping function execution with cross-cutting concerns via `govern:`.
+* **[Managed Object](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestManagedObjectHttpServer)** — OfficeFloor Managed Objects, the native unit of state.
+* **[Supplier](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestSupplierHttpServer)** — supplying dependencies into the endpoint.
+* **[Team](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestTeamHttpServer)** — Thread Injection: assigning threads/pools to functions.
+
+## Spring ecosystem integration
+
+* **[Data JPA](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestDataJpaHttpServer)** — Spring Data JPA with YAML composition and transaction governance.
+* **[Security](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestSecurityHttpServer)** — securing endpoints with Spring Security.
+* **[Validation](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestValidationHttpServer)** — Bean Validation with YAML composition.
+* **[Qualifier](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestQualifierHttpServer)** — `@Qualifier` injection into service methods.
+* **[Actuator](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestActuatorHttpServer)** — Spring Boot Actuator production endpoints.
+* **[OpenAPI](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestOpenApiHttpServer)** — YAML endpoints appearing in generated OpenAPI documentation.
+* **[CORS](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestCorsHttpServer)** — configuring Cross-Origin Resource Sharing.
+* **[Servlet](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestServletHttpServer)** — direct injection of `jakarta.servlet.http.HttpServletRequest`.
+* **[Thymeleaf](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestThymeleafHttpServer)** — server-side HTML rendering from service methods.
+
+## Other JVM languages and effect systems
+
+* **[Kotlin](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestKotlinHttpServer)** — endpoint logic in Kotlin.
+* **[Scala](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestScalaHttpServer)** — endpoint logic in Scala.
+* **[JavaScript](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestJavaScriptHttpServer)** — JavaScript via GraalVM.
+* **[Cats Effect](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestCatsHttpServer)** — using Cats Effect within a handler.
+* **[ZIO](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestZioHttpServer)** — using ZIO within a handler.
+
+
+---

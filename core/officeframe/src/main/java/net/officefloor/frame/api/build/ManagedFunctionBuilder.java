@@ -53,6 +53,8 @@ public interface ManagedFunctionBuilder<O extends Enum<O>, F extends Enum<F>> ex
 	 * <li>means to trigger functionality on this {@link ManagedFunction} (e.g. can
 	 * expose functionality to be invoked)</li>
 	 * </ol>
+	 * <p>
+	 * It is also exposed to {@link Administration} to enable reflective administration.
 	 * 
 	 * @param annotation Annotation.
 	 */

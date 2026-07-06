@@ -45,22 +45,22 @@
 		<module>stage-sonatype</module>
 	</modules>
 	<properties>
-		<revision>4.0.0</revision>
+		<revision>4.0.2</revision>
 		<annotation-version>2.1.1</annotation-version>
-		<ant-version>1.10.15</ant-version>
+		<ant-version>1.10.17</ant-version>
 		<antrun-version>3.2.0</antrun-version>
-		<ant-jsch-version>1.10.14</ant-jsch-version>
+		<ant-jsch-version>1.10.15</ant-jsch-version>
 		<affinity-version>3.23.3</affinity-version>
 		<appengine-version>2.4.4</appengine-version>
 		<aws-java-sdk-version>1.12.797</aws-java-sdk-version>
-		<aws-lambda-core-version>1.2.3</aws-lambda-core-version>
+		<aws-lambda-core-version>1.4.0</aws-lambda-core-version>
 		<aws-lambda-events-version>3.11.4</aws-lambda-events-version>
 		<azure-cosmos-version>4.48.1</azure-cosmos-version>
 		<byte-buddy-version>1.14.11</byte-buddy-version>
-		<commons-codec-version>1.16.0</commons-codec-version>
+		<commons-codec-version>1.21.0</commons-codec-version>
 		<commons-io-version>2.21.0</commons-io-version>
 		<commons-lang-version>3.20.0</commons-lang-version>
-		<commons-text-version>1.11.0</commons-text-version>
+		<commons-text-version>1.15.0</commons-text-version>
 		<concurrent-api-version>3.0.3</concurrent-api-version>
 		<cats-effect-version>3.6-623178c</cats-effect-version>
 		<cdi-version>2.0.1</cdi-version>
@@ -68,9 +68,9 @@
 		<datanucleus-version>6.0.10</datanucleus-version>
 		<deploy-version>3.1.1</deploy-version>
 		<docker-java-version>3.7.1</docker-java-version>
-		<dokka-maven-version>1.9.10</dokka-maven-version>
+		<dokka-maven-version>2.2.0</dokka-maven-version>
 		<doobie-version>1.0.0-RC5</doobie-version>
-		<flatten-maven-version>1.5.0</flatten-maven-version>
+		<flatten-maven-version>1.7.3</flatten-maven-version>
 		<github-site-version>0.12</github-site-version>
 		<google-api-version>2.2.0</google-api-version>
 		<google-appengine-version>2.0.19</google-appengine-version>
@@ -79,42 +79,46 @@
 		<gpg-version>3.2.8</gpg-version>
 		<graalvm-js-version>23.0.4</graalvm-js-version>
 		<h2database-version>2.2.224</h2database-version>
-		<hibernate-version>6.2.4.Final</hibernate-version>
+		<hibernate-version>7.2.12.Final</hibernate-version>
 		<hikari-version>5.0.1</hikari-version>
 		<hsqldb-version>2.7.3</hsqldb-version>
 		<httpclient-version>4.5.14</httpclient-version>
-		<jackson-version>2.16.1</jackson-version>
+		<jackson2-version>2.16.1</jackson2-version>
+		<jackson3-version>3.1.2</jackson3-version>
 		<javadoc-version>3.6.0</javadoc-version>
 		<jsonwebtoken-version>0.11.5</jsonwebtoken-version>
-		<junit-version>5.10.1</junit-version>
+		<junit-version>6.0.3</junit-version>
 		<junit-vintage-version>4.13.2</junit-vintage-version>
-		<lombok-version>1.18.34</lombok-version>
+		<lombok-version>1.18.44</lombok-version>
 		<kotlin-version>1.9.22</kotlin-version>
-		<maven-scm-version>2.0.1</maven-scm-version>
-		<maven-site-version>3.12.1</maven-site-version>
+		<kotlin4-version>2.2.21</kotlin4-version>
+		<maven-scm-version>2.2.1</maven-scm-version>
+		<maven-site-version>3.22.0</maven-site-version>
 		<maven-source-version>3.3.0</maven-source-version>
-		<netty-version>4.1.131.Final</netty-version>
-		<nexus-staging-version>1.6.13</nexus-staging-version>
+		<netty-version>4.2.12.Final</netty-version>
+		<central-publishing-version>0.7.0</central-publishing-version>
 		<objectify-version>6.1.1</objectify-version>
 		<objenesis-version>3.4</objenesis-version>
 		<ongres-scram-client>2.1</ongres-scram-client>
-		<persistence-version>3.1.0</persistence-version>
-		<postgresql-version>42.7.10</postgresql-version>
+		<persistence-version>3.2.0</persistence-version>
+		<postgresql-version>42.7.11</postgresql-version>
 		<r2dbc-version>Borca-SR2</r2dbc-version>
 		<reactor-version>2024.0.15</reactor-version>
 		<scala-maven-version>4.8.1</scala-maven-version>
 		<scala-series>2.13</scala-series>
-		<scala-version>2.13.12</scala-version>
-		<scalacheck-version>1.17.0</scalacheck-version>
+		<scala-version>2.13.18</scala-version>
+		<scalacheck-version>1.19.0</scalacheck-version>
 		<scalatest-maven-version>2.2.0</scalatest-maven-version>
 		<scalatest-version>3.3.0-SNAP4</scalatest-version>
 		<servlet-version>6.0.0</servlet-version>
-		<slf4j-version>2.0.12</slf4j-version>
-		<spring-version>3.5.11</spring-version>
-		<swagger-version>2.2.22</swagger-version>
+		<slf4j-version>2.0.17</slf4j-version>
+		<spring3-version>3.5.11</spring3-version>
+		<spring-version>4.1.0</spring-version>
+		<swagger-version>2.2.46</swagger-version>
 		<swagger-ui-version>5.11.3</swagger-ui-version>
 		<tika-version>3.2.2</tika-version>
-		<undertow-version>2.3.14.Final</undertow-version>
+		<undertow-version>2.4.0.Final</undertow-version>
+		<log4j2-version>2.25.4</log4j2-version>
 		<vertx-version>4.5.3</vertx-version>
 		<wagon-ssh-version>3.5.3</wagon-ssh-version>
 		<zio-version>2.1.5</zio-version>
@@ -170,8 +174,28 @@
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
+				<groupId>net.officefloor.activity</groupId>
+				<artifactId>officeadmin</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
 				<groupId>net.officefloor.dependency</groupId>
 				<artifactId>officedependency</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.activity</groupId>
+				<artifactId>officemanagedobject</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.activity</groupId>
+				<artifactId>officesupplier</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.activity</groupId>
+				<artifactId>officeteam</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
@@ -184,6 +208,16 @@
                 <artifactId>officecompose</artifactId>
                 <version>${revision}</version>
             </dependency>
+			<dependency>
+				<groupId>net.officefloor.activity</groupId>
+				<artifactId>officeescalation</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.activity</groupId>
+				<artifactId>officegovern</artifactId>
+				<version>${revision}</version>
+			</dependency>
 			<!-- Declare -->
 			<dependency>
 				<groupId>net.officefloor.declare</groupId>
@@ -367,6 +401,11 @@
 			<dependency>
 				<groupId>net.officefloor.web</groupId>
 				<artifactId>officeweb_template</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.web</groupId>
+				<artifactId>officeweb_thymeleaf</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
@@ -610,9 +649,27 @@
 				<artifactId>officespring_webflux</artifactId>
 				<version>${revision}</version>
 			</dependency>
+			<!-- Spring Boot -->
 			<dependency>
-				<groupId>net.officefloor.spring</groupId>
+				<groupId>net.officefloor.springboot</groupId>
+				<artifactId>springboot</artifactId>
+				<version>${revision}</version>
+				<type>pom</type>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.springboot</groupId>
 				<artifactId>officefloor-rest-spring-boot-starter</artifactId>
+				<version>${revision}</version>
+				<type>pom</type>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.springboot</groupId>
+				<artifactId>officefloor-rest-spring-boot-3-starter</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.springboot</groupId>
+				<artifactId>officefloor-rest-spring-boot-4-starter</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<!-- ================================================ -->
@@ -882,9 +939,9 @@
 				<scope>import</scope>
 			</dependency>
 			<dependency>
-				<groupId>com.fasterxml.jackson</groupId>
+				<groupId>tools.jackson</groupId>
 				<artifactId>jackson-bom</artifactId>
-				<version>${jackson-version}</version>
+				<version>${jackson3-version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -918,7 +975,7 @@
 			<dependency>
 				<groupId>org.jetbrains.kotlin</groupId>
 				<artifactId>kotlin-bom</artifactId>
-				<version>${kotlin-version}</version>
+				<version>${kotlin4-version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -943,6 +1000,13 @@
 				<groupId>com.google.cloud</groupId>
 				<artifactId>libraries-bom</artifactId>
 				<version>${google-libraaries-version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-bom</artifactId>
+				<version>${log4j2-version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -996,7 +1060,7 @@
 				<plugin>
 					<groupId>org.jetbrains.kotlin</groupId>
 					<artifactId>kotlin-maven-plugin</artifactId>
-					<version>${kotlin-version}</version>
+					<version>${kotlin4-version}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.jetbrains.dokka</groupId>
@@ -1024,9 +1088,9 @@
 					<version>${maven-scm-version}</version>
 				</plugin>
 				<plugin>
-					<groupId>org.sonatype.plugins</groupId>
-					<artifactId>nexus-staging-maven-plugin</artifactId>
-					<version>${nexus-staging-version}</version>
+					<groupId>org.sonatype.central</groupId>
+					<artifactId>central-publishing-maven-plugin</artifactId>
+					<version>${central-publishing-version}</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -1307,13 +1371,14 @@
 					</plugin>
 					<!-- Deploy to Sonatype with staging plugin -->
 					<plugin>
-						<groupId>org.sonatype.plugins</groupId>
-						<artifactId>nexus-staging-maven-plugin</artifactId>
+						<groupId>org.sonatype.central</groupId>
+						<artifactId>central-publishing-maven-plugin</artifactId>
 						<extensions>true</extensions>
 						<configuration>
-							<nexusUrl>https://oss.sonatype.org/</nexusUrl>
-							<serverId>sonatype-nexus-staging</serverId>
-							<autoReleaseAfterClose>true</autoReleaseAfterClose>
+							<publishingServerId>central</publishingServerId>
+							<deploymentName>net.officefloor ${revision}</deploymentName>
+							<autoPublish>true</autoPublish>
+							<waitUntil>published</waitUntil>
 						</configuration>
 					</plugin>
 				</plugins>

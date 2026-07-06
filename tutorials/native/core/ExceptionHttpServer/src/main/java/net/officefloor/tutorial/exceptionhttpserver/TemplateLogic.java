@@ -1,0 +1,13 @@
+package net.officefloor.tutorial.exceptionhttpserver;
+
+import java.sql.SQLException;
+
+// START SNIPPET: tutorial
+public class TemplateLogic {
+
+	public void submit() throws SQLException {
+		throw new SQLException("Test");
+	}
+
+}
+// END SNIPPET: tutorial

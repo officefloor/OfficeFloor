@@ -31,6 +31,8 @@ import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.TestObject;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 /**
  * Ensure can apply pre-load {@link Administration} to an already loaded
  * {@link ManagedObject}.

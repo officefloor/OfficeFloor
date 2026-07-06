@@ -22,7 +22,7 @@ package net.officefloor.web.jwt.jwks;
 
 import java.security.Key;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Parses out the JWKS {@link Key} from the content.
