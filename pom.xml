@@ -482,9 +482,7 @@
 				<artifactId>maven-antrun-plugin</artifactId>
 				<executions>
 						<execution>
-							<!-- Generate the AI documentation file for the website by
-							     concatenating the README and the docs in a fixed order.
-							     Not committed: the docs are the single source of truth. -->
+							<!-- Generate the AI documentation file -->
 							<id>generate-llms-full</id>
 							<inherited>false</inherited>
 							<phase>post-site</phase>
@@ -550,6 +548,36 @@
 </string>
 											<file file="${basedir}/docs/tutorials.md" />
 										</resources>
+									</concat>
+								</target>
+							</configuration>
+						</execution>
+						<execution>
+							<!-- Generate sitemap.xml for the website -->
+							<id>generate-sitemap</id>
+							<inherited>false</inherited>
+							<phase>post-site</phase>
+							<goals>
+								<goal>run</goal>
+							</goals>
+							<configuration>
+								<target>
+									<mkdir dir="${project.build.directory}/site" />
+									<pathconvert property="sitemap.tutorials" pathsep="&#10;">
+										<sort>
+											<dirset dir="${basedir}/tutorials/springboot" includes="SpringRest*" />
+										</sort>
+										<mapper type="regexp" from=".*[/\\](SpringRest[^/\\]+)$" to="  &lt;url&gt;&lt;loc&gt;https://officefloor.net/tutorials/springboot/\1/index.html&lt;/loc&gt;&lt;/url&gt;" />
+									</pathconvert>
+									<concat destfile="${project.build.directory}/site/sitemap.xml" fixlastline="true">
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"&gt;
+  &lt;url&gt;&lt;loc&gt;https://officefloor.net/&lt;/loc&gt;&lt;/url&gt;
+  &lt;url&gt;&lt;loc&gt;https://officefloor.net/about.html&lt;/loc&gt;&lt;/url&gt;
+  &lt;url&gt;&lt;loc&gt;https://officefloor.net/getting-help.html&lt;/loc&gt;&lt;/url&gt;
+  &lt;url&gt;&lt;loc&gt;https://officefloor.net/tutorials/index.html&lt;/loc&gt;&lt;/url&gt;
+${sitemap.tutorials}
+&lt;/urlset&gt;
 									</concat>
 								</target>
 							</configuration>
