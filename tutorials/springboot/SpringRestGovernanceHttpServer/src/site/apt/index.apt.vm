@@ -236,6 +236,5 @@ governance:
 
 Next
 
-  The {{{../SpringRestVariableHttpServer/index.html}Variables tutorial}} demonstrates
-  passing state downstream through a procedure flow without coupling callers to callees
-  using <<<Out\<T\>>>> and <<<@Val>>>.
+  The {{{../SpringRestCrudHttpServer/index.html}REST CRUD Orchestration tutorial}} builds a full CRUD
+  resource from Load and Build producers, Apply and Save actions, and RespondWith responders.

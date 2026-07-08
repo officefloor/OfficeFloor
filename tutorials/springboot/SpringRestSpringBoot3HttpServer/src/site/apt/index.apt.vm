@@ -146,4 +146,5 @@ officefloor/rest/
 
 Next
 
-  The {{{../SpringRestFunctionHttpServer/index.html}Function Injection tutorial}} explores function injection more deeply: a three-step pipeline with conditional branching, typed data passing between steps, and independent Spring service injection at each step.
+  The {{{../SpringRestExceptionHttpServer/index.html}Exception Handling tutorial}} handles exceptions
+  thrown from REST service methods and maps them to HTTP responses.
