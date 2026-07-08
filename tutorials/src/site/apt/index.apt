@@ -32,12 +32,12 @@ OfficeFloor Tutorials
      entirely in a YAML file.  The YAML is the specification: readable without opening any Java file,
      which is especially valuable when working with AI coding tools.
 
-   * <<Thread injection>> assigns dedicated thread pools to steps based solely on their
+   * <<Thread injection>> assigns dedicated thread pools to functions based solely on their
      dependencies.  Socket threads never block on database calls.
 
   The first section covers existing Spring MVC functionality delivered through OfficeFloor function
   injection.  The second covers function orchestration.  It composes an endpoint from small,
-  single-purpose steps wired together in YAML.  The third shows where OfficeFloor goes beyond
+  single-purpose functions wired together in YAML.  The third shows where OfficeFloor goes beyond
   Spring MVC, adding capabilities such as thread injection and polyglot procedure logic.
 
   All tutorials are part of the OfficeFloor continuous builds and their source can be found
@@ -108,15 +108,15 @@ OfficeFloor Tutorials
 * Function Orchestration
 
   These tutorials cover OfficeFloor's function orchestration model: composing an endpoint from small,
-  single-purpose steps wired together in YAML.  Each step is a plain Java method handling one concern,
-  and the YAML names the steps, their order, how state flows between them, and the cross-cutting
+  single-purpose functions wired together in YAML.  Each function is a plain Java method handling one concern,
+  and the YAML names the functions, their order, how state flows between them, and the cross-cutting
   concerns that wrap them.  The final two tutorials apply the complete producer to action to responder
   pattern to a REST resource, with the naming conventions that keep it navigable.
 
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 || Tutorial                                                    || Description                                               || Covered
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./springboot/SpringRestFunctionHttpServer/index.html}Function Injection}} | Compose a multi-step request pipeline via YAML. Conditional branching with @Flow, sequential continuation with return values, and typed data passing between steps. | @Flow\
+| {{{./springboot/SpringRestFunctionHttpServer/index.html}Function Injection}} | Compose a multi-function request pipeline via YAML. Conditional branching with @Flow, sequential continuation with return values, and typed data passing between functions. | @Flow\
 |                                                              |                                                            | @Parameter\
 |                                                              |                                                            | Pipeline composition
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
@@ -127,16 +127,16 @@ OfficeFloor Tutorials
 |                                                              |                                                            | @Govern, @Enforce, @Disregard\
 |                                                              |                                                            | Auto-wire extensions
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./springboot/SpringRestCrudHttpServer/index.html}REST CRUD Orchestration}} | Build a full CRUD resource from single-purpose steps for GET, POST, PUT and DELETE.  Load and Build producers, Apply and Save actions, RespondWith responders.  Entities flow between steps as variables; DTOs appear only at the edges. | Load / Build / Save / RespondWith
+| {{{./springboot/SpringRestCrudHttpServer/index.html}REST CRUD Orchestration}} | Build a full CRUD resource from single-purpose functions for GET, POST, PUT and DELETE.  Load and Build producers, Apply and Save actions, RespondWith responders.  Entities flow between functions as variables; DTOs appear only at the edges. | Load / Build / Save / RespondWith
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./springboot/SpringRestOrchestrationReference/index.html}Orchestration Patterns and Naming}} | Reference for the step naming conventions and the request-to-response data flow: validate the DTO, publish the entity via a variable, work only with entities, then transform back to a DTO when responding.  Covers the one-shot request body, @Valid ordering, and variable reference semantics. | Naming and data-flow reference
+| {{{./springboot/SpringRestOrchestrationReference/index.html}Orchestration Patterns and Naming}} | Reference for the function naming conventions and the request-to-response data flow: validate the DTO, publish the entity via a variable, work only with entities, then transform back to a DTO when responding.  Covers the one-shot request body, @Valid ordering, and variable reference semantics. | Naming and data-flow reference
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 
 
 * Beyond Spring MVC: Additional OfficeFloor Capabilities
 
   The following tutorials cover capabilities that OfficeFloor provides over and above what Spring MVC
-  offers.  Thread injection assigns dedicated thread pools to pipeline steps so that socket threads
+  offers.  Thread injection assigns dedicated thread pools to pipeline functions so that socket threads
   are never blocked waiting on databases or external services.  The remaining tutorials extend that
   further with reactive interop, implicit state passing via variables, and polyglot procedure logic
   written in Kotlin, Scala, JavaScript, or other JVM languages.
@@ -144,7 +144,7 @@ OfficeFloor Tutorials
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 || Tutorial                                                    || Description                                               || Covered
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./springboot/SpringRestTeamHttpServer/index.html}Thread Injection}} | Assign dedicated thread pools to steps based on their dependencies. Socket threads are freed immediately; blocking database calls run on a separate team. | Teams\
+| {{{./springboot/SpringRestTeamHttpServer/index.html}Thread Injection}} | Assign dedicated thread pools to functions based on their dependencies. Socket threads are freed immediately; blocking database calls run on a separate team. | Teams\
 |                                                              |                                                            | Thread injection\
 |                                                              |                                                            | officefloor/teams/
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+

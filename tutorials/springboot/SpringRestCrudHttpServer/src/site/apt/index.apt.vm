@@ -11,8 +11,8 @@
 REST CRUD Orchestration
 
   The {{{./SpringRestFunctionHttpServer/index.html}Function}} tutorial introduced composing an endpoint
-  from steps.  This tutorial applies that model to a full CRUD resource.  It uses a small vocabulary of
-  single-purpose steps.  The vocabulary reads the same way for every endpoint.
+  from functions.  This tutorial applies that model to a full CRUD resource.  It uses a small vocabulary of
+  single-purpose functions.  The vocabulary reads the same way for every endpoint.
 
    * <<Producers>> obtain an entity and publish it.  <<<LoadArticle>>> loads an existing row by id.
      <<<BuildArticle>>> constructs a new entity from the request body.
@@ -24,10 +24,10 @@ REST CRUD Orchestration
      <<<RespondWithArticle>>>, <<<RespondWithArticleCreated>>> and <<<RespondWithNoContent>>>.
 
   The guiding rule is <<DTOs only at the edges>>.  A request DTO is validated and turned into an entity at
-  the first step.  Every step in the middle works only with the entity.  The responder is the one place
-  the entity becomes a response DTO.  State flows between steps as
-  {{{./SpringRestVariableHttpServer/index.html}variables}}.  A step uses <<<Out>>> to publish a value.  It
-  uses <<<@Val>>> to consume one.  So each step declares only the entities it needs.
+  the first function.  Every function in the middle works only with the entity.  The responder is the one place
+  the entity becomes a response DTO.  State flows between functions as
+  {{{./SpringRestVariableHttpServer/index.html}variables}}.  A function uses <<<Out>>> to publish a value.  It
+  uses <<<@Val>>> to consume one.  So each function declares only the entities it needs.
 
   {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestCrudHttpServer}Tutorial Source}}
 
@@ -64,7 +64,7 @@ REST CRUD Orchestration
 
 %{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestcrud/RespondWithArticle.java}
 
-  The two steps never reference each other.  <<<LoadArticle>>> publishes an <<<Article>>>.
+  The two functions never reference each other.  <<<LoadArticle>>> publishes an <<<Article>>>.
   <<<RespondWithArticle>>> consumes an <<<Article>>>.  The variable type is the contract between them.
 
 
@@ -80,7 +80,7 @@ REST CRUD Orchestration
 
 *List: GET /article
 
-  Listing has no id and no 404.  It stays a single step that queries and responds.
+  Listing has no id and no 404.  It stays a single function that queries and responds.
 
 %{snippet|file=${basedir}/src/main/resources/officefloor/rest/article.GET.yml}
 
@@ -93,12 +93,12 @@ REST CRUD Orchestration
 
 %{snippet|file=${basedir}/src/main/resources/officefloor/rest/article.POST.yml}
 
-  <<<BuildArticle>>> is the producer for a create.  As the first step it carries the
+  <<<BuildArticle>>> is the producer for a create.  As the first function it carries the
   <<<@Valid @RequestBody>>>.  Validation runs before anything is persisted.
 
 %{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestcrud/BuildArticle.java}
 
-  <<<SaveArticle>>> is a pure persistence step.  It works only on the entity.
+  <<<SaveArticle>>> is a pure persistence function.  It works only on the entity.
   <<<RespondWithArticleCreated>>> maps the saved entity to a DTO.  It adds the 201 status and the Location
   header.
 
@@ -109,14 +109,14 @@ REST CRUD Orchestration
 
 *Update: PUT /article/\{id\}
 
-  Update is the fullest pipeline.  It shows why validation is its own step.
+  Update is the fullest pipeline.  It shows why validation is its own function.
 
 %{snippet|file=${project.build.directory}/site-snippets/article/id.PUT.yml}
 
-  The order matters.  The request body can be read only once.  <<<@Valid>>> runs before its step's body.
+  The order matters.  The request body can be read only once.  <<<@Valid>>> runs before its function's body.
   If <<<Load>>> ran first, an invalid body against a missing id would return 404 before the body was
   checked.  So <<<ValidateArticle>>> runs first.  It validates the body and publishes it as a variable for
-  a later step.  The body is consumed exactly once.
+  a later function.  The body is consumed exactly once.
 
 %{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestcrud/ValidateArticle.java}
 
@@ -132,7 +132,7 @@ REST CRUD Orchestration
 *Invalid input: escalation to 400
 
   Validation failures escalate the same way not-found does.  A handler for Spring's
-  <<<MethodArgumentNotValidException>>> maps it to a 400.  The <<<Validate>>> and <<<Build>>> steps stay
+  <<<MethodArgumentNotValidException>>> maps it to a 400.  The <<<Validate>>> and <<<Build>>> functions stay
   free of error handling.
 
 %{snippet|file=${basedir}/src/main/resources/officefloor/escalation/org.springframework.web.bind.MethodArgumentNotValidException.yml}
@@ -163,5 +163,5 @@ REST CRUD Orchestration
 Next
 
   The {{{./SpringRestOrchestrationReference/index.html}Orchestration Patterns and Naming}} reference
-  collects the step naming conventions and the data-flow rules used in this tutorial.  It also covers the
+  collects the function naming conventions and the data-flow rules used in this tutorial.  It also covers the
   one-shot request body and the <<<@Val>>> reference semantics.

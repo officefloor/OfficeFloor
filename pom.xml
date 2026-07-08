@@ -481,6 +481,79 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
 				<executions>
+						<execution>
+							<!-- Generate the AI documentation file for the website by
+							     concatenating the README and the docs in a fixed order.
+							     Not committed: the docs are the single source of truth. -->
+							<id>generate-llms-full</id>
+							<inherited>false</inherited>
+							<phase>post-site</phase>
+							<goals>
+								<goal>run</goal>
+							</goals>
+							<configuration>
+								<target>
+									<mkdir dir="${project.build.directory}/site" />
+									<concat destfile="${project.build.directory}/site/llms-full.txt" fixlastline="true">
+										<resources>
+											<string># OfficeFloor: Full Documentation
+
+&gt; Explicit, AI-friendly YAML orchestration for Spring Boot REST. This file concatenates the README and all core documentation for ingestion by AI tools. Source: https://github.com/officefloor/OfficeFloor
+</string>
+											<string>
+---
+
+&lt;!-- ===== SOURCE: README.md ===== --&gt;
+
+</string>
+											<file file="${basedir}/README.md" />
+											<string>
+---
+
+&lt;!-- ===== SOURCE: docs/getting-started.md ===== --&gt;
+
+</string>
+											<file file="${basedir}/docs/getting-started.md" />
+											<string>
+---
+
+&lt;!-- ===== SOURCE: docs/spring-boot-plugin.md ===== --&gt;
+
+</string>
+											<file file="${basedir}/docs/spring-boot-plugin.md" />
+											<string>
+---
+
+&lt;!-- ===== SOURCE: docs/comparison.md ===== --&gt;
+
+</string>
+											<file file="${basedir}/docs/comparison.md" />
+											<string>
+---
+
+&lt;!-- ===== SOURCE: docs/yaml-endpoint-configuration.md ===== --&gt;
+
+</string>
+											<file file="${basedir}/docs/yaml-endpoint-configuration.md" />
+											<string>
+---
+
+&lt;!-- ===== SOURCE: docs/spring-integration.md ===== --&gt;
+
+</string>
+											<file file="${basedir}/docs/spring-integration.md" />
+											<string>
+---
+
+&lt;!-- ===== SOURCE: docs/tutorials.md ===== --&gt;
+
+</string>
+											<file file="${basedir}/docs/tutorials.md" />
+										</resources>
+									</concat>
+								</target>
+							</configuration>
+						</execution>
 					<execution>
 						<id>Setup Authorizor download link and Landing Page</id>
 						<inherited>false</inherited>

@@ -26,12 +26,12 @@
 
 Orchestration Patterns and Naming
 
-  This page is a reference for building a REST resource from function orchestration steps.  It collects
+  This page is a reference for building a REST resource from function orchestration functions.  It collects
   the naming conventions and the data flow rules.  The
   {{{./SpringRestCrudHttpServer/index.html}REST CRUD Orchestration}} tutorial applies them to a working
   resource.
 
-  A step has one of three roles.  A <<producer>> obtains an entity and publishes it.  An <<action>>
+  A function has one of three roles.  A <<producer>> obtains an entity and publishes it.  An <<action>>
   changes an entity.  A <<responder>> turns an entity into a response.  Every endpoint is a chain of
   producers and actions that ends in a responder.
 
@@ -49,56 +49,56 @@ Orchestration Patterns and Naming
   opens a transaction on the way down and commits it on the way up.  Errors are caught and translated on
   the way up.  The layers exist to organise this down and up traffic.
 
-  Function orchestration removes the round trip.  The steps run once, in order, and hand off forward.
+  Function orchestration removes the round trip.  The functions run once, in order, and hand off forward.
   There is no way back up.  So the sandwich disappears, and with it the reason for the layers.
 
 *----------------------------------------------------+--------------------------------------------------------------+
 || Layered application                               || Function orchestration
 *----------------------------------------------------+--------------------------------------------------------------+
-| Controller maps the request DTO, then calls down   | <<<Build>>> or <<<Validate>>> step at the front edge
+| Controller maps the request DTO, then calls down   | <<<Build>>> or <<<Validate>>> function at the front edge
 *----------------------------------------------------+--------------------------------------------------------------+
-| Service business logic                             | <<<Apply>>> and <<<Resolve>>> steps in the middle
+| Service business logic                             | <<<Apply>>> and <<<Resolve>>> functions in the middle
 *----------------------------------------------------+--------------------------------------------------------------+
-| Repository call, the bottom of the stack           | <<<Load>>> or <<<Save>>> step, in line with the rest
+| Repository call, the bottom of the stack           | <<<Load>>> or <<<Save>>> function, in line with the rest
 *----------------------------------------------------+--------------------------------------------------------------+
-| Service opens a transaction, commits on the return | <<<govern>>> across the steps, commit at the end of the request
+| Service opens a transaction, commits on the return | <<<govern>>> across the functions, commit at the end of the request
 *----------------------------------------------------+--------------------------------------------------------------+
-| Controller maps the entity to the response DTO on the return | <<<RespondWith>>> step at the back edge, a forward step
+| Controller maps the entity to the response DTO on the return | <<<RespondWith>>> function at the back edge, a forward function
 *----------------------------------------------------+--------------------------------------------------------------+
-| Exceptions unwind up through the layers            | a step throws, and the exception escalates to a handler
+| Exceptions unwind up through the layers            | a function throws, and the exception escalates to a handler
 *----------------------------------------------------+--------------------------------------------------------------+
 
   The vertical stack becomes a horizontal line.  A layered update reads across three classes.  The
   controller calls the service.  The service loads and saves through the repository.  The mapping and the
   response happen as the calls unwind.  The same update as a pipeline reads top to bottom in one file:
   <<<validate>>>, <<<load>>>, <<<apply>>>, <<<save>>>, <<<respond>>>.  The response is the last forward
-  step, not the unwinding of a controller.
+  function, not the unwinding of a controller.
 
-  A little of the old shape remains, and only at the edges.  The front steps take the request DTO.  The
-  back step produces the response DTO.  That is the presentation boundary.  But it is the two ends of a
-  line, not a layer that wraps the others.  The middle steps work with entities, which resembles the
+  A little of the old shape remains, and only at the edges.  The front functions take the request DTO.  The
+  back function produces the response DTO.  That is the presentation boundary.  But it is the two ends of a
+  line, not a layer that wraps the others.  The middle functions work with entities, which resembles the
   service layer.  But it is the body of the pipeline, not a layer that is called and returned from.  There
-  is no separate data layer at all.  A repository is a dependency of a step, and persistence is a step in
+  is no separate data layer at all.  A repository is a dependency of a function, and persistence is a function in
   the line.
 
   So the layer boundary becomes a data boundary.  DTOs live only at the edges.  Entities live in the
-  middle.  Each step declares what it works with, and that declaration is the boundary.  It is enforced by
+  middle.  Each function declares what it works with, and that declaration is the boundary.  It is enforced by
   the data, not by a call.
 
 
-*Step naming
+*Function naming
 
-  Each step is a single class with one public method.  The class name states the role.  The reader can
+  Each function is a single class with one public method.  The class name states the role.  The reader can
   pick the right class from its name alone.
 
 *----------------------------+--------------+--------------------------------------------------------------+
-|| Step                      || Role        || Shape
+|| Function                      || Role        || Shape
 *----------------------------+--------------+--------------------------------------------------------------+
 | <<<Load\<Entity\>>>>       | producer     | Path variable in.  Publishes <<<Out\<Entity\>>>>.  Throws <<<NotFoundException>>> when absent.
 *----------------------------+--------------+--------------------------------------------------------------+
 | <<<Build\<Entity\>>>>      | producer     | <<<@Valid @RequestBody>>> in.  Publishes <<<Out\<Entity\>>>>.  Constructs a new entity.
 *----------------------------+--------------+--------------------------------------------------------------+
-| <<<Validate\<Entity\>>>>   | producer     | <<<@Valid @RequestBody>>> in.  Publishes <<<Out\<Dto\>>>>.  Stashes the validated body for a later step.
+| <<<Validate\<Entity\>>>>   | producer     | <<<@Valid @RequestBody>>> in.  Publishes <<<Out\<Dto\>>>>.  Stashes the validated body for a later function.
 *----------------------------+--------------+--------------------------------------------------------------+
 | <<<Apply\<Entity\>>>>      | action       | <<<@Val Entity>>> and <<<@Val Dto>>> in.  Mutates the entity in place.
 *----------------------------+--------------+--------------------------------------------------------------+
@@ -116,57 +116,57 @@ Orchestration Patterns and Naming
   The name pairs a verb with the entity.  <<<Load>>> and <<<Build>>> are the two ways to get an entity
   into the pipeline.  <<<Save>>> and <<<RespondWith>>> read one letter apart at a glance, so the responder
   uses the longer <<<RespondWith>>> prefix.  The status sits in the responder name.  So the pipeline reads
-  its response contract from the step names.
+  its response contract from the function names.
 
 
 *DTOs only at the edges
 
-  A step in the middle of a pipeline works only with entities.  The DTO appears twice, and only at the
-  edges.  It arrives as the request body at the first step.  It leaves as the response body at the
+  A function in the middle of a pipeline works only with entities.  The DTO appears twice, and only at the
+  edges.  It arrives as the request body at the first function.  It leaves as the response body at the
   responder.  Between those two points the entity is the only currency.
 
-  This keeps each step simple.  A <<<Save>>> step saves an entity.  It does not know about DTOs, status
-  codes or JSON.  A <<<RespondWith>>> step is the one place the entity to DTO mapping lives.
+  This keeps each function simple.  A <<<Save>>> function saves an entity.  It does not know about DTOs, status
+  codes or JSON.  A <<<RespondWith>>> function is the one place the entity to DTO mapping lives.
 
 
 *Passing state with variables
 
-  Steps do not call each other.  A producer publishes a value into a variable.  A later step consumes it.
+  Functions do not call each other.  A producer publishes a value into a variable.  A later function consumes it.
   The variable type is the contract.
 
   A producer declares <<<Out\<T\>>>> and calls <<<set>>>.  A consumer declares <<<@Val T>>>.  OfficeFloor
   matches them by type.  For a request that handles one entity type there is one variable of that type,
   so the match is unambiguous.
 
-  <<<@Val>>> returns the same object the producer stored.  It is not a copy.  So an <<<Apply>>> step can
-  mutate a <<<@Val>>> entity in place, and a later <<<Save>>> or <<<RespondWith>>> step sees the change.
+  <<<@Val>>> returns the same object the producer stored.  It is not a copy.  So an <<<Apply>>> function can
+  mutate a <<<@Val>>> entity in place, and a later <<<Save>>> or <<<RespondWith>>> function sees the change.
   This is why the update pipeline works without threading the entity through return values.
 
 
 *One request body per pipeline
 
-  The HTTP request body can be read only once.  Only one step may bind <<<@RequestBody>>>.  A second step
+  The HTTP request body can be read only once.  Only one function may bind <<<@RequestBody>>>.  A second function
   that also binds it fails at runtime.
 
-  When more than one step needs the body, the first step reads it and publishes it as a variable.  Later
-  steps read the variable, not the body.  This is the job of the <<<Validate>>> step.  It binds
-  <<<@Valid @RequestBody>>> once, then publishes <<<Out\<Dto\>>>> for the <<<Apply>>> step.
+  When more than one function needs the body, the first function reads it and publishes it as a variable.  Later
+  functions read the variable, not the body.  This is the job of the <<<Validate>>> function.  It binds
+  <<<@Valid @RequestBody>>> once, then publishes <<<Out\<Dto\>>>> for the <<<Apply>>> function.
 
 
-*Validation runs before the step body
+*Validation runs before the function body
 
-  <<<@Valid>>> on a parameter runs before the method body of that step.  So the position of the validating
-  step decides when validation happens.
+  <<<@Valid>>> on a parameter runs before the method body of that function.  So the position of the validating
+  function decides when validation happens.
 
-  Put the validating step first.  If <<<Load>>> ran first, an invalid body against a missing id would
+  Put the validating function first.  If <<<Load>>> ran first, an invalid body against a missing id would
   return 404 before the body was checked.  With <<<Validate>>> first, the invalid body returns 400.  This
-  is why create validates in <<<Build>>> (the first step) and update validates in <<<Validate>>> (before
+  is why create validates in <<<Build>>> (the first function) and update validates in <<<Validate>>> (before
   <<<Load>>>).
 
 
 *Errors escalate to a handler
 
-  A step reports an error by throwing.  It does not build the error response itself.  The exception
+  A function reports an error by throwing.  It does not build the error response itself.  The exception
   escalates to a handler.
 
   Register a handler for the exception type under <<<officefloor/escalation/>>>.  Escalation is
@@ -180,7 +180,7 @@ Orchestration Patterns and Naming
 
 *One public method per class
 
-  Each step class has one public method.  OfficeFloor detects it, so the YAML names only the class:
+  Each function class has one public method.  OfficeFloor detects it, so the YAML names only the class:
 
 +------------------------------------------------------------------+
 load:
@@ -189,12 +189,12 @@ load:
   next: respond
 +------------------------------------------------------------------+
 
-  There is no <<<method:>>> line.  A step name in the YAML is a label.  The <<<next>>> value points to
+  There is no <<<method:>>> line.  A function name in the YAML is a label.  The <<<next>>> value points to
   another label.  The label carries no data.  Data flows through variables, not through the wiring.
 
 
-*Governance per step
+*Governance per function
 
-  Each step lists its {{{./SpringRestGovernanceHttpServer/index.html}governance}}.  A read uses
-  <<<readonly-transaction>>>.  A write uses <<<transaction>>>.  The governance spans the steps of the
+  Each function lists its {{{./SpringRestGovernanceHttpServer/index.html}governance}}.  A read uses
+  <<<readonly-transaction>>>.  A write uses <<<transaction>>>.  The governance spans the functions of the
   request, so the whole pipeline runs in one transaction.

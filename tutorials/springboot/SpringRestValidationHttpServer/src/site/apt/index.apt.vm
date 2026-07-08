@@ -155,12 +155,12 @@ Bean Validation in OfficeFloor REST YAML Composition
 
 
 
-*Validation in a multi-step pipeline
+*Validation in a multi-function pipeline
 
-  <<<@Valid>>> runs before the body of the step that declares it.  In a single step this is automatic.  In
-  a multi-step pipeline the position of the validating step decides when validation runs.
+  <<<@Valid>>> runs before the body of the function that declares it.  In a single function this is automatic.  In
+  a multi-function pipeline the position of the validating function decides when validation runs.
 
-  Put the validating step first.  If a load step ran first, an invalid body against a missing id would
+  Put the validating function first.  If a load function ran first, an invalid body against a missing id would
   return 404 before the body was checked.  With validation first, the invalid body returns 400.
 
   The {{{../SpringRestCrudHttpServer/index.html}REST CRUD Orchestration}} tutorial shows this ordering for
