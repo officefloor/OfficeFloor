@@ -1,0 +1,8 @@
+load:
+  class: net.officefloor.tutorial.springrestcrud.LoadArticle
+  govern: [ readonly-transaction ]
+  next: respond
+
+respond:
+  class: net.officefloor.tutorial.springrestcrud.RespondWithArticle
+  govern: [ readonly-transaction ]

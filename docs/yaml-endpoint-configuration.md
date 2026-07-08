@@ -1,7 +1,7 @@
 # YAML Endpoint Configuration Reference
 
 This is the complete model for declaring Spring Boot REST endpoints as OfficeFloor YAML files.
-Every endpoint's structure — its steps, their order, and their conditional branches — is
+Every endpoint's structure — its functions, their order, and their conditional branches — is
 explicit in one file, which is what makes endpoints reliable targets for AI coding tools.
 
 ## File location and naming — path and method from the file name
@@ -31,10 +31,10 @@ Rules:
 On start-up the starter scans the classpath for these YAML files and registers each one as a
 handler for its HTTP method and URL path. No additional Java or XML configuration is needed.
 
-## Steps — entries are named, the first is the entry point
+## Functions — entries are named, the first is the entry point
 
-Inside each YAML file, top-level entries are named steps. The label on each entry is a
-developer-chosen name used to wire steps together — **it is not a keyword.** A step identifies
+Inside each YAML file, top-level entries are named functions. The label on each entry is a
+developer-chosen name used to wire functions together — **it is not a keyword.** A function identifies
 the Java class that implements it:
 
 ```yaml
@@ -75,9 +75,9 @@ service:
 
 Both entries reference the same class but each picks a different method.
 
-## `next:` — an unconditional next step
+## `next:` — an unconditional next function
 
-Use `next:` to chain to the next step unconditionally after the current step completes:
+Use `next:` to chain to the next function unconditionally after the current function completes:
 
 ```yaml
 service:
@@ -90,15 +90,15 @@ send:
   method: send
 ```
 
-### How data flows to a `next:` step in code
+### How data flows to a `next:` function in code
 
-The value a handler method **returns** becomes the input to the `next:` step. The receiving
+The value a handler method **returns** becomes the input to the `next:` function. The receiving
 method declares a parameter annotated with `@Parameter` (from
 `net.officefloor.plugin.section.clazz.Parameter`) to receive it. Returning a value plus `next:`
 is the lightweight way to pass data downstream when there is no branching:
 
 ```java
-// The step with `next: save` returns a PricedOrder ...
+// The function with `next: save` returns a PricedOrder ...
 public class CalculatePricingLogic {
     public PricedOrder price(@Parameter OrderRequest order, PricingService pricingService) {
         double total = pricingService.calculateTotal(order.getProductId(), order.getQuantity());
@@ -106,7 +106,7 @@ public class CalculatePricingLogic {
     }
 }
 
-// ... and the `save` step receives it as an @Parameter
+// ... and the `save` function receives it as an @Parameter
 public class SaveOrderLogic {
     public void save(@Parameter PricedOrder order, OrderService orderService,
                      ObjectResponse<OrderResponse> response) {
@@ -116,12 +116,12 @@ public class SaveOrderLogic {
 }
 ```
 
-Only the type matters for the wiring: the return type of one step is matched to the `@Parameter`
+Only the type matters for the wiring: the return type of one function is matched to the `@Parameter`
 type of the next.
 
 ## `outputs:` — conditional branches
 
-A step may declare named outputs. Each output maps a branch name to the step to run when the
+A function may declare named outputs. Each output maps a branch name to the function to run when the
 handler triggers that output — enabling conditional flow:
 
 ```yaml
@@ -148,13 +148,13 @@ The output name in the YAML (`valid`) is not magic — it is matched to a **flow
 handler. A flow is a custom `@FunctionalInterface` parameter annotated with `@Flow` (from
 `net.officefloor.plugin.section.clazz.Flow`), where the annotation value is the output name. The
 handler *triggers* the branch by calling the interface's method; the argument passed becomes the
-`@Parameter` of the receiving step:
+`@Parameter` of the receiving function:
 
 ```java
 public class ValidateOrderLogic {
 
     // Custom functional interface = the "valid" branch. Its argument type (OrderRequest)
-    // becomes the @Parameter of the target step (price).
+    // becomes the @Parameter of the target function (price).
     @FunctionalInterface
     public interface ValidOrderFlow {
         void flow(OrderRequest order);
@@ -169,7 +169,7 @@ public class ValidateOrderLogic {
             // Invalid: respond directly and short-circuit — `price`/`save` never run.
             response.send(new OrderResponse(null, request.getProductId(), request.getQuantity(), 0.0));
         } else {
-            // Valid: route to whatever step `valid` is mapped to in the YAML (here, price).
+            // Valid: route to whatever function `valid` is mapped to in the YAML (here, price).
             validFlow.flow(request);
         }
     }
@@ -179,8 +179,8 @@ public class ValidateOrderLogic {
 Key points:
 
 * `@Flow("valid")` binds the parameter to the YAML output named `valid`; the class name of the functional interface (`ValidOrderFlow`) is arbitrary.
-* Calling `validFlow.flow(request)` transfers execution to the mapped step. The argument (`request`) arrives there as an `@Parameter`.
-* A step can declare several `@Flow` parameters for several outputs, and simply not call the ones whose branches should not run — that is how conditional and short-circuit routing is expressed.
+* Calling `validFlow.flow(request)` transfers execution to the mapped function. The argument (`request`) arrives there as an `@Parameter`.
+* A function can declare several `@Flow` parameters for several outputs, and simply not call the ones whose branches should not run — that is how conditional and short-circuit routing is expressed.
 * This keeps each class ignorant of the others: `ValidateOrderLogic` never names `CalculatePricingLogic`. The YAML `outputs:` map is the single place the wiring lives.
 
 ## `escalations:` — exception handling
@@ -188,7 +188,7 @@ Key points:
 Exceptions (called *escalations* in OfficeFloor) are handled with the **same function-injection
 model** as `outputs:` and `next:`: a handler is a plain Java class whose method receives the
 routed value as an `@Parameter` and writes the response with `ObjectResponse`. The one
-difference is *how the branch is triggered* — a step does not call a `@Flow` method, it simply
+difference is *how the branch is triggered* — a function does not call a `@Flow` method, it simply
 **throws the exception**, and OfficeFloor routes it to the matching handler.
 
 ### The exception must be checked (`extends Exception`)
@@ -205,7 +205,7 @@ public class MockException extends Exception {
 }
 ```
 
-The service step just declares and throws it — it names no handler:
+The service function just declares and throws it — it names no handler:
 
 ```java
 public class MethodService {
@@ -217,7 +217,7 @@ public class MethodService {
 
 ### The handler receives the exception as `@Parameter`
 
-The thrown exception is passed to the handler exactly like any other step input — via
+The thrown exception is passed to the handler exactly like any other function input — via
 `@Parameter` (from `net.officefloor.plugin.section.clazz.Parameter`). This is the same
 annotation used to receive a `next:` return value or a `@Flow` argument; for an escalation the
 value is the thrown exception object:
@@ -238,7 +238,7 @@ No Spring-specific annotations are needed. The handler can return a `ResponseEnt
 The Java classes are written identically regardless of which level catches the exception — the
 level is chosen entirely in YAML.
 
-**1. Method escalation** — declared under the step that throws, applies to that step only:
+**1. Method escalation** — declared under the function that throws, applies to that function only:
 
 ```yaml
 service:
@@ -251,7 +251,7 @@ handler:
 ```
 
 **2. Composition escalation** — declared in a `composition:` block at the top of the file,
-applies to every step in that file:
+applies to every function in that file:
 
 ```yaml
 composition:
@@ -296,18 +296,18 @@ existing `@ControllerAdvice` handlers.
 
 ## `govern:` — cross-cutting concerns
 
-Wrap a step's execution with governance — such as a database transaction or auditing — using a
-`govern:` list. Governance is defined once (under `officefloor/govern/`) and applied per step:
+Wrap a function's execution with governance — such as a database transaction or auditing — using a
+`govern:` list. Governance is defined once (under `officefloor/govern/`) and applied per function:
 
 ```yaml
-# apply a transaction around the step
+# apply a transaction around the function
 service:
   class: net.officefloor.tutorial.springrestdatajpa.CreateArticleService
   govern: [ transaction ]
 ```
 
 ```yaml
-# apply audit governance around the step
+# apply audit governance around the function
 service:
   class: net.officefloor.tutorial.springrestgovernance.GovernedService
   govern: [ audit ]
@@ -345,3 +345,8 @@ complete specification of the endpoint.
 
 See [Spring Integration](spring-integration.md) for how the handler methods obtain Spring beans
 and use Spring MVC parameter annotations.
+
+See the [REST CRUD Orchestration](https://officefloor.net/tutorials/springboot/SpringRestCrudHttpServer/index.html)
+tutorial for these keys applied to a full resource, and the
+[Orchestration Patterns and Naming](https://officefloor.net/tutorials/springboot/SpringRestOrchestrationReference/index.html)
+reference for the function naming conventions and the request to response data flow.

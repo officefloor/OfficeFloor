@@ -481,6 +481,107 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
 				<executions>
+						<execution>
+							<!-- Generate the AI documentation file -->
+							<id>generate-llms-full</id>
+							<inherited>false</inherited>
+							<phase>post-site</phase>
+							<goals>
+								<goal>run</goal>
+							</goals>
+							<configuration>
+								<target>
+									<mkdir dir="${project.build.directory}/site" />
+									<concat destfile="${project.build.directory}/site/llms-full.txt" fixlastline="true">
+										<resources>
+											<string># OfficeFloor: Full Documentation
+
+&gt; Explicit, AI-friendly YAML orchestration for Spring Boot REST. This file concatenates the README and all core documentation for ingestion by AI tools. Source: https://github.com/officefloor/OfficeFloor
+</string>
+											<string>
+---
+
+&lt;!-- ===== SOURCE: README.md ===== --&gt;
+
+</string>
+											<file file="${basedir}/README.md" />
+											<string>
+---
+
+&lt;!-- ===== SOURCE: docs/getting-started.md ===== --&gt;
+
+</string>
+											<file file="${basedir}/docs/getting-started.md" />
+											<string>
+---
+
+&lt;!-- ===== SOURCE: docs/spring-boot-plugin.md ===== --&gt;
+
+</string>
+											<file file="${basedir}/docs/spring-boot-plugin.md" />
+											<string>
+---
+
+&lt;!-- ===== SOURCE: docs/comparison.md ===== --&gt;
+
+</string>
+											<file file="${basedir}/docs/comparison.md" />
+											<string>
+---
+
+&lt;!-- ===== SOURCE: docs/yaml-endpoint-configuration.md ===== --&gt;
+
+</string>
+											<file file="${basedir}/docs/yaml-endpoint-configuration.md" />
+											<string>
+---
+
+&lt;!-- ===== SOURCE: docs/spring-integration.md ===== --&gt;
+
+</string>
+											<file file="${basedir}/docs/spring-integration.md" />
+											<string>
+---
+
+&lt;!-- ===== SOURCE: docs/tutorials.md ===== --&gt;
+
+</string>
+											<file file="${basedir}/docs/tutorials.md" />
+										</resources>
+									</concat>
+								</target>
+							</configuration>
+						</execution>
+						<execution>
+							<!-- Generate sitemap.xml for the website -->
+							<id>generate-sitemap</id>
+							<inherited>false</inherited>
+							<phase>post-site</phase>
+							<goals>
+								<goal>run</goal>
+							</goals>
+							<configuration>
+								<target>
+									<mkdir dir="${project.build.directory}/site" />
+									<pathconvert property="sitemap.tutorials" pathsep="&#10;">
+										<sort>
+											<dirset dir="${basedir}/tutorials/springboot" includes="SpringRest*" />
+										</sort>
+										<mapper type="regexp" from=".*[/\\](SpringRest[^/\\]+)$" to="  &lt;url&gt;&lt;loc&gt;https://officefloor.net/tutorials/springboot/\1/index.html&lt;/loc&gt;&lt;/url&gt;" />
+									</pathconvert>
+									<concat destfile="${project.build.directory}/site/sitemap.xml" fixlastline="true">
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"&gt;
+  &lt;url&gt;&lt;loc&gt;https://officefloor.net/&lt;/loc&gt;&lt;/url&gt;
+  &lt;url&gt;&lt;loc&gt;https://officefloor.net/about.html&lt;/loc&gt;&lt;/url&gt;
+  &lt;url&gt;&lt;loc&gt;https://officefloor.net/getting-help.html&lt;/loc&gt;&lt;/url&gt;
+  &lt;url&gt;&lt;loc&gt;https://officefloor.net/tutorials/index.html&lt;/loc&gt;&lt;/url&gt;
+${sitemap.tutorials}
+&lt;/urlset&gt;
+									</concat>
+								</target>
+							</configuration>
+						</execution>
 					<execution>
 						<id>Setup Authorizor download link and Landing Page</id>
 						<inherited>false</inherited>

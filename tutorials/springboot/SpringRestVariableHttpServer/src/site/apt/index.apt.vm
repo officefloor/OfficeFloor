@@ -93,16 +93,62 @@ Variable Tutorial
 
 
 
+*A shared scope for functions
+
+  Variables give a set of functions the same convenience that a single method gives its statements.
+
+  A single method has one local scope.  Each statement can use any variable declared above it.  Set a value
+  on one line and every later line can use it.  The state accumulates in scope as the method runs.
+
+  Composing the same work from separate functions would normally lose that scope.  A function sees only its
+  own parameters.  With return values a function hands one value to the next.  To carry several accumulated
+  values it has to bundle them into a type.  As the flow grows, so does the number of these carrier types,
+  one for each combination of state in flight.  The types model nothing.  They exist only to move state
+  between functions.
+
+  Variables restore the shared scope.  A function publishes a value with <<<Out>>>.  Any later function
+  reads it with <<<@Val>>>.  The set of live variables is the shared scope, so each function reads any
+  earlier value it needs.  Each function is like a block of code in the single method, with its variables
+  still available to the functions that follow.  There are no carrier types.
+
+  It also improves on the single method.  In a method a block's use of the surrounding variables is
+  implicit, and the block cannot be reused on its own.  A function instead declares the variables it reads
+  and the variables it writes.  Its inputs and outputs are explicit, so the function is reusable wherever
+  those variables are in scope.
+
+  So variables give the flexibility of a shared local scope with the discipline of an explicit, reusable
+  contract on each function.
+
+
+
 *Composing flows — YAML endpoint files
 
-  The YAML files wire together the upstream setter and downstream reader as a two-step pipeline.
-  Each step is independent — neither class references the other.
+  The YAML files wire together the upstream setter and downstream reader as a two-function pipeline.
+  Each function is independent — neither class references the other.
 
 %{snippet|file=${basedir}/src/main/resources/officefloor/rest/outIn.GET.yml|ignoreDownloadError=false}
 
 %{snippet|file=${basedir}/src/main/resources/officefloor/rest/varVal.GET.yml|ignoreDownloadError=false}
 
 %{snippet|file=${basedir}/src/main/resources/officefloor/rest/outVal.GET.yml|ignoreDownloadError=false}
+
+
+
+*Variables in a REST pipeline
+
+  Two rules make variables the natural way to pass request state between functions.
+
+  First, the HTTP request body can be read only once.  Only one function may bind <<<@RequestBody>>>.  When a
+  later function also needs the body, the first function binds it once and publishes it with <<<Out>>>.  The later
+  function reads the variable, not the body.
+
+  Second, <<<@Val>>> returns the same object the producer stored.  It is not a copy.  So one function can load
+  an entity into a variable, a second function can mutate that entity in place, and a third function sees the
+  change.
+
+  The {{{../SpringRestCrudHttpServer/index.html}REST CRUD Orchestration}} tutorial uses both rules to build
+  a full resource.  The {{{../SpringRestOrchestrationReference/index.html}Orchestration Patterns and Naming}}
+  reference states them in full.
 
 
 

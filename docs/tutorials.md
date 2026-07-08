@@ -14,14 +14,23 @@ Each entry below links to its runnable source on GitHub.
 * **[Spring Boot 3 REST](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestSpringBoot3HttpServer)** — choosing the correct version-specific starter for your Spring Boot generation.
 * **[Spring REST to OfficeFloor Conversion Reference](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestConversionReference)** — the mechanical substitutions to convert a Spring MVC `@RestController` into YAML composition.
 
-## Endpoint flow and composition
+## Function orchestration
 
-* **[Function](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestFunctionHttpServer)** — multi-step endpoints with `next:` and `outputs:` (Continuation Injection).
-* **[Variable](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestVariableHttpServer)** — passing values downstream between functions using variables.
-* **[Exception](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestExceptionHttpServer)** — handling exceptions (escalations) via `escalations:` and global handlers.
+Composing an endpoint from small, single-purpose functions wired together in YAML — the function is the unit of composition, the YAML is the specification.
+
+* **[Function](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestFunctionHttpServer)** — multi-function endpoints with `next:` and `outputs:` (Continuation Injection).
+* **[Variable](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestVariableHttpServer)** — passing state downstream between functions via `Out<T>` / `@Val`, without coupling caller to callee.
 * **[Governance](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestGovernanceHttpServer)** — wrapping function execution with cross-cutting concerns via `govern:`.
+* **[Exception](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestExceptionHttpServer)** — handling exceptions (escalations) via `escalations:` and global handlers.
+* **[REST CRUD Orchestration](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestCrudHttpServer)** — a full CRUD resource built from `Load`/`Build` producers, `Apply`/`Save` actions and `RespondWith` responders for GET, POST, PUT and DELETE.
+* **[Orchestration Patterns and Naming](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestOrchestrationReference)** — the function naming conventions and the DTO to entity to DTO data-flow, plus the one-shot request body, `@Valid` ordering and variable reference-semantics rules.
+
+## Beyond Spring MVC — additional capabilities
+
+Capabilities OfficeFloor provides over and above Spring MVC, through its function and thread injection.
+
 * **[Managed Object](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestManagedObjectHttpServer)** — OfficeFloor Managed Objects, the native unit of state.
-* **[Supplier](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestSupplierHttpServer)** — supplying dependencies into the endpoint.
+* **[Supplier](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestSupplierHttpServer)** — supplying a library of related managed objects from a single declaration.
 * **[Team](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestTeamHttpServer)** — Thread Injection: assigning threads/pools to functions.
 
 ## Spring ecosystem integration
