@@ -175,5 +175,5 @@ Function Injection
 
 Next
 
-  The {{{../SpringRestExceptionHttpServer/index.html}Spring REST Exception Handling tutorial}} covers
-  method escalations, composition escalations, and Spring <<<@ControllerAdvice>>> integration.
+  The {{{../SpringRestVariableHttpServer/index.html}Variable tutorial}} passes state downstream between
+  functions using variables, with <<<Out>>> and <<<@Val>>>.

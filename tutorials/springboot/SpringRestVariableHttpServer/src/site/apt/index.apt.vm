@@ -162,5 +162,5 @@ Variable Tutorial
 
 Next
 
-  The {{{../SpringRestKotlinHttpServer/index.html}Kotlin tutorial}} demonstrates implementing
-  REST procedure logic in Kotlin alongside Java procedures.
+  The {{{../SpringRestGovernanceHttpServer/index.html}Governance tutorial}} wraps function execution with
+  cross-cutting concerns such as transactions, declared in YAML.
