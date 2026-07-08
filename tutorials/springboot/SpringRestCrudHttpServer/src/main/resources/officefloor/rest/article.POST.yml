@@ -1,0 +1,13 @@
+build:
+  class: net.officefloor.tutorial.springrestcrud.BuildArticle
+  govern: [ transaction ]
+  next: save
+
+save:
+  class: net.officefloor.tutorial.springrestcrud.SaveArticle
+  govern: [ transaction ]
+  next: respond
+
+respond:
+  class: net.officefloor.tutorial.springrestcrud.RespondWithArticleCreated
+  govern: [ transaction ]

@@ -1,0 +1,167 @@
+~~~
+~~ Spring REST CRUD Orchestration Tutorial
+~~~
+
+                                               -----------------------
+                                         REST CRUD Orchestration Tutorial
+                                               -----------------------
+                                                Daniel Sagenschneider
+                                               -----------------------
+
+REST CRUD Orchestration
+
+  The {{{./SpringRestFunctionHttpServer/index.html}Function}} tutorial introduced composing an endpoint
+  from steps.  This tutorial applies that model to a full CRUD resource.  It uses a small vocabulary of
+  single-purpose steps.  The vocabulary reads the same way for every endpoint.
+
+   * <<Producers>> obtain an entity and publish it.  <<<LoadArticle>>> loads an existing row by id.
+     <<<BuildArticle>>> constructs a new entity from the request body.
+
+   * <<Actions>> operate only on entities.  These are <<<ApplyArticle>>>, <<<SaveArticle>>> and
+     <<<DeleteArticle>>>.
+
+   * <<Responders>> turn an entity back into a DTO and send it with a status.  These are
+     <<<RespondWithArticle>>>, <<<RespondWithArticleCreated>>> and <<<RespondWithNoContent>>>.
+
+  The guiding rule is <<DTOs only at the edges>>.  A request DTO is validated and turned into an entity at
+  the first step.  Every step in the middle works only with the entity.  The responder is the one place
+  the entity becomes a response DTO.  State flows between steps as
+  {{{./SpringRestVariableHttpServer/index.html}variables}}.  A step uses <<<Out>>> to publish a value.  It
+  uses <<<@Val>>> to consume one.  So each step declares only the entities it needs.
+
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestCrudHttpServer}Tutorial Source}}
+
+
+*The domain
+
+  A single JPA entity, with a request DTO for input and a response DTO for output.  Mapping between DTO
+  and entity is deliberately explicit.  It is the boundary the pattern is built around.
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestcrud/Article.java}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestcrud/ArticleRequest.java}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestcrud/ArticleResponse.java}
+
+
+*Maven dependencies
+
+%{snippet|id=tutorial|file=${basedir}/pom.xml}
+
+
+*Read: GET /article/\{id\}
+
+  A read is a producer followed by a responder.
+
+%{snippet|file=${project.build.directory}/site-snippets/article/id.GET.yml}
+
+  <<<LoadArticle>>> fetches the row or throws <<<NotFoundException>>>.  It publishes the entity as a
+  variable.
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestcrud/LoadArticle.java}
+
+  <<<RespondWithArticle>>> reads that entity with <<<@Val>>> and maps it to the response DTO.
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestcrud/RespondWithArticle.java}
+
+  The two steps never reference each other.  <<<LoadArticle>>> publishes an <<<Article>>>.
+  <<<RespondWithArticle>>> consumes an <<<Article>>>.  The variable type is the contract between them.
+
+
+*Not found: office-level escalation
+
+  <<<LoadArticle>>> simply throws.  A handler registered under <<<officefloor/escalation/>>> maps the
+  exception to a 404.  This applies to every endpoint that loads.  There is no per-endpoint error wiring.
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/escalation/net.officefloor.tutorial.springrestcrud.NotFoundException.yml}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestcrud/NotFoundExceptionHandler.java}
+
+
+*List: GET /article
+
+  Listing has no id and no 404.  It stays a single step that queries and responds.
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/article.GET.yml}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestcrud/ListArticles.java}
+
+
+*Create: POST /article
+
+  Create builds a new entity from the validated body.  It then saves the entity and responds 201.
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/article.POST.yml}
+
+  <<<BuildArticle>>> is the producer for a create.  As the first step it carries the
+  <<<@Valid @RequestBody>>>.  Validation runs before anything is persisted.
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestcrud/BuildArticle.java}
+
+  <<<SaveArticle>>> is a pure persistence step.  It works only on the entity.
+  <<<RespondWithArticleCreated>>> maps the saved entity to a DTO.  It adds the 201 status and the Location
+  header.
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestcrud/SaveArticle.java}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestcrud/RespondWithArticleCreated.java}
+
+
+*Update: PUT /article/\{id\}
+
+  Update is the fullest pipeline.  It shows why validation is its own step.
+
+%{snippet|file=${project.build.directory}/site-snippets/article/id.PUT.yml}
+
+  The order matters.  The request body can be read only once.  <<<@Valid>>> runs before its step's body.
+  If <<<Load>>> ran first, an invalid body against a missing id would return 404 before the body was
+  checked.  So <<<ValidateArticle>>> runs first.  It validates the body and publishes it as a variable for
+  a later step.  The body is consumed exactly once.
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestcrud/ValidateArticle.java}
+
+  <<<LoadArticle>>> is reused unchanged from the read.  <<<ApplyArticle>>> copies the validated request
+  onto the loaded entity.  It reads two variables and mutates the entity in place.
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestcrud/ApplyArticle.java}
+
+  <<<SaveArticle>>> and <<<RespondWithArticle>>> are reused from create and read.  The same 200 responder
+  serves both reading and updating an article.
+
+
+*Invalid input: escalation to 400
+
+  Validation failures escalate the same way not-found does.  A handler for Spring's
+  <<<MethodArgumentNotValidException>>> maps it to a 400.  The <<<Validate>>> and <<<Build>>> steps stay
+  free of error handling.
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/escalation/org.springframework.web.bind.MethodArgumentNotValidException.yml}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestcrud/ValidationExceptionHandler.java}
+
+
+*Delete: DELETE /article/\{id\}
+
+  Delete loads the row, deletes it, then responds 204.  It reuses <<<LoadArticle>>> and its 404.  It has no
+  body.  The responder is the shared <<<RespondWithNoContent>>>.  Every no-content endpoint uses it.
+
+%{snippet|file=${project.build.directory}/site-snippets/article/id.DELETE.yml}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestcrud/DeleteArticle.java}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestcrud/RespondWithNoContent.java}
+
+
+*Testing
+
+  Every endpoint is exercised through the running application.  This includes the validate-before-load
+  (400) and not-found (404) escalation paths.
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springrestcrud/SpringRestCrudTest.java}
+
+
+Next
+
+  The {{{./SpringRestOrchestrationReference/index.html}Orchestration Patterns and Naming}} reference
+  collects the step naming conventions and the data-flow rules used in this tutorial.  It also covers the
+  one-shot request body and the <<<@Val>>> reference semantics.

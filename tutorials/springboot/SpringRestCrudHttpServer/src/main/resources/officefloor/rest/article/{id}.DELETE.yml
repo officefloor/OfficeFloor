@@ -1,0 +1,13 @@
+load:
+  class: net.officefloor.tutorial.springrestcrud.LoadArticle
+  govern: [ transaction ]
+  next: delete
+
+delete:
+  class: net.officefloor.tutorial.springrestcrud.DeleteArticle
+  govern: [ transaction ]
+  next: respond
+
+respond:
+  class: net.officefloor.tutorial.springrestcrud.RespondWithNoContent
+  govern: [ transaction ]

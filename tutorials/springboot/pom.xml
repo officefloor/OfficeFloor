@@ -82,6 +82,8 @@
 		<module>SpringRestServletHttpServer</module>
 		<module>SpringRestQualifierHttpServer</module>
 		<module>SpringRestDataJpaHttpServer</module>
+		<module>SpringRestCrudHttpServer</module>
+		<module>SpringRestOrchestrationReference</module>
 		<module>SpringRestTeamHttpServer</module>
 		<module>SpringRestManagedObjectHttpServer</module>
 		<module>SpringRestSupplierHttpServer</module>

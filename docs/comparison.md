@@ -230,6 +230,13 @@ this one file both a developer and an AI tool know precisely which code to open 
 Each handler knows only its own inputs and its own Spring beans. None of them knows about the
 others.
 
+There is a deeper consequence. Layered architecture, with a presentation, service and data layer, is
+largely a product of the call stack. A method call goes down and must return, so each layer does its
+work in two halves, on the way down and on the way back up. Making the flow explicit removes the
+return trip, so the layers collapse into a single line of steps. The
+[From layers to a pipeline](https://officefloor.net/tutorials/springboot/SpringRestOrchestrationReference/index.html)
+reference details this shift.
+
 ## What stays exactly the same
 
 | Concern | `@RestController` | OfficeFloor YAML |

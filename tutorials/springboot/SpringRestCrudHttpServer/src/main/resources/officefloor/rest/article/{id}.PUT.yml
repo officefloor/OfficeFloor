@@ -1,0 +1,23 @@
+validate:
+  class: net.officefloor.tutorial.springrestcrud.ValidateArticle
+  govern: [ transaction ]
+  next: load
+
+load:
+  class: net.officefloor.tutorial.springrestcrud.LoadArticle
+  govern: [ transaction ]
+  next: apply
+
+apply:
+  class: net.officefloor.tutorial.springrestcrud.ApplyArticle
+  govern: [ transaction ]
+  next: save
+
+save:
+  class: net.officefloor.tutorial.springrestcrud.SaveArticle
+  govern: [ transaction ]
+  next: respond
+
+respond:
+  class: net.officefloor.tutorial.springrestcrud.RespondWithArticle
+  govern: [ transaction ]
