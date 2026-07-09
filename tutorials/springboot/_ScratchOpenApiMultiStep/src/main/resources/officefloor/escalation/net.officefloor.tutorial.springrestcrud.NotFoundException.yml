@@ -1,2 +1,0 @@
-handle:
-  class: net.officefloor.tutorial.scratchopenapi.NotFoundExceptionHandler

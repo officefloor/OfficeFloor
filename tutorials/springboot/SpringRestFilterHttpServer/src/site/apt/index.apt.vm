@@ -1,0 +1,88 @@
+~~~
+~~ Spring REST Filtering and Pagination Tutorial
+~~~
+
+                                               -----------------------
+                                       Filtering and Pagination Tutorial
+                                               -----------------------
+                                                Daniel Sagenschneider
+                                               -----------------------
+
+Filtering and Pagination
+
+  Collection endpoints take query parameters.  An optional filter narrows the list.  Pagination limits how
+  much is returned.  This tutorial shows both, and both together.
+
+  A collection read has no branching pipeline, so it stays a single function.  This is the read side of the
+  {{{../SpringRestCrudHttpServer/index.html}CRUD Orchestration}} pattern, where the write side is composed
+  of many functions but the list is not.
+
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestFilterHttpServer}Tutorial Source}}
+
+
+*The domain
+
+  An article has a category.  The category is what the list is filtered by.
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestfilter/Article.java}
+
+  The repository declares derived finders for the filter, one returning a list and one a page:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestfilter/ArticleRepository.java}
+
+  Sample data is seeded so the endpoints return something:
+
+%{snippet|file=${basedir}/src/main/resources/data.sql}
+
+
+*An optional filter: GET /article
+
+  The <<<category>>> query parameter is <<<required = false>>>.  When it is present the list is filtered.
+  When it is absent the whole list is returned.  The function chooses the query from whether the parameter
+  was given.
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/article.GET.yml}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestfilter/ListArticles.java}
+
+  So <<<GET /article>>> returns everything, and <<<GET /article?category=spring>>> returns only the spring
+  articles.  The parameter is optional, so both requests are valid.
+
+
+*Filter plus pagination: GET /article/page
+
+  Pagination adds <<<page>>> and <<<size>>>.  Both have a <<<defaultValue>>>, so a request needs neither.
+  The optional filter still applies.  The filter and the paging combine into one Spring Data query, and the
+  response carries the page metadata clients need.
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/article/page.GET.yml}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestfilter/ListArticlesPage.java}
+
+  The page response is a small DTO of the content plus the totals:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestfilter/ArticlePage.java}
+
+  So <<<GET /article/page>>> uses the defaults, <<<GET /article/page?page=1&size=2>>> pages through all
+  articles, and <<<GET /article/page?category=officefloor&size=1>>> pages through one category.
+
+
+*Query parameters in short
+
+  Two <<<@RequestParam>>> forms cover collection endpoints.  <<<required = false>>> makes a parameter
+  optional, for a filter that may be absent.  <<<defaultValue>>> supplies a value when the parameter is
+  omitted, for paging that should always have a page and size.  As always, use the <<<name =>>> attribute
+  form.
+
+
+*Testing
+
+  The test drives the endpoints with and without the filter, and with and without paging.
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springrestfilter/SpringRestFilterTest.java}
+
+
+Next
+
+  The {{{../SpringRestRelationshipHttpServer/index.html}Related Entities tutorial}} adds a second entity
+  and shows shared loads and ownership-scoped loads.

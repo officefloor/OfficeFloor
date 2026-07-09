@@ -163,5 +163,5 @@ REST CRUD Orchestration
 
 Next
 
-  The {{{../SpringRestRelationshipHttpServer/index.html}Related Entities tutorial}} adds a second
-  entity and shows shared loads and ownership-scoped loads.
+  The {{{../SpringRestFilterHttpServer/index.html}Filtering and Pagination tutorial}} covers the read
+  side: collection endpoints with an optional filter and pagination.

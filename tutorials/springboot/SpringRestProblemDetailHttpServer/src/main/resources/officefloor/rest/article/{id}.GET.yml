@@ -1,0 +1,3 @@
+service:
+  class: net.officefloor.tutorial.springrestproblemdetail.GetArticle
+  govern: [ readonly-transaction ]

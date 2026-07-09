@@ -1,0 +1,3 @@
+service:
+  class: net.officefloor.tutorial.springrestfilter.ListArticles
+  govern: [ readonly-transaction ]

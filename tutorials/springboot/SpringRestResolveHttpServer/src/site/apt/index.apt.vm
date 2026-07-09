@@ -98,7 +98,8 @@ Resolving References
 %{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springrestresolve/ArticleResolveIntegrationTest.java}
 
 
+
 Next
 
-  The {{{../SpringRestTestingHttpServer/index.html}Testing Functions}} tutorial covers unit testing each
-  function in isolation, then the wiring with one integration test.
+  The {{{../SpringRestProblemDetailHttpServer/index.html}Problem Detail tutorial}} gives errors a
+  structured RFC 7807 response shape via escalation handlers.

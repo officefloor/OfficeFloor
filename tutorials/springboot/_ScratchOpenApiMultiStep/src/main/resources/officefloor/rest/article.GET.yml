@@ -1,3 +1,0 @@
-service:
-  class: net.officefloor.tutorial.scratchopenapi.ListArticles
-  govern: [ readonly-transaction ]
