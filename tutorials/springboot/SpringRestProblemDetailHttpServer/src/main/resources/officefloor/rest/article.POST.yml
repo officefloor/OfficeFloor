@@ -1,0 +1,3 @@
+service:
+  class: net.officefloor.tutorial.springrestproblemdetail.CreateArticle
+  govern: [ transaction ]

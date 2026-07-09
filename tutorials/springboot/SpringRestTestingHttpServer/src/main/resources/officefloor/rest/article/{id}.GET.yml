@@ -1,0 +1,8 @@
+load:
+  class: net.officefloor.tutorial.springresttesting.LoadArticle
+  govern: [ readonly-transaction ]
+  next: respond
+
+respond:
+  class: net.officefloor.tutorial.springresttesting.RespondWithArticle
+  govern: [ readonly-transaction ]

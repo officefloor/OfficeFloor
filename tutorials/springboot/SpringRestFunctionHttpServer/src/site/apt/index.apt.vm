@@ -142,8 +142,10 @@ Function Injection
 
 *Testing
 
-  Each step is a plain Java class — unit-testable without any framework by simply instantiating it
-  and calling the method.  Integration tests use the standard Spring Boot <<<MockMvc>>> approach:
+  Each step is a plain Java class, unit-testable without any framework by simply instantiating it and
+  calling the method.  The {{{../SpringRestTestingHttpServer/index.html}Testing Functions tutorial}} shows
+  this in full, including the shipped mocks for variables and responses.  The integration test below uses
+  the standard Spring Boot <<<MockMvc>>> approach:
 
 %{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springrestfunction/SpringRestFunctionHttpServerTest.java|ignoreDownloadError=false}
 

@@ -1,0 +1,23 @@
+validate:
+  class: net.officefloor.tutorial.springrestresolve.ValidateArticle
+  govern: [ transaction ]
+  next: build
+
+build:
+  class: net.officefloor.tutorial.springrestresolve.BuildArticle
+  govern: [ transaction ]
+  next: resolveTags
+
+resolveTags:
+  class: net.officefloor.tutorial.springrestresolve.ResolveTags
+  govern: [ transaction ]
+  next: save
+
+save:
+  class: net.officefloor.tutorial.springrestresolve.SaveArticle
+  govern: [ transaction ]
+  next: respond
+
+respond:
+  class: net.officefloor.tutorial.springrestresolve.RespondWithArticleCreated
+  govern: [ transaction ]

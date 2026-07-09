@@ -1,0 +1,131 @@
+~~~
+~~ Spring REST Problem Detail Tutorial
+~~~
+
+                                               -----------------------
+                                         Problem Detail Error Responses
+                                               -----------------------
+                                                Daniel Sagenschneider
+                                               -----------------------
+
+Problem Detail Error Responses
+
+  A function reports an error by throwing.  An escalation handler turns the exception into an HTTP
+  response.  This tutorial gives those responses a consistent, structured shape:
+  {{{https://www.rfc-editor.org/rfc/rfc7807}RFC 7807 Problem Detail}}, served as
+  <<<application/problem+json>>>.
+
+  Three handlers cover three kinds of error.  A domain exception becomes a 404.  A framework validation
+  failure becomes a 400 with a field-by-field breakdown.  Anything else becomes a 500 that does not leak
+  internal detail.  Registering them at office level means every endpoint gets the same error contract
+  with no per-endpoint wiring.
+
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestProblemDetailHttpServer}Tutorial Source}}
+
+
+*Problem Detail
+
+  Spring's {{{/apidocs/org/springframework/http/ProblemDetail.html}ProblemDetail}} is the RFC 7807 model.
+  It carries <<<type>>>, <<<title>>>, <<<status>>>, <<<detail>>>, and <<<instance>>>, and it allows extra
+  properties.  A handler builds one and sends it in a <<<ResponseEntity>>>.  OfficeFloor serialises it as
+  <<<application/problem+json>>>.
+
+
+*A domain exception: 404
+
+  The read endpoint throws <<<NotFoundException>>> when the article is absent.  The endpoints here are kept
+  as single functions so the focus stays on the responses.
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestproblemdetail/GetArticle.java}
+
+  A handler registered under <<<officefloor/escalation/>>> maps the exception to a 404 Problem Detail:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/escalation/net.officefloor.tutorial.springrestproblemdetail.NotFoundException.yml}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestproblemdetail/NotFoundExceptionHandler.java}
+
+  <<<GET /article/99999>>> then returns:
+
++--
+{
+  "type": "https://example.com/problems/not-found",
+  "title": "Article not found",
+  "status": 404,
+  "detail": "No article exists with id 99999",
+  "timestamp": "2026-07-09T12:00:00Z"
+}
++--
+
+
+*A validation failure: 400 with field errors
+
+  The create endpoint validates the body with <<<@Valid>>>.  A blank title makes the framework throw
+  <<<MethodArgumentNotValidException>>>.
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestproblemdetail/CreateArticle.java}
+
+  Its handler maps to a 400 and adds a field-by-field breakdown, so a client can show which fields failed:
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/escalation/org.springframework.web.bind.MethodArgumentNotValidException.yml}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestproblemdetail/ValidationExceptionHandler.java}
+
+  <<<POST /article>>> with a blank title returns:
+
++--
+{
+  "type": "https://example.com/problems/validation",
+  "title": "Request validation failed",
+  "status": 400,
+  "detail": "The request has 1 invalid field(s)",
+  "timestamp": "2026-07-09T12:00:00Z",
+  "errors": { "title": "title is required" }
+}
++--
+
+
+*Anything else: 500 without leaking
+
+  A handler for <<<Exception>>> is the catch-all.  It maps any exception with no more specific handler to a
+  500, with a generic message so internal detail never reaches the client.
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestproblemdetail/Boom.java}
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/escalation/java.lang.Exception.yml}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestproblemdetail/GeneralExceptionHandler.java}
+
+  <<<GET /boom>>> throws an <<<IllegalStateException>>> with an internal message, but the client only sees:
+
++--
+{
+  "type": "about:blank",
+  "title": "Internal server error",
+  "status": 500,
+  "detail": "An unexpected error occurred while processing the request",
+  "timestamp": "2026-07-09T12:00:00Z"
+}
++--
+
+
+*Most specific wins
+
+  All three handlers are active at once.  Escalation is most specific first.  <<<NotFoundException>>> and
+  <<<MethodArgumentNotValidException>>> each have their own handler, so they are used ahead of the
+  <<<Exception>>> catch-all.  The catch-all only runs for exceptions nothing else claims.  See the
+  {{{../SpringRestExceptionHttpServer/index.html}Exception}} tutorial for escalation routing in depth.
+
+
+*Testing
+
+  The test drives all three error responses and checks the status, the <<<application/problem+json>>>
+  content type, and the body fields.
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springrestproblemdetail/SpringRestProblemDetailTest.java}
+
+
+
+Next
+
+  The {{{../SpringRestTestingHttpServer/index.html}Testing Functions tutorial}} unit tests each
+  function in isolation, then covers the wiring with one integration test.
