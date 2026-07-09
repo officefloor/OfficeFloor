@@ -10,7 +10,7 @@
 
 REST CRUD Orchestration
 
-  The {{{./SpringRestFunctionHttpServer/index.html}Function}} tutorial introduced composing an endpoint
+  The {{{../SpringRestFunctionHttpServer/index.html}Function}} tutorial introduced composing an endpoint
   from functions.  This tutorial applies that model to a full CRUD resource.  It uses a small vocabulary of
   single-purpose functions.  The vocabulary reads the same way for every endpoint.
 
@@ -26,7 +26,7 @@ REST CRUD Orchestration
   The guiding rule is <<DTOs only at the edges>>.  A request DTO is validated and turned into an entity at
   the first function.  Every function in the middle works only with the entity.  The responder is the one place
   the entity becomes a response DTO.  State flows between functions as
-  {{{./SpringRestVariableHttpServer/index.html}variables}}.  A function uses <<<Out>>> to publish a value.  It
+  {{{../SpringRestVariableHttpServer/index.html}variables}}.  A function uses <<<Out>>> to publish a value.  It
   uses <<<@Val>>> to consume one.  So each function declares only the entities it needs.
 
   {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestCrudHttpServer}Tutorial Source}}
@@ -160,8 +160,8 @@ REST CRUD Orchestration
 %{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springrestcrud/SpringRestCrudTest.java}
 
 
+
 Next
 
-  The {{{./SpringRestOrchestrationReference/index.html}Orchestration Patterns and Naming}} reference
-  collects the function naming conventions and the data-flow rules used in this tutorial.  It also covers the
-  one-shot request body and the <<<@Val>>> reference semantics.
+  The {{{../SpringRestRelationshipHttpServer/index.html}Related Entities tutorial}} adds a second
+  entity and shows shared loads and ownership-scoped loads.

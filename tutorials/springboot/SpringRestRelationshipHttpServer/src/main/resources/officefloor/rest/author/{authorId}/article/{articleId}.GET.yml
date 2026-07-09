@@ -1,0 +1,13 @@
+loadAuthor:
+  class: net.officefloor.tutorial.springrestrelationship.LoadAuthor
+  govern: [ readonly-transaction ]
+  next: loadArticle
+
+loadArticle:
+  class: net.officefloor.tutorial.springrestrelationship.LoadAuthorsArticle
+  govern: [ readonly-transaction ]
+  next: send
+
+send:
+  class: net.officefloor.tutorial.springrestrelationship.RespondWithArticle
+  govern: [ readonly-transaction ]

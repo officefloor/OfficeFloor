@@ -1,0 +1,104 @@
+~~~
+~~ Spring REST Related Entities Tutorial
+~~~
+
+                                               -----------------------
+                                          Related Entities Tutorial
+                                               -----------------------
+                                                Daniel Sagenschneider
+                                               -----------------------
+
+Related Entities: shared and scoped loads
+
+  The {{{../SpringRestCrudHttpServer/index.html}CRUD Orchestration}} tutorial built one resource from
+  single-purpose functions.  This tutorial adds a second, related entity and shows the two kinds of load
+  that a relationship introduces.
+
+   * A <<shared load>> is one <<<Load>>> function reused by every endpoint that needs the same entity.
+     Here <<<LoadAuthor>>> serves three endpoints.
+
+   * An <<ownership-scoped load>> finds a child <<within its parent>>.  A child that belongs to a
+     different parent is not found.  This is a different function from a global load, and using the wrong
+     one is a real bug.
+
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestRelationshipHttpServer}Tutorial Source}}
+
+
+*The domain
+
+  An author has many articles.  An article belongs to one author.  The author carries a helper that finds
+  one of its own articles by id.
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestrelationship/Author.java}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestrelationship/Article.java}
+
+
+*A shared load: GET /author/\{authorId\}
+
+  Loading an author is one function.  Every author-scoped endpoint reuses it.
+
+%{snippet|file=${project.build.directory}/site-snippets/author.GET.yml}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestrelationship/LoadAuthor.java}
+
+  There is one place that turns an <<<authorId>>> into an <<<Author>>>, and one place that decides a
+  missing author is a 404.  The three endpoints below all start with this same function.
+
+
+*A global load: GET /article/\{articleId\}
+
+  Loading an article by its own id finds any article, whatever its author.
+
+%{snippet|file=${project.build.directory}/site-snippets/article.GET.yml}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestrelationship/LoadArticle.java}
+
+
+*An ownership-scoped load: GET /author/\{authorId\}/article/\{articleId\}
+
+  The nested URL means "this author's article".  So the pipeline loads the author first, then finds the
+  article <<within that author>>.
+
+%{snippet|file=${project.build.directory}/site-snippets/authorArticle.GET.yml}
+
+  <<<LoadAuthor>>> is reused unchanged.  It publishes the <<<Author>>>.  <<<LoadAuthorsArticle>>> then
+  consumes that author and looks the article up in its collection:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestrelationship/LoadAuthorsArticle.java}
+
+  An article that exists but belongs to a different author is not found here, so the endpoint returns 404.
+  Do not use the global <<<LoadArticle>>> for this endpoint.  It would return another author's article
+  under this URL and leak data across authors.  The scoping is the contract of the nested URL, so the
+  scoped load is its own function.
+
+  <<<RespondWithArticle>>> is shared.  Both the global and the scoped article endpoints end with an
+  <<<Article>>> to render, so both reuse the same responder.
+
+
+*Create under a parent: POST /author/\{authorId\}/article
+
+  Creating an article for an author reuses <<<LoadAuthor>>> a third time.  The author comes from the URL.
+  The body is validated first, before the author is loaded, so an invalid body is a 400 even when the
+  author does not exist.
+
+%{snippet|file=${project.build.directory}/site-snippets/authorArticle.POST.yml}
+
+  <<<BuildAuthorsArticle>>> consumes two variables, the loaded author and the validated body, and attaches
+  the new article to the author:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestrelationship/BuildAuthorsArticle.java}
+
+
+*Testing
+
+  The test exercises both loads.  One case proves the scoping directly: an article of one author is found
+  globally, is a 404 under a different author, and is found under its own author.
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springrestrelationship/SpringRestRelationshipTest.java}
+
+
+Next
+
+  The {{{../SpringRestOrchestrationReference/index.html}Orchestration Patterns and Naming}} reference
+  collects the function naming conventions and the data-flow rules used in this tutorial.

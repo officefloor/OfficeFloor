@@ -28,7 +28,7 @@ Orchestration Patterns and Naming
 
   This page is a reference for building a REST resource from function orchestration functions.  It collects
   the naming conventions and the data flow rules.  The
-  {{{./SpringRestCrudHttpServer/index.html}REST CRUD Orchestration}} tutorial applies them to a working
+  {{{../SpringRestCrudHttpServer/index.html}REST CRUD Orchestration}} tutorial applies them to a working
   resource.
 
   A function has one of three roles.  A <<producer>> obtains an entity and publishes it.  An <<action>>
@@ -175,7 +175,7 @@ Orchestration Patterns and Naming
   tutorial maps <<<NotFoundException>>> to 404 and <<<MethodArgumentNotValidException>>> to 400 with two
   small handlers.
 
-  See the {{{./SpringRestExceptionHttpServer/index.html}Exception}} tutorial for escalation in depth.
+  See the {{{../SpringRestExceptionHttpServer/index.html}Exception}} tutorial for escalation in depth.
 
 
 *One public method per class
@@ -195,6 +195,6 @@ load:
 
 *Governance per function
 
-  Each function lists its {{{./SpringRestGovernanceHttpServer/index.html}governance}}.  A read uses
+  Each function lists its {{{../SpringRestGovernanceHttpServer/index.html}governance}}.  A read uses
   <<<readonly-transaction>>>.  A write uses <<<transaction>>>.  The governance spans the functions of the
   request, so the whole pipeline runs in one transaction.

@@ -1,0 +1,23 @@
+validate:
+  class: net.officefloor.tutorial.springrestrelationship.ValidateArticle
+  govern: [ transaction ]
+  next: loadAuthor
+
+loadAuthor:
+  class: net.officefloor.tutorial.springrestrelationship.LoadAuthor
+  govern: [ transaction ]
+  next: build
+
+build:
+  class: net.officefloor.tutorial.springrestrelationship.BuildAuthorsArticle
+  govern: [ transaction ]
+  next: save
+
+save:
+  class: net.officefloor.tutorial.springrestrelationship.SaveArticle
+  govern: [ transaction ]
+  next: send
+
+send:
+  class: net.officefloor.tutorial.springrestrelationship.RespondWithArticleCreated
+  govern: [ transaction ]
