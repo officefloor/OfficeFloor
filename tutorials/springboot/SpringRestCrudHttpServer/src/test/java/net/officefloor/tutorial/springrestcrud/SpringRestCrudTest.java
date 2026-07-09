@@ -11,6 +11,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -103,6 +104,11 @@ public class SpringRestCrudTest {
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.title").value("After"))
 				.andExpect(jsonPath("$.content").value("new"));
+
+		// Verify the change was persisted, not just reflected in the response.
+		Article persisted = repository.findById(saved.getId()).orElseThrow();
+		assertEquals("After", persisted.getTitle());
+		assertEquals("new", persisted.getContent());
 	}
 
 	// Validate runs BEFORE Load: an invalid body is a 400 even when the id does not exist

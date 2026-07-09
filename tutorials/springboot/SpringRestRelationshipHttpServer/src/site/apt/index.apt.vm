@@ -98,7 +98,8 @@ Related Entities: shared and scoped loads
 %{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springrestrelationship/SpringRestRelationshipTest.java}
 
 
+
 Next
 
-  The {{{../SpringRestOrchestrationReference/index.html}Orchestration Patterns and Naming}} reference
-  collects the function naming conventions and the data-flow rules used in this tutorial.
+  The {{{../SpringRestResolveHttpServer/index.html}Resolving References tutorial}} adds a Resolve
+  function that enriches an entity with managed references, shared across create and update.

@@ -131,6 +131,10 @@ OfficeFloor Tutorials
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./springboot/SpringRestRelationshipHttpServer/index.html}Related Entities}} | Two related entities.  A shared Load reused across endpoints, and an ownership-scoped load that finds a child within its parent.  A global load would leak data across parents. | Shared and scoped loads
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./springboot/SpringRestResolveHttpServer/index.html}Resolving References}} | A Resolve function enriches an entity by looking up managed references from a second repository, between Build/Apply and Save.  Shared across create and update. | Resolve function
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./springboot/SpringRestTestingHttpServer/index.html}Testing Functions}} | Unit test each function as a plain object with the shipped MockVar and MockObjectResponse, then one integration test for the wiring.  A testing pyramid over composed functions. | Unit and integration testing
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./springboot/SpringRestOrchestrationReference/index.html}Orchestration Patterns and Naming}} | Reference for the function naming conventions and the request-to-response data flow: validate the DTO, publish the entity via a variable, work only with entities, then transform back to a DTO when responding.  Covers the one-shot request body, @Valid ordering, and variable reference semantics. | Naming and data-flow reference
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 

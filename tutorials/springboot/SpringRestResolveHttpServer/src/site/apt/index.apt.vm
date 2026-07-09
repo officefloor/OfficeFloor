@@ -1,0 +1,104 @@
+~~~
+~~ Spring REST Resolve References Tutorial
+~~~
+
+                                               -----------------------
+                                          Resolving References Tutorial
+                                               -----------------------
+                                                Daniel Sagenschneider
+                                               -----------------------
+
+Resolving References
+
+  A request often names a related entity rather than sending it whole.  An article carries tag names.
+  The article needs the managed <<<Tag>>> entities, not new ones built from the names.  Turning those
+  names into managed entities is a <<Resolve>>.
+
+  A Resolve is an action, like Apply, but it does a repository lookup rather than copying a field.  It
+  runs after Build or Apply and before Save.  It enriches the entity with managed references.  The same
+  Resolve serves both the create and the update pipeline.
+
+  This tutorial builds on the {{{../SpringRestCrudHttpServer/index.html}CRUD Orchestration}} pattern.
+
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestResolveHttpServer}Tutorial Source}}
+
+
+*The domain
+
+  An article has many tags.  Tags are a reference entity, shared across articles and pre-seeded.  A request
+  names its tags by name.
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestresolve/Tag.java}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestresolve/Article.java}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestresolve/ArticleRequest.java}
+
+  The tags are pre-seeded, so a request references existing rows:
+
+%{snippet|file=${basedir}/src/main/resources/data.sql}
+
+
+*Why a Resolve is needed
+
+  Without it, saving an article whose tags were built from the request names would try to persist new
+  <<<Tag>>> rows.  That duplicates tags or violates the unique-name constraint.  The managed tags must be
+  looked up first.  That lookup is the Resolve.
+
+  So the mutating functions divide the work.  <<<Build>>> and <<<Apply>>> set the scalar fields only.
+  <<<ResolveTags>>> handles the references.
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestresolve/BuildArticle.java}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestresolve/ApplyArticle.java}
+
+
+*The Resolve function
+
+  <<<ResolveTags>>> reads the tag names from the request, looks up the managed tags, and sets them on the
+  article.  It mutates the article's collection in place, so the following Save persists managed
+  references and nothing transient is ever saved.
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springrestresolve/ResolveTags.java}
+
+  It mutates the <<<@Val>>> article, so the later Save sees the change.  This is the same reference
+  behaviour that {{{../SpringRestVariableHttpServer/index.html}variables}} give any function that takes an
+  entity.
+
+
+*Create: POST /article
+
+  The Resolve sits between Build and Save.
+
+%{snippet|file=${basedir}/src/main/resources/officefloor/rest/article.POST.yml}
+
+
+*Update: PUT /article/\{id\}
+
+  The same <<<ResolveTags>>> sits between Apply and Save.  One function, two pipelines.
+
+%{snippet|file=${project.build.directory}/site-snippets/article/id.PUT.yml}
+
+  <<<validate>>> runs first so an invalid body is rejected before the load, exactly as in the CRUD
+  tutorial.  <<<load>>> then <<<apply>>> set the title.  <<<resolveTags>>> replaces the tags with managed
+  ones.  <<<save>>> persists.  The read endpoint <<<GET /article/\{id\}>>> is the usual load then respond.
+
+
+*Testing
+
+  <<<ResolveTags>>> takes an entity, the request, and a repository, no <<<Out>>>.  So it unit tests as a
+  plain object with a stubbed repository, following the
+  {{{../SpringRestTestingHttpServer/index.html}Testing Functions}} tutorial.
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springrestresolve/ResolveTagsUnitTest.java}
+
+  The integration test drives the running application.  It proves the payoff directly: creating two
+  articles that share tags does not create new tag rows, and updating re-resolves against the seeded tags.
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springrestresolve/ArticleResolveIntegrationTest.java}
+
+
+Next
+
+  The {{{../SpringRestTestingHttpServer/index.html}Testing Functions}} tutorial covers unit testing each
+  function in isolation, then the wiring with one integration test.

@@ -1,0 +1,92 @@
+~~~
+~~ Spring REST Function Testing Tutorial
+~~~
+
+                                               -----------------------
+                                          Testing Functions Tutorial
+                                               -----------------------
+                                                Daniel Sagenschneider
+                                               -----------------------
+
+Testing Composed Functions
+
+  Composing an endpoint from small functions has a direct payoff for testing.  Each function is a plain
+  object with one method, so most of the logic is tested by calling that method.  No server, no Spring
+  context, no HTTP.  A thin layer of integration tests then proves the wiring.
+
+  This is a testing pyramid.  Many fast unit tests cover the logic inside the functions.  A few slower
+  integration tests cover the parts only the running application can show: validation, escalation routing,
+  and function order.
+
+  This tutorial reuses the update pipeline from the {{{../SpringRestCrudHttpServer/index.html}CRUD
+  Orchestration}} tutorial: <<<validate>>>, <<<load>>>, <<<apply>>>, <<<save>>>, <<<respond>>>.
+
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestTestingHttpServer}Tutorial Source}}
+
+
+*Unit testing a function
+
+  A function takes its inputs as method parameters and its dependencies by injection.  A unit test supplies
+  those directly.  Two small helpers from OfficeFloor stand in for the framework pieces:
+
+   * {{{/apidocs/net/officefloor/model/test/variable/MockVar.html}MockVar}} is a variable.  Pass it where a
+     function expects an <<<Out>>>, then read what was published with <<<get()>>>.  It ships with the
+     OfficeFloor compiler, already on the test classpath.
+
+   * {{{/apidocs/net/officefloor/woof/mock/MockObjectResponse.html}MockObjectResponse}} captures the
+     response.  Pass it where a function expects an <<<ObjectResponse>>>, then read what was sent with
+     <<<getObject()>>>.  Add the <<<woof_test>>> dependency for it:
+
+%{snippet|id=test|file=${basedir}/pom.xml}
+
+  The functions differ in what they need, and the tests show the range.
+
+   * <<<ApplyArticle>>> is pure.  It takes two values and mutates one.  No helpers, no doubles.
+
+   * <<<RespondWithArticle>>> takes an <<<ObjectResponse>>>.  Capture it with <<<MockObjectResponse>>>.
+
+   * <<<LoadArticle>>> takes a repository and an <<<Out>>>.  Stub the repository with Mockito and capture
+     the published entity with <<<MockVar>>>.  Its 404 branch is a thrown exception, asserted directly.
+
+   * <<<SaveArticle>>> takes a repository.  Verify it persisted the entity.
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springresttesting/ArticleFunctionUnitTest.java}
+
+  None of these start a server.  The whole class runs in a few milliseconds.  A function's inputs and
+  outputs are explicit in its signature, so there is nothing to stand up and nothing to tear down.
+
+
+*What a unit test cannot prove
+
+  Some behaviour is not inside any one function.  It is in how the framework runs them.
+
+   * <<<@Valid>>> is applied by the framework when it binds the request body, not by calling the method.
+     Calling <<<ValidateArticle.service(...)>>> directly does not validate anything.
+
+   * The order of the functions is declared in the YAML.  A unit test calls one function, so it cannot show
+     that <<<validate>>> runs before <<<load>>>.
+
+   * An escalation is routed to its handler by the framework.  A unit test sees the thrown exception, not
+     the 404 response.
+
+  These are integration concerns.  One test class covers them by driving the running application with
+  <<<MockMvc>>>, exactly as the other tutorials do.
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springresttesting/ArticleEndpointIntegrationTest.java}
+
+  <<<invalidBodyIsRejectedBeforeTheLoad>>> is the case that justifies the split.  An invalid body against a
+  missing id returns 400, not 404, which proves both the validation binding and the function order.  No
+  unit test can show it, and it is one small integration test.
+
+
+*The payoff
+
+  The logic lives in functions that are tested in isolation, fast, with no framework to start.  The wiring
+  is tested once, through the running application.  Adding a function adds a unit test for its logic, not
+  another slow end-to-end test.  Small composed functions make the common case cheap to test.
+
+
+Next
+
+  The {{{../SpringRestOrchestrationReference/index.html}Orchestration Patterns and Naming}} reference
+  collects the function naming conventions and the data-flow rules used across these tutorials.

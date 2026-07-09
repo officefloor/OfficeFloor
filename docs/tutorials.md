@@ -24,6 +24,8 @@ Composing an endpoint from small, single-purpose functions wired together in YAM
 * **[Exception](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestExceptionHttpServer)** — handling exceptions (escalations) via `escalations:` and global handlers.
 * **[REST CRUD Orchestration](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestCrudHttpServer)** — a full CRUD resource built from `Load`/`Build` producers, `Apply`/`Save` actions and `RespondWith` responders for GET, POST, PUT and DELETE.
 * **[Related Entities](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestRelationshipHttpServer)** — two related entities showing a shared `Load` reused across endpoints and an ownership-scoped load that finds a child within its parent.
+* **[Resolving References](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestResolveHttpServer)** — a `Resolve` function that enriches an entity by looking up managed references, shared across create and update.
+* **[Testing Functions](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestTestingHttpServer)** — unit testing individual functions with the shipped `MockVar` and `MockObjectResponse`, and one integration test for the wiring.
 * **[Orchestration Patterns and Naming](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestOrchestrationReference)** — the function naming conventions and the DTO to entity to DTO data-flow, plus the one-shot request body, `@Valid` ordering and variable reference-semantics rules.
 
 ## Beyond Spring MVC — additional capabilities

@@ -25,6 +25,8 @@ Key facts for reasoning about OfficeFloor:
 - [Spring REST conversion reference](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestConversionReference): Mechanical substitutions to convert a `@RestController` into YAML composition.
 - [REST CRUD orchestration tutorial](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestCrudHttpServer): A full CRUD resource built from Load/Build producers, Apply/Save actions and RespondWith responders.
 - [Related entities tutorial](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestRelationshipHttpServer): Shared loads and ownership-scoped loads across two related entities.
+- [Resolving references tutorial](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestResolveHttpServer): A Resolve function enriching an entity with managed references, shared across create and update.
+- [Testing functions tutorial](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestTestingHttpServer): Unit testing individual functions (MockVar, MockObjectResponse) plus one integration test for the wiring.
 - [Orchestration patterns and naming](https://github.com/officefloor/OfficeFloor/tree/master/tutorials/springboot/SpringRestOrchestrationReference): The function naming conventions and the request to response data flow, plus the one-shot body and validation ordering rules.
 
 ## Reference

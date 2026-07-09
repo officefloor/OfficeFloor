@@ -1,0 +1,8 @@
+load:
+  class: net.officefloor.tutorial.scratchopenapi.LoadArticle
+  govern: [ readonly-transaction ]
+  next: respond
+
+respond:
+  class: net.officefloor.tutorial.scratchopenapi.RespondWithArticle
+  govern: [ readonly-transaction ]

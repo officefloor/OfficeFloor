@@ -85,6 +85,8 @@
 		<module>SpringRestCrudHttpServer</module>
 		<module>SpringRestOrchestrationReference</module>
 		<module>SpringRestRelationshipHttpServer</module>
+		<module>SpringRestResolveHttpServer</module>
+		<module>SpringRestTestingHttpServer</module>
 		<module>SpringRestTeamHttpServer</module>
 		<module>SpringRestManagedObjectHttpServer</module>
 		<module>SpringRestSupplierHttpServer</module>
