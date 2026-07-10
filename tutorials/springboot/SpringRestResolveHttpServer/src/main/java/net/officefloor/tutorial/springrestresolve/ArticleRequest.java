@@ -17,7 +17,6 @@ public class ArticleRequest {
 	@NotBlank(message = "title is required")
 	private String title;
 
-	/** Tags are given by name. The managed Tag entities are resolved from these. */
 	private List<String> tags = new ArrayList<>();
 }
 // END SNIPPET: tutorial

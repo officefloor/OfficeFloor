@@ -14,11 +14,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 // START SNIPPET: tutorial
-/**
- * Maps a framework {@link MethodArgumentNotValidException} to a 400 Problem
- * Detail, adding a field-by-field breakdown so clients can show which fields
- * failed and why.
- */
 public class ValidationExceptionHandler {
 
 	public void handle(@Parameter MethodArgumentNotValidException ex,

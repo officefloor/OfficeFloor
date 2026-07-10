@@ -10,10 +10,6 @@ import java.net.URI;
 import java.time.Instant;
 
 // START SNIPPET: tutorial
-/**
- * Maps a domain {@link NotFoundException} to a 404 Problem Detail (RFC 7807).
- * The response body is an {@code application/problem+json} document.
- */
 public class NotFoundExceptionHandler {
 
 	public void handle(@Parameter NotFoundException ex,

@@ -16,11 +16,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 // START SNIPPET: tutorial
-/**
- * Unit tests for individual functions. No Spring context, no server, no HTTP.
- * Each function is a plain object: construct it, call the one method, assert.
- * These run in milliseconds.
- */
 public class ArticleFunctionUnitTest {
 
 	// A pure function: no dependencies at all. Just logic over two values.
