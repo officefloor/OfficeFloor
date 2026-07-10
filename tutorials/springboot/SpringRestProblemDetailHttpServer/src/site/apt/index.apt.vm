@@ -25,7 +25,7 @@ Problem Detail Error Responses
 
 *Problem Detail
 
-  Spring's {{{/apidocs/org/springframework/http/ProblemDetail.html}ProblemDetail}} is the RFC 7807 model.
+  Spring's {{{https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/http/ProblemDetail.html}ProblemDetail}} is the RFC 7807 model.
   It carries <<<type>>>, <<<title>>>, <<<status>>>, <<<detail>>>, and <<<instance>>>, and it allows extra
   properties.  A handler builds one and sends it in a <<<ResponseEntity>>>.  OfficeFloor serialises it as
   <<<application/problem+json>>>.
