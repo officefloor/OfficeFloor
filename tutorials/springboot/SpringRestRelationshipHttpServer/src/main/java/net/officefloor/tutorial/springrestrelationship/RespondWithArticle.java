@@ -5,11 +5,6 @@ import net.officefloor.web.ObjectResponse;
 import org.springframework.http.ResponseEntity;
 
 // START SNIPPET: tutorial
-/**
- * Shared responder. Both GET /article/{articleId} and
- * GET /author/{authorId}/article/{articleId} reuse it, because both end with an
- * Article to render.
- */
 public class RespondWithArticle {
 
 	public void service(@Val Article article,

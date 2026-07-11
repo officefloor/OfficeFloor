@@ -14,11 +14,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 // START SNIPPET: tutorial
-/**
- * One integration test for what the unit tests cannot cover: the wiring.
- * The order of the functions, the @Valid binding, and the escalation routing
- * are framework behaviour, so they are proven through the running application.
- */
 @SpringBootTest
 @AutoConfigureMockMvc
 public class ArticleEndpointIntegrationTest {

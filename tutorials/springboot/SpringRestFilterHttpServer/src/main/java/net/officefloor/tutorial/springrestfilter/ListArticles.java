@@ -7,13 +7,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 // START SNIPPET: tutorial
-/**
- * Lists articles, with an optional category filter.
- *
- * <p>The {@code category} query parameter is {@code required = false}. When it
- * is absent the list is unfiltered. A collection read like this has no branching
- * pipeline, so it stays a single function.
- */
 public class ListArticles {
 
 	public void service(

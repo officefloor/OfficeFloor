@@ -7,10 +7,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
 
 // START SNIPPET: tutorial
-/**
- * Creates an article. A blank title fails {@code @Valid}, which the framework
- * reports as a MethodArgumentNotValidException, mapped to a 400 Problem Detail.
- */
 @Validated
 public class CreateArticle {
 

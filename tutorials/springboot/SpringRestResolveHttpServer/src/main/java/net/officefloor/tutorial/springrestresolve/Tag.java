@@ -8,10 +8,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 // START SNIPPET: tutorial
-/**
- * Reference entity. Tags are shared across articles and are looked up by name.
- * They are pre-seeded (see data.sql), not created per request.
- */
 @Entity
 @Table(name = "tags")
 public class Tag {

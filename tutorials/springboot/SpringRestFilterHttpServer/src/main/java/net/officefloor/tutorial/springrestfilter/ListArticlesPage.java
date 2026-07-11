@@ -10,13 +10,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.stream.Collectors;
 
 // START SNIPPET: tutorial
-/**
- * Lists articles with the optional category filter and pagination together.
- *
- * <p>{@code category} is optional. {@code page} and {@code size} have defaults,
- * so a request needs neither. The filter and the paging combine into one
- * Spring Data query.
- */
 public class ListArticlesPage {
 
 	public void service(

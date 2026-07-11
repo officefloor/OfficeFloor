@@ -10,11 +10,6 @@ import java.net.URI;
 import java.time.Instant;
 
 // START SNIPPET: tutorial
-/**
- * Catch-all handler. Any exception with no more specific handler maps to a 500
- * Problem Detail. It uses a generic message so internal detail is never leaked
- * to the client.
- */
 public class GeneralExceptionHandler {
 
 	public void handle(@Parameter Exception ex,

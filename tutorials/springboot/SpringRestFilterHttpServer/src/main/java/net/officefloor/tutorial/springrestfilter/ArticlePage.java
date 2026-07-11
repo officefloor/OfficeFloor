@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 // START SNIPPET: tutorial
-/** A page of articles, with the pagination metadata clients need. */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

@@ -12,10 +12,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 // START SNIPPET: tutorial
-/**
- * ResolveTags takes the entity, the request and a repository, no Out. So it
- * unit tests with plain objects and a stubbed repository. No Spring, no server.
- */
 public class ResolveTagsUnitTest {
 
 	@Test

@@ -36,7 +36,6 @@ public class Author {
 		this.name = name;
 	}
 
-	/** Finds an article that belongs to THIS author, or null. */
 	public Article getArticle(Long articleId) {
 		for (Article article : this.articles) {
 			if (article.getId().equals(articleId)) {
