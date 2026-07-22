@@ -91,4 +91,13 @@ When you only need the body and a 200 status, `ObjectResponse<T>` is simpler; re
 * `@Service`, `@Component`, `@Repository`, `@Configuration` beans and `@Qualifier` injection
 * Testing with `MockMvc` and `@SpringBootTest(webEnvironment = RANDOM_PORT)` + `TestRestTemplate`
 
+Spring Security is configured as normal, and the usual method annotations still work on handler
+classes. An endpoint can instead declare its SpEL expression in YAML with `authorize:`, which keeps
+the endpoint's security visible in the same file as its steps and lets one path config file secure a
+whole subtree — see [`authorize:`](yaml-endpoint-configuration.md#authorize--securing-endpoints).
+
+Transactions are the one Spring habit to drop: use `govern: [ transaction ]` on the functions rather
+than `@Transactional`, so the transaction spans the pipeline — see
+[`govern:`](yaml-endpoint-configuration.md#govern--cross-cutting-concerns).
+
 See the [Tutorials](tutorials.md) for worked examples of each of these integrations.

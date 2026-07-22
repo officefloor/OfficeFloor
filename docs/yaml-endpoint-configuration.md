@@ -297,7 +297,7 @@ existing `@ControllerAdvice` handlers.
 ## `govern:` — cross-cutting concerns
 
 Wrap a function's execution with governance — such as a database transaction or auditing — using a
-`govern:` list. Governance is defined once (under `officefloor/govern/`) and applied per function:
+`govern:` list. Governance is named once and applied per function:
 
 ```yaml
 # apply a transaction around the function
@@ -311,6 +311,83 @@ service:
 service:
   class: net.officefloor.tutorial.springrestgovernance.GovernedService
   govern: [ audit ]
+```
+
+### `transaction` and `readonly-transaction` — provided by the starter
+
+Two governances exist without any configuration. The starter registers them against Spring's
+transaction manager, so there is no file to write under `officefloor/govern/`:
+
+* `transaction` — a read-write transaction. Use for writes.
+* `readonly-transaction` — a read-only transaction. Use for reads.
+
+```yaml
+# officefloor/rest/article/{id}.GET.yml
+load:
+  class: com.example.LoadArticle
+  govern: [ readonly-transaction ]
+  next: respond
+
+respond:
+  class: com.example.RespondWithArticle
+  govern: [ readonly-transaction ]
+```
+
+List the governance on **every** function it covers. Because governance spans the functions of the
+request rather than nesting inside a call, the whole pipeline runs in one transaction and commits at
+the end of the request — this is what replaces `@Transactional` on a service method. A failure at
+commit escalates like any other exception, so a global escalation handler can catch a
+`TransactionSystemException`.
+
+The two names are defaults; override them with the `officefloor.transaction.governance.name` and
+`officefloor.transaction.readonly.governance.name` properties.
+
+### Custom governance
+
+Anything else is defined by a YAML file under `officefloor/govern/`, the file name being the
+governance name used in `govern:`:
+
+```yaml
+# File: officefloor/govern/audit.yml
+governance:
+  class: net.officefloor.tutorial.springrestgovernance.AuditGovernance
+```
+
+## `authorize:` — securing endpoints
+
+Guard an endpoint with a Spring Security SpEL expression, evaluated before the first function runs.
+Place it in a `composition:` block, which applies it to the whole file:
+
+```yaml
+# officefloor/rest/security/yaml.GET.yml
+composition:
+  authorize: "hasRole('ADMIN')"
+
+service:
+  class: net.officefloor.tutorial.springrestsecurity.YamlAuthorizeService
+```
+
+This is the OfficeFloor-native alternative to `@PreAuthorize` on a controller method. The expression
+is parsed at start-up, so a syntax error fails the build rather than the request.
+
+### Path-level defaults
+
+A YAML file named without a `.METHOD` part is a **path config** file rather than an endpoint. Its
+top-level `authorize:` is inherited by every endpoint at and below that path:
+
+```yaml
+# File: officefloor/rest/security/admin.yml  → guards everything under /security/admin
+authorize: "hasRole('ADMIN')"
+```
+
+Resolution takes the endpoint's own `composition.authorize` first, then walks up the parent path
+chain — the most specific (deepest) expression wins. So a single file secures a whole subtree, and an
+individual endpoint can override it. An empty expression opens a path back up:
+
+```yaml
+# File: officefloor/rest/security/admin/open.GET.yml  → public, despite the parent path config
+composition:
+  authorize: ""
 ```
 
 ## Other configuration folders
