@@ -150,6 +150,111 @@ header a.link-button {
 }
 
 /*
+ * ----------- Agent rules modal ----------------
+ * Re-uses the a.start-now button and .code-block palette above.
+ */
+.container.agent-rules-cta {
+	margin-top: 3%;
+	margin-bottom: 3%;
+}
+
+.container a.agent-rules-trigger {
+	display: inline-block;
+	font-size: 1.1em;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.container a.agent-rules-trigger:hover {
+	background-color: #0072d1;
+}
+
+.agent-rules-modal .modal-content {
+	background-color: GhostWhite;
+	border: 1px solid #c0c0c0;
+}
+
+.agent-rules-modal .modal-title {
+	color: #505050;
+}
+
+.agent-rules-intro, .agent-rules-fallback {
+	color: #606060;
+	font-size: small;
+}
+
+.agent-rules-fallback[hidden] {
+	display: none;
+}
+
+.agent-rules-prereq {
+	margin-bottom: 1.5em;
+}
+
+.agent-rules-source {
+	max-height: 30vh;
+	overflow: auto;
+	white-space: pre;
+}
+
+.agent-rules-source:focus {
+	outline: 2px solid #008BFF;
+}
+
+.agent-rules-actions {
+	margin-top: 1em;
+	margin-bottom: 1.5em;
+}
+
+.agent-rules-copy {
+	color: #E5E5E5;
+	background-color: #008BFF;
+	border: none;
+	border-radius: 0.8em;
+	padding: 0.4em 1.2em;
+	text-transform: uppercase;
+	font-weight: bold;
+	font-size: 0.9em;
+}
+
+.agent-rules-copy[disabled] {
+	background-color: #bbe0ff;
+}
+
+.agent-rules-status {
+	color: #6a9955;
+	font-weight: bold;
+	font-size: small;
+	margin-left: 0.8em;
+}
+
+.agent-rules-prereq h6, .agent-rules-subhead, .agent-rules-other h6 {
+	color: #606060;
+	text-transform: uppercase;
+	font-weight: bold;
+}
+
+.agent-rules-other ul {
+	padding-left: 1.2em;
+	margin-bottom: 0;
+}
+
+.agent-rules-other code, .agent-rules-intro code {
+	background-color: #1e1e1e;
+	color: #d4d4d4;
+	border-radius: 3px;
+	padding: 0.1em 0.35em;
+}
+
+/* Off screen textarea for the non secure context copy fallback */
+.agent-rules-offscreen {
+	position: absolute;
+	left: -9999px;
+	opacity: 0;
+	height: 1px;
+	width: 1px;
+}
+
+/*
  * ----------- FOOTER ----------------
  */
 footer {
