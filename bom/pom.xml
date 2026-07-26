@@ -119,7 +119,7 @@
 		<tika-version>3.2.2</tika-version>
 		<undertow-version>2.4.0.Final</undertow-version>
 		<log4j2-version>2.25.4</log4j2-version>
-		<vertx-version>4.5.3</vertx-version>
+		<vertx-version>5.1.5</vertx-version>
 		<wagon-ssh-version>3.5.3</wagon-ssh-version>
 		<zio-version>2.1.5</zio-version>
 	</properties>
