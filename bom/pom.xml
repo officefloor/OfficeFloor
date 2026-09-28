@@ -121,7 +121,7 @@
 		<log4j2-version>2.25.4</log4j2-version>
 		<vertx-version>4.5.3</vertx-version>
 		<wagon-ssh-version>3.5.3</wagon-ssh-version>
-		<zio-version>2.1.5</zio-version>
+		<zio-version>2.1.26</zio-version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
