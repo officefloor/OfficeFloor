@@ -1,8 +1,9 @@
 # YAML Endpoint Configuration Reference
 
 This is the complete model for declaring Spring Boot REST endpoints as OfficeFloor YAML files.
-Every endpoint's structure — its functions, their order, and their conditional branches — is
-explicit in one file, which is what makes endpoints reliable targets for AI coding tools.
+Every endpoint's structure is explicit in one file. Its functions, their order, and their
+conditional branches are all declared there. To add a feature you add a step, one small class and
+one line, so your endpoints stay tidy as AI coding tools change them.
 
 ## File location and naming — path and method from the file name
 
@@ -138,8 +139,8 @@ save:
   class: net.officefloor.tutorial.springrestfunction.SaveOrderLogic
 ```
 
-Here `validate` continues to `price` only via its `valid` output; `price` then always continues
-to `save`. The whole flow — validate, then price, then save — is readable without opening any
+Here `validate` continues to `price` only via its `valid` output. `price` then always continues
+to `save`. The whole flow, validate then price then save, is declared here without opening any
 Java file.
 
 ### How an output is defined and triggered in code — `@Flow`

@@ -29,11 +29,12 @@ OfficeFloor Tutorials
   OfficeFloor extends dependency injection with two further kinds of injection:
 
    * <<Function injection>> composes plain Java methods into a request-handling pipeline declared
-     entirely in a YAML file.  The YAML is the specification: readable without opening any Java file,
-     which is especially valuable when working with AI coding tools.
+     entirely in a YAML file.  The YAML is the specification.  To add a feature you add a step, one
+     small class and one line.  So an endpoint stays tidy as AI coding tools change it, instead of
+     eroding into a tangle.
 
-   * <<Thread injection>> assigns dedicated thread pools to functions based solely on their
-     dependencies.  Socket threads never block on database calls.
+   * <<Thread injection>> assigns dedicated thread pools to functions based on their dependencies.
+     Java 21 and 25 virtual threads now cover the common case, so this is mostly a tuning option.
 
   The first section covers existing Spring MVC functionality delivered through OfficeFloor function
   injection.  The second covers function orchestration.  It composes an endpoint from small,

@@ -1,6 +1,6 @@
 # OfficeFloor
 
-> OfficeFloor is a Spring Boot add-on that adds explicit, AI-friendly YAML orchestration to Spring Boot REST. Each endpoint is a single YAML file declaring its function steps, their order, and how their outputs connect — so the whole endpoint is readable (and generatable) from one file rather than implicit across annotations and Spring's call stack. Spring's dependency injection, security, persistence, and actuator config remain intact; OfficeFloor enriches Spring, it does not replace it.
+> OfficeFloor is a Spring Boot add-on that adds explicit function orchestration to Spring Boot REST. Each endpoint is a single YAML file declaring its function steps, their order, and how their outputs connect. Adding a feature means adding a step, one small class and one line, so an endpoint stays tidy as AI tools change it rather than eroding into a tangle. Spring's dependency injection, security, persistence, and actuator config remain intact. OfficeFloor enriches Spring, it does not replace it.
 
 Key facts for reasoning about OfficeFloor:
 
@@ -41,6 +41,6 @@ Key facts for reasoning about OfficeFloor:
 
 ## Optional
 
-- [Inversion of Coupling Control (paper)](http://doi.acm.org/10.1145/2739011.2739013): The paradigm behind OfficeFloor — Continuation, Thread, and Dependency Injection as separate concerns.
+- [Inversion of Coupling Control (paper)](http://doi.acm.org/10.1145/2739011.2739013): The paradigm behind OfficeFloor. Continuation, Thread, and Dependency Injection as separate concerns.
 - [Introductory blog post](https://sagenschneider.blogspot.com/2019/02/inversion-of-coupling-control.html): Accessible introduction to Inversion of Coupling Control.
 - [Full documentation as one file](https://officefloor.net/llms-full.txt): README plus all core docs concatenated for ingestion.

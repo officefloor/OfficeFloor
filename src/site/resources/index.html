@@ -38,14 +38,14 @@
 
 <!-- Social Media sharing -->
 <meta name="description"
-	content="OfficeFloor brings Function Injection (Explicit Function Orchestration) to Spring Boot REST. Function Injection indexes the codebase into small, focused functions so AI tools can navigate directly to the relevant code and make surgical changes. Add OfficeFloor progressively to your existing Spring app." />
+	content="OfficeFloor brings Function Injection (Explicit Function Orchestration) to Spring Boot REST. Let an AI add feature after feature without eroding your code into a tangle. Each endpoint is one YAML file and each step one small function, so adding a feature just adds a step. Add OfficeFloor progressively to your existing Spring app." />
 
 <!-- Twitter Card data -->
 <meta name="twitter:card" content="summary">
 <meta name="twitter:site" content="@sagenschneider">
 <meta name="twitter:title" content="OfficeFloor - AI-Augmented Spring Boot REST via Function Injection (Explicit Function Orchestration)">
 <meta name="twitter:description"
-	content="OfficeFloor brings Function Injection (Explicit Function Orchestration) to Spring Boot REST. Function Injection indexes the codebase into small, focused functions so AI tools can navigate directly to the relevant code and make surgical changes. Add OfficeFloor progressively to your existing Spring app.">
+	content="OfficeFloor brings Function Injection (Explicit Function Orchestration) to Spring Boot REST. Let an AI add feature after feature without eroding your code into a tangle. Each endpoint is one YAML file and each step one small function, so adding a feature just adds a step. Add OfficeFloor progressively to your existing Spring app.">
 <meta name="twitter:creator" content="@sagenschneider">
 <meta name="twitter:image"
 	content="https://officefloor.net/images/OfficeFloorBannerImage.png">
@@ -57,7 +57,7 @@
 <meta property="og:image"
 	content="https://officefloor.net/images/OfficeFloorBannerImage.png" />
 <meta property="og:description"
-	content="OfficeFloor brings Function Injection (Explicit Function Orchestration) to Spring Boot REST. Function Injection indexes the codebase into small, focused functions so AI tools can navigate directly to the relevant code and make surgical changes. Add OfficeFloor progressively to your existing Spring app." />
+	content="OfficeFloor brings Function Injection (Explicit Function Orchestration) to Spring Boot REST. Let an AI add feature after feature without eroding your code into a tangle. Each endpoint is one YAML file and each step one small function, so adding a feature just adds a step. Add OfficeFloor progressively to your existing Spring app." />
 <meta property="og:site_name" content="OfficeFloor" />
 
 <!-- Structured data -->
@@ -67,7 +67,7 @@
   "@type": "SoftwareApplication",
   "name": "OfficeFloor",
   "url": "https://officefloor.net/",
-  "description": "OfficeFloor brings Function Injection (Explicit Function Orchestration) to Spring Boot REST. An endpoint's steps, branches and error flows are declared in one YAML file whose directory path maps to the URL, so developers and AI tools can navigate directly from a URL to the relevant code. Add OfficeFloor progressively to an existing Spring Boot application.",
+  "description": "OfficeFloor brings Function Injection (Explicit Function Orchestration) to Spring Boot REST. Let an AI add feature after feature without eroding your code into a tangle. An endpoint's steps, branches and error flows are declared in one YAML file whose directory path maps to the URL, and adding a feature just adds a step. Add OfficeFloor progressively to an existing Spring Boot application.",
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Cross-platform (JVM)",
   "programmingLanguage": "Java",
@@ -116,14 +116,15 @@
 		<div class="row text-center">
 			<div class="col-12">
 				<h1>OfficeFloor</h1>
-				<h2 class="banner-subtitle">Function Injection for AI-augmented Spring Boot REST</h2>
+				<h2 class="banner-subtitle">Let AI add feature after feature, and your code stays tidy. Function Injection for Spring Boot REST.</h2>
 				<div class="ioc">
 					<p>
 						OfficeFloor brings Function Injection (Explicit Function Orchestration) to <a href="https://spring.io/projects/spring-boot"
 							target="_blank">Spring Boot</a>.
-						Each endpoint is one YAML file, each step one function.
-						OfficeFloor wires the functions together and Spring injects the dependencies into each.
-						Function Injection indexes the codebase into small, focused functions so AI tools can navigate directly to the relevant code and make surgical changes.
+						Let an AI keep adding features to a normal codebase and it slowly erodes into a tangle. OfficeFloor stops that.
+						Each endpoint is one YAML file. Each step is one small function.
+						OfficeFloor wires the functions together. Spring injects the dependencies into each.
+						To add a feature you add a step. The AI gets one obvious place to put new code, and the rest stays put.
 					</p>
 					<p>
 						<a class="start-now" href="./tutorials/index.html">View Tutorials &rarr;</a>
@@ -253,20 +254,21 @@ audit:
   class: AuditGreetingLogic</pre>
 			</div>
 			<div class="col-12 col-md-6 info-text">
-				<h3>AI-readable Function Injection alongside <code>@RestController</code></h3>
+				<h3>Explicit Function Injection your AI cannot erode, alongside <code>@RestController</code></h3>
 				<p>In a Spring <code>@RestController</code>, the flow between
-					validation, business logic, and auditing is implicit, living in the
-					call stack and framework conventions rather than in any single
-					readable artefact. The YAML keeps each concern in its own function.
-					OfficeFloor wires them together in the order the file declares.</p>
+					validation, business logic, and auditing is implicit. It lives in the
+					call stack and framework conventions. Ask an AI to add feature after
+					feature and that one method grows and tangles. The YAML keeps each
+					concern in its own small function. OfficeFloor wires them together in
+					the order the file declares.</p>
 				<p>Each function declares only its own Spring bean
 					dependencies, injected by Spring exactly as in any other bean.
 					No function knows about the others, and no annotation
 					describes the wiring. The YAML file is the complete specification.</p>
 				<p>Conditional branching, sequential composition, and error flows
-					are all declared in the same file. The YAML indexes the codebase into
-					small, focused functions so AI tools can navigate directly to the
-					relevant code and make surgical changes.</p>
+					are all declared in the same file. To add a feature you add a step:
+					one small class and one line. So the endpoint stays tidy however many
+					times an AI changes it.</p>
 				<p>
 					<a href="./tutorials/index.html">See the full tutorial series &rarr;</a>
 				</p>
@@ -277,16 +279,18 @@ audit:
 	<section class="container">
 		<div class="row align-items-center">
 			<div class="col-12 col-md-6 info-text">
-				<h3>Why Function Injection makes AI development reliable</h3>
+				<h3>Why Function Injection stops AI eroding your code</h3>
 				<p>In a Spring controller, the flow between an endpoint's steps
-					is implicit, spread across the call stack and framework conventions:
-					which function runs next, which branch handles a validation failure,
-					which step writes the response. This is opaque to AI coding tools.</p>
+					is implicit. It is spread across the call stack and framework
+					conventions. Which function runs next, which branch handles a
+					validation failure, which step writes the response: none of it has a
+					fixed home. So every time an AI adds a feature it decides again where
+					the code goes. Bit by bit the controller erodes into a tangle.</p>
 				<p>OfficeFloor's YAML files are the specification. Every
 					endpoint's steps, their order, and their conditional branches
-					are explicit in one file. Function Injection indexes the codebase
-					into small, focused functions so AI tools can navigate directly to
-					the relevant code and make surgical changes.</p>
+					are explicit in one file. To add a feature an AI adds a step: one small
+					class and one line. So your code stays tidy however many times it
+					changes.</p>
 				<p>Just as Dependency Injection made dependencies first-class in
 					the architecture by making them explicit, named, and wired in
 					configuration rather than constructed inline, Function Injection
@@ -294,11 +298,11 @@ audit:
 					declared in configuration, not buried in the call stack.</p>
 				<p>Function Injection gives AI an explicit, contextual index into the
 					codebase instead of implicit framework conventions.</p>
-				<p>And because that index lives in the code itself, OfficeFloor needs no AI
-					tooling to stay legible: no Model Context Protocol (MCP) server or add-on to
+				<p>And because the structure lives in the code itself, OfficeFloor needs no AI
+					tooling. There is no Model Context Protocol (MCP) server or add-on to
 					reconstruct how endpoints are wired. Documentation is enough. Where a
 					framework's flow is implicit, such tooling is bolted on to recover what the
-					code does not state; Function Injection removes the need.</p>
+					code does not state. Function Injection removes the need.</p>
 				<p>
 					<a
 						href="https://sagenschneider.blogspot.com/2019/02/inversion-of-coupling-control.html"

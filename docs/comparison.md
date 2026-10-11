@@ -1,9 +1,8 @@
 # `@RestController` vs OfficeFloor YAML: the same endpoint, two ways
 
 OfficeFloor does not replace Spring MVC. It adds an explicit YAML orchestration layer *on top of*
-your existing Spring Boot application, using the same beans, the same security, the same
-persistence. Two things change, and both make an endpoint easier for a developer or an AI tool to
-work with:
+your existing Spring Boot application. It uses the same beans, the same security, the same
+persistence. Two things change. Both move where an endpoint's structure lives:
 
 1. **How you find the code behind a URL.** OfficeFloor's YAML files sit in a directory tree that
    mirrors the URL structure, so the filesystem is a direct index from URL to code. With Spring the
@@ -48,24 +47,23 @@ An assistant resolves a URL in two deterministic hops, with no searching require
 **With `@RestController` there is no positional relationship between the URL and the code.** The
 handler can live in any class, in any package. The route is often spread across a class-level
 `@RequestMapping` prefix and a method-level `@GetMapping` suffix that must be concatenated to
-recover the full path. Resolving a URL means scanning the controller layer and parsing annotations;
-understanding the endpoint then means following the call stack out of the controller method to
-discover which collaborators are involved. An AI assistant has to ingest and reason over a large
-amount of unrelated code just to find where a route is declared and what it touches.
+recover the full path. Resolving a URL means scanning the controller layer and parsing annotations.
+Finding the rest of the endpoint means following the call stack out of the controller method to
+the collaborators involved. There is no one place that states the flow. So an AI tool has to locate
+and stitch together code spread across many classes just to see what a route touches.
 
-This is the difference that matters most for AI-assisted development. The project layout itself is
-contextual grounding: routes are enumerable by listing a directory, and the code for any route is
-one deterministic file lookup away. As a codebase grows to hundreds of endpoints, that difference
-compounds.
+The project layout itself is the index. Routes are enumerable by listing a directory. The code for
+any route is one deterministic file lookup away. That holds no matter who or what is making the
+change. As a codebase grows to hundreds of endpoints, it keeps holding.
 
 ### No AI tooling required
 
-Because the architecture is explicit in the code, an AI assistant needs no tooling layer to make
-OfficeFloor legible: no Model Context Protocol (MCP) server or similar add-on that reconstructs how
-endpoints are wired. Documentation is enough, because the structure the model needs is already
-stated in the files and their layout. When a framework's flow is implicit, the common response is to
-bolt on such tooling so an assistant can recover what the code does not state. OfficeFloor removes
-that need: the legibility lives in the source, so an AI works from plain file access and the docs.
+Because the structure is fixed in the code, an AI assistant needs no tooling layer to work with
+OfficeFloor. There is no Model Context Protocol (MCP) server or similar add-on that reconstructs how
+endpoints are wired. Documentation is enough. The structure the model needs is already stated in the
+files and their layout. When a framework's flow is implicit, the common response is to bolt on such
+tooling to recover what the code does not state. OfficeFloor removes that need. The structure lives
+in the source, so an AI works from plain file access and the docs.
 
 ## 2. Orchestration: the endpoint's flow in one file
 
@@ -158,9 +156,10 @@ public class OrderController {
 }
 ```
 
-To understand this endpoint you read the method top to bottom and reconstruct the flow in your
-head. As it grows, with more branches, error handling and cross-cutting concerns, that
-reconstruction gets harder. It is exactly the part an AI tool cannot see from annotations alone.
+To follow this endpoint you read the method top to bottom and work out the flow in your
+head. As it grows, the order of steps, the branches and the error handling all pile into the one
+method. Each new feature is a fresh decision about where in the method it goes. Add enough and the
+method erodes into a tangle an AI can no longer change safely.
 
 #### With OfficeFloor
 
@@ -224,11 +223,11 @@ public class SaveOrderLogic {
 }
 ```
 
-The YAML file is the complete, readable specification of the endpoint: its steps, their order, and
-the conditional branch, all in one place. It also names the exact set of classes involved, so from
-this one file both a developer and an AI tool know precisely which code to open for full context.
-Each handler knows only its own inputs and its own Spring beans. None of them knows about the
-others.
+The YAML file is the complete specification of the endpoint. Its steps, their order, and the
+conditional branch are all in one place. To add a feature you add a step: one small class and one
+line in this file. Nothing already there changes. So the endpoint stays tidy however many times an
+AI changes it. The file also names the exact set of classes involved. Each handler knows only its
+own inputs and its own Spring beans. None of them knows about the others.
 
 There is a deeper consequence. Layered architecture, with a presentation, service and data layer, is
 largely a product of the call stack. A method call goes down and must return, so each layer does its
@@ -259,7 +258,7 @@ reference details this shift.
 | Branching between steps | `if` / method calls in Java | `outputs:` map in YAML |
 | Passing data downstream | Local variables | Return value becomes next step's `@Parameter` |
 | Error routing | `@ControllerAdvice`, try/catch | `escalations:` (unmatched fall through to `@ControllerAdvice`) |
-| AI reads / generates the flow | Must infer from annotations plus call stack | Reads and generates from one file |
+| Where new code goes as an AI adds features | Wherever the AI decides, so one method grows and tangles | A new step: one small class and one line |
 
 ## When to use which
 
