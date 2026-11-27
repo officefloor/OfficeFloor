@@ -107,8 +107,13 @@ public interface JwksKeyParserContext {
 	}
 
 	/**
+	 * <p>
 	 * Obtains the field {@link BigInteger} value.
-	 * 
+	 * <p>
+	 * The value is read as an unsigned big endian integer, as JWKS values are
+	 * (RFC 7518 Base64urlUInt). A leading zero byte, as written by
+	 * {@link BigInteger#toByteArray()}, is also accepted.
+	 *
 	 * @param node         {@link JsonNode}.
 	 * @param fieldName    Field name.
 	 * @param defaultValue Default value.
@@ -118,7 +123,7 @@ public interface JwksKeyParserContext {
 		return this.getValue(node, fieldName, defaultValue, (field) -> {
 			String base64Value = field.asText();
 			byte[] bytes = Base64.getUrlDecoder().decode(base64Value);
-			return new BigInteger(bytes);
+			return new BigInteger(1, bytes);
 		});
 	}
 
