@@ -28,6 +28,7 @@ import lombok.NoArgsConstructor;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpMethod;
+import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.HttpObject;
@@ -89,6 +90,37 @@ public class DefaultJsonTest extends OfficeFrameTestCase {
 		public void service(InputObject input, ObjectResponse<OutputObject> response) {
 			assertEquals("Incorrect JSON input", "INPUT", input.getInput());
 			response.send(new OutputObject("OUTPUT"));
+		}
+	}
+
+	/**
+	 * Ensure JSON that cannot be read is a bad request, and the parse error,
+	 * which can quote the request, is not sent back.
+	 */
+	public void testInvalidJson() throws Exception {
+
+		// Configure the server
+		this.compile.web((context) -> {
+			context.link(false, "POST", "/path", MockJacksonJson.class);
+		});
+		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
+
+		// Not JSON, malformed JSON and the wrong type are all bad requests
+		for (String entity : new String[] { "SECRET_VALUE", "{ \"input\": SECRET_VALUE }",
+				"{ \"input\": { \"SECRET_VALUE\": 1 } }" }) {
+			for (String accept : new String[] { null, "application/json", "text/plain" }) {
+				MockHttpRequestBuilder request = MockHttpServer.mockRequest("/path").method(HttpMethod.POST)
+						.header("Content-Type", "application/json").entity(entity);
+				if (accept != null) {
+					request.header("Accept", accept);
+				}
+				MockHttpResponse response = this.server.send(request);
+				String body = response.getEntity(null);
+				assertEquals("Should be bad request for " + entity + " (" + accept + "): " + body, 400,
+						response.getStatus().getStatusCode());
+				assertFalse("Must not quote request for " + entity + " (" + accept + "): " + body,
+						body.contains("SECRET_VALUE"));
+			}
 		}
 	}
 

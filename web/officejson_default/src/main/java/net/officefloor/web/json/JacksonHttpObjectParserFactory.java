@@ -21,10 +21,12 @@
 package net.officefloor.web.json;
 
 import tools.jackson.core.JacksonException;
+import tools.jackson.core.exc.JacksonIOException;
 import tools.jackson.databind.JavaType;
 import tools.jackson.databind.ObjectMapper;
 
 import net.officefloor.server.http.HttpException;
+import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.build.HttpObjectParser;
 import net.officefloor.web.build.HttpObjectParserFactory;
@@ -84,8 +86,13 @@ public class JacksonHttpObjectParserFactory implements HttpObjectParserFactory {
 				try {
 					return (T) JacksonHttpObjectParserFactory.this.mapper.readValue(connection.getRequest().getEntity(),
 							javaType);
-				} catch (JacksonException ex) {
+				} catch (JacksonIOException ex) {
+					// Failed to read the request, so not the client's JSON
 					throw new HttpException(ex);
+				} catch (JacksonException ex) {
+					// Client sent JSON that cannot be read. The parse error is not sent
+					// or kept, as it can quote the request, such as a password.
+					throw new HttpException(HttpStatus.BAD_REQUEST);
 				}
 			}
 		};
